@@ -1,3 +1,4 @@
 click>=8.1,<9
 requests>=2.31,<3
+rdflib>=7.0,<8
 

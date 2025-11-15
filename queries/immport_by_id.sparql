@@ -1,0 +1,104 @@
+# SPARQL Queries for Querying ImmPort Dataset by ID
+# 
+# These queries can be run in Protege's SPARQL query panel or against a SPARQL endpoint
+# that has the ImmPort RDF data loaded.
+
+PREFIX schema: <http://schema.org/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX okn: <https://okn.wobd.org/>
+
+# Query 1: Find a specific dataset by ID (e.g., SDY2580)
+# Replace 'sdy2580' with any dataset ID you want to query
+# Using REGEX instead of STRENDS for better compatibility
+SELECT ?dataset ?name ?description ?url ?doi
+WHERE {
+    ?dataset rdf:type schema:Dataset ;
+             schema:name ?name .
+    OPTIONAL { ?dataset schema:description ?description . }
+    OPTIONAL { ?dataset schema:url ?url . }
+    OPTIONAL { ?dataset schema:sameAs ?doi . }
+    FILTER(REGEX(STR(?dataset), "/sdy2580$"))
+}
+LIMIT 1
+
+
+# Query 2: Get all properties for a specific dataset
+SELECT ?property ?value
+WHERE {
+    <https://okn.wobd.org/dataset/immport/sdy2580> ?property ?value .
+}
+ORDER BY ?property
+
+
+# Query 3: Find datasets by partial ID match
+SELECT ?dataset ?name ?id
+WHERE {
+    ?dataset rdf:type schema:Dataset ;
+             schema:name ?name .
+    BIND(REPLACE(STR(?dataset), "https://okn.wobd.org/dataset/immport/", "") AS ?id)
+    FILTER(REGEX(?id, "sdy25"))  # Matches IDs containing "sdy25" (case-insensitive if supported)
+}
+ORDER BY ?id
+
+
+# Query 4: Get a dataset with its related entities (authors, diseases, species, funding)
+SELECT ?dataset ?name ?author ?authorName ?disease ?diseaseName ?species ?speciesName ?grant ?grantName
+WHERE {
+    <https://okn.wobd.org/dataset/immport/sdy2580> 
+        rdf:type schema:Dataset ;
+        schema:name ?name .
+    
+    OPTIONAL {
+        <https://okn.wobd.org/dataset/immport/sdy2580> schema:author ?author .
+        ?author schema:name ?authorName .
+    }
+    OPTIONAL {
+        <https://okn.wobd.org/dataset/immport/sdy2580> schema:healthCondition ?disease .
+        ?disease schema:name ?diseaseName .
+    }
+    OPTIONAL {
+        <https://okn.wobd.org/dataset/immport/sdy2580> schema:species ?species .
+        ?species schema:name ?speciesName .
+    }
+    OPTIONAL {
+        <https://okn.wobd.org/dataset/immport/sdy2580> schema:funding ?grant .
+        ?grant schema:name ?grantName .
+    }
+}
+
+
+# Query 5: List all ImmPort dataset IDs with their names
+SELECT ?id ?name ?doi
+WHERE {
+    ?dataset rdf:type schema:Dataset ;
+             schema:name ?name .
+    BIND(REPLACE(STR(?dataset), "https://okn.wobd.org/dataset/immport/", "") AS ?id)
+    OPTIONAL { ?dataset schema:sameAs ?doi . }
+    FILTER(REGEX(STR(?dataset), "^https://okn\\.wobd\\.org/dataset/immport/"))
+}
+ORDER BY ?id
+
+
+# Query 6: Count total number of ImmPort datasets
+SELECT (COUNT(DISTINCT ?dataset) AS ?totalDatasets)
+WHERE {
+    ?dataset rdf:type schema:Dataset .
+    FILTER(REGEX(STR(?dataset), "^https://okn\\.wobd\\.org/dataset/immport/"))
+}
+
+
+# Query 7: Find all properties and their values for a dataset (DESCRIBE query)
+# This is simpler - just describe the resource:
+DESCRIBE <https://okn.wobd.org/dataset/immport/sdy2580>
+
+
+# Query 8: Find datasets that reference a specific disease (by MONDO URI)
+SELECT ?dataset ?datasetName ?diseaseName
+WHERE {
+    ?dataset rdf:type schema:Dataset ;
+             schema:name ?datasetName ;
+             schema:healthCondition <http://purl.obolibrary.org/obo/MONDO_0005812> .
+    <http://purl.obolibrary.org/obo/MONDO_0005812> schema:name ?diseaseName .
+}
+ORDER BY ?datasetName
+

@@ -1,0 +1,77 @@
+# SPARQL Queries for Querying ImmPort Data in FRINK
+# 
+# These queries work with Schema.org vocabulary used in our RDF conversion
+# Note: Our data uses schema:name, not rdfs:label or dc:title
+
+PREFIX schema: <http://schema.org/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX okn: <https://okn.wobd.org/>
+
+# Query 1: Find datasets with names (equivalent to the FRINK query but using Schema.org)
+SELECT DISTINCT ?subject ?label 
+WHERE {
+    ?subject rdf:type schema:Dataset ;
+             schema:name ?label .
+    FILTER(REGEX(STR(?subject), "^https://okn\\.wobd\\.org/dataset/immport/"))
+}
+LIMIT 100
+
+
+# Query 2: Find all resources with names (datasets, persons, organizations, etc.)
+SELECT DISTINCT ?subject ?label 
+WHERE {
+    { 
+        ?subject rdf:type schema:Dataset ;
+                 schema:name ?label .
+        FILTER(REGEX(STR(?subject), "^https://okn\\.wobd\\.org/"))
+    }
+    UNION
+    {
+        ?subject rdf:type schema:Person ;
+                 schema:name ?label .
+        FILTER(REGEX(STR(?subject), "^https://okn\\.wobd\\.org/"))
+    }
+    UNION
+    {
+        ?subject rdf:type schema:Organization ;
+                 schema:name ?label .
+        FILTER(REGEX(STR(?subject), "^https://okn\\.wobd\\.org/"))
+    }
+    UNION
+    {
+        ?subject rdf:type schema:MonetaryGrant ;
+                 schema:name ?label .
+        FILTER(REGEX(STR(?subject), "^https://okn\\.wobd\\.org/"))
+    }
+}
+LIMIT 100
+
+
+# Query 3: Find ImmPort datasets with names and DOIs
+SELECT DISTINCT ?dataset ?name ?doi
+WHERE {
+    ?dataset rdf:type schema:Dataset ;
+             schema:name ?name .
+    OPTIONAL { ?dataset schema:sameAs ?doi . }
+    FILTER(REGEX(STR(?dataset), "^https://okn\\.wobd\\.org/dataset/immport/"))
+}
+LIMIT 100
+
+
+# Query 4: Count ImmPort datasets in FRINK
+SELECT (COUNT(DISTINCT ?dataset) AS ?totalImmPortDatasets)
+WHERE {
+    ?dataset rdf:type schema:Dataset .
+    FILTER(REGEX(STR(?dataset), "^https://okn\\.wobd\\.org/dataset/immport/"))
+}
+
+
+# Query 5: If you need to check what vocabularies are actually used
+SELECT DISTINCT ?property 
+WHERE {
+    ?subject ?property ?object .
+    FILTER(REGEX(STR(?subject), "^https://okn\\.wobd\\.org/dataset/immport/"))
+}
+LIMIT 50
+
