@@ -31,10 +31,16 @@ WHERE {
              schema:name ?datasetName ;
              schema:healthCondition ?disease .
     ?disease schema:name ?diseaseName .
-    FILTER(CONTAINS(LCASE(?diseaseName), "influenza"))
+    FILTER(
+        # Match by MONDO CURIE for influenza (if available) OR by name
+        ?disease = <http://purl.obolibrary.org/obo/MONDO_0005812> ||
+        CONTAINS(LCASE(?diseaseName), "influenza")
+    )
 }
 ORDER BY ?datasetName
 ```
+
+**Note:** This query matches datasets by either the MONDO ontology CURIE for influenza (`MONDO:0005812`) or by string matching on the disease name. If you need a different influenza CURIE, replace `MONDO:0005812` with the appropriate identifier.
 
 ### CQ3: Find all datasets that use mouse as a model organism
 **SPARQL Query:**
@@ -48,10 +54,16 @@ WHERE {
              schema:name ?datasetName ;
              schema:species ?species .
     ?species schema:name ?speciesName .
-    FILTER(REGEX(LCASE(?speciesName), "mouse|mus musculus"))
+    FILTER(
+        # Match by UniProt taxonomy CURIE OR name
+        ?species = <https://www.uniprot.org/taxonomy/10090> ||
+        REGEX(LCASE(?speciesName), "mouse|mus musculus")
+    )
 }
 ORDER BY ?datasetName
 ```
+
+**Note:** This query matches datasets by either the UniProt taxonomy CURIE for mouse (`10090`) or by string matching on the species name.
 
 ### CQ4: What datasets are related to COVID-19?
 **SPARQL Query:**
@@ -133,10 +145,16 @@ WHERE {
     ?author schema:name ?authorName ;
             schema:affiliation ?org .
     ?org schema:name ?affiliation .
-    FILTER(CONTAINS(LCASE(?affiliation), "stanford"))
+    FILTER(
+        # Match by ROR CURIE for Stanford OR by name
+        ?org = <https://ror.org/00f54p054> ||
+        CONTAINS(LCASE(?affiliation), "stanford")
+    )
 }
 ORDER BY ?datasetName
 ```
+
+**Note:** This query matches datasets by either the ROR identifier for Stanford University (`https://ror.org/00f54p054`) or by string matching on the affiliation name.
 
 ## Disease and Infectious Agent Questions
 
@@ -171,11 +189,21 @@ WHERE {
              schema:species ?species .
     ?disease schema:name ?diseaseName .
     ?species schema:name ?speciesName .
-    FILTER(CONTAINS(LCASE(?diseaseName), "influenza"))
-    FILTER(REGEX(LCASE(?speciesName), "human|homo sapiens"))
+    FILTER(
+        # Match influenza by CURIE OR name
+        ?disease = <http://purl.obolibrary.org/obo/MONDO_0005812> ||
+        CONTAINS(LCASE(?diseaseName), "influenza")
+    )
+    FILTER(
+        # Match human by UniProt taxonomy CURIE OR name
+        ?species = <https://www.uniprot.org/taxonomy/9606> ||
+        REGEX(LCASE(?speciesName), "human|homo sapiens")
+    )
 }
 ORDER BY ?datasetName
 ```
+
+**Note:** This query matches datasets by ontology CURIEs (MONDO for influenza, UniProt taxonomy for human) or by string matching on names.
 
 ## Cross-Resource Questions
 
@@ -254,7 +282,11 @@ WHERE {
     ?species schema:name ?speciesName .
     ?grant schema:funder <https://ror.org/043z4tv69> ;
            schema:name ?grantName .
-    FILTER(REGEX(LCASE(?speciesName), "human|homo sapiens"))
+    FILTER(
+        # Match human by UniProt taxonomy CURIE OR name
+        ?species = <https://www.uniprot.org/taxonomy/9606> ||
+        REGEX(LCASE(?speciesName), "human|homo sapiens")
+    )
 }
 ORDER BY ?datasetName
 ```
@@ -272,17 +304,38 @@ WHERE {
              schema:measurementTechnique ?tech .
     ?disease schema:name ?diseaseName .
     ?tech schema:name ?technique .
-    FILTER(CONTAINS(LCASE(?diseaseName), "influenza"))
+    FILTER(
+        # Match influenza by MONDO CURIE OR name
+        ?disease = <http://purl.obolibrary.org/obo/MONDO_0005812> ||
+        CONTAINS(LCASE(?diseaseName), "influenza")
+    )
 }
 GROUP BY ?technique
 ORDER BY DESC(?datasetCount)
 ```
+
+**Note:** This query matches datasets by either the MONDO ontology CURIE for influenza or by string matching on the disease name.
 
 ## Notes
 
 - All queries use the OKN-WOBD namespace (`https://okn.wobd.org/`) for datasets
 - External URIs are used for diseases (MONDO), species (UniProt), and organizations (ROR)
 - Some queries may need adjustment based on the actual data loaded into your SPARQL endpoint
+
+### Ontology CURIEs Used in Queries
+
+Many queries use OR conditions to match by both ontology CURIEs and string names for better precision and coverage:
+
+- **Influenza**: `MONDO:0005812`
+- **Human**: UniProt taxonomy `9606` (Homo sapiens)
+- **Mouse**: UniProt taxonomy `10090` (Mus musculus)
+- **Stanford University**: ROR `00f54p054 `
+- **COVID-19**: `MONDO:0100096`
+
+**Note:** If the CURIEs in the queries don't match your data, you can:
+1. Query your data to find the actual CURIEs used
+2. Update the queries with the correct CURIEs
+3. Or remove the CURIE condition and rely on string matching only
 
 ### Query Compatibility
 
