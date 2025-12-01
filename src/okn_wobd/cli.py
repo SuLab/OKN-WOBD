@@ -27,7 +27,7 @@ DEFAULT_RESOURCES = (
     "VDJServer",
     "Vivli",
     "RADx Data Hub",
-    "PDB",
+    #"PDB",
     "Project Tycho",
 )
 
@@ -512,6 +512,12 @@ def cli(verbose: bool) -> None:
     show_default=True,
     help="Maximum prefix length when segmenting large datasets.",
 )
+@click.option(
+    "--all",
+    "fetch_all",
+    is_flag=True,
+    help="Fetch all default resources (ImmPort, VDJServer, Vivli, RADx Data Hub, Project Tycho).",
+)
 def fetch_command(
     resources: Iterable[str],
     output_dir: Path,
@@ -522,9 +528,13 @@ def fetch_command(
     segment_field: str,
     segment_charset: str,
     segment_max_length: int,
+    fetch_all: bool,
 ) -> None:
     """Fetch dataset records from the NIAID API for one or more resources."""
-    chosen_resources = tuple(resources) or ("ImmPort",)
+    if fetch_all:
+        chosen_resources = DEFAULT_RESOURCES
+    else:
+        chosen_resources = tuple(resources) or ("ImmPort",)
     session = configure_session()
 
     if not segment_field.strip():

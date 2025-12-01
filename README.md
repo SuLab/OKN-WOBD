@@ -27,6 +27,7 @@ python -m okn_wobd.cli fetch --resource ImmPort
 
 ### Options
 
+- `--all`: Fetch all default resources (ImmPort, VDJServer, Vivli, RADx Data Hub, Project Tycho).
 - `--resource`: Repeatable; defaults to `ImmPort` when omitted. Examples: `ImmPort`, `"VDJ Server"`, `Vivli`, `RADx`, `PDB`, `"Project TYCHO"`.
 - `--output-dir`: Directory for saved data and checkpoints (default: `data/raw`).
 - `--page-size`: Batch size for API pagination (default: 100, maximum: 1000).
@@ -40,7 +41,15 @@ python -m okn_wobd.cli fetch --resource ImmPort
 
 The CLI records progress for each resource in `<output-dir>/<resource>_state.json`. Rerun the command without `--restart` to resume where it left off. Supply `--restart` to discard prior results and fetch everything again from the beginning.
 
-### Example: Fetch Multiple Resources
+### Example: Fetch All Default Resources
+
+```bash
+okn-wobd fetch --all
+```
+
+This fetches data for all default resources: ImmPort, VDJServer, Vivli, RADx Data Hub, and Project Tycho.
+
+### Example: Fetch Multiple Specific Resources
 
 ```bash
 python -m okn_wobd.cli fetch \
