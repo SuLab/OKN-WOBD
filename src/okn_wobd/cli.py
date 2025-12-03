@@ -13,6 +13,8 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
+from okn_wobd.rdf_converter import convert_jsonl_to_rdf
+
 BASE_URL = "https://api.data.niaid.nih.gov/v1/query"
 DEFAULT_PAGE_SIZE = 100
 DEFAULT_FACET_SIZE = 10
@@ -25,7 +27,7 @@ DEFAULT_RESOURCES = (
     "VDJServer",
     "Vivli",
     "RADx Data Hub",
-    "PDB",
+    #"PDB",
     "Project Tycho",
 )
 
@@ -510,6 +512,12 @@ def cli(verbose: bool) -> None:
     show_default=True,
     help="Maximum prefix length when segmenting large datasets.",
 )
+@click.option(
+    "--all",
+    "fetch_all",
+    is_flag=True,
+    help="Fetch all default resources (ImmPort, VDJServer, Vivli, RADx Data Hub, Project Tycho).",
+)
 def fetch_command(
     resources: Iterable[str],
     output_dir: Path,
@@ -520,9 +528,13 @@ def fetch_command(
     segment_field: str,
     segment_charset: str,
     segment_max_length: int,
+    fetch_all: bool,
 ) -> None:
     """Fetch dataset records from the NIAID API for one or more resources."""
-    chosen_resources = tuple(resources) or ("ImmPort",)
+    if fetch_all:
+        chosen_resources = DEFAULT_RESOURCES
+    else:
+        chosen_resources = tuple(resources) or ("ImmPort",)
     session = configure_session()
 
     if not segment_field.strip():
@@ -549,6 +561,101 @@ def fetch_command(
         except requests.HTTPError as exc:  # pragma: no cover
             click.echo(f"Failed to fetch {resource!r}: {exc}", err=True)
             break
+
+
+@cli.command("convert")
+@click.option(
+    "--input-dir",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default=Path("data/raw"),
+    show_default=True,
+    help="Directory containing JSONL input files.",
+)
+@click.option(
+    "--output-dir",
+    type=click.Path(path_type=Path),
+    default=Path("data/rdf"),
+    show_default=True,
+    help="Directory to write N-Triples output files.",
+)
+@click.option(
+    "--resource",
+    "resources",
+    multiple=True,
+    type=str,
+    help=(
+        "Resource to convert (repeat for multiple). "
+        "If omitted, converts all JSONL files found in input directory."
+    ),
+)
+def convert_command(
+    input_dir: Path,
+    output_dir: Path,
+    resources: Iterable[str],
+) -> None:
+    """Convert JSONL dataset files to RDF N-Triples format."""
+    chosen_resources = tuple(resources) if resources else None
+    
+    # Find all JSONL files in input directory
+    jsonl_files = sorted(input_dir.glob("*.jsonl"))
+    
+    if not jsonl_files:
+        click.echo(f"No JSONL files found in {input_dir}", err=True)
+        return
+    
+    # Filter by resource if specified
+    if chosen_resources:
+        # Match JSONL files to requested resources by slugified filename
+        resource_slugs = {slugify(r): r for r in chosen_resources}
+        matched_files = []
+        
+        for jsonl_file in jsonl_files:
+            file_slug = jsonl_file.stem  # filename without .jsonl
+            # Try exact match first, then slugified match
+            if file_slug in resource_slugs:
+                matched_files.append((jsonl_file, resource_slugs[file_slug]))
+            elif slugify(file_slug) in resource_slugs:
+                matched_files.append((jsonl_file, resource_slugs[slugify(file_slug)]))
+        
+        if not matched_files:
+            click.echo(
+                f"No JSONL files found matching requested resources: {', '.join(chosen_resources)}",
+                err=True,
+            )
+            return
+    else:
+        # Convert all JSONL files - try to infer resource name from filename
+        # For common resources, map filename to resource name
+        resource_map = {
+            "immport": "ImmPort",
+            "vdjserver": "VDJServer",
+            "vivli": "Vivli",
+            "radx_data_hub": "RADx Data Hub",
+            "protein_data_bank": "Protein Data Bank",
+            "project_tycho": "Project Tycho",
+        }
+        
+        matched_files = []
+        for jsonl_file in jsonl_files:
+            file_slug = jsonl_file.stem
+            resource_name = resource_map.get(file_slug, file_slug.replace("_", " ").title())
+            matched_files.append((jsonl_file, resource_name))
+    
+    # Convert each file
+    for jsonl_file, resource_name in matched_files:
+        output_file = output_dir / f"{jsonl_file.stem}.nt"
+        
+        try:
+            click.echo(f"Converting {jsonl_file.name} ({resource_name})...")
+            count = convert_jsonl_to_rdf(
+                input_path=jsonl_file,
+                output_path=output_file,
+                resource=resource_name,
+            )
+            click.echo(f"Converted {count} datasets to {output_file}")
+        except Exception as exc:
+            click.echo(f"Failed to convert {jsonl_file.name}: {exc}", err=True)
+            continue
 
 
 def main() -> None:  # pragma: no cover

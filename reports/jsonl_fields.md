@@ -72,40 +72,6 @@
 - `url`
 - `variableMeasured`
 
-## Protein Data Bank
-
-*File:* `protein_data_bank.jsonl`
-
-- `@type`
-- `_id`
-- `_ignored`
-- `_score`
-- `author`
-- `citation`
-- `conditionsOfAccess`
-- `curatedBy`
-- `date`
-- `dateModified`
-- `datePublished`
-- `description`
-- `distribution`
-- `doi`
-- `funding`
-- `identifier`
-- `includedInDataCatalog`
-- `infectiousAgent`
-- `keywords`
-- `license`
-- `measurementTechnique`
-- `name`
-- `sameAs`
-- `sourceOrganization`
-- `species`
-- `topicCategory`
-- `url`
-- `usageInfo`
-- `variableMeasured`
-
 ## RADx Data Hub
 
 *File:* `radx_data_hub.jsonl`

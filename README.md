@@ -27,6 +27,7 @@ python -m okn_wobd.cli fetch --resource ImmPort
 
 ### Options
 
+- `--all`: Fetch all default resources (ImmPort, VDJServer, Vivli, RADx Data Hub, Project Tycho).
 - `--resource`: Repeatable; defaults to `ImmPort` when omitted. Examples: `ImmPort`, `"VDJ Server"`, `Vivli`, `RADx`, `PDB`, `"Project TYCHO"`.
 - `--output-dir`: Directory for saved data and checkpoints (default: `data/raw`).
 - `--page-size`: Batch size for API pagination (default: 100, maximum: 1000).
@@ -40,7 +41,15 @@ python -m okn_wobd.cli fetch --resource ImmPort
 
 The CLI records progress for each resource in `<output-dir>/<resource>_state.json`. Rerun the command without `--restart` to resume where it left off. Supply `--restart` to discard prior results and fetch everything again from the beginning.
 
-### Example: Fetch Multiple Resources
+### Example: Fetch All Default Resources
+
+```bash
+okn-wobd fetch --all
+```
+
+This fetches data for all default resources: ImmPort, VDJServer, Vivli, RADx Data Hub, and Project Tycho.
+
+### Example: Fetch Multiple Specific Resources
 
 ```bash
 python -m okn_wobd.cli fetch \
@@ -83,3 +92,75 @@ python scripts/list_jsonl_fields.py
 ```
 
 This writes a field inventory to `reports/jsonl_fields.md`.
+
+## Converting JSONL to RDF N-Triples
+
+Convert dataset records from JSONL format to RDF N-Triples (`.nt`) format for loading into FRINK:
+
+```bash
+okn-wobd convert
+```
+
+### Options
+
+- `--input-dir`: Directory containing JSONL files (default: `data/raw`).
+- `--output-dir`: Directory to write N-Triples files (default: `data/rdf`).
+- `--resource`: Repeatable; convert specific resources. If omitted, converts all JSONL files found in input directory.
+
+### Examples
+
+```bash
+# Convert all resources
+okn-wobd convert
+
+# Convert specific resources
+okn-wobd convert --resource ImmPort --resource "VDJ Server"
+
+# Specify custom input/output directories
+okn-wobd convert --input-dir data/raw --output-dir data/rdf
+```
+
+The converter generates one `.nt` file per resource in the output directory. Each dataset is assigned a URI in the `https://okn.wobd.org/` namespace using the pattern `https://okn.wobd.org/dataset/{resource}/{_id}`.
+
+The converter uses external URIs for shared entities:
+- **Diseases**: MONDO ontology URIs (e.g., `http://purl.obolibrary.org/obo/MONDO_*`)
+- **Species**: UniProt taxonomy URIs (e.g., `https://www.uniprot.org/taxonomy/*`)
+- **Infectious Agents**: UniProt taxonomy URIs
+- **Organizations**: ROR identifiers when available (e.g., `https://ror.org/*`)
+- **DOIs**: Converted to `https://doi.org/*` URIs
+
+The converter follows [Proto-OKN Best Practice Guidelines](https://kastle-lab.github.io/education-gateway/resource-pages/graph-construction-guidelines.html):
+- ✅ Includes RDFS axioms for Schema.org classes (`rdfs:Class` declarations)
+- ✅ Includes RDFS domain and range assertions for properties
+- ✅ Adds `owl:sameAs` mappings alongside `schema:sameAs` for external identifiers
+
+Elasticsearch metadata fields (`_score`, `_ignored`, `@version`) are excluded from the RDF output.
+
+## Testing Competency Queries
+
+After converting data to RDF, you can test the competency question SPARQL queries against your local data:
+
+```bash
+# Test all queries
+python scripts/test_competency_queries.py
+
+# Test a specific query
+python scripts/test_competency_queries.py --query CQ2
+
+# Show detailed results including sample data
+python scripts/test_competency_queries.py --query CQ2 --verbose
+```
+
+### Options
+
+- `--rdf-dir`: Directory containing RDF `.nt` files (default: `data/rdf`).
+- `--queries-file`: Markdown file with competency questions (default: `docs/competency_questions.md`).
+- `--query`: Test only a specific query (e.g., `CQ2` or `CQ10`).
+- `--verbose`: Show query results and detailed error messages.
+
+The script extracts SPARQL queries from the markdown file, loads all RDF files from the specified directory, and executes each query to verify it works correctly. This is useful for:
+- Validating queries before using them in Protege or FRINK
+- Testing query syntax and compatibility
+- Verifying queries return expected results against your data
+
+See the [documentation](./docs/README.md) for more details, including competency questions and SPARQL query examples.
