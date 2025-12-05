@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git mv:*)",
+      "Bash(curl:*)",
+      "Bash(python -m json.tool:*)",
+      "Bash(python -c:*)",
+      "Bash(pip install:*)",
+      "Bash(python scripts/demos/sparql_client.py:*)",
+      "Bash(chmod:*)",
+      "WebSearch",
+      "Bash(python3 -m py_compile:*)",
+      "Bash(pip3 show:*)",
+      "Bash(python niaid_client.py:*)",
+      "Bash(python:*)",
+      "WebFetch(domain:maayanlab.cloud)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:pypi.org)",
+      "WebFetch(domain:chanzuckerberg.github.io)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
