@@ -50,7 +50,7 @@ except ImportError:
 
 # Configuration
 ARCHS4_DATA_DIR = os.environ.get("ARCHS4_DATA_DIR", "/tmp/archs4")
-
+print("using archs4 data dir: ", ARCHS4_DATA_DIR)
 
 # =============================================================================
 # Output Data Structures

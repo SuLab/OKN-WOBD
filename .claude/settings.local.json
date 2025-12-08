@@ -16,7 +16,13 @@
       "WebFetch(domain:maayanlab.cloud)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:pypi.org)",
-      "WebFetch(domain:chanzuckerberg.github.io)"
+      "WebFetch(domain:chanzuckerberg.github.io)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:frink.renci.org)",
+      "WebFetch(domain:frink.apps.renci.org)",
+      "Bash(pip3 install:*)",
+      "Bash(python3:*)"
     ],
     "deny": [],
     "ask": []
