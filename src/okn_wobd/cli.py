@@ -24,7 +24,7 @@ DEFAULT_PAGE_SIZE = 100
 DEFAULT_FACET_SIZE = 10
 DEFAULT_SEGMENT_FIELD = "identifier"
 DEFAULT_SEGMENT_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-DEFAULT_MAX_PREFIX_LENGTH = 6
+DEFAULT_MAX_PREFIX_LENGTH = 8
 MAX_RESULT_WINDOW = 10_000
 
 
@@ -37,6 +37,7 @@ class FetchState:
     segments: List[dict] = field(default_factory=list)
     segment_index: int = 0
     segment_offset: int = 0
+    segment_field: Optional[str] = None  # Track which field was used for segmentation
 
     @classmethod
     def load(cls, path: Path) -> "FetchState":
@@ -50,12 +51,14 @@ class FetchState:
             segments=payload.get("segments", []),
             segment_index=payload.get("segment_index", 0),
             segment_offset=payload.get("segment_offset", 0),
+            segment_field=payload.get("segment_field"),
         )
 
     def dump(self, path: Path) -> None:
         payload = {
             "resource": self.resource,
             "mode": self.mode,
+            "segment_field": self.segment_field,
             "next_offset": self.next_offset,
             "total": self.total,
             "segments": self.segments,
@@ -123,6 +126,7 @@ def get_all_resources_from_api(
     excluded_set = set(EXCLUDED_RESOURCES)
     resources = set()
     excluded_resources = []
+    non_dataset_repositories = []
     sources_without_datasets = []
     
     click.echo("Querying NDE metadata API to discover all Dataset Repositories...")
@@ -142,7 +146,8 @@ def get_all_resources_from_api(
                 continue
             
             info = source.get("sourceInfo", {})
-            source_name = info.get("name") or info.get("identifier") or key
+            # Prioritize identifier over name, as identifier matches what's in dataset records
+            source_name = info.get("identifier") or info.get("name") or key
             
             # Check if excluded
             if source_name in excluded_set:
@@ -150,6 +155,16 @@ def get_all_resources_from_api(
                     "name": source_name,
                     "reason": "explicitly excluded",
                     "has_datasets": False,
+                })
+                continue
+            
+            # Filter out Non-Dataset Repositories (e.g., Computational Tool Repositories)
+            source_type = info.get("type", "")
+            if source_type == "Computational Tool Repository":
+                non_dataset_repositories.append({
+                    "name": source_name,
+                    "type": source_type,
+                    "reason": "Not a Dataset Repository",
                 })
                 continue
             
@@ -177,6 +192,7 @@ def get_all_resources_from_api(
         
         click.echo(f"  Found {len(resources)} Dataset Repositories (sources with datasets)")
         click.echo(f"  Excluded {len(excluded_resources)} resources (explicitly excluded)")
+        click.echo(f"  Filtered out {len(non_dataset_repositories)} non-dataset repositories")
         click.echo(f"  Skipped {len(sources_without_datasets)} sources (no datasets)")
         
         # Save excluded resources log file to default reports directory
@@ -187,6 +203,7 @@ def get_all_resources_from_api(
         log_data = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "excluded_resources": excluded_resources,
+            "non_dataset_repositories": non_dataset_repositories,
             "sources_without_datasets": sources_without_datasets,
             "total_sources": len(sources),
             "dataset_repositories_found": len(resources),
@@ -214,10 +231,65 @@ def get_all_resources_from_api(
         raise click.Abort("Failed to discover resources from NDE API. Cannot proceed with --all flag.")
 
 
-def build_query(prefix: str, segment_field: str) -> str:
-    if prefix:
-        return f"{segment_field}:{prefix}*"
-    return "*"
+def build_query(prefix: str, segment_field: str, wildcard_query: Optional[str] = None) -> str:
+    """Build a query string for the given prefix.
+    
+    Handles both normal prefix queries and wildcard queries for special cases.
+    For prefixes like "DRYAD.0", creates a wildcard query like "*dryad.0*"
+    to match identifiers like "doi:10.5061/dryad.0XXXX".
+    For _id field with wildcard prefixes, uses the provided wildcard_query if available.
+    """
+    # If a wildcard_query was provided (from segment dict), use it directly
+    if wildcard_query:
+        return wildcard_query
+    
+    if not prefix:
+        return "*"
+    
+    # Check if this is a wildcard prefix for _id field (format: "PREFIX.CHAR" where PREFIX is like "NCBI_SRA")
+    # These are created by the _id wildcard segmentation logic
+    if segment_field == "_id" and "." in prefix:
+        parts = prefix.split(".", 1)
+        if len(parts) == 2:
+            base, char = parts
+            # Reconstruct the wildcard query pattern
+            # Base like "NCBI_SRA" should become "ncbi_sra"
+            base_lower = base.lower()
+            # Handle common patterns
+            if base_lower.startswith("ncbi"):
+                base_lower = "ncbi_sra"
+            elif base_lower.startswith("sra") and len(base_lower) == 3:
+                base_lower = "sra"
+            return f"_id:*{base_lower}_{char.lower()}*"
+    
+    # Check if this is a name-based segmentation prefix (format: "NAME_CHAR" or "NAME_CHAR1CHAR2")
+    if segment_field == "name" and prefix.startswith("NAME_"):
+        name_chars = prefix.replace("NAME_", "").lower()
+        return f"name:{name_chars}*"
+    
+    # Check if this is a date-based segmentation prefix (format: "DATE_YYYY" or "DATE_YYYY_MM")
+    if segment_field == "date" and prefix.startswith("DATE_"):
+        date_part = prefix.replace("DATE_", "")
+        if "_" in date_part:
+            # Format: DATE_YYYY_MM
+            year, month = date_part.split("_", 1)
+            return f"date:{year}-{month}*"
+        else:
+            # Format: DATE_YYYY
+            return f"date:{date_part}*"
+    
+    # Check if this is a wildcard prefix (contains a dot, indicating suffix segmentation)
+    # e.g., "DRYAD.0" should become "*dryad.0*"
+    if "." in prefix and prefix.upper().startswith(("DRYAD", "DOI")):
+        # Extract the base and suffix parts
+        parts = prefix.split(".", 1)
+        if len(parts) == 2:
+            base, suffix = parts
+            # Create wildcard query to match the suffix part
+            return f"{segment_field}:*{base.lower()}.{suffix}*"
+    
+    # Normal prefix query
+    return f"{segment_field}:{prefix}*"
 
 
 def request_payload(
@@ -305,7 +377,7 @@ def compute_segments(
     max_window: int,
     max_prefix_length: int,
     warnings: Optional[List[dict]] = None,
-) -> List[dict]:
+) -> tuple[List[dict], str]:
     total = query_total(
         session=session,
         extra_filter=extra_filter,
@@ -313,7 +385,7 @@ def compute_segments(
         query=build_query("", segment_field),
     )
     if total <= max_window:
-        return [{"prefix": "", "total": total}]
+        return [{"prefix": "", "total": total}], segment_field
 
     segments: List[dict] = []
     pending: Deque[tuple[str, int, int]] = deque()
@@ -322,8 +394,16 @@ def compute_segments(
     pending.append(("", total, 0))
     seen.add("")
 
+    click.echo(f"Computing segments (total records: {total:,})...")
+    processed_count = 0
+    queue_size_logged = False
+    
+    # Track if we found any children for the empty prefix - if not, the field might not exist
+    empty_prefix_children_found = False
+
     while pending:
         prefix, prefix_total, depth = pending.popleft()
+        processed_count += 1
 
         if prefix_total == 0:
             continue
@@ -334,6 +414,8 @@ def compute_segments(
         
         if prefix_total <= safe_limit:
             segments.append({"prefix": prefix, "total": prefix_total})
+            if processed_count % 50 == 0:
+                click.echo(f"  Processed {processed_count} prefixes, found {len(segments)} segments, {len(pending)} in queue...")
             continue
         
         # If we've reached max depth and still exceed limit, we have a problem
@@ -360,23 +442,268 @@ def compute_segments(
             segments.append({"prefix": prefix, "total": safe_limit})
             continue
 
+        # Log when processing important prefixes for debugging
+        if prefix in ("D", "DR", "DRY") or (prefix.startswith("DR") and len(prefix) <= 4):
+            click.echo(f"  Processing prefix '{prefix}' ({prefix_total:,} records, depth {depth}, queue size: {len(pending)})...")
+        
+        # Track if we found any children during sub-segmentation
+        children_found = False
         for char in charset:
             child_prefix = prefix + char
             if child_prefix in seen:
                 continue
 
-            child_total = query_total(
-                session=session,
-                extra_filter=extra_filter,
-                facet_size=facet_size,
-                query=build_query(child_prefix, segment_field),
-            )
-            seen.add(child_prefix)
-            if child_total:
-                pending.append((child_prefix, child_total, depth + 1))
+            try:
+                child_total = query_total(
+                    session=session,
+                    extra_filter=extra_filter,
+                    facet_size=facet_size,
+                    query=build_query(child_prefix, segment_field),
+                )
+                seen.add(child_prefix)
+                if child_total:
+                    children_found = True
+                    if prefix == "":
+                        empty_prefix_children_found = True
+                    pending.append((child_prefix, child_total, depth + 1))
+                    # Log when adding important prefixes to queue
+                    if child_prefix in ("DR", "DRY", "DRYA") or (child_prefix.startswith("DR") and len(child_prefix) <= 5):
+                        click.echo(f"    Added '{child_prefix}' to queue ({child_total:,} records)")
+            except Exception as e:
+                click.echo(
+                    f"Error querying prefix '{child_prefix}': {e}. Continuing with other prefixes...",
+                    err=True,
+                )
+                seen.add(child_prefix)  # Mark as seen to avoid retrying
+                # Continue processing other prefixes instead of failing completely
+        
+        # If we tried to sub-segment the empty prefix but found no children, try date-based segmentation
+        # This handles cases where records don't have an 'identifier' field and _id doesn't support prefix queries
+        # (e.g., NCBI SRA uses _id but API doesn't support prefix queries on it)
+        if not children_found and prefix == "" and prefix_total > safe_limit and segment_field == "identifier":
+            click.echo(f"  No children found for empty prefix with '{segment_field}' field. Trying date-based segmentation...")
+            # Try date-based segmentation as fallback
+            # Segment by year ranges
+            date_segments = []
+            years = list(range(2010, 2026))  # Common date range for datasets
+            date_children_found = False
+            
+            for year in years:
+                try:
+                    # Try different date query formats
+                    # Format 1: date:2023*
+                    date_query = f"date:{year}*"
+                    year_total = query_total(
+                        session=session,
+                        extra_filter=extra_filter,
+                        facet_size=facet_size,
+                        query=date_query,
+                    )
+                    # If that doesn't work, try dateModified or datePublished
+                    if year_total == 0:
+                        date_query = f"dateModified:{year}*"
+                        year_total = query_total(
+                            session=session,
+                            extra_filter=extra_filter,
+                            facet_size=facet_size,
+                            query=date_query,
+                        )
+                    if year_total == 0:
+                        date_query = f"datePublished:{year}*"
+                        year_total = query_total(
+                            session=session,
+                            extra_filter=extra_filter,
+                            facet_size=facet_size,
+                            query=date_query,
+                        )
+                    
+                    if year_total > 0:
+                        date_children_found = True
+                        date_segments.append({
+                            "prefix": f"DATE_{year}",
+                            "total": year_total,
+                            "wildcard_query": date_query
+                        })
+                        click.echo(f"    Found date segment '{year}': {year_total:,} records")
+                except Exception:
+                    continue
+            
+            # If date segmentation found segments, use it
+            if date_children_found and date_segments:
+                # Check if we need to sub-segment any year segments that exceed the limit
+                final_segments = []
+                for seg in date_segments:
+                    if seg["total"] <= safe_limit:
+                        final_segments.append(seg)
+                    else:
+                        # Try to sub-segment by month for this year
+                        year = seg["prefix"].replace("DATE_", "")
+                        months_found = False
+                        for month in range(1, 13):
+                            try:
+                                month_query = f"date:{year}-{month:02d}*"
+                                month_total = query_total(
+                                    session=session,
+                                    extra_filter=extra_filter,
+                                    facet_size=facet_size,
+                                    query=month_query,
+                                )
+                                if month_total > 0:
+                                    months_found = True
+                                    final_segments.append({
+                                        "prefix": f"DATE_{year}_{month:02d}",
+                                        "total": month_total,
+                                        "wildcard_query": month_query
+                                    })
+                            except Exception:
+                                continue
+                        if not months_found:
+                            # If month segmentation didn't work, cap the year segment
+                            final_segments.append({
+                                "prefix": seg["prefix"],
+                                "total": safe_limit,
+                                "wildcard_query": seg["wildcard_query"]
+                            })
+                
+                if final_segments:
+                    click.echo(f"  Found {len(final_segments)} segments using date-based segmentation.")
+                    return final_segments, "date"
+            
+            # If date segmentation didn't work, try name-based segmentation
+            if not date_children_found and prefix == "" and prefix_total > safe_limit and segment_field == "identifier":
+                click.echo(f"  Date-based segmentation failed. Trying 'name' field segmentation...")
+                # Try name-based segmentation as another fallback
+                # Segment by name prefixes (first character)
+                name_segments = []
+                name_children_found = False
+                
+                for char in charset:
+                    try:
+                        name_query = f"name:{char}*"
+                        name_total = query_total(
+                            session=session,
+                            extra_filter=extra_filter,
+                            facet_size=facet_size,
+                            query=name_query,
+                        )
+                        if name_total > 0:
+                            name_children_found = True
+                            name_segments.append({
+                                "prefix": f"NAME_{char.upper()}",
+                                "total": name_total,
+                                "wildcard_query": name_query
+                            })
+                            click.echo(f"    Found name segment '{char}': {name_total:,} records")
+                    except Exception:
+                        continue
+                
+                if name_children_found and name_segments:
+                    # Check if we need to sub-segment any name segments that exceed the limit
+                    final_name_segments = []
+                    for seg in name_segments:
+                        if seg["total"] <= safe_limit:
+                            final_name_segments.append(seg)
+                        else:
+                            # Try to sub-segment by second character
+                            prefix_char = seg["prefix"].replace("NAME_", "")
+                            sub_segmented = False
+                            for char2 in charset:
+                                try:
+                                    sub_query = f"name:{prefix_char.lower()}{char2}*"
+                                    sub_total = query_total(
+                                        session=session,
+                                        extra_filter=extra_filter,
+                                        facet_size=facet_size,
+                                        query=sub_query,
+                                    )
+                                    if sub_total > 0:
+                                        sub_segmented = True
+                                        final_name_segments.append({
+                                            "prefix": f"NAME_{prefix_char}{char2.upper()}",
+                                            "total": sub_total,
+                                            "wildcard_query": sub_query
+                                        })
+                                except Exception:
+                                    continue
+                            if not sub_segmented:
+                                # If sub-segmentation didn't work, cap the segment
+                                final_name_segments.append({
+                                    "prefix": seg["prefix"],
+                                    "total": safe_limit,
+                                    "wildcard_query": seg["wildcard_query"]
+                                })
+                    
+                    if final_name_segments:
+                        click.echo(f"  Found {len(final_name_segments)} segments using name-based segmentation.")
+                        return final_name_segments, "name"
+        
+        # If we tried to sub-segment but found no children, try wildcard segmentation
+        # This handles cases where prefix matching doesn't work for deeper levels
+        # (e.g., identifiers like "doi:10.5061/dryad.XXXXX" where "DRYAD" matches all but children don't)
+        if not children_found and prefix_total > safe_limit:
+            # Try wildcard segmentation: for patterns like "doi:10.5061/dryad.XXXXX",
+            # try segmenting on the suffix part using wildcards
+            wildcard_children_found = False
+            if prefix.upper() in ("DRYAD", "DOI") and depth < max_prefix_length:
+                # Try wildcard queries for the suffix part (e.g., *dryad.0*, *dryad.1*, etc.)
+                click.echo(f"    Trying wildcard segmentation for '{prefix}'...")
+                for char in charset:
+                    # Use wildcard to match the suffix part after the dot
+                    wildcard_query = f"{segment_field}:*{prefix.lower()}.{char}*"
+                    try:
+                        child_total = query_total(
+                            session=session,
+                            extra_filter=extra_filter,
+                            facet_size=facet_size,
+                            query=wildcard_query,
+                        )
+                        if child_total:
+                            wildcard_children_found = True
+                            wildcard_prefix = f"{prefix}.{char}"
+                            if wildcard_prefix not in seen:
+                                seen.add(wildcard_prefix)
+                                pending.append((wildcard_prefix, child_total, depth + 1))
+                                click.echo(f"    Added '{wildcard_prefix}' (wildcard) to queue ({child_total:,} records)")
+                    except Exception as e:
+                        # Continue trying other characters
+                        continue
+            
+            # If wildcard segmentation also failed, add as capped segment
+            if not wildcard_children_found:
+                warning_msg = (
+                    f"prefix '{prefix}' exceeds safe limit ({safe_limit}) but sub-segmentation found no children. "
+                    f"Adding as capped segment. Some records may not be fetchable."
+                )
+                click.echo(f"Warning: {warning_msg}", err=True)
+                if warnings is not None:
+                    warnings.append({
+                        "type": "no_children_found",
+                        "prefix": prefix,
+                        "depth": depth,
+                        "record_count": prefix_total,
+                        "safe_limit": safe_limit,
+                        "message": warning_msg,
+                    })
+                segments.append({"prefix": prefix, "total": safe_limit})
 
+    # Verify segments sum matches total
+    segment_sum = sum(s.get("total", 0) for s in segments)
+    missing = total - segment_sum
+    if segment_sum < total * 0.9:  # Allow 10% tolerance for capped segments
+        click.echo(
+            f"Warning: Segment total ({segment_sum:,}) is significantly less than "
+            f"expected total ({total:,}). Missing {missing:,} records.",
+            err=True,
+        )
+        click.echo(
+            f"  This suggests some prefixes were not explored during segmentation. "
+            f"Consider checking for prefixes that should have been sub-segmented.",
+            err=True,
+        )
+
+    click.echo(f"  Computed {len(segments)} segments from {processed_count} prefixes.")
     segments.sort(key=lambda item: item["prefix"])
-    return segments or [{"prefix": "", "total": total}]
+    return segments or [{"prefix": "", "total": total}], segment_field
 
 
 def fetch_resource(
@@ -430,7 +757,7 @@ def fetch_resource(
             )
             state.mode = "segmented"
             # Collect warnings during segmentation
-            state.segments = compute_segments(
+            state.segments, actual_segment_field = compute_segments(
                 session=session,
                 extra_filter=extra_filter,
                 facet_size=facet_size,
@@ -440,12 +767,13 @@ def fetch_resource(
                 max_prefix_length=segment_max_length,
                 warnings=resource_warnings,
             )
+            state.segment_field = actual_segment_field
             state.segment_index = 0
             state.segment_offset = 0
             state.dump(state_path)
     elif state.mode == "segmented" and not state.segments:
         # Collect warnings during segmentation
-        state.segments = compute_segments(
+        state.segments, actual_segment_field = compute_segments(
             session=session,
             extra_filter=extra_filter,
             facet_size=facet_size,
@@ -455,10 +783,13 @@ def fetch_resource(
             max_prefix_length=segment_max_length,
             warnings=resource_warnings,
         )
+        state.segment_field = actual_segment_field
         state.dump(state_path)
     
     with data_path.open("a", encoding="utf-8") as data_file:
         if state.mode == "segmented":
+            # Use the segment_field from state if available (may have been switched to _id)
+            actual_segment_field = state.segment_field or segment_field
             fetch_segmented(
                 session=session,
                 data_file=data_file,
@@ -467,7 +798,7 @@ def fetch_resource(
                 page_size=page_size,
                 facet_size=facet_size,
                 extra_filter=extra_filter,
-                segment_field=segment_field,
+                segment_field=actual_segment_field,
                 max_window=max_window,
                 warnings=resource_warnings,
             )
@@ -590,6 +921,10 @@ def fetch_segmented(
 ) -> None:
     segments = state.segments or [{"prefix": "", "total": 0}]
     grand_total = sum(int(seg.get("total", 0)) for seg in segments)
+    
+    # Track seen identifiers to avoid duplicates
+    seen_identifiers = set()
+    duplicates_skipped = 0
 
     click.echo(
         f"Fetching {state.resource!r} across {len(segments)} segment(s). "
@@ -647,13 +982,16 @@ def fetch_segmented(
                 break
             
             try:
+                # Check if segment has a stored wildcard_query (for _id field segmentation)
+                wildcard_query = segment.get("wildcard_query")
+                query = build_query(prefix, segment_field, wildcard_query=wildcard_query)
                 payload = request_payload(
                     session=session,
                     extra_filter=extra_filter,
                     facet_size=facet_size,
                     size=size,
                     offset=offset,
-                    query=build_query(prefix, segment_field),
+                    query=query,
                 )
             except requests.HTTPError as e:
                 if "search_phase_execution_exception" in str(e) or "400" in str(e):
@@ -682,6 +1020,17 @@ def fetch_segmented(
                 break
 
             for item in hits:
+                # Extract identifier for deduplication
+                # Use identifier if available, otherwise fall back to _id
+                identifier = item.get("identifier") or item.get("_id", "")
+                
+                # Skip if we've already seen this identifier
+                if identifier in seen_identifiers:
+                    duplicates_skipped += 1
+                    continue
+                
+                # Mark as seen and write
+                seen_identifiers.add(identifier)
                 data_file.write(json.dumps(item))
                 data_file.write("\n")
 
@@ -702,6 +1051,12 @@ def fetch_segmented(
         state.segment_offset = 0
         state.dump(state_path)
 
+    if duplicates_skipped > 0:
+        click.echo(
+            f"Skipped {duplicates_skipped} duplicate record(s) during fetch "
+            f"for {state.resource!r}."
+        )
+    
     click.echo(f"Completed segmented fetch for {state.resource!r}.")
 
 
@@ -901,6 +1256,17 @@ def fetch_command(
         log_dir.mkdir(parents=True, exist_ok=True)
         summary_file = log_dir / "fetch_summary.json"
         
+        # Load excluded resources data if available
+        excluded_log_file = log_dir / "excluded_resources_log.json"
+        excluded_resources_data = None
+        if excluded_log_file.exists():
+            try:
+                with excluded_log_file.open("r", encoding="utf-8") as f:
+                    excluded_resources_data = json.load(f)
+            except Exception:
+                # If we can't read it, just continue without it
+                pass
+        
         summary = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "total_resources": len(chosen_resources),
@@ -912,8 +1278,86 @@ def fetch_command(
             "failed_resources": failed_resources,
         }
         
+        # Add excluded resources data if available
+        if excluded_resources_data:
+            summary["excluded_resources"] = excluded_resources_data.get("excluded_resources", [])
+            summary["non_dataset_repositories"] = excluded_resources_data.get("non_dataset_repositories", [])
+            summary["sources_without_datasets"] = excluded_resources_data.get("sources_without_datasets", [])
+            summary["total_sources_in_nde"] = excluded_resources_data.get("total_sources", 0)
+            summary["dataset_repositories_found"] = excluded_resources_data.get("dataset_repositories_found", 0)
+        
         with summary_file.open("w", encoding="utf-8") as f:
             json.dump(summary, f, indent=2)
+        
+        # Also save as Markdown report
+        report_file = log_dir / "fetch_summary.md"
+        with report_file.open("w", encoding="utf-8") as f:
+            f.write("# Fetch Summary\n\n")
+            f.write(f"**Timestamp:** {summary['timestamp']}\n\n")
+            f.write("## Overview\n\n")
+            f.write(f"- **Total resources:** {summary['total_resources']}\n")
+            f.write(f"- **✓ Completed:** {summary['completed']}\n")
+            if incomplete_resources:
+                f.write(f"- **⚠ Incomplete:** {len(incomplete_resources)}\n")
+            if failed_resources:
+                f.write(f"- **✗ Failed:** {len(failed_resources)}\n")
+            f.write("\n")
+            
+            if completed_resources:
+                f.write("## Completed Resources\n\n")
+                for resource in completed_resources:
+                    f.write(f"- {resource}\n")
+                f.write("\n")
+            
+            if incomplete_resources:
+                f.write("## Incomplete Resources\n\n")
+                f.write("Run again with `--restart` to resume fetching.\n\n")
+                for item in incomplete_resources:
+                    f.write(f"- **{item['resource']}**: {item['fetched']:,}/{item['total']:,} records ")
+                    f.write(f"({item['remaining']:,} remaining)\n")
+                f.write("\n")
+            
+            if failed_resources:
+                f.write("## Failed Resources\n\n")
+                f.write("Check errors and retry manually.\n\n")
+                for item in failed_resources:
+                    f.write(f"- **{item['resource']}**: {item['error_type']}\n")
+                f.write("\n")
+            
+            # Add excluded resources and sources without datasets if available
+            if excluded_resources_data:
+                excluded_resources = excluded_resources_data.get("excluded_resources", [])
+                non_dataset_repositories = excluded_resources_data.get("non_dataset_repositories", [])
+                sources_without_datasets = excluded_resources_data.get("sources_without_datasets", [])
+                total_sources = excluded_resources_data.get("total_sources", 0)
+                dataset_repositories_found = excluded_resources_data.get("dataset_repositories_found", 0)
+                
+                f.write("## NDE Dataset Repository Discovery\n\n")
+                f.write(f"- **Total Dataset Repositories in NDE:** {total_sources}\n")
+                f.write(f"- **Dataset Repositories found:** {dataset_repositories_found}\n")
+                f.write(f"- **Resources fetched:** {len(chosen_resources)}\n")
+                f.write("\n")
+                
+                if excluded_resources:
+                    f.write("### Excluded Resources\n\n")
+                    f.write("These resources are explicitly excluded from fetching.\n\n")
+                    for item in excluded_resources:
+                        f.write(f"- **{item['name']}**: {item['reason']}\n")
+                    f.write("\n")
+                
+                if non_dataset_repositories:
+                    f.write("### Non-Dataset Repositories\n\n")
+                    f.write("These sources are returned by the API but are not Dataset Repositories (e.g., Computational Tool Repositories). They are automatically filtered out.\n\n")
+                    for item in non_dataset_repositories:
+                        f.write(f"- **{item['name']}**: {item.get('type', 'Unknown type')} - {item['reason']}\n")
+                    f.write("\n")
+                
+                if sources_without_datasets:
+                    f.write("### Sources Without Datasets\n\n")
+                    f.write("These sources are registered in the NDE but do not have datasets.\n\n")
+                    for item in sources_without_datasets:
+                        f.write(f"- **{item['name']}**: {item['reason']}\n")
+                    f.write("\n")
         
         click.echo("\n" + "=" * 60)
         click.echo("FETCH SUMMARY")
@@ -924,7 +1368,9 @@ def fetch_command(
             click.echo(f"⚠ Incomplete: {len(incomplete_resources)} (see details below)")
         if failed_resources:
             click.echo(f"✗ Failed: {len(failed_resources)} (see details below)")
-        click.echo(f"\nDetailed summary saved to: {summary_file}")
+        click.echo(f"\nDetailed summary saved to:")
+        click.echo(f"  - JSON: {summary_file}")
+        click.echo(f"  - Markdown: {report_file}")
         
         if incomplete_resources:
             click.echo("\nINCOMPLETE RESOURCES (run again to resume):")

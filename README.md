@@ -70,7 +70,7 @@ okn-wobd fetch \
   --max-window 10000 \
   --segment-field identifier \
   --segment-charset 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ \
-  --segment-max-length 6
+  --segment-max-length 8
 ```
 
 The state file tracks both the current segment and offset so interrupted runs can resume without re-downloading data.

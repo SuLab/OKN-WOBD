@@ -1,46 +1,39 @@
 {
-  "timestamp": "2025-12-07T05:09:05.234708+00:00",
-  "total_resources": 33,
-  "completed": 26,
-  "incomplete": 7,
+  "timestamp": "2025-12-09T00:57:23.159652+00:00",
+  "total_resources": 31,
+  "completed": 27,
+  "incomplete": 4,
   "failed": 0,
   "completed_resources": [
     "AccessClinicalData@NIAID",
-    "COVID RADx Data Hub",
     "ClinEpiDB",
     "Data Discovery Engine",
-    "Database of Genotypes and Phenotypes (dbGaP)",
+    "Dryad Digital Repository",
     "Flow Repository",
     "Harvard Dataverse",
+    "HuBMAP",
     "Human Cell Atlas",
     "ImmPort",
     "ImmuneSpace",
     "LINCS",
     "MalariaGEN",
-    "Mendeley Data",
+    "MassIVE",
+    "Mendeley",
     "MicrobiomeDB",
     "NCBI SRA",
-    "NICHD Data and Specimen Hub (DASH)",
-    "OmicsDI",
+    "NDEx",
+    "Omics Discovery Index (OmicsDI)",
     "Project Tycho",
     "Qiita",
+    "RADx Data Hub",
     "ReframeDB",
-    "The Network Data Exchange (NDEx)",
+    "The Database of Genotypes and Phenotypes",
     "VDJServer",
-    "VEuPath Collections",
     "VEuPathDB",
     "Vivli",
-    "bio.tools"
+    "Zenodo"
   ],
   "incomplete_resources": [
-    {
-      "resource": "Dryad Digital Repository",
-      "fetched": 28437,
-      "total": 64423,
-      "remaining": 35986,
-      "data_file": "data/raw/dryad_digital_repository.jsonl",
-      "state_file": "data/raw/dryad_digital_repository_state.json"
-    },
     {
       "resource": "Figshare",
       "fetched": 2041101,
@@ -50,26 +43,10 @@
       "state_file": "data/raw/figshare_state.json"
     },
     {
-      "resource": "HuBMAP",
-      "fetched": 4700,
-      "total": 4871,
-      "remaining": 171,
-      "data_file": "data/raw/hubmap.jsonl",
-      "state_file": "data/raw/hubmap_state.json"
-    },
-    {
-      "resource": "MassIVE",
-      "fetched": 9999,
-      "total": 17989,
-      "remaining": 7990,
-      "data_file": "data/raw/massive.jsonl",
-      "state_file": "data/raw/massive_state.json"
-    },
-    {
       "resource": "NCBI BioProject",
-      "fetched": 184637,
+      "fetched": 975861,
       "total": 975869,
-      "remaining": 791232,
+      "remaining": 8,
       "data_file": "data/raw/ncbi_bioproject.jsonl",
       "state_file": "data/raw/ncbi_bioproject_state.json"
     },
@@ -82,13 +59,91 @@
       "state_file": "data/raw/ncbi_geo_state.json"
     },
     {
-      "resource": "Zenodo",
-      "fetched": 404470,
-      "total": 425109,
-      "remaining": 20639,
-      "data_file": "data/raw/zenodo.jsonl",
-      "state_file": "data/raw/zenodo_state.json"
+      "resource": "NICHD DASH",
+      "fetched": 9999,
+      "total": 12510,
+      "remaining": 2511,
+      "data_file": "data/raw/nichd_dash.jsonl",
+      "state_file": "data/raw/nichd_dash_state.json"
     }
   ],
-  "failed_resources": []
+  "failed_resources": [],
+  "excluded_resources": [
+    {
+      "name": "Protein Data Bank",
+      "reason": "explicitly excluded",
+      "has_datasets": false
+    }
+  ],
+  "non_dataset_repositories": [
+    {
+      "name": "bio.tools",
+      "type": "Computational Tool Repository",
+      "reason": "Not a Dataset Repository"
+    }
+  ],
+  "sources_without_datasets": [
+    {
+      "name": "AmoebaDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "CryptoDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "GiardiaDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "HostDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "PlasmoDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "VectorBase",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "FungiDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "MicrosporidiaDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "ToxoDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "TrichDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "TriTrypDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "PiroplasmaDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    }
+  ],
+  "total_sources_in_nde": 46,
+  "dataset_repositories_found": 31
 }
