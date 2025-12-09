@@ -473,10 +473,14 @@ def validate_with_archs4(
     control_search_term: str = "normal lung",
     max_studies: int = 10,
     max_control_samples: int = 100,
+    use_cache: bool = True,
 ) -> Dict[str, Any]:
     """
     Validate findings in bulk RNA-seq studies from ARCHS4.
     Compares disease samples to control samples.
+
+    This function searches through ALL available studies until it finds
+    max_studies with usable expression data, or exhausts the available studies.
     """
     if not HAS_ARCHS4:
         return {"available": False, "reason": "ARCHS4 not installed"}
@@ -484,6 +488,22 @@ def validate_with_archs4(
     data_dir = os.environ.get("ARCHS4_DATA_DIR")
     if not data_dir:
         return {"available": False, "reason": "ARCHS4_DATA_DIR not configured"}
+
+    # Check cache first
+    cache_dir = get_cache_dir()
+    cache_key = get_cache_key({
+        "genes": sorted(genes),
+        "disease_search_term": disease_search_term,
+        "control_search_term": control_search_term,
+        "max_studies": max_studies,
+    })
+    cache_file = cache_dir / f"archs4_{cache_key}.json" if cache_dir else None
+
+    if use_cache and cache_file:
+        cached = load_from_cache(cache_file)
+        if cached:
+            print(f"  [Cache] Loaded ARCHS4 results from {cache_file.name}")
+            return cached
 
     try:
         client = ARCHS4Client(data_dir=data_dir)
@@ -498,11 +518,11 @@ def validate_with_archs4(
         if disease_metadata.empty:
             return {"available": True, "n_studies": 0, "reason": "No disease studies found"}
 
-        # Extract series IDs
+        # Extract ALL series IDs (don't limit yet - we'll search until we find enough)
         gse_series = disease_metadata["series_id"].str.split(',').explode().str.strip().dropna()
-        gse_ids = [gse for gse in gse_series.unique() if gse.startswith("GSE")][:max_studies]
+        all_gse_ids = [gse for gse in gse_series.unique() if gse.startswith("GSE")]
 
-        print(f"  Found {len(gse_ids)} studies with {len(disease_metadata)} disease samples")
+        print(f"  Found {len(all_gse_ids)} unique studies with {len(disease_metadata)} samples in metadata")
 
         # Search for control samples
         print(f"  Searching for control samples ('{control_search_term}')...")
@@ -515,14 +535,18 @@ def validate_with_archs4(
             ]
 
         n_control = len(control_metadata) if not control_metadata.empty else 0
-        print(f"  Found {n_control} control samples")
+        print(f"  Found {n_control} control samples in metadata")
 
         # Get control expression
         control_expr = None
         control_sample_info = []
+        control_samples_with_data = 0
         if n_control > 0:
             control_samples = list(control_metadata["geo_accession"].head(max_control_samples))
             control_expr = client.get_expression_by_samples(control_samples, genes=genes)
+
+            if control_expr is not None and not control_expr.empty:
+                control_samples_with_data = len(control_expr.columns)
 
             for _, row in control_metadata.head(10).iterrows():
                 control_sample_info.append({
@@ -532,24 +556,74 @@ def validate_with_archs4(
                     "source": str(row["source_name_ch1"])[:80] if row["source_name_ch1"] else "N/A",
                 })
 
-        # Process disease studies
+        print(f"  Control samples with expression data: {control_samples_with_data}")
+
+        # Process disease studies - search ALL until we find max_studies with data
         study_results = []
-        for gse in gse_ids:
+        study_stats = {
+            "total_examined": 0,
+            "no_samples_in_metadata": 0,
+            "no_expression_data": 0,
+            "expression_empty": 0,
+            "no_target_genes": 0,
+            "exceptions": 0,
+            "success": 0,
+            "failed_studies": [],  # Track which studies failed and why
+        }
+
+        total_disease_samples_with_data = 0
+
+        print(f"  Searching for studies with expression data (target: {max_studies})...")
+
+        for gse in all_gse_ids:
+            # Stop if we have enough successful studies
+            if len(study_results) >= max_studies:
+                break
+
+            study_stats["total_examined"] += 1
+
             try:
                 series_mask = disease_metadata["series_id"].str.contains(gse, na=False)
                 series_data = disease_metadata.loc[series_mask]
                 series_samples = list(series_data["geo_accession"])
 
                 if not series_samples:
+                    study_stats["no_samples_in_metadata"] += 1
+                    study_stats["failed_studies"].append({
+                        "gse": gse, "reason": "no_samples_in_metadata", "n_samples": 0
+                    })
                     continue
 
                 expr = client.get_expression_by_samples(series_samples, genes=genes)
-                if expr is None or expr.empty:
+
+                if expr is None:
+                    study_stats["no_expression_data"] += 1
+                    study_stats["failed_studies"].append({
+                        "gse": gse, "reason": "no_expression_data",
+                        "n_samples": len(series_samples),
+                        "sample_ids": series_samples[:5]  # First 5 for debugging
+                    })
+                    continue
+
+                if expr.empty:
+                    study_stats["expression_empty"] += 1
+                    study_stats["failed_studies"].append({
+                        "gse": gse, "reason": "expression_empty",
+                        "n_samples": len(series_samples)
+                    })
                     continue
 
                 genes_found = [g for g in genes if g in expr.index]
 
-                # Collect sample metadata
+                if not genes_found:
+                    study_stats["no_target_genes"] += 1
+                    study_stats["failed_studies"].append({
+                        "gse": gse, "reason": "no_target_genes_found",
+                        "n_samples": len(expr.columns)
+                    })
+                    continue
+
+                # Success! Collect sample metadata
                 sample_titles = [str(row["title"])[:100] for _, row in series_data.iterrows()]
                 study_title = _infer_study_title(sample_titles)
 
@@ -561,20 +635,52 @@ def validate_with_archs4(
                         "source": str(row["source_name_ch1"])[:80] if row["source_name_ch1"] else "N/A",
                     })
 
-                mean_expr = {gene: float(expr.loc[gene].mean()) for gene in genes_found}
+                # Calculate mean expression per gene
+                # Handle both Series (single row) and DataFrame (duplicate gene indices)
+                mean_expr = {}
+                for gene in genes_found:
+                    gene_data = expr.loc[gene]
+                    if hasattr(gene_data, 'values') and len(gene_data.shape) > 1:
+                        # DataFrame case - multiple rows for same gene, flatten and mean
+                        mean_expr[gene] = float(gene_data.values.flatten().mean())
+                    else:
+                        # Series case - single row
+                        mean_expr[gene] = float(gene_data.mean())
+
+                n_samples_with_data = len(expr.columns)
+                total_disease_samples_with_data += n_samples_with_data
 
                 study_results.append({
                     "gse": gse,
                     "study_title": study_title,
-                    "n_samples": len(expr.columns),
+                    "n_samples": n_samples_with_data,
+                    "n_samples_in_metadata": len(series_samples),
                     "n_genes_detected": len(genes_found),
                     "genes_detected": genes_found,
                     "mean_expression": mean_expr,
                     "sample_info": sample_info,
                 })
 
-            except Exception:
+                study_stats["success"] += 1
+                print(f"    ✓ {gse}: {n_samples_with_data} samples, {len(genes_found)} genes")
+
+            except Exception as e:
+                study_stats["exceptions"] += 1
+                study_stats["failed_studies"].append({
+                    "gse": gse, "reason": f"exception: {str(e)[:100]}"
+                })
                 continue
+
+        # Summary of study search
+        print(f"\n  Study search summary:")
+        print(f"    Examined: {study_stats['total_examined']} of {len(all_gse_ids)} studies")
+        print(f"    Successful: {study_stats['success']}")
+        print(f"    No samples in metadata: {study_stats['no_samples_in_metadata']}")
+        print(f"    No expression data in HDF5: {study_stats['no_expression_data']}")
+        print(f"    Expression data empty: {study_stats['expression_empty']}")
+        print(f"    No target genes found: {study_stats['no_target_genes']}")
+        print(f"    Exceptions: {study_stats['exceptions']}")
+        print(f"    Total disease samples with data: {total_disease_samples_with_data}")
 
         # Calculate differential expression
         differential_expression = []
@@ -623,17 +729,29 @@ def validate_with_archs4(
                 all_detected.update(s["genes_detected"])
             concordance = len(all_detected) / len(genes) if genes else 0
 
-        return {
+        result = {
             "available": True,
             "n_studies": len(study_results),
-            "n_disease_samples": len(disease_metadata),
-            "n_control_samples": n_control,
+            "n_studies_examined": study_stats["total_examined"],
+            "n_studies_in_metadata": len(all_gse_ids),
+            "n_disease_samples_in_metadata": len(disease_metadata),
+            "n_disease_samples_with_data": total_disease_samples_with_data,
+            "n_control_samples_in_metadata": n_control,
+            "n_control_samples_with_data": control_samples_with_data,
+            "study_search_stats": study_stats,
             "studies": study_results,
             "control_samples": control_sample_info,
             "differential_expression": differential_expression,
             "genes_queried": genes,
             "concordance": concordance,
         }
+
+        # Cache results
+        if use_cache and cache_file:
+            save_to_cache(cache_file, result)
+            print(f"  [Cache] Saved ARCHS4 results to {cache_file.name}")
+
+        return result
 
     except Exception as e:
         import traceback
@@ -706,9 +824,16 @@ def generate_llm_summary(result: Dict[str, Any]) -> Optional[str]:
         },
     }, indent=2)
 
-    prompt = f"""You are a computational biology expert. Summarize this gene expression analysis.
+    prompt = f"""You are a computational biology expert. Summarize this multi-layer gene expression analysis.
 
 QUESTION: Which genes involved in {query.get('go_label', 'the biological process')} are dysregulated in {query.get('disease')}, and which cell types drive those changes?
+
+ANALYSIS WORKFLOW:
+1. Layer 1 (Knowledge Graph): Discovered genes annotated to GO term {query.get('go_term')} and its subclasses via Ubergraph + Wikidata
+2. Layer 2 (Single-Cell): Analyzed expression in {query.get('tissue')} comparing "{query.get('disease')}" vs "normal" using CellxGene Census
+   - TISSUE-LEVEL: A gene is "upregulated" if its max fold change > 1.5 in ANY cell type within that tissue
+   - CELL-TYPE LEVEL: Individual cell populations may show different patterns (same gene can be UP in lymphocytes but DOWN in NK cells)
+3. Layer 3 (Bulk Validation): Tested whether genes upregulated in single-cell (Layer 2) are also upregulated in independent bulk RNA-seq studies from ARCHS4/GEO
 
 DATA PROVENANCE:
 {chr(10).join(provenance_parts)}
@@ -717,10 +842,10 @@ RESULTS:
 {data_summary}
 
 Provide a scientific summary (3-4 paragraphs) covering:
-1. Key gene expression findings
-2. Cell types driving the changes
-3. Biological context
-4. Data sources section with GEO series IDs
+1. Key gene expression findings - clarify tissue-level patterns vs cell-type-specific patterns
+2. Cell types driving the changes - note if different cell types show opposite patterns
+3. Validation results - do the single-cell findings replicate in bulk RNA-seq?
+4. Biological interpretation and data sources (include GEO series IDs)
 """
 
     try:
@@ -856,7 +981,7 @@ def run_analysis(
         if not top_genes:
             top_genes = [g.symbol for g in genes[:10]]
 
-        validation = validate_with_archs4(top_genes, disease, control_term)
+        validation = validate_with_archs4(top_genes, disease, control_term, use_cache=use_cache)
         result["layer3_validation"] = validation
 
         if validation.get("available") and validation.get("n_studies", 0) > 0:
@@ -948,6 +1073,19 @@ Examples:
         with open(args.output, "w") as f:
             json.dump(result, f, indent=2, default=str)
         print(f"\nResults saved to: {args.output}")
+
+        # Generate visualization
+        try:
+            from visualize_results import generate_visualization
+            viz_output = args.output.replace(".json", "_provenance.txt")
+            visualization = generate_visualization(result)
+            with open(viz_output, "w") as f:
+                f.write(visualization)
+            print(f"Provenance visualization saved to: {viz_output}")
+        except ImportError:
+            print("  (Visualization not available - visualize_results.py not found)")
+        except Exception as e:
+            print(f"  (Visualization error: {e})")
 
 
 if __name__ == "__main__":
