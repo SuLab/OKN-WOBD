@@ -96,6 +96,26 @@ def generate_visualization(data: Dict[str, Any]) -> str:
     lines.append("=" * 100)
     lines.append("")
 
+    # Introduction / Overview
+    lines.append("┌" + "─" * 98 + "┐")
+    lines.append("│" + " ABOUT THIS ANALYSIS ".center(98) + "│")
+    lines.append("├" + "─" * 98 + "┤")
+    lines.append("│".ljust(99) + "│")
+    lines.append("│  This analysis answers the question:".ljust(99) + "│")
+    lines.append(f"│  \"Which genes involved in {truncate(go_label, 40)} are dysregulated in".ljust(99) + "│")
+    lines.append(f"│   {truncate(disease, 50)}, and which cell types drive those changes?\"".ljust(99) + "│")
+    lines.append("│".ljust(99) + "│")
+    lines.append("│  The analysis proceeds through 4 layers:".ljust(99) + "│")
+    lines.append("│    1. KNOWLEDGE GRAPH: Discover genes annotated to the GO term via Ubergraph + Wikidata".ljust(99) + "│")
+    lines.append("│    2. SINGLE-CELL: Compare expression in disease vs normal cells (CellxGene Census)".ljust(99) + "│")
+    lines.append("│    3. BULK VALIDATION: Validate findings in independent GEO studies (ARCHS4)".ljust(99) + "│")
+    lines.append("│    4. INTEGRATION: Synthesize findings and assess cross-layer concordance".ljust(99) + "│")
+    lines.append("│".ljust(99) + "│")
+    lines.append("│  Each layer provides provenance: the specific data sources, sample IDs, and methods used.".ljust(99) + "│")
+    lines.append("│".ljust(99) + "│")
+    lines.append("└" + "─" * 98 + "┘")
+    lines.append("")
+
     # Query Box
     lines.append("┌" + "─" * 98 + "┐")
     lines.append("│" + " QUERY ".center(98) + "│")

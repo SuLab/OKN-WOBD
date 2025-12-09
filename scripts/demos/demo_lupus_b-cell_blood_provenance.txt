@@ -3,6 +3,24 @@
 ====================================================================================================
 
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                       ABOUT THIS ANALYSIS                                        │
+├──────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                  │
+│  This analysis answers the question:                                                             │
+│  "Which genes involved in B cell activation are dysregulated in                                  │
+│   systemic lupus erythematosus, and which cell types drive those changes?"                       │
+│                                                                                                  │
+│  The analysis proceeds through 4 layers:                                                         │
+│    1. KNOWLEDGE GRAPH: Discover genes annotated to the GO term via Ubergraph + Wikidata          │
+│    2. SINGLE-CELL: Compare expression in disease vs normal cells (CellxGene Census)              │
+│    3. BULK VALIDATION: Validate findings in independent GEO studies (ARCHS4)                     │
+│    4. INTEGRATION: Synthesize findings and assess cross-layer concordance                        │
+│                                                                                                  │
+│  Each layer provides provenance: the specific data sources, sample IDs, and methods used.        │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
 │                                              QUERY                                               │
 ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
 │  GO Term:  GO:0042113 (B cell activation)                                                        │

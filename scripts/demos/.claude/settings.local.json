@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(python visualize_results.py:*)",
+      "Bash(cat:*)"
     ]
   }
 }
