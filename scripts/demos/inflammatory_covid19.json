@@ -1,0 +1,397 @@
+{
+  "query": {
+    "go_term": "GO:0006954",
+    "go_label": "inflammatory response",
+    "disease": "COVID-19",
+    "tissue": "lung",
+    "uberon_id": null,
+    "control_term": "normal lung"
+  },
+  "timestamp": "2025-12-09T03:41:22.298657+00:00",
+  "layer1_knowledge": {
+    "n_genes": 0,
+    "sample_genes": [],
+    "genes_with_go_terms": []
+  },
+  "layer2_singlecell": {
+    "n_genes_analyzed": 0,
+    "n_upregulated": 0,
+    "n_downregulated": 0,
+    "top_upregulated": [],
+    "cell_type_drivers": []
+  },
+  "layer3_validation": {
+    "available": true,
+    "n_studies": 10,
+    "n_disease_samples": 4375,
+    "n_control_samples": 671,
+    "studies": [
+      {
+        "gse": "GSE147507",
+        "study_title": "Series15_COVID19Lung",
+        "n_samples": 2,
+        "n_genes_detected": 0,
+        "genes_detected": [],
+        "mean_expression": {},
+        "sample_info": [
+          {
+            "gsm": "GSM4462415",
+            "title": "Series15_COVID19Lung_1",
+            "source": "Lung sample from postmortem COVID-19 patient"
+          },
+          {
+            "gsm": "GSM4462416",
+            "title": "Series15_COVID19Lung_2",
+            "source": "Lung sample from postmortem COVID-19 patient"
+          }
+        ]
+      },
+      {
+        "gse": "GSE149689",
+        "study_title": "Sample 20_nCoV 11 scRNA-seq [SW122]",
+        "n_samples": 1,
+        "n_genes_detected": 0,
+        "genes_detected": [],
+        "mean_expression": {},
+        "sample_info": [
+          {
+            "gsm": "GSM4509030",
+            "title": "Sample 20_nCoV 11 scRNA-seq [SW122]",
+            "source": "nCoV_PBMC"
+          }
+        ]
+      },
+      {
+        "gse": "GSE150728",
+        "study_title": "PBMCs from COVID-19 sample covid_5",
+        "n_samples": 6,
+        "n_genes_detected": 0,
+        "genes_detected": [],
+        "mean_expression": {},
+        "sample_info": [
+          {
+            "gsm": "GSM4557327",
+            "title": "PBMCs from COVID-19 sample covid_555_1",
+            "source": "PBMCs from COVID-19 sample"
+          },
+          {
+            "gsm": "GSM4557328",
+            "title": "PBMCs from COVID-19 sample covid_555_2",
+            "source": "PBMCs from COVID-19 sample"
+          },
+          {
+            "gsm": "GSM4557330",
+            "title": "PBMCs from COVID-19 sample covid_557",
+            "source": "PBMCs from COVID-19 sample"
+          },
+          {
+            "gsm": "GSM4557331",
+            "title": "PBMCs from COVID-19 sample covid_558",
+            "source": "PBMCs from COVID-19 sample"
+          },
+          {
+            "gsm": "GSM4557332",
+            "title": "PBMCs from COVID-19 sample covid_559",
+            "source": "PBMCs from COVID-19 sample"
+          }
+        ]
+      },
+      {
+        "gse": "GSE151803",
+        "study_title": "L.2: COVID-19 Lung 51L",
+        "n_samples": 3,
+        "n_genes_detected": 0,
+        "genes_detected": [],
+        "mean_expression": {},
+        "sample_info": [
+          {
+            "gsm": "GSM4591156",
+            "title": "L.2: COVID-19 Lung 51L",
+            "source": "Autopsy patient"
+          },
+          {
+            "gsm": "GSM4591157",
+            "title": "L.3: COVID-19 Lung 56L",
+            "source": "Autopsy patient"
+          },
+          {
+            "gsm": "GSM4591158",
+            "title": "L.4: COVID-19 Lung 58L",
+            "source": "Autopsy patient"
+          }
+        ]
+      },
+      {
+        "gse": "GSE152418",
+        "study_title": "S147_nCoV001EUHM-Draw-1",
+        "n_samples": 16,
+        "n_genes_detected": 0,
+        "genes_detected": [],
+        "mean_expression": {},
+        "sample_info": [
+          {
+            "gsm": "GSM4614986",
+            "title": "S147_nCoV001EUHM-Draw-1",
+            "source": "PBMC"
+          },
+          {
+            "gsm": "GSM4614987",
+            "title": "S149_nCoV002EUHM-Draw-2",
+            "source": "PBMC"
+          },
+          {
+            "gsm": "GSM4614988",
+            "title": "S150_nCoV003EUHM-Draw-1",
+            "source": "PBMC"
+          },
+          {
+            "gsm": "GSM4614989",
+            "title": "S151_nCoV004EUHM-Draw-1",
+            "source": "PBMC"
+          },
+          {
+            "gsm": "GSM4614990",
+            "title": "S152_nCoV006EUHM-Draw-1",
+            "source": "PBMC"
+          }
+        ]
+      },
+      {
+        "gse": "GSE153131",
+        "study_title": "S52",
+        "n_samples": 6,
+        "n_genes_detected": 0,
+        "genes_detected": [],
+        "mean_expression": {},
+        "sample_info": [
+          {
+            "gsm": "GSM4634750",
+            "title": "S52",
+            "source": "Lung"
+          },
+          {
+            "gsm": "GSM4634751",
+            "title": "S59",
+            "source": "Lung"
+          },
+          {
+            "gsm": "GSM4634752",
+            "title": "S519",
+            "source": "Lung"
+          },
+          {
+            "gsm": "GSM4634753",
+            "title": "S523",
+            "source": "Lung"
+          },
+          {
+            "gsm": "GSM4634754",
+            "title": "S527",
+            "source": "Lung"
+          }
+        ]
+      },
+      {
+        "gse": "GSE154244",
+        "study_title": "S2_patient sample",
+        "n_samples": 4,
+        "n_genes_detected": 0,
+        "genes_detected": [],
+        "mean_expression": {},
+        "sample_info": [
+          {
+            "gsm": "GSM4667504",
+            "title": "S2_patient sample",
+            "source": "Nasopharyngeal swab"
+          },
+          {
+            "gsm": "GSM4667505",
+            "title": "S3_patient sample",
+            "source": "Nasopharyngeal swab"
+          },
+          {
+            "gsm": "GSM4667506",
+            "title": "S4_patient sample",
+            "source": "Nasopharyngeal swab"
+          },
+          {
+            "gsm": "GSM4667507",
+            "title": "S9_patient sample",
+            "source": "Nasopharyngeal swab"
+          }
+        ]
+      },
+      {
+        "gse": "GSE154311",
+        "study_title": "CD16High, replicate 1",
+        "n_samples": 6,
+        "n_genes_detected": 0,
+        "genes_detected": [],
+        "mean_expression": {},
+        "sample_info": [
+          {
+            "gsm": "GSM4668816",
+            "title": "CD16High, replicate 1",
+            "source": "CD16High, replicate 1"
+          },
+          {
+            "gsm": "GSM4668817",
+            "title": "CD16High, replicate 2",
+            "source": "CD16High, replicate 2"
+          },
+          {
+            "gsm": "GSM4668818",
+            "title": "CD16High, replicate 3",
+            "source": "CD16High, replicate 3"
+          },
+          {
+            "gsm": "GSM4668819",
+            "title": "CD16Int, replicate 1",
+            "source": "CD16Int, replicate 1"
+          },
+          {
+            "gsm": "GSM4668820",
+            "title": "CD16Int, replicate 2",
+            "source": "CD16Int, replicate 2"
+          }
+        ]
+      },
+      {
+        "gse": "GSE154567",
+        "study_title": "CM5",
+        "n_samples": 7,
+        "n_genes_detected": 0,
+        "genes_detected": [],
+        "mean_expression": {},
+        "sample_info": [
+          {
+            "gsm": "GSM4674663",
+            "title": "CM5",
+            "source": "Mild COVID19 Patient"
+          },
+          {
+            "gsm": "GSM4674664",
+            "title": "CS7_CS8",
+            "source": "Severe COVID19 Patient"
+          },
+          {
+            "gsm": "GSM4674665",
+            "title": "CS9_CS10",
+            "source": "Severe COVID19 Patient"
+          },
+          {
+            "gsm": "GSM4674666",
+            "title": "CS11_CS12",
+            "source": "Severe COVID19 Patient"
+          },
+          {
+            "gsm": "GSM4674667",
+            "title": "CR13_CR14",
+            "source": "Recovered COVID19 Patient"
+          }
+        ]
+      },
+      {
+        "gse": "GSE155223",
+        "study_title": "Subject NS0 at timepoint A",
+        "n_samples": 14,
+        "n_genes_detected": 0,
+        "genes_detected": [],
+        "mean_expression": {},
+        "sample_info": [
+          {
+            "gsm": "GSM4697611",
+            "title": "Subject NS0 at timepoint A",
+            "source": "PBMC"
+          },
+          {
+            "gsm": "GSM4697613",
+            "title": "Subject NS1 at timepoint A",
+            "source": "PBMC"
+          },
+          {
+            "gsm": "GSM4697614",
+            "title": "Subject NS1 at timepoint B",
+            "source": "PBMC"
+          },
+          {
+            "gsm": "GSM4697615",
+            "title": "Subject TP6 at timepoint A",
+            "source": "PBMC"
+          },
+          {
+            "gsm": "GSM4697616",
+            "title": "Subject TP6 at timepoint B",
+            "source": "PBMC"
+          }
+        ]
+      }
+    ],
+    "control_samples": [
+      {
+        "gsm": "GSM1375986",
+        "series": "GSE57148",
+        "title": "Normal lung tissue 1017-NOR",
+        "source": "Normal Lung Tissue"
+      },
+      {
+        "gsm": "GSM1375987",
+        "series": "GSE57148",
+        "title": "Normal lung tissue 1079-NOR",
+        "source": "Normal Lung Tissue"
+      },
+      {
+        "gsm": "GSM1375988",
+        "series": "GSE57148",
+        "title": "Normal lung tissue 110-NOR",
+        "source": "Normal Lung Tissue"
+      },
+      {
+        "gsm": "GSM1375989",
+        "series": "GSE57148",
+        "title": "Normal lung tissue 1199-NOR",
+        "source": "Normal Lung Tissue"
+      },
+      {
+        "gsm": "GSM1375990",
+        "series": "GSE57148",
+        "title": "Normal lung tissue 1207-NOR",
+        "source": "Normal Lung Tissue"
+      },
+      {
+        "gsm": "GSM1375991",
+        "series": "GSE57148",
+        "title": "Normal lung tissue 1264-NOR",
+        "source": "Normal Lung Tissue"
+      },
+      {
+        "gsm": "GSM1375992",
+        "series": "GSE57148",
+        "title": "Normal lung tissue 1334-NOR",
+        "source": "Normal Lung Tissue"
+      },
+      {
+        "gsm": "GSM1375993",
+        "series": "GSE57148",
+        "title": "Normal lung tissue 1355-NOR",
+        "source": "Normal Lung Tissue"
+      },
+      {
+        "gsm": "GSM1375994",
+        "series": "GSE57148",
+        "title": "Normal lung tissue 1376-NOR",
+        "source": "Normal Lung Tissue"
+      },
+      {
+        "gsm": "GSM1375995",
+        "series": "GSE57148",
+        "title": "Normal lung tissue 1379-NOR",
+        "source": "Normal Lung Tissue"
+      }
+    ],
+    "differential_expression": [],
+    "genes_queried": [],
+    "concordance": 0
+  },
+  "llm_summary": "## Gene Expression Analysis Summary: Inflammatory Response in COVID-19\n\n**Key Gene Expression Findings**\n\nThe computational analysis of inflammatory response genes (GO:0006954) in COVID-19 lung tissue yielded unexpectedly null results across all analytical layers. No genes associated with inflammatory response were identified through the federated SPARQL query of gene ontology databases, and subsequently no differential expression patterns could be detected in the single-cell RNA-seq datasets. This absence of detectable inflammatory gene signatures is surprising given the well-established role of hyperinflammation in COVID-19 pathogenesis and suggests potential technical limitations in the query methodology or data integration pipeline.\n\n**Cell Type Analysis**\n\nDue to the lack of identified inflammatory response genes in the primary query results, no specific cell types could be identified as drivers of inflammatory changes in this analysis. Typically, one would expect to see contributions from alveolar macrophages, neutrophils, monocytes, and activated epithelial cells in COVID-19 lung inflammation, but the current dataset failed to capture these cellular dynamics. This represents a significant gap in the analysis that warrants further investigation with alternative query strategies or expanded gene sets.\n\n**Biological Context and Limitations**\n\nThe null findings contrast sharply with established COVID-19 literature demonstrating robust inflammatory responses, including cytokine storms, complement activation, and innate immune dysregulation. The absence of detectable inflammatory gene expression changes may reflect several technical issues: incomplete gene-GO term associations in the federated databases, potential mismatches between query parameters and available datasets, or limitations in the cross-platform data integration methodology. These results highlight the challenges in large-scale computational biology approaches and underscore the need for careful validation of automated query systems against known biological phenomena.\n\n**Data Sources**\n\nThis analysis integrated multiple high-throughput datasets including single-cell RNA-seq data from the CellxGene Census focusing on lung tissue, and bulk RNA-seq validation from 10 ARCHS4 studies. Key GEO series examined included GSE147507 (COVID-19 lung tissue), GSE149689 (single-cell COVID-19 analysis), GSE150728 (PBMC analysis), GSE151803 (COVID-19 lung samples), and GSE152418 (additional COVID-19 cohorts). The analysis pipeline utilized federated SPARQL queries through FRINK/Ubergraph and Wikidata for gene ontology associations, though the technical failure to retrieve expected inflammatory response genes suggests these resources may require optimization for disease-specific queries."
+}

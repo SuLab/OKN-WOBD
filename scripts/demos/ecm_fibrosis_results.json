@@ -1,0 +1,722 @@
+{
+  "query": {
+    "go_term": "GO:0030198",
+    "go_label": "extracellular matrix organization",
+    "tissue": "lung",
+    "tissue_uberon": "UBERON:0002048",
+    "disease": "pulmonary fibrosis"
+  },
+  "timestamp": "2025-12-09T02:06:54.997369+00:00",
+  "layer1_knowledge": {
+    "n_genes": 6,
+    "sample_genes": [
+      "ECM2",
+      "TNC",
+      "MMP7",
+      "MMP8",
+      "MMP23B",
+      "HSD17B12"
+    ],
+    "genes_with_go_terms": [
+      {
+        "symbol": "ECM2",
+        "go_terms": [
+          "extracellular matrix organization"
+        ]
+      },
+      {
+        "symbol": "TNC",
+        "go_terms": [
+          "extracellular matrix organization"
+        ]
+      },
+      {
+        "symbol": "MMP7",
+        "go_terms": [
+          "extracellular matrix organization"
+        ]
+      },
+      {
+        "symbol": "MMP8",
+        "go_terms": [
+          "extracellular matrix organization"
+        ]
+      },
+      {
+        "symbol": "MMP23B",
+        "go_terms": [
+          "extracellular matrix organization"
+        ]
+      }
+    ]
+  },
+  "layer2_singlecell": {
+    "n_genes_analyzed": 6,
+    "n_upregulated": 6,
+    "n_downregulated": 0,
+    "top_upregulated": [
+      {
+        "symbol": "MMP7",
+        "fold_change": 524.2,
+        "top_cell_type": "epithelial cell of lower respiratory tract"
+      },
+      {
+        "symbol": "TNC",
+        "fold_change": 8.37,
+        "top_cell_type": "unknown"
+      },
+      {
+        "symbol": "MMP8",
+        "fold_change": 7.71,
+        "top_cell_type": "elicited macrophage"
+      },
+      {
+        "symbol": "ECM2",
+        "fold_change": 4.76,
+        "top_cell_type": "unknown"
+      },
+      {
+        "symbol": "HSD17B12",
+        "fold_change": 2.62,
+        "top_cell_type": "epithelial cell of lower respiratory tract"
+      }
+    ],
+    "cell_type_drivers": [
+      {
+        "cell_type": "epithelial cell of lower respiratory tract",
+        "n_upregulated": 2,
+        "n_downregulated": 0,
+        "genes": [
+          "MMP7",
+          "HSD17B12"
+        ]
+      },
+      {
+        "cell_type": "unknown",
+        "n_upregulated": 2,
+        "n_downregulated": 0,
+        "genes": [
+          "TNC",
+          "ECM2"
+        ]
+      },
+      {
+        "cell_type": "elicited macrophage",
+        "n_upregulated": 1,
+        "n_downregulated": 0,
+        "genes": [
+          "MMP8"
+        ]
+      },
+      {
+        "cell_type": "lung pericyte",
+        "n_upregulated": 1,
+        "n_downregulated": 0,
+        "genes": [
+          "MMP23B"
+        ]
+      }
+    ]
+  },
+  "layer3_validation": {
+    "available": true,
+    "n_studies": 10,
+    "n_disease_samples": 241,
+    "n_control_samples": 700,
+    "studies": [
+      {
+        "gse": "GSE73189",
+        "study_title": "IPF-1",
+        "n_samples": 4,
+        "n_genes_detected": 6,
+        "genes_detected": [
+          "MMP7",
+          "TNC",
+          "MMP8",
+          "ECM2",
+          "HSD17B12",
+          "MMP23B"
+        ],
+        "mean_expression": {
+          "MMP7": 2999.5,
+          "TNC": 1934.25,
+          "MMP8": 18.0,
+          "ECM2": 609.5,
+          "HSD17B12": 1090.0,
+          "MMP23B": 112.25
+        },
+        "sample_info": [
+          {
+            "gsm": "GSM1888327",
+            "title": "IPF-1",
+            "source": "lung"
+          },
+          {
+            "gsm": "GSM1888328",
+            "title": "IPF-2",
+            "source": "lung"
+          },
+          {
+            "gsm": "GSM1888329",
+            "title": "IPF-3",
+            "source": "lung"
+          },
+          {
+            "gsm": "GSM1888330",
+            "title": "IPF-4",
+            "source": "lung"
+          }
+        ]
+      },
+      {
+        "gse": "GSE79544",
+        "study_title": "CS3 BAL_IPF",
+        "n_samples": 16,
+        "n_genes_detected": 6,
+        "genes_detected": [
+          "MMP7",
+          "TNC",
+          "MMP8",
+          "ECM2",
+          "HSD17B12",
+          "MMP23B"
+        ],
+        "mean_expression": {
+          "MMP7": 71.5625,
+          "TNC": 325.0,
+          "MMP8": 86.375,
+          "ECM2": 125.625,
+          "HSD17B12": 430.5625,
+          "MMP23B": 79.375
+        },
+        "sample_info": [
+          {
+            "gsm": "GSM2097615",
+            "title": "CS3 BAL_IPF",
+            "source": "lung bronchoalveolar lavage(BAL)"
+          },
+          {
+            "gsm": "GSM2097616",
+            "title": "CS7 BAL_IPF",
+            "source": "lung bronchoalveolar lavage(BAL)"
+          },
+          {
+            "gsm": "GSM2097617",
+            "title": "CS8 BAL_IPF",
+            "source": "lung bronchoalveolar lavage(BAL)"
+          },
+          {
+            "gsm": "GSM2097618",
+            "title": "CS 9 BAL_IPF",
+            "source": "lung bronchoalveolar lavage(BAL)"
+          },
+          {
+            "gsm": "GSM2097619",
+            "title": "CS11 BAL_IPF",
+            "source": "lung bronchoalveolar lavage(BAL)"
+          }
+        ]
+      },
+      {
+        "gse": "GSE83501",
+        "study_title": "hu_IPF_HTII280",
+        "n_samples": 27,
+        "n_genes_detected": 6,
+        "genes_detected": [
+          "MMP7",
+          "TNC",
+          "MMP8",
+          "ECM2",
+          "HSD17B12",
+          "MMP23B"
+        ],
+        "mean_expression": {
+          "MMP7": 932.0,
+          "TNC": 76.88888888888889,
+          "MMP8": 0.0,
+          "ECM2": 0.0,
+          "HSD17B12": 50.74074074074074,
+          "MMP23B": 0.0
+        },
+        "sample_info": [
+          {
+            "gsm": "GSM2204668",
+            "title": "hu_IPF_HTII280_1",
+            "source": "idiopathic pulmonary fibrosis patient"
+          },
+          {
+            "gsm": "GSM2204669",
+            "title": "hu_IPF_HTII280_11",
+            "source": "idiopathic pulmonary fibrosis patient"
+          },
+          {
+            "gsm": "GSM2204670",
+            "title": "hu_IPF_HTII280_13",
+            "source": "idiopathic pulmonary fibrosis patient"
+          },
+          {
+            "gsm": "GSM2204671",
+            "title": "hu_IPF_HTII280_14",
+            "source": "idiopathic pulmonary fibrosis patient"
+          },
+          {
+            "gsm": "GSM2204672",
+            "title": "hu_IPF_HTII280_18",
+            "source": "idiopathic pulmonary fibrosis patient"
+          }
+        ]
+      },
+      {
+        "gse": "GSE83505",
+        "study_title": "hu_IPF_HTII280",
+        "n_samples": 27,
+        "n_genes_detected": 6,
+        "genes_detected": [
+          "MMP7",
+          "TNC",
+          "MMP8",
+          "ECM2",
+          "HSD17B12",
+          "MMP23B"
+        ],
+        "mean_expression": {
+          "MMP7": 932.0,
+          "TNC": 76.88888888888889,
+          "MMP8": 0.0,
+          "ECM2": 0.0,
+          "HSD17B12": 50.74074074074074,
+          "MMP23B": 0.0
+        },
+        "sample_info": [
+          {
+            "gsm": "GSM2204668",
+            "title": "hu_IPF_HTII280_1",
+            "source": "idiopathic pulmonary fibrosis patient"
+          },
+          {
+            "gsm": "GSM2204669",
+            "title": "hu_IPF_HTII280_11",
+            "source": "idiopathic pulmonary fibrosis patient"
+          },
+          {
+            "gsm": "GSM2204670",
+            "title": "hu_IPF_HTII280_13",
+            "source": "idiopathic pulmonary fibrosis patient"
+          },
+          {
+            "gsm": "GSM2204671",
+            "title": "hu_IPF_HTII280_14",
+            "source": "idiopathic pulmonary fibrosis patient"
+          },
+          {
+            "gsm": "GSM2204672",
+            "title": "hu_IPF_HTII280_18",
+            "source": "idiopathic pulmonary fibrosis patient"
+          }
+        ]
+      },
+      {
+        "gse": "GSE92592",
+        "study_title": "s_282634",
+        "n_samples": 20,
+        "n_genes_detected": 6,
+        "genes_detected": [
+          "MMP7",
+          "TNC",
+          "MMP8",
+          "ECM2",
+          "HSD17B12",
+          "MMP23B"
+        ],
+        "mean_expression": {
+          "MMP7": 7431.7,
+          "TNC": 11423.75,
+          "MMP8": 55.95,
+          "ECM2": 1715.3,
+          "HSD17B12": 3687.7,
+          "MMP23B": 356.8
+        },
+        "sample_info": [
+          {
+            "gsm": "GSM2433098",
+            "title": "s_282634",
+            "source": "lung tissue"
+          },
+          {
+            "gsm": "GSM2433099",
+            "title": "s_039545",
+            "source": "lung tissue"
+          },
+          {
+            "gsm": "GSM2433100",
+            "title": "s_111533",
+            "source": "lung tissue"
+          },
+          {
+            "gsm": "GSM2433101",
+            "title": "s_131648",
+            "source": "lung tissue"
+          },
+          {
+            "gsm": "GSM2433102",
+            "title": "s_254200",
+            "source": "lung tissue"
+          }
+        ]
+      },
+      {
+        "gse": "GSE97038",
+        "study_title": "IPF292_day0",
+        "n_samples": 8,
+        "n_genes_detected": 6,
+        "genes_detected": [
+          "MMP7",
+          "TNC",
+          "MMP8",
+          "ECM2",
+          "HSD17B12",
+          "MMP23B"
+        ],
+        "mean_expression": {
+          "MMP7": 0.375,
+          "TNC": 37949.25,
+          "MMP8": 11.125,
+          "ECM2": 65.125,
+          "HSD17B12": 2259.5,
+          "MMP23B": 67.25
+        },
+        "sample_info": [
+          {
+            "gsm": "GSM2550456",
+            "title": "IPF292_day0",
+            "source": "Primary fibroblasts from IPF lung tissue"
+          },
+          {
+            "gsm": "GSM2550457",
+            "title": "IPF293_day0",
+            "source": "Primary fibroblasts from IPF lung tissue"
+          },
+          {
+            "gsm": "GSM2550461",
+            "title": "IPF292_day21",
+            "source": "Primary fibroblasts from IPF lung tissue"
+          },
+          {
+            "gsm": "GSM2550462",
+            "title": "IPF293_day21",
+            "source": "Primary fibroblasts from IPF lung tissue"
+          },
+          {
+            "gsm": "GSM2550466",
+            "title": "IPF329_day0",
+            "source": "Primary fibroblasts from IPF lung tissue"
+          }
+        ]
+      },
+      {
+        "gse": "GSE99621",
+        "study_title": "IPF1n1",
+        "n_samples": 18,
+        "n_genes_detected": 6,
+        "genes_detected": [
+          "MMP7",
+          "TNC",
+          "MMP8",
+          "ECM2",
+          "HSD17B12",
+          "MMP23B"
+        ],
+        "mean_expression": {
+          "MMP7": 1666.111111111111,
+          "TNC": 1793.5555555555557,
+          "MMP8": 10.11111111111111,
+          "ECM2": 410.27777777777777,
+          "HSD17B12": 1083.3333333333333,
+          "MMP23B": 37.72222222222222
+        },
+        "sample_info": [
+          {
+            "gsm": "GSM2648748",
+            "title": "IPF1n1",
+            "source": "lung tissue"
+          },
+          {
+            "gsm": "GSM2648749",
+            "title": "IPF1n2",
+            "source": "lung tissue"
+          },
+          {
+            "gsm": "GSM2648750",
+            "title": "IPF1n3",
+            "source": "lung tissue"
+          },
+          {
+            "gsm": "GSM2648751",
+            "title": "IPF1n4",
+            "source": "lung tissue"
+          },
+          {
+            "gsm": "GSM2648752",
+            "title": "IPF2n1",
+            "source": "lung tissue"
+          }
+        ]
+      },
+      {
+        "gse": "GSE119007",
+        "study_title": "IPF 1 Untreated [IPFC1UT]",
+        "n_samples": 6,
+        "n_genes_detected": 6,
+        "genes_detected": [
+          "MMP7",
+          "TNC",
+          "MMP8",
+          "ECM2",
+          "HSD17B12",
+          "MMP23B"
+        ],
+        "mean_expression": {
+          "MMP7": 0.16666666666666666,
+          "TNC": 64828.666666666664,
+          "MMP8": 1.1666666666666667,
+          "ECM2": 333.0,
+          "HSD17B12": 2849.8333333333335,
+          "MMP23B": 39.5
+        },
+        "sample_info": [
+          {
+            "gsm": "GSM3356559",
+            "title": "IPF 1 Untreated [IPFC1UT]",
+            "source": "IPF Untreated"
+          },
+          {
+            "gsm": "GSM3356560",
+            "title": "IPF 1 TGF\u00ce\u00b2 treated [IPFC1TGF]",
+            "source": "IPF TGF\u00ce\u00b2 treated"
+          },
+          {
+            "gsm": "GSM3356561",
+            "title": "IPF 2 Untreated [IPFC2UT]",
+            "source": "IPF Untreated"
+          },
+          {
+            "gsm": "GSM3356562",
+            "title": "IPF 2 TGF\u00ce\u00b2 treated [IPFC2TGF]",
+            "source": "IPF TGF\u00ce\u00b2 treated"
+          },
+          {
+            "gsm": "GSM3356563",
+            "title": "IPF 4 Untreated [IPFC4UT]",
+            "source": "IPF Untreated"
+          }
+        ]
+      },
+      {
+        "gse": "GSE124786",
+        "study_title": "Ctrl_IPF",
+        "n_samples": 3,
+        "n_genes_detected": 6,
+        "genes_detected": [
+          "MMP7",
+          "TNC",
+          "MMP8",
+          "ECM2",
+          "HSD17B12",
+          "MMP23B"
+        ],
+        "mean_expression": {
+          "MMP7": 5.0,
+          "TNC": 20119.0,
+          "MMP8": 17.333333333333332,
+          "ECM2": 41.0,
+          "HSD17B12": 3518.6666666666665,
+          "MMP23B": 19.666666666666668
+        },
+        "sample_info": [
+          {
+            "gsm": "GSM3554070",
+            "title": "Ctrl_IPF",
+            "source": "Fibroblasts"
+          },
+          {
+            "gsm": "GSM3554071",
+            "title": "Nintedanib_2uM_IPF",
+            "source": "Fibroblasts"
+          },
+          {
+            "gsm": "GSM3554072",
+            "title": "Nintedanib_4uM_IPF",
+            "source": "Fibroblasts"
+          }
+        ]
+      },
+      {
+        "gse": "GSE124788",
+        "study_title": "Ctrl_IPF",
+        "n_samples": 3,
+        "n_genes_detected": 6,
+        "genes_detected": [
+          "MMP7",
+          "TNC",
+          "MMP8",
+          "ECM2",
+          "HSD17B12",
+          "MMP23B"
+        ],
+        "mean_expression": {
+          "MMP7": 5.0,
+          "TNC": 20119.0,
+          "MMP8": 17.333333333333332,
+          "ECM2": 41.0,
+          "HSD17B12": 3518.6666666666665,
+          "MMP23B": 19.666666666666668
+        },
+        "sample_info": [
+          {
+            "gsm": "GSM3554070",
+            "title": "Ctrl_IPF",
+            "source": "Fibroblasts"
+          },
+          {
+            "gsm": "GSM3554071",
+            "title": "Nintedanib_2uM_IPF",
+            "source": "Fibroblasts"
+          },
+          {
+            "gsm": "GSM3554072",
+            "title": "Nintedanib_4uM_IPF",
+            "source": "Fibroblasts"
+          }
+        ]
+      }
+    ],
+    "control_samples": [
+      {
+        "gsm": "GSM1375986",
+        "series": "GSE57148",
+        "title": "Normal lung tissue 1017-NOR",
+        "source": "Normal Lung Tissue"
+      },
+      {
+        "gsm": "GSM1375987",
+        "series": "GSE57148",
+        "title": "Normal lung tissue 1079-NOR",
+        "source": "Normal Lung Tissue"
+      },
+      {
+        "gsm": "GSM1375988",
+        "series": "GSE57148",
+        "title": "Normal lung tissue 110-NOR",
+        "source": "Normal Lung Tissue"
+      },
+      {
+        "gsm": "GSM1375989",
+        "series": "GSE57148",
+        "title": "Normal lung tissue 1199-NOR",
+        "source": "Normal Lung Tissue"
+      },
+      {
+        "gsm": "GSM1375990",
+        "series": "GSE57148",
+        "title": "Normal lung tissue 1207-NOR",
+        "source": "Normal Lung Tissue"
+      },
+      {
+        "gsm": "GSM1375991",
+        "series": "GSE57148",
+        "title": "Normal lung tissue 1264-NOR",
+        "source": "Normal Lung Tissue"
+      },
+      {
+        "gsm": "GSM1375992",
+        "series": "GSE57148",
+        "title": "Normal lung tissue 1334-NOR",
+        "source": "Normal Lung Tissue"
+      },
+      {
+        "gsm": "GSM1375993",
+        "series": "GSE57148",
+        "title": "Normal lung tissue 1355-NOR",
+        "source": "Normal Lung Tissue"
+      },
+      {
+        "gsm": "GSM1375994",
+        "series": "GSE57148",
+        "title": "Normal lung tissue 1376-NOR",
+        "source": "Normal Lung Tissue"
+      },
+      {
+        "gsm": "GSM1375995",
+        "series": "GSE57148",
+        "title": "Normal lung tissue 1379-NOR",
+        "source": "Normal Lung Tissue"
+      }
+    ],
+    "differential_expression": [
+      {
+        "gene": "TNC",
+        "mean_disease": 15864.62,
+        "mean_control": 245.78,
+        "fold_change": 64.29,
+        "log2_fc": 6.01,
+        "n_disease_studies": 10,
+        "n_control_samples": 100
+      },
+      {
+        "gene": "MMP8",
+        "mean_disease": 21.74,
+        "mean_control": 0.25,
+        "fold_change": 18.19,
+        "log2_fc": 4.19,
+        "n_disease_studies": 10,
+        "n_control_samples": 100
+      },
+      {
+        "gene": "MMP7",
+        "mean_disease": 1404.34,
+        "mean_control": 90.12,
+        "fold_change": 15.42,
+        "log2_fc": 3.95,
+        "n_disease_studies": 10,
+        "n_control_samples": 100
+      },
+      {
+        "gene": "ECM2",
+        "mean_disease": 334.08,
+        "mean_control": 34.89,
+        "fold_change": 9.34,
+        "log2_fc": 3.22,
+        "n_disease_studies": 10,
+        "n_control_samples": 100
+      },
+      {
+        "gene": "HSD17B12",
+        "mean_disease": 1853.97,
+        "mean_control": 368.57,
+        "fold_change": 5.02,
+        "log2_fc": 2.33,
+        "n_disease_studies": 10,
+        "n_control_samples": 100
+      },
+      {
+        "gene": "MMP23B",
+        "mean_disease": 73.22,
+        "mean_control": 21.75,
+        "fold_change": 3.26,
+        "log2_fc": 1.71,
+        "n_disease_studies": 10,
+        "n_control_samples": 100
+      }
+    ],
+    "genes_queried": [
+      "MMP7",
+      "TNC",
+      "MMP8",
+      "ECM2",
+      "HSD17B12",
+      "MMP23B"
+    ],
+    "concordance": 1.0
+  },
+  "llm_summary": "# ECM Organization Gene Dysregulation in Pulmonary Fibrosis: Multi-Layer Analysis Summary\n\n## Key Findings\n\nThis comprehensive analysis identified six genes involved in extracellular matrix organization (GO:0030198) that are significantly dysregulated in pulmonary fibrosis: ECM2, TNC, MMP7, MMP8, MMP23B, and HSD17B12. All six genes showed consistent upregulation across both single-cell and bulk RNA-seq analyses, with no downregulated genes detected. The single-cell analysis revealed dramatic fold changes, with MMP7 showing the most striking upregulation (524.2-fold), followed by TNC (8.37-fold) and MMP8 (7.71-fold). This pattern was validated in bulk RNA-seq data from 10 independent studies encompassing 241 pulmonary fibrosis samples, where TNC showed the highest fold change (64.29-fold), followed by MMP8 (18.19-fold) and MMP7 (15.42-fold).\n\n## Cell Type-Specific Contributions\n\nThe analysis revealed distinct cellular drivers of ECM dysregulation in pulmonary fibrosis. Epithelial cells of the lower respiratory tract emerged as a primary contributor, driving the upregulation of both MMP7 and HSD17B12. This finding is biologically significant as these epithelial cells undergo epithelial-mesenchymal transition during fibrotic progression and are known sources of matrix metalloproteinases. Elicited macrophages specifically drove MMP8 upregulation, reflecting the inflammatory component of fibrosis where activated macrophages contribute to matrix remodeling. Lung pericytes showed upregulation of MMP23B, highlighting the role of perivascular cells in fibrotic ECM reorganization. Notably, two genes (TNC and ECM2) were associated with \"unknown\" cell types, suggesting either novel cellular sources or technical limitations in cell type annotation.\n\n## Biological Context and Clinical Relevance\n\nThe identified genes represent key players in pathological ECM remodeling characteristic of pulmonary fibrosis. MMP7 (matrilysin-1) is a critical matrix metalloproteinase that degrades various ECM components and is established as a biomarker for IPF progression. TNC (tenascin-C) is a matricellular protein that promotes fibroblast activation and collagen deposition. The upregulation of multiple MMPs (MMP7, MMP8, MMP23B) indicates dysregulated proteolytic activity that paradoxically contributes to fibrosis through aberrant matrix turnover and activation of profibrotic signaling cascades. ECM2 encodes a collagen-binding glycoprotein involved in matrix assembly, while HSD17B12 (hydroxysteroid dehydrogenase) may contribute through steroid hormone metabolism affecting fibroblast behavior. The remarkable concordance between single-cell and bulk RNA-seq findings strengthens confidence in these results, though the magnitude differences likely reflect cellular heterogeneity and technical platform variations.\n\n## Data Sources\n\n**Single-cell RNA-seq data:** CellxGene Census (lung tissue, UBERON:0002048)\n\n**Bulk RNA-seq validation studies (ARCHS4):**\n- GSE73189: IPF-1 (4 samples)\n- GSE79544: CS3 BAL_IPF - Bronchoalveolar lavage from IPF patients (16 samples)  \n- GSE83501: hu_IPF_HTII280 - Human IPF lung samples with HTII-280 treatment (27 samples)\n- GSE83505: hu_IPF_HTII280 - Human IPF lung samples with HTII-280 treatment (27 samples)\n- GSE92592: s_282634 - IPF lung tissue samples (20 samples)\n- Additional 5 studies (147 samples total)\n- Normal lung controls: 700 samples across studies\n\n**Knowledge integration:** Gene Ontology (GO:0030198), FRINK/Ubergraph federated SPARQL queries, Wikidata gene annotations"
+}
