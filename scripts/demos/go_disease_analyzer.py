@@ -588,7 +588,12 @@ def validate_with_archs4(
 
                 control_values = []
                 if gene in control_expr.index:
-                    control_values = control_expr.loc[gene].tolist()
+                    row = control_expr.loc[gene]
+                    # Handle both Series (single row) and DataFrame (duplicate index)
+                    if hasattr(row, 'values'):
+                        control_values = row.values.flatten().tolist()
+                    else:
+                        control_values = [row]
 
                 if disease_values and control_values:
                     mean_disease = sum(disease_values) / len(disease_values)
