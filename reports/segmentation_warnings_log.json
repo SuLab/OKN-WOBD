@@ -1,0 +1,192 @@
+{
+  "timestamp": "2025-12-07T04:38:56.362257+00:00",
+  "warnings": [
+    {
+      "type": "segment_exceeds_limit",
+      "resource": "Dryad Digital Repository",
+      "prefix": "DRYA",
+      "segment_total": 62064,
+      "max_allowed_offset": 9999,
+      "effective_segment_total": 10000,
+      "records_skipped": 52064,
+      "message": "Segment 'DRYA' has 62064 records but API limit allows max offset 9999. Will only fetch first 10000 records. Segment needs further sub-segmentation.",
+      "timestamp": "2025-12-07T02:20:36.787125+00:00"
+    },
+    {
+      "type": "max_depth_exceeded",
+      "prefix": "DRYA",
+      "depth": 4,
+      "record_count": 62064,
+      "safe_limit": 9999,
+      "max_prefix_length": 4,
+      "message": "prefix 'DRYA' reached max depth (4) with 62064 records (exceeds safe limit of 9999). Some records may not be fetchable. Consider increasing --segment-max-length to allow further sub-segmentation.",
+      "resource": "Dryad Digital Repository",
+      "timestamp": "2025-12-07T02:25:17.934844+00:00"
+    },
+    {
+      "type": "max_depth_exceeded",
+      "prefix": "MSV000",
+      "depth": 6,
+      "record_count": 17989,
+      "safe_limit": 9999,
+      "max_prefix_length": 6,
+      "message": "prefix 'MSV000' reached max depth (6) with 17989 records (exceeds safe limit of 9999). Some records may not be fetchable. Consider increasing --segment-max-length to allow further sub-segmentation.",
+      "resource": "MassIVE",
+      "timestamp": "2025-12-07T04:03:10.619814+00:00"
+    },
+    {
+      "type": "max_depth_exceeded",
+      "prefix": "PRJEB2",
+      "depth": 6,
+      "record_count": 10264,
+      "safe_limit": 9999,
+      "max_prefix_length": 6,
+      "message": "prefix 'PRJEB2' reached max depth (6) with 10264 records (exceeds safe limit of 9999). Some records may not be fetchable. Consider increasing --segment-max-length to allow further sub-segmentation.",
+      "resource": "NCBI BioProject",
+      "timestamp": "2025-12-07T04:09:49.849424+00:00"
+    },
+    {
+      "type": "max_depth_exceeded",
+      "prefix": "PRJEB3",
+      "depth": 6,
+      "record_count": 10395,
+      "safe_limit": 9999,
+      "max_prefix_length": 6,
+      "message": "prefix 'PRJEB3' reached max depth (6) with 10395 records (exceeds safe limit of 9999). Some records may not be fetchable. Consider increasing --segment-max-length to allow further sub-segmentation.",
+      "resource": "NCBI BioProject",
+      "timestamp": "2025-12-07T04:09:49.849436+00:00"
+    },
+    {
+      "type": "max_depth_exceeded",
+      "prefix": "PRJEB4",
+      "depth": 6,
+      "record_count": 10068,
+      "safe_limit": 9999,
+      "max_prefix_length": 6,
+      "message": "prefix 'PRJEB4' reached max depth (6) with 10068 records (exceeds safe limit of 9999). Some records may not be fetchable. Consider increasing --segment-max-length to allow further sub-segmentation.",
+      "resource": "NCBI BioProject",
+      "timestamp": "2025-12-07T04:09:49.849440+00:00"
+    },
+    {
+      "type": "max_depth_exceeded",
+      "prefix": "PRJNA1",
+      "depth": 6,
+      "record_count": 234318,
+      "safe_limit": 9999,
+      "max_prefix_length": 6,
+      "message": "prefix 'PRJNA1' reached max depth (6) with 234318 records (exceeds safe limit of 9999). Some records may not be fetchable. Consider increasing --segment-max-length to allow further sub-segmentation.",
+      "resource": "NCBI BioProject",
+      "timestamp": "2025-12-07T04:09:49.849443+00:00"
+    },
+    {
+      "type": "max_depth_exceeded",
+      "prefix": "PRJNA2",
+      "depth": 6,
+      "record_count": 79212,
+      "safe_limit": 9999,
+      "max_prefix_length": 6,
+      "message": "prefix 'PRJNA2' reached max depth (6) with 79212 records (exceeds safe limit of 9999). Some records may not be fetchable. Consider increasing --segment-max-length to allow further sub-segmentation.",
+      "resource": "NCBI BioProject",
+      "timestamp": "2025-12-07T04:09:49.849446+00:00"
+    },
+    {
+      "type": "max_depth_exceeded",
+      "prefix": "PRJNA3",
+      "depth": 6,
+      "record_count": 85155,
+      "safe_limit": 9999,
+      "max_prefix_length": 6,
+      "message": "prefix 'PRJNA3' reached max depth (6) with 85155 records (exceeds safe limit of 9999). Some records may not be fetchable. Consider increasing --segment-max-length to allow further sub-segmentation.",
+      "resource": "NCBI BioProject",
+      "timestamp": "2025-12-07T04:09:49.849448+00:00"
+    },
+    {
+      "type": "max_depth_exceeded",
+      "prefix": "PRJNA4",
+      "depth": 6,
+      "record_count": 88747,
+      "safe_limit": 9999,
+      "max_prefix_length": 6,
+      "message": "prefix 'PRJNA4' reached max depth (6) with 88747 records (exceeds safe limit of 9999). Some records may not be fetchable. Consider increasing --segment-max-length to allow further sub-segmentation.",
+      "resource": "NCBI BioProject",
+      "timestamp": "2025-12-07T04:09:49.849450+00:00"
+    },
+    {
+      "type": "max_depth_exceeded",
+      "prefix": "PRJNA5",
+      "depth": 6,
+      "record_count": 85937,
+      "safe_limit": 9999,
+      "max_prefix_length": 6,
+      "message": "prefix 'PRJNA5' reached max depth (6) with 85937 records (exceeds safe limit of 9999). Some records may not be fetchable. Consider increasing --segment-max-length to allow further sub-segmentation.",
+      "resource": "NCBI BioProject",
+      "timestamp": "2025-12-07T04:09:49.849453+00:00"
+    },
+    {
+      "type": "max_depth_exceeded",
+      "prefix": "PRJNA6",
+      "depth": 6,
+      "record_count": 84305,
+      "safe_limit": 9999,
+      "max_prefix_length": 6,
+      "message": "prefix 'PRJNA6' reached max depth (6) with 84305 records (exceeds safe limit of 9999). Some records may not be fetchable. Consider increasing --segment-max-length to allow further sub-segmentation.",
+      "resource": "NCBI BioProject",
+      "timestamp": "2025-12-07T04:09:49.849457+00:00"
+    },
+    {
+      "type": "max_depth_exceeded",
+      "prefix": "PRJNA7",
+      "depth": 6,
+      "record_count": 78112,
+      "safe_limit": 9999,
+      "max_prefix_length": 6,
+      "message": "prefix 'PRJNA7' reached max depth (6) with 78112 records (exceeds safe limit of 9999). Some records may not be fetchable. Consider increasing --segment-max-length to allow further sub-segmentation.",
+      "resource": "NCBI BioProject",
+      "timestamp": "2025-12-07T04:09:49.849460+00:00"
+    },
+    {
+      "type": "max_depth_exceeded",
+      "prefix": "PRJNA8",
+      "depth": 6,
+      "record_count": 73309,
+      "safe_limit": 9999,
+      "max_prefix_length": 6,
+      "message": "prefix 'PRJNA8' reached max depth (6) with 73309 records (exceeds safe limit of 9999). Some records may not be fetchable. Consider increasing --segment-max-length to allow further sub-segmentation.",
+      "resource": "NCBI BioProject",
+      "timestamp": "2025-12-07T04:09:49.849463+00:00"
+    },
+    {
+      "type": "max_depth_exceeded",
+      "prefix": "PRJNA9",
+      "depth": 6,
+      "record_count": 71398,
+      "safe_limit": 9999,
+      "max_prefix_length": 6,
+      "message": "prefix 'PRJNA9' reached max depth (6) with 71398 records (exceeds safe limit of 9999). Some records may not be fetchable. Consider increasing --segment-max-length to allow further sub-segmentation.",
+      "resource": "NCBI BioProject",
+      "timestamp": "2025-12-07T04:09:49.849466+00:00"
+    },
+    {
+      "type": "segment_exceeds_limit",
+      "resource": "NCBI SRA",
+      "prefix": "",
+      "segment_total": 391038,
+      "max_allowed_offset": 9999,
+      "effective_segment_total": 10000,
+      "records_skipped": 381038,
+      "message": "Segment '' has 391038 records but API limit allows max offset 9999. Will only fetch first 10000 records. Segment needs further sub-segmentation.",
+      "timestamp": "2025-12-07T04:23:12.795125+00:00"
+    },
+    {
+      "type": "max_depth_exceeded",
+      "prefix": "ZENODO",
+      "depth": 6,
+      "record_count": 365747,
+      "safe_limit": 9999,
+      "max_prefix_length": 6,
+      "message": "prefix 'ZENODO' reached max depth (6) with 365747 records (exceeds safe limit of 9999). Some records may not be fetchable. Consider increasing --segment-max-length to allow further sub-segmentation.",
+      "resource": "Zenodo",
+      "timestamp": "2025-12-07T04:38:56.362245+00:00"
+    }
+  ]
+}

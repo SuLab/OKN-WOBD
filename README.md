@@ -27,7 +27,7 @@ python -m okn_wobd.cli fetch --resource ImmPort
 
 ### Options
 
-- `--all`: Fetch all default resources (ImmPort, VDJServer, Vivli, RADx Data Hub, Project Tycho).
+- `--all`: Fetch all available resources from the NDE API (automatically discovers all Dataset Repositories). Resources listed in `src/okn_wobd/excluded_resources.py` are excluded.
 - `--resource`: Repeatable; defaults to `ImmPort` when omitted. Examples: `ImmPort`, `"VDJ Server"`, `Vivli`, `RADx`, `PDB`, `"Project TYCHO"`.
 - `--output-dir`: Directory for saved data and checkpoints (default: `data/raw`).
 - `--page-size`: Batch size for API pagination (default: 100, maximum: 1000).
@@ -41,13 +41,13 @@ python -m okn_wobd.cli fetch --resource ImmPort
 
 The CLI records progress for each resource in `<output-dir>/<resource>_state.json`. Rerun the command without `--restart` to resume where it left off. Supply `--restart` to discard prior results and fetch everything again from the beginning.
 
-### Example: Fetch All Default Resources
+### Example: Fetch All Available Dataset Repository Resources
 
 ```bash
 okn-wobd fetch --all
 ```
 
-This fetches data for all default resources: ImmPort, VDJServer, Vivli, RADx Data Hub, and Project Tycho.
+This queries the NDE API to discover all available dataset repository resources and fetches data for each one (excluding resources configured in `src/okn_wobd/excluded_resources.py`, such as "Protein Data Bank").
 
 ### Example: Fetch Multiple Specific Resources
 
@@ -70,7 +70,7 @@ okn-wobd fetch \
   --max-window 10000 \
   --segment-field identifier \
   --segment-charset 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ \
-  --segment-max-length 4
+  --segment-max-length 6
 ```
 
 The state file tracks both the current segment and offset so interrupted runs can resume without re-downloading data.

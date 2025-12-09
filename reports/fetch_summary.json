@@ -1,0 +1,94 @@
+{
+  "timestamp": "2025-12-07T05:09:05.234708+00:00",
+  "total_resources": 33,
+  "completed": 26,
+  "incomplete": 7,
+  "failed": 0,
+  "completed_resources": [
+    "AccessClinicalData@NIAID",
+    "COVID RADx Data Hub",
+    "ClinEpiDB",
+    "Data Discovery Engine",
+    "Database of Genotypes and Phenotypes (dbGaP)",
+    "Flow Repository",
+    "Harvard Dataverse",
+    "Human Cell Atlas",
+    "ImmPort",
+    "ImmuneSpace",
+    "LINCS",
+    "MalariaGEN",
+    "Mendeley Data",
+    "MicrobiomeDB",
+    "NCBI SRA",
+    "NICHD Data and Specimen Hub (DASH)",
+    "OmicsDI",
+    "Project Tycho",
+    "Qiita",
+    "ReframeDB",
+    "The Network Data Exchange (NDEx)",
+    "VDJServer",
+    "VEuPath Collections",
+    "VEuPathDB",
+    "Vivli",
+    "bio.tools"
+  ],
+  "incomplete_resources": [
+    {
+      "resource": "Dryad Digital Repository",
+      "fetched": 28437,
+      "total": 64423,
+      "remaining": 35986,
+      "data_file": "data/raw/dryad_digital_repository.jsonl",
+      "state_file": "data/raw/dryad_digital_repository_state.json"
+    },
+    {
+      "resource": "Figshare",
+      "fetched": 2041101,
+      "total": 2041105,
+      "remaining": 4,
+      "data_file": "data/raw/figshare.jsonl",
+      "state_file": "data/raw/figshare_state.json"
+    },
+    {
+      "resource": "HuBMAP",
+      "fetched": 4700,
+      "total": 4871,
+      "remaining": 171,
+      "data_file": "data/raw/hubmap.jsonl",
+      "state_file": "data/raw/hubmap_state.json"
+    },
+    {
+      "resource": "MassIVE",
+      "fetched": 9999,
+      "total": 17989,
+      "remaining": 7990,
+      "data_file": "data/raw/massive.jsonl",
+      "state_file": "data/raw/massive_state.json"
+    },
+    {
+      "resource": "NCBI BioProject",
+      "fetched": 184637,
+      "total": 975869,
+      "remaining": 791232,
+      "data_file": "data/raw/ncbi_bioproject.jsonl",
+      "state_file": "data/raw/ncbi_bioproject_state.json"
+    },
+    {
+      "resource": "NCBI GEO",
+      "fetched": 246504,
+      "total": 246522,
+      "remaining": 18,
+      "data_file": "data/raw/ncbi_geo.jsonl",
+      "state_file": "data/raw/ncbi_geo_state.json"
+    },
+    {
+      "resource": "Zenodo",
+      "fetched": 404470,
+      "total": 425109,
+      "remaining": 20639,
+      "data_file": "data/raw/zenodo.jsonl",
+      "state_file": "data/raw/zenodo_state.json"
+    }
+  ],
+  "failed_resources": []
+}
