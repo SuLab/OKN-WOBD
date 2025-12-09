@@ -127,8 +127,8 @@ class CellxGeneClient:
         self._census = None
 
     def __enter__(self):
-        """Open Census connection."""
-        self._census = cellxgene_census.open_soma()
+        """Open Census connection with specific version to suppress warning."""
+        self._census = cellxgene_census.open_soma(census_version="2025-11-08")
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -141,7 +141,7 @@ class CellxGeneClient:
     def census(self):
         """Get the Census connection, opening if necessary."""
         if self._census is None:
-            self._census = cellxgene_census.open_soma()
+            self._census = cellxgene_census.open_soma(census_version="2025-11-08")
         return self._census
 
     def close(self):
@@ -175,6 +175,7 @@ class CellxGeneClient:
         self,
         gene_symbol: str,
         tissue: Optional[str] = None,
+        tissue_ontology_term_id: Optional[str] = None,
         cell_types: Optional[List[str]] = None,
         diseases: Optional[List[str]] = None,
         max_cells: int = 100000,
@@ -184,7 +185,8 @@ class CellxGeneClient:
 
         Args:
             gene_symbol: Gene symbol (e.g., "ACTA2")
-            tissue: Tissue to filter by (e.g., "lung")
+            tissue: Tissue to filter by general name (e.g., "lung")
+            tissue_ontology_term_id: UBERON ID to filter by (e.g., "UBERON:0000114")
             cell_types: List of cell types to include
             diseases: List of diseases to include
             max_cells: Maximum number of cells to retrieve
@@ -195,7 +197,10 @@ class CellxGeneClient:
         # Build observation filter
         filters = ["is_primary_data == True"]
 
-        if tissue:
+        # Prefer specific ontology term over general tissue name
+        if tissue_ontology_term_id:
+            filters.append(f"tissue_ontology_term_id == '{tissue_ontology_term_id}'")
+        elif tissue:
             filters.append(f"tissue_general == '{tissue}'")
 
         if cell_types:
@@ -331,9 +336,9 @@ class CellxGeneClient:
         mean_a = float(np.mean(expr_a))
         mean_b = float(np.mean(expr_b))
 
-        # Fold change (add small epsilon to avoid division by zero)
-        epsilon = 1e-10
-        fold_change = (mean_b + epsilon) / (mean_a + epsilon)
+        # Fold change with pseudo-count for realistic values when one condition is zero
+        pseudo_count = 0.01
+        fold_change = (mean_b + pseudo_count) / (mean_a + pseudo_count)
         log2_fc = float(np.log2(fold_change))
 
         # Statistical test (Mann-Whitney U)
@@ -369,7 +374,8 @@ class CellxGeneClient:
     def get_cell_type_comparison(
         self,
         gene_symbol: str,
-        tissue: str,
+        tissue: Optional[str] = None,
+        tissue_ontology_term_id: Optional[str] = None,
         condition_a: str = "normal",
         condition_b: str = "pulmonary fibrosis",
         min_cells: int = 20,
@@ -379,7 +385,8 @@ class CellxGeneClient:
 
         Args:
             gene_symbol: Gene symbol
-            tissue: Tissue to analyze
+            tissue: Tissue to analyze by general name (e.g., "lung")
+            tissue_ontology_term_id: UBERON ID to filter by (e.g., "UBERON:0000114")
             condition_a: First condition
             condition_b: Second condition
             min_cells: Minimum cells per cell type per condition
@@ -390,6 +397,7 @@ class CellxGeneClient:
         adata = self.get_expression_data(
             gene_symbol,
             tissue=tissue,
+            tissue_ontology_term_id=tissue_ontology_term_id,
             diseases=[condition_a, condition_b],
         )
 
@@ -413,8 +421,10 @@ class CellxGeneClient:
 
             mean_a = float(np.mean(expr_a))
             mean_b = float(np.mean(expr_b))
-            epsilon = 1e-10
-            fold_change = (mean_b + epsilon) / (mean_a + epsilon)
+            # Use pseudo-count of 0.01 for more realistic fold changes
+            # when one condition has zero expression
+            pseudo_count = 0.01
+            fold_change = (mean_b + pseudo_count) / (mean_a + pseudo_count)
 
             results[cell_type] = {
                 "mean_normal": mean_a,
