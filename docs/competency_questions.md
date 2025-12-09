@@ -32,7 +32,6 @@ WHERE {
              schema:healthCondition ?disease .
     ?disease schema:name ?diseaseName .
     FILTER(
-        # Match by MONDO CURIE for influenza (if available) OR by name
         ?disease = <http://purl.obolibrary.org/obo/MONDO_0005812> ||
         CONTAINS(LCASE(?diseaseName), "influenza")
     )
@@ -55,7 +54,6 @@ WHERE {
              schema:species ?species .
     ?species schema:name ?speciesName .
     FILTER(
-        # Match by UniProt taxonomy CURIE OR name
         ?species = <https://www.uniprot.org/taxonomy/10090> ||
         REGEX(LCASE(?speciesName), "mouse|mus musculus")
     )

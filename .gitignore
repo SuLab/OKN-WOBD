@@ -1,5 +1,6 @@
 # Custom 
 data/raw/*_state.json
+reports/segmentation_warnings_log.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
