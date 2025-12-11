@@ -76,6 +76,7 @@ MVA_PATHWAY_GENES = {
     "IDI1": "isopentenyl-diphosphate delta-isomerase",
     "ERG20": "farnesyl diphosphate synthase",
 }
+# test
 
 # Manufacturing-relevant organisms
 MANUFACTURING_ORGANISMS = {
