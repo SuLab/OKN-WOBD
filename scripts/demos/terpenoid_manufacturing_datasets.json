@@ -1,0 +1,723 @@
+{
+  "total": 89,
+  "datasets": [
+    {
+      "name": "MOESM1 of Engineering the oleaginous yeast Yarrowia lipolytica to produce the aroma compound \u00ce\u02db-ionone",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/MOESM1_of_Engineering_the_oleaginous_yeast_Yarrowia_lipolytica_to_produce_the_aroma_compound_-ionone/7038620",
+      "identifier": "7038620",
+      "query_source": "Yeast terpenoid production"
+    },
+    {
+      "name": "Yeast metabolism adaptation for efficient terpenoids synthesis via isopentenol utilization",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.ncbi.nlm.nih.gov/sra/SRP543278",
+      "identifier": "ncbi_sra_srp543278",
+      "query_source": "Yeast terpenoid production"
+    },
+    {
+      "name": "Data_Sheet_1_Yarrowia lipolytica Strains Engineered for the Production of Terpenoids.pdf",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Data_Sheet_1_Yarrowia_lipolytica_Strains_Engineered_for_the_Production_of_Terpenoids_pdf/12807665",
+      "identifier": "12807665",
+      "query_source": "Yeast terpenoid production"
+    },
+    {
+      "name": "DataSheet1_YALIcloneNHEJ: An Efficient Modular Cloning Toolkit for NHEJ Integration of Multigene Pathway and Terpenoid P",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/DataSheet1_YALIcloneNHEJ_An_Efficient_Modular_Cloning_Toolkit_for_NHEJ_Integration_of_Multigene_Pathway_and_Terpenoid_Production_in_Yarrowia_lipolytica_docx/19289270",
+      "identifier": "19289270",
+      "query_source": "Yeast terpenoid production"
+    },
+    {
+      "name": "ATP-Binding Cassette\nExporter PDR11-Mediated Terpenoid\nSecretion in Engineered Yeast",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/ATP-Binding_Cassette_Exporter_PDR11-Mediated_Terpenoid_Secretion_in_Engineered_Yeast/22550011",
+      "identifier": "22550011",
+      "query_source": "Yeast terpenoid production"
+    },
+    {
+      "name": "Yeast strains used and constructed in this study.",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/_Yeast_strains_used_and_constructed_in_this_study_/1236095",
+      "identifier": "1236095",
+      "query_source": "Yeast terpenoid production"
+    },
+    {
+      "name": "Peroxisomal Compartmentalization\nof the Methylerythritol-4-phosphate\nPathway Alleviates Cellular Stress and Enhances Ger",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Peroxisomal_Compartmentalization_of_the_Methylerythritol-4-phosphate_Pathway_Alleviates_Cellular_Stress_and_Enhances_Geraniol_Production_in_Saccharomyces_cerevisiae/29631929",
+      "identifier": "29631929",
+      "query_source": "Yeast terpenoid production"
+    },
+    {
+      "name": "Peroxisomal Compartmentalization\nof the Methylerythritol-4-phosphate\nPathway Alleviates Cellular Stress and Enhances Ger",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Peroxisomal_Compartmentalization_of_the_Methylerythritol-4-phosphate_Pathway_Alleviates_Cellular_Stress_and_Enhances_Geraniol_Production_in_Saccharomyces_cerevisiae/29631923",
+      "identifier": "29631923",
+      "query_source": "Yeast terpenoid production"
+    },
+    {
+      "name": "Peroxisomal Compartmentalization\nof the Methylerythritol-4-phosphate\nPathway Alleviates Cellular Stress and Enhances Ger",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Peroxisomal_Compartmentalization_of_the_Methylerythritol-4-phosphate_Pathway_Alleviates_Cellular_Stress_and_Enhances_Geraniol_Production_in_Saccharomyces_cerevisiae/29631926",
+      "identifier": "29631926",
+      "query_source": "Yeast terpenoid production"
+    },
+    {
+      "name": "Yeast metabolism adaptation for efficient terpenoids synthesis via isopentenol utilization",
+      "catalog": "",
+      "species": [
+        "Multispecies"
+      ],
+      "url": "https://www.ncbi.nlm.nih.gov/bioproject/PRJNA1182314",
+      "identifier": "PRJNA1182314",
+      "query_source": "Yeast terpenoid production"
+    },
+    {
+      "name": "<i>In Vivo</i> Validation of <i>In Silico</i> Predicted Metabolic Engineering Strategies in Yeast: Disruption of \u03b1-Ketog",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/_In_Vivo_Validation_of_In_Silico_Predicted_Metabolic_Engineering_Strategies_in_Yeast_Disruption_of_Ketoglutarate_Dehydrogenase_and_Expression_of_ATP_Citrate_Lyase_for_Terpenoid_Production/1628098",
+      "identifier": "1628098",
+      "query_source": "Yeast terpenoid production"
+    },
+    {
+      "name": "File S1 - Identification of Novel Knockout Targets for Improving Terpenoids Biosynthesis in <i>Saccharomyces cerevisiae<",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Identification_of_Novel_Knockout_Targets_for_Improving_Terpenoids_Biosynthesis_in_Saccharomyces_cerevisiae_/1236096",
+      "identifier": "1236096",
+      "query_source": "Yeast terpenoid production"
+    },
+    {
+      "name": "Table_1_Production of Terpenoids by Synthetic Biology Approaches.docx",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Table_1_Production_of_Terpenoids_by_Synthetic_Biology_Approaches_docx/12185862",
+      "identifier": "12185862",
+      "query_source": "Yeast terpenoid production"
+    },
+    {
+      "name": "DataSheet1_Metabolic Engineering of Saccharomyces cerevisiae for Heterologous Carnosic Acid Production.docx",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/DataSheet1_Metabolic_Engineering_of_Saccharomyces_cerevisiae_for_Heterologous_Carnosic_Acid_Production_docx/19957574",
+      "identifier": "19957574",
+      "query_source": "Yeast terpenoid production"
+    },
+    {
+      "name": "Data_Sheet_1_Combined Biosynthetic Pathway Engineering and Storage Pool Expansion for High-Level Production of Ergostero",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Data_Sheet_1_Combined_Biosynthetic_Pathway_Engineering_and_Storage_Pool_Expansion_for_High-Level_Production_of_Ergosterol_in_Industrial_Saccharomyces_cerevisiae_docx/14871144",
+      "identifier": "14871144",
+      "query_source": "Yeast terpenoid production"
+    },
+    {
+      "name": "Crystal Structure of 2-C-methyl-D-erythritol 2,4-cyclodiphosphate Synthase (ispF) from E. coli involved in Mevalonate-In",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/1KNK",
+      "identifier": "1KNK",
+      "query_source": "E. coli isoprenoid"
+    },
+    {
+      "name": "Co-Crystal Structure of 2-C-methyl-D-erythritol 2,4-cyclodiphosphate Synthase (ispF) from E. coli Involved in Mevalonate",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/1KNJ",
+      "identifier": "1KNJ",
+      "query_source": "E. coli isoprenoid"
+    },
+    {
+      "name": "Crystal Structure of E. coli undecaprenyl pyrophosphate synthase in complex with BPH-1290",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/3SGV",
+      "identifier": "3SGV",
+      "query_source": "E. coli isoprenoid"
+    },
+    {
+      "name": "Crystal Structure of E. coli undecaprenyl pyrophosphate synthase in complex with BPH-1100",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/3SGX",
+      "identifier": "3SGX",
+      "query_source": "E. coli isoprenoid"
+    },
+    {
+      "name": "Crystal Structure of E. coli undecaprenyl pyrophosphate synthase in complex with BPH-1065",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/3SH0",
+      "identifier": "3SH0",
+      "query_source": "E. coli isoprenoid"
+    },
+    {
+      "name": "E. coli ispF double mutant",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/1YQN",
+      "identifier": "1YQN",
+      "query_source": "E. coli isoprenoid"
+    },
+    {
+      "name": "a triclinic crystal form of E. coli 4-diphosphocytidyl-2C-methyl-D- erythritol kinase",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/2WW4",
+      "identifier": "2WW4",
+      "query_source": "E. coli isoprenoid"
+    },
+    {
+      "name": "Structure of E. coli undecaprenyl diphosphate synthase complexed with BPH-1063",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/3TH8",
+      "identifier": "3TH8",
+      "query_source": "E. coli isoprenoid"
+    },
+    {
+      "name": "1-deoxy-D-xylulose 5-phosphate synthase (DXS) from Escherichia coli",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/2O1S",
+      "identifier": "2O1S",
+      "query_source": "E. coli isoprenoid"
+    },
+    {
+      "name": "The SPFH complex HflK-HflC regulates aerobic respiration in bacteria",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.omicsdi.org/dataset/pride/PXD051202",
+      "identifier": "PXD051202",
+      "query_source": "E. coli isoprenoid"
+    },
+    {
+      "name": "The SPFH complex HflK-HflC regulates aerobic respiration in bacteria",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.omicsdi.org/dataset/pride/PXD058845",
+      "identifier": "PXD058845",
+      "query_source": "E. coli isoprenoid"
+    },
+    {
+      "name": "The SPFH complex HflK-HflC regulates aerobic respiration in bacteria",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.omicsdi.org/dataset/pride/PXD058571",
+      "identifier": "PXD058571",
+      "query_source": "E. coli isoprenoid"
+    },
+    {
+      "name": "Structure of 2C-Methyl-D-Erythritol 2,4-Clycodiphosphate Synthase complexed with a CDP derived fluorescent inhibitor",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/2AMT",
+      "identifier": "2AMT",
+      "query_source": "E. coli isoprenoid"
+    },
+    {
+      "name": "Structure of E. coli undecaprenyl diphosphate synthase in complex with BPH-1408",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/4H2M",
+      "identifier": "4H2M",
+      "query_source": "E. coli isoprenoid"
+    },
+    {
+      "name": "Structure of E. coli undecaprenyl diphosphate synthase in complex with BPH-1248",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/4H2O",
+      "identifier": "4H2O",
+      "query_source": "E. coli isoprenoid"
+    },
+    {
+      "name": "Data_Sheet_1_Evolutionary flexibility and rigidity in the bacterial methylerythritol phosphate (MEP) pathway.zip",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Data_Sheet_1_Evolutionary_flexibility_and_rigidity_in_the_bacterial_methylerythritol_phosphate_MEP_pathway_zip/24522433",
+      "identifier": "24522433",
+      "query_source": "MEP pathway microbial"
+    },
+    {
+      "name": "Kinetic Characterization and Allosteric Inhibition of the <i>Yersinia pestis</i> 1-Deoxy-D-Xylulose 5-Phosphate Reductoi",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Kinetic_Characterization_and_Allosteric_Inhibition_of_the_Yersinia_pestis_1_Deoxy_D_Xylulose_5_Phosphate_Reductoisomerase_MEP_Synthase_/1155909",
+      "identifier": "1155909",
+      "query_source": "MEP pathway microbial"
+    },
+    {
+      "name": "Inhibition of the Yersinia pestis Methylerythritol\nPhosphate Pathway of Isoprenoid Biosynthesis by\n\u03b1\u2011Phenyl-Substituted ",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Inhibition_of_the_Yersinia_pestis_Methylerythritol_Phosphate_Pathway_of_Isoprenoid_Biosynthesis_by_Phenyl-Substituted_Reverse_Fosmidomycin_Analogues/11931519",
+      "identifier": "11931519",
+      "query_source": "MEP pathway microbial"
+    },
+    {
+      "name": "Sub-Inhibitory Fosmidomycin Exposures Elicits Oxidative Stress in <i>Salmonella enterica</i> Serovar <i>typhimurium LT2<",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Sub_Inhibitory_Fosmidomycin_Exposures_Elicits_Oxidative_Stress_in_Salmonella_enterica_Serovar_typhimurium_LT2_/1072415",
+      "identifier": "1072415",
+      "query_source": "MEP pathway microbial"
+    },
+    {
+      "name": "<em>Francisella tularensis</em> 2-C-Methyl-D-Erythritol 4-Phosphate Cytidylyltransferase: Kinetic Characterization and P",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/_Francisella_tularensis_2_C_Methyl_D_Erythritol_4_Phosphate_Cytidylyltransferase_Kinetic_Characterization_and_Phosphoregulation/136095",
+      "identifier": "136095",
+      "query_source": "MEP pathway microbial"
+    },
+    {
+      "name": "Kinetic Characterization and Phosphoregulation of the <em>Francisella tularensis</em> 1-Deoxy-D-Xylulose 5-Phosphate Red",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Kinetic_Characterization_and_Phosphoregulation_of_the_Francisella_tularensis_1_Deoxy_D_Xylulose_5_Phosphate_Reductoisomerase_MEP_Synthase_/145371",
+      "identifier": "145371",
+      "query_source": "MEP pathway microbial"
+    },
+    {
+      "name": "Lipophilic Prodrugs of FR900098 Are Antimicrobial against <em>Francisella novicida In Vivo</em> and <em>In Vitro</em> an",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Lipophilic_Prodrugs_of_FR900098_Are_Antimicrobial_against_Francisella_novicida_In_Vivo_and_In_Vitro_and_Show_GlpT_Independent_Efficacy/118796",
+      "identifier": "118796",
+      "query_source": "MEP pathway microbial"
+    },
+    {
+      "name": "<b>Metagenomics reveal potential for geosmin and 2-methylisoborneol production in multiple bacterial phyla in recirculat",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/_b_Metagenomics_reveal_potential_for_geosmin_and_2-methylisoborneol_production_in_multiple_bacterial_phyla_in_recirculating_aquaculture_systems_b_Supplementary_tables_/26796928",
+      "identifier": "26796928",
+      "query_source": "MEP pathway microbial"
+    },
+    {
+      "name": "Metabolite Profiling Identified Methylerythritol Cyclodiphosphate Efflux as a Limiting Step in Microbial Isoprenoid Prod",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Metabolite_Profiling_Identified_Methylerythritol_Cyclodiphosphate_Efflux_as_a_Limiting_Step_in_Microbial_Isoprenoid_Production__/117920",
+      "identifier": "117920",
+      "query_source": "MEP pathway microbial"
+    },
+    {
+      "name": "Inhibitory effect of MEPicides against a panel of Gram-negative bacteria.",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Inhibitory_effect_of_MEPicides_against_a_panel_of_Gram-negative_bacteria_/12428987",
+      "identifier": "12428987",
+      "query_source": "MEP pathway microbial"
+    },
+    {
+      "name": "MOESM3 of Systems analysis of methylerythritol-phosphate pathway flux in E. coli: insights into the role of oxidative st",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/MOESM3_of_Systems_analysis_of_methylerythritol-phosphate_pathway_flux_in_E_coli_insights_into_the_role_of_oxidative_stress_and_the_validity_of_lycopene_as_an_isoprenoid_reporter_metabolite/4354472",
+      "identifier": "4354472",
+      "query_source": "MEP pathway microbial"
+    },
+    {
+      "name": "MOESM2 of Systems analysis of methylerythritol-phosphate pathway flux in E. coli: insights into the role of oxidative st",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/MOESM2_of_Systems_analysis_of_methylerythritol-phosphate_pathway_flux_in_E_coli_insights_into_the_role_of_oxidative_stress_and_the_validity_of_lycopene_as_an_isoprenoid_reporter_metabolite/4354514",
+      "identifier": "4354514",
+      "query_source": "MEP pathway microbial"
+    },
+    {
+      "name": "Table_2_Functional Characterization of the 1-Deoxy-D-Xylulose 5-Phosphate Synthase Genes in Morus notabilis.docx",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Table_2_Functional_Characterization_of_the_1-Deoxy-D-Xylulose_5-Phosphate_Synthase_Genes_in_Morus_notabilis_docx/12708602",
+      "identifier": "12708602",
+      "query_source": "MEP pathway microbial"
+    },
+    {
+      "name": "Table_1_Functional Characterization of the 1-Deoxy-D-Xylulose 5-Phosphate Synthase Genes in Morus notabilis.docx",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Table_1_Functional_Characterization_of_the_1-Deoxy-D-Xylulose_5-Phosphate_Synthase_Genes_in_Morus_notabilis_docx/12708599",
+      "identifier": "12708599",
+      "query_source": "MEP pathway microbial"
+    },
+    {
+      "name": "Crystal structure of a terpene synthase from Streptomyces lydicus, target EFI-540129",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/4ZQ8",
+      "identifier": "4ZQ8",
+      "query_source": "Bacterial terpene synthase"
+    },
+    {
+      "name": "Crystal structure of pentalenene synthase mutant F76W",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/6WKG",
+      "identifier": "6WKG",
+      "query_source": "Bacterial terpene synthase"
+    },
+    {
+      "name": "Crystal structure of pentalenene synthase mutant F76Y",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/6WKE",
+      "identifier": "6WKE",
+      "query_source": "Bacterial terpene synthase"
+    },
+    {
+      "name": "Crystal structure of pentalenene synthase mutant F76H",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/6WKI",
+      "identifier": "6WKI",
+      "query_source": "Bacterial terpene synthase"
+    },
+    {
+      "name": "Crystal structure of pentalenene synthase mutant F76W complexed with 12,13-difluorofarnesyl diphosphate",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/6WKH",
+      "identifier": "6WKH",
+      "query_source": "Bacterial terpene synthase"
+    },
+    {
+      "name": "Crystal structure of pentalenene synthase mutant F76H complexed with 12,13-difluorofarnesyl diphosphate",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/6WKJ",
+      "identifier": "6WKJ",
+      "query_source": "Bacterial terpene synthase"
+    },
+    {
+      "name": "Crystal structure of pentalenene synthase complexed with Mg2+ ions",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/6WKC",
+      "identifier": "6WKC",
+      "query_source": "Bacterial terpene synthase"
+    },
+    {
+      "name": "Crystal structure of pentalenene synthase complexed with 12,13-difluorofarnesyl diphosphate",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/6WKD",
+      "identifier": "6WKD",
+      "query_source": "Bacterial terpene synthase"
+    },
+    {
+      "name": "Crystal structure of pentalenene synthase mutant F76Y complexed with 12,13-difluorofarnesyl diphosphate",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/6WKF",
+      "identifier": "6WKF",
+      "query_source": "Bacterial terpene synthase"
+    },
+    {
+      "name": "List of 22 tested TSs and their activity.",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/List_of_22_tested_TSs_and_their_activity_/12223175",
+      "identifier": "12223175",
+      "query_source": "Bacterial terpene synthase"
+    },
+    {
+      "name": "Crystal structure of Cytochrome P450 170A1 (CYP170A1) from Streptomyces coelicolor",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/3DBG",
+      "identifier": "3DBG",
+      "query_source": "Bacterial terpene synthase"
+    },
+    {
+      "name": "Crystal structure of a-eudesmol synthase",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/6Q4S",
+      "identifier": "6Q4S",
+      "query_source": "Bacterial terpene synthase"
+    },
+    {
+      "name": "Unliganded F96H epi-Isozizaene Synthase",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/8SU0",
+      "identifier": "8SU0",
+      "query_source": "Bacterial terpene synthase"
+    },
+    {
+      "name": "F96H epi-Isozizaene Synthase: complex with 3 Mg2+ and pamidronate",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/8SU1",
+      "identifier": "8SU1",
+      "query_source": "Bacterial terpene synthase"
+    },
+    {
+      "name": "F96H epi-Isozizaene Synthase: complex with 3 Mg2+ and risedronate",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.rcsb.org/structure/8SU2",
+      "identifier": "8SU2",
+      "query_source": "Bacterial terpene synthase"
+    },
+    {
+      "name": "RNA-Seq of Coprinopsis strossmayeri",
+      "catalog": "",
+      "species": [
+        "Multispecies"
+      ],
+      "url": "https://www.ncbi.nlm.nih.gov/bioproject/PRJNA604530",
+      "identifier": "PRJNA604530",
+      "query_source": "Fungal terpenoid biosynthesis"
+    },
+    {
+      "name": "Peroxisomal Compartmentalization\nof the Methylerythritol-4-phosphate\nPathway Alleviates Cellular Stress and Enhances Ger",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Peroxisomal_Compartmentalization_of_the_Methylerythritol-4-phosphate_Pathway_Alleviates_Cellular_Stress_and_Enhances_Geraniol_Production_in_Saccharomyces_cerevisiae/29631923",
+      "identifier": "29631923",
+      "query_source": "Fungal terpenoid biosynthesis"
+    },
+    {
+      "name": "Peroxisomal Compartmentalization\nof the Methylerythritol-4-phosphate\nPathway Alleviates Cellular Stress and Enhances Ger",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Peroxisomal_Compartmentalization_of_the_Methylerythritol-4-phosphate_Pathway_Alleviates_Cellular_Stress_and_Enhances_Geraniol_Production_in_Saccharomyces_cerevisiae/29631926",
+      "identifier": "29631926",
+      "query_source": "Fungal terpenoid biosynthesis"
+    },
+    {
+      "name": "Peroxisomal Compartmentalization\nof the Methylerythritol-4-phosphate\nPathway Alleviates Cellular Stress and Enhances Ger",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Peroxisomal_Compartmentalization_of_the_Methylerythritol-4-phosphate_Pathway_Alleviates_Cellular_Stress_and_Enhances_Geraniol_Production_in_Saccharomyces_cerevisiae/29631929",
+      "identifier": "29631929",
+      "query_source": "Fungal terpenoid biosynthesis"
+    },
+    {
+      "name": "Supplementary file 1_Multi-omics analysis of Taiwanofungus gaoligongensis: effects of different cultivation methods on s",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Supplementary_file_1_Multi-omics_analysis_of_Taiwanofungus_gaoligongensis_effects_of_different_cultivation_methods_on_secondary_metabolites_zip/29782829",
+      "identifier": "29782829",
+      "query_source": "Fungal terpenoid biosynthesis"
+    },
+    {
+      "name": "Genomic analysis of trichothecene-producing fungi. Trichothecene-producing Fungi",
+      "catalog": "",
+      "species": [
+        "Multispecies"
+      ],
+      "url": "https://www.ncbi.nlm.nih.gov/bioproject/PRJNA374046",
+      "identifier": "PRJNA374046",
+      "query_source": "Fungal terpenoid biosynthesis"
+    },
+    {
+      "name": "Genomic analysis of trichothecene-producing fungi",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Genomic_analysis_of_trichothecene-producing_fungi/25082042",
+      "identifier": "25082042",
+      "query_source": "Fungal terpenoid biosynthesis"
+    },
+    {
+      "name": "Data_Sheet_1_Comparative Transcriptomics and Proteomics of Atractylodes lancea in Response to Endophytic Fungus Gilmanie",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Data_Sheet_1_Comparative_Transcriptomics_and_Proteomics_of_Atractylodes_lancea_in_Response_to_Endophytic_Fungus_Gilmaniella_sp_AL12_Reveals_Regulation_in_Plant_Metabolism_docx/8189219",
+      "identifier": "8189219",
+      "query_source": "Fungal terpenoid biosynthesis"
+    },
+    {
+      "name": "Discovery of\nDiverse Sesquiterpenoids from <i>Crossiella cryophila</i> through Genome Mining and NMR Tracking",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Discovery_of_Diverse_Sesquiterpenoids_from_i_Crossiella_cryophila_i_through_Genome_Mining_and_NMR_Tracking/25057543",
+      "identifier": "25057543",
+      "query_source": "Fungal terpenoid biosynthesis"
+    },
+    {
+      "name": "Discovery of\nDiverse Sesquiterpenoids from <i>Crossiella cryophila</i> through Genome Mining and NMR Tracking",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Discovery_of_Diverse_Sesquiterpenoids_from_i_Crossiella_cryophila_i_through_Genome_Mining_and_NMR_Tracking/25057546",
+      "identifier": "25057546",
+      "query_source": "Fungal terpenoid biosynthesis"
+    },
+    {
+      "name": "Discovery of\nDiverse Sesquiterpenoids from <i>Crossiella cryophila</i> through Genome Mining and NMR Tracking",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Discovery_of_Diverse_Sesquiterpenoids_from_i_Crossiella_cryophila_i_through_Genome_Mining_and_NMR_Tracking/25057549",
+      "identifier": "25057549",
+      "query_source": "Fungal terpenoid biosynthesis"
+    },
+    {
+      "name": "RNA-Seq of Coprinopsis strossmayeri",
+      "catalog": "",
+      "species": [],
+      "url": "https://www.ncbi.nlm.nih.gov/sra/SRP247462",
+      "identifier": "ncbi_sra_srp247462",
+      "query_source": "Fungal terpenoid biosynthesis"
+    },
+    {
+      "name": "Transcriptional profile of genes involved in the production of terpenes and glyceollins in response to biotic stresses i",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Transcriptional_profile_of_genes_involved_in_the_production_of_terpenes_and_glyceollins_in_response_to_biotic_stresses_in_soybean/14320522",
+      "identifier": "14320522",
+      "query_source": "Fungal terpenoid biosynthesis"
+    },
+    {
+      "name": "Table_1_Comparative transcriptome meta-analysis reveals a set of genes involved in the responses to multiple pathogens i",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Table_1_Comparative_transcriptome_meta-analysis_reveals_a_set_of_genes_involved_in_the_responses_to_multiple_pathogens_in_maize_xlsx/21116854",
+      "identifier": "21116854",
+      "query_source": "Fungal terpenoid biosynthesis"
+    },
+    {
+      "name": "Table_2_Comparative transcriptome meta-analysis reveals a set of genes involved in the responses to multiple pathogens i",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Table_2_Comparative_transcriptome_meta-analysis_reveals_a_set_of_genes_involved_in_the_responses_to_multiple_pathogens_in_maize_docx/21116857",
+      "identifier": "21116857",
+      "query_source": "Fungal terpenoid biosynthesis"
+    },
+    {
+      "name": "Metabolomic and Transcriptomic Comparison of Solid-State and Submerged Fermentation of <i>Penicillium expansum</i> KACC ",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Metabolomic_and_Transcriptomic_Comparison_of_Solid_State_and_Submerged_Fermentation_of_Penicillium_expansum_KACC_40815/1644100",
+      "identifier": "1644100",
+      "query_source": "Fermentation terpenoid"
+    },
+    {
+      "name": "Data_Sheet_1_Evolutionary flexibility and rigidity in the bacterial methylerythritol phosphate (MEP) pathway.zip",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Data_Sheet_1_Evolutionary_flexibility_and_rigidity_in_the_bacterial_methylerythritol_phosphate_MEP_pathway_zip/24522433",
+      "identifier": "24522433",
+      "query_source": "Fermentation terpenoid"
+    },
+    {
+      "name": "Data_Sheet_1_Bacillus licheniformis-based intensive fermentation of Tibetan tea improved its bioactive compounds and rei",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Data_Sheet_1_Bacillus_licheniformis-based_intensive_fermentation_of_Tibetan_tea_improved_its_bioactive_compounds_and_reinforced_the_intestinal_barrier_in_mice_docx/26019871",
+      "identifier": "26019871",
+      "query_source": "Fermentation terpenoid"
+    },
+    {
+      "name": "Terpenoids in different treatments.",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Terpenoids_in_different_treatments_/28097157",
+      "identifier": "28097157",
+      "query_source": "Fermentation terpenoid"
+    },
+    {
+      "name": "Data_Sheet_1_Optimization of tomato (Solanum lycopersicum L.) juice fermentation process and analysis of its metabolites",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Data_Sheet_1_Optimization_of_tomato_Solanum_lycopersicum_L_juice_fermentation_process_and_analysis_of_its_metabolites_during_fermentation_zip/25845859",
+      "identifier": "25845859",
+      "query_source": "Fermentation terpenoid"
+    },
+    {
+      "name": "DataSheet1_Contribution of traditional deep fermentation to volatile metabolites and odor characteristics of Wuyi rock t",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/DataSheet1_Contribution_of_traditional_deep_fermentation_to_volatile_metabolites_and_odor_characteristics_of_Wuyi_rock_tea_PDF/22827131",
+      "identifier": "22827131",
+      "query_source": "Fermentation terpenoid"
+    },
+    {
+      "name": "Data_Sheet_1_Wide identification of chemical constituents in fermented licorice and explore its efficacy of anti-neurode",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Data_Sheet_1_Wide_identification_of_chemical_constituents_in_fermented_licorice_and_explore_its_efficacy_of_anti-neurodegeneration_by_combining_quasi-targeted_metabolomics_and_in-depth_bioinformatics_xlsx/22932848",
+      "identifier": "22932848",
+      "query_source": "Fermentation terpenoid"
+    },
+    {
+      "name": "Table_1_Microbiomics and volatile metabolomics-based investigation of changes in quality and flavor of oat (Avena sativa",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Table_1_Microbiomics_and_volatile_metabolomics-based_investigation_of_changes_in_quality_and_flavor_of_oat_Avena_sativa_L_silage_at_different_stages_xlsx/24503218",
+      "identifier": "24503218",
+      "query_source": "Fermentation terpenoid"
+    },
+    {
+      "name": "Table_3_Microbiomics and volatile metabolomics-based investigation of changes in quality and flavor of oat (Avena sativa",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Table_3_Microbiomics_and_volatile_metabolomics-based_investigation_of_changes_in_quality_and_flavor_of_oat_Avena_sativa_L_silage_at_different_stages_xlsx/24503224",
+      "identifier": "24503224",
+      "query_source": "Fermentation terpenoid"
+    },
+    {
+      "name": "Table_2_Microbiomics and volatile metabolomics-based investigation of changes in quality and flavor of oat (Avena sativa",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Table_2_Microbiomics_and_volatile_metabolomics-based_investigation_of_changes_in_quality_and_flavor_of_oat_Avena_sativa_L_silage_at_different_stages_xlsx/24503221",
+      "identifier": "24503221",
+      "query_source": "Fermentation terpenoid"
+    },
+    {
+      "name": "Table_4_Microbiomics and volatile metabolomics-based investigation of changes in quality and flavor of oat (Avena sativa",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Table_4_Microbiomics_and_volatile_metabolomics-based_investigation_of_changes_in_quality_and_flavor_of_oat_Avena_sativa_L_silage_at_different_stages_xlsx/24503227",
+      "identifier": "24503227",
+      "query_source": "Fermentation terpenoid"
+    },
+    {
+      "name": "Data Sheet 1_Rational engineering of Escherichia coli strain for stable and enhanced biosynthesis of pinene.docx",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Data_Sheet_1_Rational_engineering_of_Escherichia_coli_strain_for_stable_and_enhanced_biosynthesis_of_pinene_docx/28150541",
+      "identifier": "28150541",
+      "query_source": "Fermentation terpenoid"
+    },
+    {
+      "name": "MOESM1 of Engineering the oleaginous yeast Yarrowia lipolytica to produce the aroma compound \u00ce\u02db-ionone",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/MOESM1_of_Engineering_the_oleaginous_yeast_Yarrowia_lipolytica_to_produce_the_aroma_compound_-ionone/7038620",
+      "identifier": "7038620",
+      "query_source": "Fermentation terpenoid"
+    },
+    {
+      "name": "MOESM2 of Synthesis and techno-economic assessment of microbial-based processes for terpenes production",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/MOESM2_of_Synthesis_and_techno-economic_assessment_of_microbial-based_processes_for_terpenes_production/7264022",
+      "identifier": "7264022",
+      "query_source": "Fermentation terpenoid"
+    },
+    {
+      "name": "Table_1_Effects of Alkali Stress on the Growth and Menaquinone-7 Metabolism of Bacillus subtilis natto.DOCX",
+      "catalog": "",
+      "species": [],
+      "url": "https://figshare.com/articles/dataset/Table_1_Effects_of_Alkali_Stress_on_the_Growth_and_Menaquinone-7_Metabolism_of_Bacillus_subtilis_natto_DOCX/19671396",
+      "identifier": "19671396",
+      "query_source": "Fermentation terpenoid"
+    }
+  ]
+}
