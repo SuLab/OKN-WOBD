@@ -5,7 +5,8 @@
       "Bash(python visualize_results.py:*)",
       "Bash(cat:*)",
       "Bash(python frink_nl2sparql.py:*)",
-      "Bash(python gene_neighborhood.py:*)"
+      "Bash(python gene_neighborhood.py:*)",
+      "Bash(wc:*)"
     ]
   }
 }

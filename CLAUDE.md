@@ -12,25 +12,28 @@ OKN-WOBD extracts biomedical dataset metadata from the NIAID Data Ecosystem Disc
 ## Common Commands
 
 ```bash
-# Install package in development mode
+# Install package in development mode (requires Python >= 3.11)
 pip install -e .
 
 # Fetch dataset records from NIAID API
 okn-wobd fetch --resource ImmPort
 okn-wobd fetch --all                    # Fetch all default resources
+okn-wobd fetch --resource ImmPort --restart  # Ignore checkpoints, start fresh
 
 # Convert JSONL to RDF N-Triples
 okn-wobd convert
 okn-wobd convert --resource ImmPort
 
 # Run demo scripts (from scripts/demos/)
-python demo_acta2_fibrosis.py           # Cross-layer gene expression query
+cd scripts/demos && python demo_acta2_fibrosis.py
 
 # Test competency SPARQL queries against local RDF
+python scripts/test_competency_queries.py           # Test all queries
 python scripts/test_competency_queries.py --query CQ2 --verbose
 
 # Summarize downloaded data
-python scripts/summarize_jsonl.py
+python scripts/summarize_jsonl.py       # Output: reports/jsonl_summary.md
+python scripts/list_jsonl_fields.py     # Output: reports/jsonl_fields.md
 ```
 
 ## Architecture
@@ -80,3 +83,14 @@ Copy `scripts/demos/.env.example` to `.env` and set `ARCHS4_DATA_DIR` to the dir
 - `data/rdf/` - N-Triples RDF output
 - `docs/competency_questions.md` - SPARQL queries for validating the knowledge graph
 - `queries/` - Operational SPARQL queries for FRINK
+
+## Default Resources
+
+The `--all` flag fetches these resources: ImmPort, VDJServer, Vivli, RADx Data Hub, Project Tycho.
+
+## External Integrations
+
+- **FRINK**: https://frink.apps.renci.org/ - Target knowledge graph
+- **Wikidata**: https://query.wikidata.org/sparql - Gene/disease lookups via demo clients
+- **CellxGene Census**: Single-cell RNA-seq expression data
+- **ARCHS4**: Bulk RNA-seq from GEO (requires local HDF5 files)
