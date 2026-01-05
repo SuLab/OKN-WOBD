@@ -106,6 +106,7 @@ okn-wobd convert
 - `--input-dir`: Directory containing JSONL files (default: `data/raw`).
 - `--output-dir`: Directory to write N-Triples files (default: `data/rdf`).
 - `--resource`: Repeatable; convert specific resources. If omitted, converts all JSONL files found in input directory.
+- `--log-file`: Path to write conversion log file (includes warnings about bad URIs, skipped duplicates, etc.). If omitted, logs only appear in terminal.
 
 ### Examples
 
@@ -118,6 +119,12 @@ okn-wobd convert --resource ImmPort --resource "VDJ Server"
 
 # Specify custom input/output directories
 okn-wobd convert --input-dir data/raw --output-dir data/rdf
+
+# Save conversion logs to a file (useful for reporting data quality issues)
+okn-wobd convert --log-file reports/conversion_log.txt
+
+# Convert with logging for a specific resource
+okn-wobd convert --resource ImmPort --log-file reports/immport_conversion_log.txt
 ```
 
 The converter generates one `.nt` file per resource in the output directory. Each dataset is assigned a URI in the `https://okn.wobd.org/` namespace using the pattern `https://okn.wobd.org/dataset/{resource}/{_id}`.

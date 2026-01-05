@@ -1,0 +1,22 @@
+PREFIX schema: <http://schema.org/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+# Count how many datasets have contentUrl via distribution
+# This verifies the conversion captured all distribution contentUrl values
+
+SELECT 
+    (COUNT(DISTINCT ?dataset) AS ?datasetsWithDistribution)
+    (COUNT(DISTINCT ?contentUrl) AS ?uniqueContentUrls)
+    (COUNT(?contentUrl) AS ?totalContentUrls)
+WHERE {
+    ?dataset rdf:type schema:Dataset .
+    
+    # Link to distribution (DataDownload entity)
+    ?dataset schema:distribution ?distribution .
+    
+    # Get contentUrl from the distribution entity
+    ?distribution schema:contentUrl ?contentUrl .
+    
+    # Filter to OmicsDI datasets only
+    FILTER (CONTAINS(STR(?dataset), "omics_discovery_index_omicsdi"))
+}

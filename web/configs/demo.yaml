@@ -1,0 +1,33 @@
+sources:
+  nde:
+    endpoints:
+      - id: nde-production
+        label: "NDE via FRINK"
+        sparql_url: "https://frink.apps.renci.org/nde/sparql"
+
+  frink:
+    endpoints:
+      - id: frink-production
+        label: "FRINK (production)"
+        sparql_url: "https://example.org/frink/sparql"
+
+  gene_expression:
+    default_mode: "sparql"
+    sparql:
+      endpoints:
+        - id: geneexpr-production
+          label: "Gene expression (production)"
+          sparql_url: "https://example.org/geneexpr/sparql"
+    web_mcp: {}
+    local: {}
+
+ui:
+  show_generated_sparql: true
+  show_provenance: true
+  max_rows: 200
+
+llm:
+  provider: "openai"
+  model: "gpt-4.1"
+  temperature: 0.1
+

@@ -1064,7 +1064,12 @@ def fetch_segmented(
 @click.option("--verbose", is_flag=True, help="Enable verbose logging.")
 def cli(verbose: bool) -> None:
     """CLI utilities for working with the NIAID dataset API."""
-    logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO)
+    # Configure basic logging - can be overridden by commands that need file logging
+    logging.basicConfig(
+        level=logging.DEBUG if verbose else logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
 
 
 @cli.command("fetch")
@@ -1412,12 +1417,36 @@ def fetch_command(
         "If omitted, converts all JSONL files found in input directory."
     ),
 )
+@click.option(
+    "--log-file",
+    type=click.Path(path_type=Path),
+    default=None,
+    help=(
+        "Path to write conversion log file (includes warnings about bad URIs, etc.). "
+        "If omitted, logs only appear in terminal."
+    ),
+)
 def convert_command(
     input_dir: Path,
     output_dir: Path,
     resources: Iterable[str],
+    log_file: Optional[Path],
 ) -> None:
     """Convert JSONL dataset files to RDF N-Triples format."""
+    # Configure file logging if requested
+    if log_file:
+        log_file.parent.mkdir(parents=True, exist_ok=True)
+        file_handler = logging.FileHandler(log_file, encoding="utf-8")
+        file_handler.setLevel(logging.DEBUG)  # Capture all levels in file
+        file_formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+        file_handler.setFormatter(file_formatter)
+        # Add to root logger so all modules log to file
+        logging.getLogger().addHandler(file_handler)
+        click.echo(f"Logging to file: {log_file}")
+    
     chosen_resources = tuple(resources) if resources else None
     
     # Find all JSONL files in input directory
@@ -1476,8 +1505,9 @@ def convert_command(
                 output_path=output_file,
                 resource=resource_name,
             )
-            click.echo(f"Converted {count} datasets to {output_file}")
+            click.echo(f"Successfully converted {count} datasets to {output_file}")
         except Exception as exc:
+            # Only report as failure if conversion didn't complete at all
             click.echo(f"Failed to convert {jsonl_file.name}: {exc}", err=True)
             continue
 
