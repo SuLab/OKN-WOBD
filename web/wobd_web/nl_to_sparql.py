@@ -72,7 +72,7 @@ def _build_system_prompt(target: TargetKind) -> str:
         "PREFIX schema: <http://schema.org/>\n"
         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n"
         "If you use any additional prefixes, declare them as well.\n"
-        "Use explicit variable names and include a LIMIT clause."
+        "Use explicit variable names."
     )
     if target == "nde":
         return (

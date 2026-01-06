@@ -10,15 +10,19 @@ from wobd_web.models import AnswerBundle
 from wobd_web.router import GeneExprMode, build_query_plan
 
 
+# EXAMPLE_QUESTIONS: List[str] = [
+#     "What studies are available for COVID-19?",
+#     "List gene expression datasets involving lung tissue.",
+#     "Which datasets include pediatric participants?",
+#     "Show datasets related to influenza vaccines.",
+#     "Find datasets with RNA-seq data for human blood samples.",
+#     "Which datasets link clinical outcomes to gene expression?",
+# ]
+
 EXAMPLE_QUESTIONS: List[str] = [
-    "What studies are available for COVID-19?",
-    "List gene expression datasets involving lung tissue.",
-    "Which datasets include pediatric participants?",
     "Show datasets related to influenza vaccines.",
     "Find datasets with RNA-seq data for human blood samples.",
-    "Which datasets link clinical outcomes to gene expression?",
 ]
-
 
 def _init_session_state() -> None:
     if "history" not in st.session_state:
