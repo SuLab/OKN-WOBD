@@ -1,0 +1,230 @@
+{
+  "version": "1.0.0",
+  "generated_at": "2026-01-07",
+  "description": "Context file for GXA-v2 Gene Expression Atlas data in local Fuseki",
+  "endpoint": {
+    "url": "http://localhost:3030/GXA-v2/sparql",
+    "type": "fuseki",
+    "dataset": "GXA-v2"
+  },
+  "prefixes": {
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "biolink": "https://w3id.org/biolink/vocab/",
+    "spokegenelab": "https://spoke.ucsf.edu/genelab/",
+    "obo": "http://purl.obolibrary.org/obo/",
+    "go": "http://purl.obolibrary.org/obo/GO_",
+    "ncbigene": "https://www.ncbi.nlm.nih.gov/gene/",
+    "ensembl": "http://identifiers.org/ensembl/",
+    "efo": "http://www.ebi.ac.uk/efo/"
+  },
+  "statistics": {
+    "total_triples": 10811134,
+    "studies": 1774,
+    "genes": 873159,
+    "assays": 4846,
+    "diseases": 305,
+    "go_terms": 2162
+  },
+  "schema": {
+    "classes": [
+      {
+        "uri": "biolink:Study",
+        "label": "Study",
+        "description": "Gene expression study from GEO/ArrayExpress",
+        "count": 1774,
+        "key_properties": [
+          "biolink:name",
+          "biolink:id",
+          "biolink:description",
+          "biolink:in_taxon",
+          "biolink:has_output",
+          "biolink:has_attribute",
+          "biolink:studies",
+          "spokegenelab:project_title",
+          "spokegenelab:experimental_factors",
+          "spokegenelab:secondary_accessions",
+          "spokegenelab:source"
+        ]
+      },
+      {
+        "uri": "biolink:Assay",
+        "label": "Assay",
+        "description": "Experimental contrast comparing conditions",
+        "count": 4846,
+        "key_properties": [
+          "biolink:has_input",
+          "biolink:has_output"
+        ]
+      },
+      {
+        "uri": "biolink:Gene",
+        "label": "Gene",
+        "description": "Gene entity with expression data",
+        "count": 873159,
+        "key_properties": [
+          "biolink:id",
+          "biolink:name",
+          "biolink:symbol",
+          "biolink:in_taxon",
+          "spokegenelab:ensembl_id"
+        ]
+      },
+      {
+        "uri": "biolink:GeneExpressionMixin",
+        "label": "GeneExpressionMixin",
+        "description": "Differential expression result linking assay to gene",
+        "count": 572863,
+        "key_properties": [
+          "biolink:subject",
+          "biolink:object",
+          "biolink:predicate",
+          "spokegenelab:log2fc",
+          "spokegenelab:adj_p_value"
+        ]
+      },
+      {
+        "uri": "biolink:Association",
+        "label": "Association",
+        "description": "GO term enrichment result",
+        "count": 47702,
+        "key_properties": [
+          "biolink:participates_in",
+          "biolink:name",
+          "spokegenelab:adj_p_value",
+          "spokegenelab:effect_size",
+          "spokegenelab:genes_significant",
+          "spokegenelab:genes_total",
+          "spokegenelab:enrichment_type",
+          "spokegenelab:contrast_id"
+        ]
+      },
+      {
+        "uri": "biolink:Disease",
+        "label": "Disease",
+        "description": "Disease or condition studied",
+        "count": 305,
+        "key_properties": [
+          "biolink:id",
+          "biolink:name"
+        ]
+      },
+      {
+        "uri": "biolink:BiologicalProcess",
+        "label": "BiologicalProcess",
+        "description": "GO term or biological process",
+        "count": 2162,
+        "key_properties": [
+          "biolink:id",
+          "biolink:name"
+        ]
+      },
+      {
+        "uri": "biolink:LifeStage",
+        "label": "LifeStage",
+        "description": "Developmental or life stage",
+        "count": 241,
+        "key_properties": [
+          "biolink:id",
+          "biolink:name"
+        ]
+      }
+    ],
+    "key_relationships": [
+      {
+        "predicate": "biolink:has_output",
+        "domain": "biolink:Study",
+        "range": "biolink:Assay",
+        "description": "Study produces assays/contrasts"
+      },
+      {
+        "predicate": "biolink:studies",
+        "domain": "biolink:Study",
+        "range": "biolink:Disease",
+        "description": "Study investigates disease"
+      },
+      {
+        "predicate": "biolink:has_input",
+        "domain": "biolink:Assay",
+        "range": "biolink:Disease",
+        "description": "Assay uses samples from disease state"
+      },
+      {
+        "predicate": "biolink:has_attribute",
+        "domain": "biolink:Study",
+        "range": "biolink:LifeStage | biolink:BiologicalSex",
+        "description": "Study attributes like life stage, sex"
+      },
+      {
+        "predicate": "biolink:participates_in",
+        "domain": "biolink:Association",
+        "range": "biolink:BiologicalProcess",
+        "description": "Enrichment linked to GO term"
+      },
+      {
+        "predicate": "biolink:affects_expression_of",
+        "domain": "biolink:Assay",
+        "range": "biolink:Gene",
+        "description": "Via GeneExpressionMixin with log2fc, p-value"
+      }
+    ]
+  },
+  "top_entities": {
+    "diseases": [
+      {"name": "breast cancer", "id": "EFO_0000305", "studies": 78},
+      {"name": "lung cancer", "id": "EFO_0001071", "studies": 25},
+      {"name": "melanoma", "id": "EFO_0000756", "studies": 18},
+      {"name": "hepatocellular carcinoma", "id": "EFO_0000182", "studies": 16},
+      {"name": "glioblastoma", "id": "EFO_0000519", "studies": 14},
+      {"name": "psoriasis", "id": "EFO_0000676", "studies": 13},
+      {"name": "prostate cancer", "id": "EFO_0001663", "studies": 12},
+      {"name": "lung adenocarcinoma", "id": "EFO_0000571", "studies": 12},
+      {"name": "colon cancer", "id": "EFO_0000365", "studies": 10},
+      {"name": "ovarian cancer", "id": "EFO_0001075", "studies": 10}
+    ],
+    "experimental_factors": [
+      {"factor": "genotype", "studies": 674},
+      {"factor": "compound", "studies": 328},
+      {"factor": "time", "studies": 213},
+      {"factor": "disease", "studies": 189},
+      {"factor": "dose", "studies": 185},
+      {"factor": "growth condition", "studies": 145},
+      {"factor": "treatment", "studies": 139},
+      {"factor": "organism part", "studies": 131},
+      {"factor": "phenotype", "studies": 127},
+      {"factor": "cell type", "studies": 76},
+      {"factor": "infect", "studies": 70},
+      {"factor": "RNA interference", "studies": 66}
+    ],
+    "organisms": [
+      {"name": "Homo sapiens", "studies": 690},
+      {"name": "Mus musculus", "studies": 505},
+      {"name": "Arabidopsis thaliana", "studies": 271},
+      {"name": "Rattus norvegicus", "studies": 67},
+      {"name": "Drosophila melanogaster", "studies": 53}
+    ]
+  },
+  "example_queries": {
+    "find_studies_for_disease": {
+      "description": "Find studies investigating a specific disease",
+      "sparql": "SELECT ?study ?title ?description WHERE {\n  ?disease a biolink:Disease ;\n           biolink:name ?diseaseName .\n  FILTER(CONTAINS(LCASE(?diseaseName), 'breast cancer'))\n  ?study biolink:studies ?disease ;\n         spokegenelab:project_title ?title ;\n         biolink:description ?description .\n}\nLIMIT 20"
+    },
+    "go_enrichment_for_term": {
+      "description": "Find GO term enrichments across studies",
+      "sparql": "SELECT ?study ?studyTitle ?assay ?pvalue ?goTermName\nWHERE {\n  ?enrichment biolink:participates_in ?goTerm ;\n              spokegenelab:adj_p_value ?pvalue .\n  ?goTerm biolink:name ?goId .\n  FILTER(?goId = 'GO:0006955')  # immune response\n  OPTIONAL { ?goTerm biolink:id ?goTermName }\n  ?assay biolink:has_output ?enrichment .\n  ?study biolink:has_output ?assay ;\n         biolink:name ?studyTitle .\n}\nORDER BY ?pvalue\nLIMIT 50"
+    },
+    "studies_by_perturbation": {
+      "description": "Find studies using a specific experimental factor",
+      "sparql": "SELECT ?study ?title ?factors WHERE {\n  ?study a biolink:Study ;\n         spokegenelab:project_title ?title ;\n         spokegenelab:experimental_factors ?factors .\n  FILTER(?factors = 'compound')\n}\nLIMIT 50"
+    },
+    "differential_expression": {
+      "description": "Find differentially expressed genes in an assay",
+      "sparql": "SELECT ?gene ?symbol ?log2fc ?pvalue WHERE {\n  ?expr a biolink:GeneExpressionMixin ;\n        biolink:subject ?assay ;\n        biolink:object ?gene ;\n        spokegenelab:log2fc ?log2fc ;\n        spokegenelab:adj_p_value ?pvalue .\n  ?gene biolink:symbol ?symbol .\n  FILTER(?pvalue < 0.05)\n  FILTER(ABS(?log2fc) > 1.5)\n}\nORDER BY ?pvalue\nLIMIT 100"
+    },
+    "count_by_organism": {
+      "description": "Count studies by organism",
+      "sparql": "SELECT ?taxon (COUNT(DISTINCT ?study) as ?count) WHERE {\n  ?study a biolink:Study ;\n         biolink:in_taxon ?taxon .\n  FILTER(!REGEX(?taxon, '^[0-9]+$'))\n}\nGROUP BY ?taxon\nORDER BY DESC(?count)"
+    }
+  }
+}
