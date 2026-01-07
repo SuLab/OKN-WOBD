@@ -36,6 +36,7 @@ class AppConfig:
     raw: Dict[str, Any]
     nde_endpoints: List[EndpointConfig]
     frink_endpoints: List[EndpointConfig]
+    wikidata_endpoints: List[EndpointConfig]
     gene_expr: Dict[str, Any]
     ui: UIConfig
     llm: LLMConfig
@@ -158,6 +159,9 @@ def load_config(force_reload: bool = False) -> AppConfig:
     frink = sources.get("frink") or {}
     frink_endpoints = _coerce_endpoints(frink, "sources.frink")
 
+    wikidata = sources.get("wikidata") or {}
+    wikidata_endpoints = _coerce_endpoints(wikidata, "sources.wikidata")
+
     gene_expr = sources.get("gene_expression") or {}
     if not isinstance(gene_expr, dict):
         raise ConfigError("'sources.gene_expression' must be a mapping/object if present.")
@@ -169,6 +173,7 @@ def load_config(force_reload: bool = False) -> AppConfig:
         raw=raw,
         nde_endpoints=nde_endpoints,
         frink_endpoints=frink_endpoints,
+        wikidata_endpoints=wikidata_endpoints,
         gene_expr=gene_expr,
         ui=ui_cfg,
         llm=llm_cfg,
@@ -188,6 +193,12 @@ def get_frink_endpoints_or_none() -> List[EndpointConfig]:
     return load_config().frink_endpoints
 
 
+def get_wikidata_endpoints_or_none() -> List[EndpointConfig]:
+    """Convenience accessor for Wikidata endpoints (may be empty)."""
+
+    return load_config().wikidata_endpoints
+
+
 def get_gene_expr_config() -> Dict[str, Any]:
     """Return the raw gene expression configuration mapping (may be empty)."""
 
@@ -203,6 +214,7 @@ __all__ = [
     "load_config",
     "get_nde_endpoints",
     "get_frink_endpoints_or_none",
+    "get_wikidata_endpoints_or_none",
     "get_gene_expr_config",
 ]
 

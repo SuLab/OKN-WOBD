@@ -80,6 +80,20 @@ def get_gene_expr_endpoint_for_mode(mode: str) -> Optional[Endpoint]:
         return None
 
 
+def get_wikidata_endpoints() -> List[Endpoint]:
+    """Get all configured Wikidata endpoints."""
+    from wobd_web.config import get_wikidata_endpoints_or_none
+    
+    endpoints = get_wikidata_endpoints_or_none()
+    return [_to_endpoint(e) for e in endpoints]
+
+
+def get_default_wikidata_endpoint() -> Optional[Endpoint]:
+    """Return the first configured Wikidata endpoint, or None if not configured."""
+    endpoints = get_wikidata_endpoints()
+    return endpoints[0] if endpoints else None
+
+
 __all__ = [
     "Endpoint",
     "get_config",
@@ -87,6 +101,8 @@ __all__ = [
     "get_default_nde_endpoint",
     "get_frink_endpoints",
     "get_default_frink_endpoint",
+    "get_wikidata_endpoints",
+    "get_default_wikidata_endpoint",
     "get_gene_expr_endpoint_for_mode",
 ]
 

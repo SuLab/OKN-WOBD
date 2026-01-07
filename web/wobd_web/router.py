@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, Optional
 
 from wobd_web.config import AppConfig, load_config
 from wobd_web.models import QueryPlan, SourceAction
+from wobd_web.preset_queries import PresetQueryConfig, get_preset_query
 
 
 GeneExprMode = Literal["off", "sparql", "web_mcp", "local"]
@@ -35,13 +36,48 @@ def build_query_plan(
     """
     Build a QueryPlan for the given natural-language question and UI toggles.
 
+    First checks for preset queries. If found, uses the preset SPARQL.
+    Otherwise, falls back to NL→SPARQL generation.
+
     - NDE is always included by default.
     - FRINK is optionally included if both toggled on and configured.
     - Gene expression is optionally included depending on the selected / default mode.
     """
 
+    # Check for preset query first
+    preset = get_preset_query(question)
+    if preset is not None:
+        actions: list[SourceAction] = []
+        
+        if preset.query_type == "single":
+            # Single-step preset query
+            actions.append(
+                SourceAction(
+                    source_id=preset.source_kind,
+                    kind=preset.source_kind,
+                    query_text=preset.query or "",  # Contains raw SPARQL
+                    mode="interactive",
+                )
+            )
+        else:
+            # Multi-step preset query - create actions for each step
+            # The executor will handle the multi-step logic
+            if preset.steps:
+                for step in preset.steps:
+                    actions.append(
+                        SourceAction(
+                            source_id=step.step_name,
+                            kind=step.source_kind,
+                            query_text=step.query,  # Contains raw SPARQL or template
+                            mode="interactive",
+                        )
+                    )
+        
+        return QueryPlan(actions=actions)
+
+    # No preset found - use NL→SPARQL generation (original behavior)
     cfg = load_config()
-    actions: list[SourceAction] = []
+    actions = []
 
     # NDE is always on for now.
     actions.append(

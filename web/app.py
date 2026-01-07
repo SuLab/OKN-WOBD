@@ -22,6 +22,7 @@ from wobd_web.router import GeneExprMode, build_query_plan
 EXAMPLE_QUESTIONS: List[str] = [
     "Show datasets related to influenza vaccines.",
     "Find datasets with RNA-seq data for human blood samples.",
+    "Find me datasets that use an experimental system (organism, what part of the immune system is measured, and experimental context (treatment, stimulation, disease state)) that might be useful for studying Drug Tocilizumab.",
 ]
 
 def _init_session_state() -> None:

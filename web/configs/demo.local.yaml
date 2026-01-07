@@ -8,6 +8,12 @@ sources:
   frink:
     endpoints: []
 
+  wikidata:
+    endpoints:
+      - id: wikidata-frink
+        label: "Wikidata via FRINK"
+        sparql_url: "https://frink.apps.renci.org/wikidata/sparql"
+
   gene_expression:
     default_mode: "sparql"
     sparql:
