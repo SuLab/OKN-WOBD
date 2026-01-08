@@ -22,7 +22,8 @@ from wobd_web.router import GeneExprMode, build_query_plan
 EXAMPLE_QUESTIONS: List[str] = [
     "Show datasets related to influenza vaccines.",
     "Find datasets with RNA-seq data for human blood samples.",
-    "Find me datasets that use an experimental system (organism, what part of the immune system is measured, and experimental context (treatment, stimulation, disease state)) that might be useful for studying Drug Tocilizumab.",
+    "Find datasets that use an experimental system that might be useful for studying the drug Tocilizumab.",
+    "Find experiments where Dusp2 is upregulated.",
 ]
 
 def _init_session_state() -> None:
@@ -69,6 +70,11 @@ def main() -> None:
         show_provenance = st.checkbox(
             "Show provenance", value=cfg.ui.show_provenance
         )
+        
+        apply_query_limit = st.checkbox(
+            "Apply query limit", value=True,
+            help="Limit query results to max_rows (from config). Disable to get all results."
+        )
 
         st.markdown("### Example questions")
         for q in EXAMPLE_QUESTIONS:
@@ -100,7 +106,7 @@ def main() -> None:
                 include_gene_expr=include_gene_expr,
                 gene_expr_mode=gene_expr_mode,
             )
-            answer_bundle = run_plan(plan, question=question.strip())
+            answer_bundle = run_plan(plan, question=question.strip(), apply_limit=apply_query_limit)
             st.session_state["history"].append((question.strip(), answer_bundle))
 
     # Display chat history
@@ -112,6 +118,10 @@ def main() -> None:
     if answer_bundle is not None:
         st.markdown("### Latest answer")
         st.write(answer_bundle.final_text)
+        
+        # Show note about limit if it was applied
+        if answer_bundle.limit_applied and answer_bundle.limit_value:
+            st.info(f"ℹ️ Results limited to {answer_bundle.limit_value} rows. Uncheck 'Apply query limit' in the sidebar to get all results, or include keywords like 'all results' or 'no limit' in your question.")
 
         # Tabs per source
         if answer_bundle.tables:

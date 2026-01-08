@@ -166,7 +166,6 @@ WHERE {
     )
 }
 ORDER BY ?catalogName ?datasetName
-LIMIT 200
 """
 
 # Step 1: Query Wikidata in FRINK for Tocilizumab → disease (MONDO) mappings
@@ -205,7 +204,6 @@ WHERE {
   # MONDO as normalized URI (sometimes present)
   OPTIONAL { ?disease wdtn:P5270 ?mondo_uri . }
 }
-LIMIT 200
 """
 
 # Step 2: Query NDE with MONDO identifiers (will be parameterized)
@@ -232,7 +230,6 @@ WHERE {
     FILTER(CONTAINS(LCASE(STR(?doi)), "doi.org/") || CONTAINS(STR(?doi), "10."))
   }
 }
-LIMIT 200
 """
 
 # Step 3: Query sample metadata for datasets
@@ -298,7 +295,230 @@ WHERE {
 }
 GROUP BY ?study ?studyName ?catalogName
 ORDER BY ?healthConditions ?studyName
-LIMIT 200
+"""
+
+
+# Preset query for Dusp2 upregulation
+DUSP2_UPREGULATION_QUERY = """PREFIX biolink: <https://w3id.org/biolink/vocab/>
+PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
+PREFIX ensembl: <http://identifiers.org/ensembl/>
+
+SELECT DISTINCT 
+    ?experiment 
+    (REPLACE(STR(?experiment), "^.*/(E-[A-Z0-9-]+)-.*$", "$1") AS ?experimentId)
+    ?experimentLabel
+    ?gene 
+    ?geneSymbol 
+    ?log2fc 
+    ?adjPValue
+WHERE {
+    # Find gene expression associations
+    ?association a biolink:GeneExpressionMixin ;
+        biolink:object ?gene ;
+        biolink:subject ?experiment ;
+        spokegenelab:log2fc ?log2fc ;
+        spokegenelab:adj_p_value ?adjPValue .
+    
+    # Get gene symbol (filter for Dusp2)
+    ?gene biolink:symbol ?geneSymbol .
+    FILTER(LCASE(?geneSymbol) = "dusp2")
+    
+    # Filter for upregulated genes (log2fc > 0)
+    FILTER(?log2fc > 0)
+    
+    # Get experiment label if available
+    OPTIONAL {
+        ?experiment biolink:name ?experimentLabel .
+    }
+}
+ORDER BY DESC(?log2fc)
+"""
+
+
+# Query to find studies/experiments where SFRP2 is upregulated or downregulated
+# Similar structure to DUSP2_UPREGULATION_QUERY but for SFRP2 and includes both up and down
+# Key fields returned: studyId, gene, expressionDirection (upregulated/downregulated)
+SFRP2_EXPRESSION_STUDIES_QUERY = """PREFIX biolink: <https://w3id.org/biolink/vocab/>
+PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
+
+SELECT DISTINCT 
+    ?studyId
+    ?gene 
+    ?geneSymbol 
+    ?expressionDirection
+    ?experiment 
+    (REPLACE(STR(?experiment), "^.*/(E-[A-Z0-9-]+)-.*$", "$1") AS ?experimentId)
+    ?experimentLabel
+    ?log2fc 
+    ?adjPValue
+WHERE {
+    # Find gene expression associations
+    ?association a biolink:GeneExpressionMixin ;
+        biolink:object ?gene ;
+        biolink:subject ?experiment ;
+        spokegenelab:log2fc ?log2fc ;
+        spokegenelab:adj_p_value ?adjPValue .
+    
+    # Get gene symbol (filter for SFRP2)
+    ?gene biolink:symbol ?geneSymbol .
+    FILTER(LCASE(?geneSymbol) = "sfrp2" || LCASE(?geneSymbol) = "sfrp-2")
+    
+    # Get study ID from experiment (key field for linking to other graphs)
+    ?experiment spokegenelab:study_id ?studyId .
+    
+    # Determine if upregulated or downregulated
+    BIND(IF(?log2fc > 0, "upregulated", "downregulated") AS ?expressionDirection)
+    
+    # Get experiment label if available
+    OPTIONAL {
+        ?experiment biolink:name ?experimentLabel .
+    }
+}
+ORDER BY ?studyId DESC(?log2fc)
+"""
+
+# Query to find Doxycycline → SFRP2 → Disease connections (matching the visualization)
+# This query spans three endpoints:
+# 1. SPOKE-OKN: Drug-gene relationships (Doxycycline → SFRP2)
+# 2. Ubergraph: Gene-disease relationships (SFRP2 → Diseases)
+# 3. GXA (Gene Expression): Gene expression data (SFRP2 upregulated/downregulated in diseases)
+DOXYCYCLINE_SFRP2_DISEASE_QUERY = """PREFIX biolink: <https://w3id.org/biolink/vocab/>
+PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT DISTINCT
+    ?drug
+    ?drugLabel
+    ?gene
+    ?geneSymbol
+    ?disease
+    ?diseaseLabel
+    ?experiment
+    (REPLACE(STR(?experiment), "^.*/(E-[A-Z0-9-]+)-.*$", "$1") AS ?experimentId)
+    ?log2fc
+    ?adjPValue
+    ?experimentLabel
+    ?drugGenePredicate
+    ?geneDiseasePredicate
+WHERE {
+    # Step 1: Query SPOKE-OKN for Doxycycline → SFRP2 relationship
+    SERVICE <SPOKE_ENDPOINT_PLACEHOLDER> {
+        ?drug ?drugGenePredicate ?gene .
+        
+        # Filter for Doxycycline
+        OPTIONAL {
+            ?drug rdfs:label ?drugLabel .
+            FILTER(LANG(?drugLabel) = "en")
+        }
+        FILTER(
+            CONTAINS(LCASE(STR(?drugLabel)), "doxycycline") ||
+            CONTAINS(LCASE(STR(?drug)), "doxycycline")
+        )
+        
+        # Filter for SFRP2 gene
+        ?gene biolink:symbol ?geneSymbol .
+        FILTER(LCASE(?geneSymbol) = "sfrp2" || LCASE(?geneSymbol) = "sfrp-2")
+    }
+    
+    # Step 2: Query Ubergraph for SFRP2 → Disease relationships
+    SERVICE <UBERGRAPH_ENDPOINT_PLACEHOLDER> {
+        ?gene ?geneDiseasePredicate ?disease .
+        
+        # Get disease label
+        OPTIONAL {
+            ?disease rdfs:label ?diseaseLabel .
+            FILTER(LANG(?diseaseLabel) = "en")
+        }
+    }
+    
+    # Step 3: Query GXA (Gene Expression) for SFRP2 expression data
+    SERVICE <GENE_EXPR_ENDPOINT_PLACEHOLDER> {
+        ?association a biolink:GeneExpressionMixin ;
+            biolink:object ?gene ;
+            biolink:subject ?experiment ;
+            spokegenelab:log2fc ?log2fc ;
+            spokegenelab:adj_p_value ?adjPValue .
+        
+        # Get experiment label
+        OPTIONAL {
+            ?experiment biolink:name ?experimentLabel .
+        }
+    }
+}
+ORDER BY ?drugLabel ?geneSymbol ?diseaseLabel DESC(?log2fc)
+"""
+
+# Federated query for drug repurposing across multiple FRINK graph endpoints
+# 
+# This query uses SPARQL SERVICE clauses to query across separate endpoints:
+# 1. SPOKE endpoint: Drug-gene relationships (drug downregulates gene)
+# 2. Gene Expression endpoint: Gene expression data (gene upregulated in diseases)
+#
+# Structure: Drug → downregulates → Gene → upregulated in → Diseases/Experiments
+#
+# Note: Adjust endpoint URLs and predicates based on your FRINK setup
+DRUG_REPURPOSE_FEDERATED_QUERY = """PREFIX biolink: <https://w3id.org/biolink/vocab/>
+PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
+
+SELECT DISTINCT
+    ?drug
+    ?drugLabel
+    ?gene
+    ?geneSymbol
+    ?experiment
+    (REPLACE(STR(?experiment), "^.*/(E-[A-Z0-9-]+)-.*$", "$1") AS ?experimentId)
+    ?log2fc
+    ?adjPValue
+    ?experimentLabel
+    ?predicate
+WHERE {
+    # Step 1: Query SPOKE endpoint for drug-gene relationships
+    # Find drugs that downregulate genes (e.g., Doxycycline downregulates SFPR2)
+    SERVICE <SPOKE_ENDPOINT_PLACEHOLDER> {
+        ?drug ?predicate ?gene .
+        
+        # Filter for drug-gene relationships that indicate downregulation
+        # Common predicates: biolink:decreases_expression_of, biolink:negatively_regulates
+        # Adjust based on actual SPOKE/Ubergraph vocabulary
+        FILTER(?predicate IN (biolink:decreases_expression_of, biolink:negatively_regulates, biolink:affects))
+        
+        # Get drug label from SPOKE
+        OPTIONAL {
+            ?drug rdfs:label ?drugLabel .
+            FILTER(LANG(?drugLabel) = "en")
+        }
+        
+        # Filter for specific drug (e.g., Doxycycline)
+        # This can be by label or by URI/identifier
+        FILTER(
+            CONTAINS(LCASE(STR(?drugLabel)), "doxycycline") ||
+            CONTAINS(LCASE(STR(?drug)), "doxycycline")
+        )
+        
+        # Get gene symbol from SPOKE
+        ?gene biolink:symbol ?geneSymbol .
+    }
+    
+    # Step 2: Query Gene Expression endpoint for upregulated genes
+    # Find where those same genes are upregulated in disease experiments
+    SERVICE <GENE_EXPR_ENDPOINT_PLACEHOLDER> {
+        ?association a biolink:GeneExpressionMixin ;
+            biolink:object ?gene ;
+            biolink:subject ?experiment ;
+            spokegenelab:log2fc ?log2fc ;
+            spokegenelab:adj_p_value ?adjPValue .
+        
+        # Filter for upregulated genes (log2fc > 0)
+        # Drug downregulates, but disease shows upregulation - repurposing opportunity
+        FILTER(?log2fc > 0)
+        
+        # Get experiment label
+        OPTIONAL {
+            ?experiment biolink:name ?experimentLabel .
+        }
+    }
+}
+ORDER BY ?drugLabel ?geneSymbol DESC(?log2fc)
 """
 
 
@@ -316,9 +536,9 @@ PRESET_QUERIES: Dict[str, PresetQueryConfig] = {
         query=RNA_SEQ_HUMAN_BLOOD_QUERY,
         source_kind="nde",
     ),
-    "Find me datasets that use an experimental system (organism, what part of the immune system is measured, and experimental context (treatment, stimulation, disease state)) that might be useful for studying Drug Tocilizumab.": PresetQueryConfig(
+    "Find datasets that use an experimental system that might be useful for studying the drug Tocilizumab.": PresetQueryConfig(
         query_type="multistep",
-        question_text="Find me datasets that use an experimental system (organism, what part of the immune system is measured, and experimental context (treatment, stimulation, disease state)) that might be useful for studying Drug Tocilizumab.",
+        question_text="Find datasets that use an experimental system that might be useful for studying the drug Tocilizumab.",
         steps=[
             QueryStep(
                 query=TOCILIZUMAB_STEP1_WIKIDATA,
@@ -337,6 +557,34 @@ PRESET_QUERIES: Dict[str, PresetQueryConfig] = {
             ),
         ],
     ),
+    "Find experiments where Dusp2 is upregulated.": PresetQueryConfig(
+        query_type="single",
+        question_text="Find experiments where Dusp2 is upregulated.",
+        query=DUSP2_UPREGULATION_QUERY,
+        source_kind="gene_expression",
+    ),
+    # Note: This query assumes FRINK has both drug-gene relationships (from SPOKE/Ubergraph)
+    # and gene expression data (from GXA) in a unified graph or accessible via federated queries
+    "Find disease experiments where genes downregulated by Doxycycline show upregulation.": PresetQueryConfig(
+        query_type="single",
+        question_text="Find disease experiments where genes downregulated by Doxycycline show upregulation.",
+        query=DRUG_REPURPOSE_FEDERATED_QUERY,
+        source_kind="frink",  # Use FRINK if it has unified access to both drug-gene and gene expression data
+    ),
+    # Query matching the Doxycycline → SFRP2 → Disease network visualization
+    "Find diseases connected to SFRP2 that is affected by Doxycycline.": PresetQueryConfig(
+        query_type="single",
+        question_text="Find diseases connected to SFRP2 that is affected by Doxycycline.",
+        query=DOXYCYCLINE_SFRP2_DISEASE_QUERY,
+        source_kind="frink",  # Uses federated queries across SPOKE-OKN, Ubergraph, and GXA
+    ),
+    # Simple query to find studies where SFRP2 is up or downregulated
+    "Find studies where SFRP2 is upregulated or downregulated.": PresetQueryConfig(
+        query_type="single",
+        question_text="Find studies where SFRP2 is upregulated or downregulated.",
+        query=SFRP2_EXPRESSION_STUDIES_QUERY,
+        source_kind="gene_expression",
+    ),
 }
 
 
@@ -354,7 +602,11 @@ __all__ = [
     "PresetQueryConfig",
     "PRESET_QUERIES",
     "get_preset_query",
+    "DUSP2_UPREGULATION_QUERY",
     "TOCILIZUMAB_STEP2_NDE_TEMPLATE",
     "TOCILIZUMAB_STEP3_METADATA_TEMPLATE",
+    "DRUG_REPURPOSE_FEDERATED_QUERY",
+    "DOXYCYCLINE_SFRP2_DISEASE_QUERY",
+    "SFRP2_EXPRESSION_STUDIES_QUERY",
 ]
 

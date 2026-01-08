@@ -21,16 +21,17 @@ class SourceResult:
 
 def ensure_limit(query: str, max_rows: int) -> str:
     """
-    Ensure that a SPARQL SELECT query has a LIMIT clause.
+    Ensure that a SPARQL SELECT query has a LIMIT clause with the specified max_rows.
 
     This is a simple, case-insensitive heuristic and does not attempt to fully
-    parse SPARQL. If a LIMIT is already present, the query is returned
-    unchanged; otherwise a LIMIT is appended.
+    parse SPARQL. If a LIMIT is already present, it is replaced with the specified
+    max_rows; otherwise a LIMIT is appended.
     """
 
     pattern = re.compile(r"\blimit\s+\d+\b", flags=re.IGNORECASE)
     if pattern.search(query):
-        return query
+        # Replace existing LIMIT clause
+        return re.sub(r"\blimit\s+\d+\b", f"LIMIT {int(max_rows)}", query, flags=re.IGNORECASE)
 
     stripped = query.rstrip().rstrip(";")
     return f"{stripped}\nLIMIT {int(max_rows)}"

@@ -41,12 +41,16 @@ class AnswerBundle:
     - tables: mapping from source_id to list of row dicts.
     - sparql_texts: mapping from source_id to generated SPARQL.
     - provenance: list of per-source provenance records.
+    - limit_applied: whether a LIMIT clause was applied to non-preset queries.
+    - limit_value: the LIMIT value that was applied (if any).
     """
 
     final_text: str
     tables: Dict[str, List[Dict[str, Any]]] = field(default_factory=dict)
     sparql_texts: Dict[str, str] = field(default_factory=dict)
     provenance: List[ProvenanceItem] = field(default_factory=list)
+    limit_applied: bool = False
+    limit_value: Optional[int] = None
 
 
 __all__ = [

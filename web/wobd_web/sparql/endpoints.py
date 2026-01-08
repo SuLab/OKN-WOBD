@@ -94,6 +94,34 @@ def get_default_wikidata_endpoint() -> Optional[Endpoint]:
     return endpoints[0] if endpoints else None
 
 
+def get_spoke_endpoints() -> List[Endpoint]:
+    """Get all configured SPOKE endpoints."""
+    from wobd_web.config import get_spoke_endpoints_or_none
+    
+    endpoints = get_spoke_endpoints_or_none()
+    return [_to_endpoint(e) for e in endpoints]
+
+
+def get_default_spoke_endpoint() -> Optional[Endpoint]:
+    """Return the first configured SPOKE endpoint, or None if not configured."""
+    endpoints = get_spoke_endpoints()
+    return endpoints[0] if endpoints else None
+
+
+def get_ubergraph_endpoints() -> List[Endpoint]:
+    """Get all configured Ubergraph endpoints."""
+    from wobd_web.config import get_ubergraph_endpoints_or_none
+    
+    endpoints = get_ubergraph_endpoints_or_none()
+    return [_to_endpoint(e) for e in endpoints]
+
+
+def get_default_ubergraph_endpoint() -> Optional[Endpoint]:
+    """Return the first configured Ubergraph endpoint, or None if not configured."""
+    endpoints = get_ubergraph_endpoints()
+    return endpoints[0] if endpoints else None
+
+
 __all__ = [
     "Endpoint",
     "get_config",
@@ -103,6 +131,10 @@ __all__ = [
     "get_default_frink_endpoint",
     "get_wikidata_endpoints",
     "get_default_wikidata_endpoint",
+    "get_spoke_endpoints",
+    "get_default_spoke_endpoint",
+    "get_ubergraph_endpoints",
+    "get_default_ubergraph_endpoint",
     "get_gene_expr_endpoint_for_mode",
 ]
 

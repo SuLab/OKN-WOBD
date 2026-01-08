@@ -109,13 +109,13 @@ def _add_prefixes_if_missing(query: str) -> str:
 def generate_sparql(
     question: str,
     target: TargetKind,
-    interactive_limit: int,
+    interactive_limit: int | None = None,
 ) -> str:
     """
     Use OpenAI to generate a SPARQL SELECT query for the given target.
 
     The generated query is post-processed to ensure a LIMIT clause is present
-    for interactive usage.
+    for interactive usage, unless interactive_limit is None.
     """
 
     client, llm_cfg = _get_client_and_model()
@@ -154,7 +154,9 @@ def generate_sparql(
         raise RuntimeError("Generated query appears to contain forbidden SPARQL operations.")
 
     query_with_prefixes = _add_prefixes_if_missing(query)
-    return ensure_limit(query_with_prefixes, interactive_limit)
+    if interactive_limit is not None:
+        return ensure_limit(query_with_prefixes, interactive_limit)
+    return query_with_prefixes
 
 
 __all__ = [

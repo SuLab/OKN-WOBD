@@ -11,12 +11,14 @@ from wobd_web.preset_queries import (
     TOCILIZUMAB_STEP3_METADATA_TEMPLATE,
     get_preset_query,
 )
-from wobd_web.sparql.client import SourceResult, execute_sparql
+from wobd_web.sparql.client import SourceResult, ensure_limit, execute_sparql
 from wobd_web.sparql.endpoints import (
     Endpoint,
     get_default_frink_endpoint,
     get_default_nde_endpoint,
     get_default_wikidata_endpoint,
+    get_default_spoke_endpoint,
+    get_default_ubergraph_endpoint,
     get_gene_expr_endpoint_for_mode,
 )
 
@@ -32,21 +34,67 @@ def _is_preset_query(query_text: str) -> bool:
     return "SELECT" in query_text.upper() or "PREFIX" in query_text.upper()
 
 
-def _run_single_action(action: SourceAction, max_rows: int) -> tuple[SourceResult, str, ProvenanceItem]:
+def _replace_endpoint_placeholders(sparql: str) -> str:
+    """
+    Replace endpoint placeholders in SPARQL queries with actual endpoint URLs.
+    
+    Placeholders:
+    - SPOKE_ENDPOINT_PLACEHOLDER -> SPOKE endpoint URL
+    - UBERGRAPH_ENDPOINT_PLACEHOLDER -> Ubergraph endpoint URL
+    - GENE_EXPR_ENDPOINT_PLACEHOLDER -> Gene expression endpoint URL
+    """
+    from wobd_web.sparql.endpoints import get_default_ubergraph_endpoint
+    
+    query = sparql
+    
+    # Replace SPOKE endpoint placeholder
+    spoke_endpoint = get_default_spoke_endpoint()
+    if spoke_endpoint:
+        query = query.replace(
+            "<SPOKE_ENDPOINT_PLACEHOLDER>",
+            f"<{spoke_endpoint.sparql_url}>"
+        )
+    
+    # Replace Ubergraph endpoint placeholder
+    ubergraph_endpoint = get_default_ubergraph_endpoint()
+    if ubergraph_endpoint:
+        query = query.replace(
+            "<UBERGRAPH_ENDPOINT_PLACEHOLDER>",
+            f"<{ubergraph_endpoint.sparql_url}>"
+        )
+    
+    # Replace Gene Expression endpoint placeholder
+    gene_expr_endpoint = get_gene_expr_endpoint_for_mode("sparql")
+    if gene_expr_endpoint:
+        query = query.replace(
+            "<GENE_EXPR_ENDPOINT_PLACEHOLDER>",
+            f"<{gene_expr_endpoint.sparql_url}>"
+        )
+    
+    return query
+
+
+def _run_single_action(action: SourceAction, max_rows: int, apply_limit: bool = True) -> tuple[SourceResult, str, ProvenanceItem]:
     cfg = load_config()
     
     # Check if this is a preset query (raw SPARQL) or needs NL→SPARQL generation
     if _is_preset_query(action.query_text):
-        # Preset query - use SPARQL directly
-        sparql = action.query_text
+        # Preset query - use SPARQL directly, but replace endpoint placeholders if present
+        # Preset queries don't get LIMIT applied - they're trusted queries
+        sparql = _replace_endpoint_placeholders(action.query_text)
     else:
         # Generate SPARQL from natural language
         target = _target_for_action(action)
+        # Only apply limit if requested and not a preset query
+        limit_for_llm = max_rows if apply_limit else None
         sparql = generate_sparql(
             question=action.query_text,
             target=target,
-            interactive_limit=max_rows,
+            interactive_limit=limit_for_llm,
         )
+        # Also ensure LIMIT is in the generated query if needed
+        if apply_limit:
+            sparql = ensure_limit(sparql, max_rows)
 
     # Resolve endpoint and execute.
     endpoint: Endpoint | None
@@ -100,7 +148,7 @@ def _run_single_action(action: SourceAction, max_rows: int) -> tuple[SourceResul
     return result, sparql, prov
 
 
-def _execute_multistep_query(plan: QueryPlan, question: str) -> AnswerBundle:
+def _execute_multistep_query(plan: QueryPlan, question: str, apply_limit: bool = True) -> AnswerBundle:
     """
     Execute a multi-step query workflow (e.g., Tocilizumab).
     
@@ -130,7 +178,7 @@ def _execute_multistep_query(plan: QueryPlan, question: str) -> AnswerBundle:
         )
     
     if step1_action:
-        result1, sparql1, prov1 = _run_single_action(step1_action, max_rows=max_rows)
+        result1, sparql1, prov1 = _run_single_action(step1_action, max_rows=max_rows, apply_limit=apply_limit)
         tables["wikidata_drug_to_disease"] = result1.rows
         sparql_texts["wikidata_drug_to_disease"] = sparql1
         provenance.append(prov1)
@@ -161,7 +209,7 @@ def _execute_multistep_query(plan: QueryPlan, question: str) -> AnswerBundle:
                 query_text=step2_query,
                 mode="interactive",
             )
-            result2, sparql2, prov2 = _run_single_action(step2_action, max_rows=max_rows)
+            result2, sparql2, prov2 = _run_single_action(step2_action, max_rows=max_rows, apply_limit=apply_limit)
             tables["nde_datasets_by_mondo"] = result2.rows
             sparql_texts["nde_datasets_by_mondo"] = sparql2
             provenance.append(prov2)
@@ -182,7 +230,7 @@ def _execute_multistep_query(plan: QueryPlan, question: str) -> AnswerBundle:
                     query_text=step3_query,
                     mode="interactive",
                 )
-                result3, sparql3, prov3 = _run_single_action(step3_action, max_rows=max_rows)
+                result3, sparql3, prov3 = _run_single_action(step3_action, max_rows=max_rows, apply_limit=apply_limit)
                 tables["sample_metadata"] = result3.rows
                 sparql_texts["sample_metadata"] = sparql3
                 provenance.append(prov3)
@@ -213,10 +261,12 @@ def _execute_multistep_query(plan: QueryPlan, question: str) -> AnswerBundle:
         tables=tables,
         sparql_texts=sparql_texts,
         provenance=provenance,
+        limit_applied=False,  # Multi-step queries use preset queries which don't get limits
+        limit_value=None,
     )
 
 
-def run_plan(plan: QueryPlan, question: str) -> AnswerBundle:
+def run_plan(plan: QueryPlan, question: str, apply_limit: bool = True) -> AnswerBundle:
     """
     Execute all actions in the given QueryPlan and aggregate results.
 
@@ -227,24 +277,36 @@ def run_plan(plan: QueryPlan, question: str) -> AnswerBundle:
     # Check if this is a multi-step query (Tocilizumab workflow)
     preset = get_preset_query(question)
     if preset and preset.query_type == "multistep":
-        return _execute_multistep_query(plan, question)
+        return _execute_multistep_query(plan, question, apply_limit=apply_limit)
     
     # Single-step execution (original behavior)
     cfg = load_config()
     max_rows = cfg.ui.max_rows
+    
+    # Check for keywords in question that indicate no limit should be applied
+    question_lower = question.lower()
+    no_limit_keywords = ["all results", "no limit", "remove limit", "unlimited", "show all"]
+    if any(keyword in question_lower for keyword in no_limit_keywords):
+        apply_limit = False
 
     tables: Dict[str, List[Dict[str, object]]] = {}
     sparql_texts: Dict[str, str] = {}
     provenance: List[ProvenanceItem] = []
+    limit_was_applied = False
 
     for action in plan.actions:
+        # Track if this is a preset query before processing
+        is_preset = _is_preset_query(action.query_text)
         # For non-preset queries, use the original question as the prompt
-        if not _is_preset_query(action.query_text):
+        if not is_preset:
             action.query_text = question
-        result, sparql, prov = _run_single_action(action, max_rows=max_rows)
+        result, sparql, prov = _run_single_action(action, max_rows=max_rows, apply_limit=apply_limit)
         tables[action.source_id] = result.rows
         sparql_texts[action.source_id] = sparql
         provenance.append(prov)
+        # Track if limit was applied (only for non-preset queries)
+        if apply_limit and not is_preset:
+            limit_was_applied = True
 
     # Simple heuristic answer text for MVP: summarise by counts.
     parts: List[str] = []
@@ -259,6 +321,8 @@ def run_plan(plan: QueryPlan, question: str) -> AnswerBundle:
         tables=tables,
         sparql_texts=sparql_texts,
         provenance=provenance,
+        limit_applied=limit_was_applied,
+        limit_value=max_rows if limit_was_applied else None,
     )
 
 

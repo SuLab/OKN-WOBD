@@ -37,6 +37,8 @@ class AppConfig:
     nde_endpoints: List[EndpointConfig]
     frink_endpoints: List[EndpointConfig]
     wikidata_endpoints: List[EndpointConfig]
+    spoke_endpoints: List[EndpointConfig]
+    ubergraph_endpoints: List[EndpointConfig]
     gene_expr: Dict[str, Any]
     ui: UIConfig
     llm: LLMConfig
@@ -162,6 +164,12 @@ def load_config(force_reload: bool = False) -> AppConfig:
     wikidata = sources.get("wikidata") or {}
     wikidata_endpoints = _coerce_endpoints(wikidata, "sources.wikidata")
 
+    spoke = sources.get("spoke") or {}
+    spoke_endpoints = _coerce_endpoints(spoke, "sources.spoke")
+
+    ubergraph = sources.get("ubergraph") or {}
+    ubergraph_endpoints = _coerce_endpoints(ubergraph, "sources.ubergraph")
+
     gene_expr = sources.get("gene_expression") or {}
     if not isinstance(gene_expr, dict):
         raise ConfigError("'sources.gene_expression' must be a mapping/object if present.")
@@ -174,6 +182,8 @@ def load_config(force_reload: bool = False) -> AppConfig:
         nde_endpoints=nde_endpoints,
         frink_endpoints=frink_endpoints,
         wikidata_endpoints=wikidata_endpoints,
+        spoke_endpoints=spoke_endpoints,
+        ubergraph_endpoints=ubergraph_endpoints,
         gene_expr=gene_expr,
         ui=ui_cfg,
         llm=llm_cfg,
@@ -197,6 +207,18 @@ def get_wikidata_endpoints_or_none() -> List[EndpointConfig]:
     """Convenience accessor for Wikidata endpoints (may be empty)."""
 
     return load_config().wikidata_endpoints
+
+
+def get_spoke_endpoints_or_none() -> List[EndpointConfig]:
+    """Convenience accessor for SPOKE endpoints (may be empty)."""
+
+    return load_config().spoke_endpoints
+
+
+def get_ubergraph_endpoints_or_none() -> List[EndpointConfig]:
+    """Convenience accessor for Ubergraph endpoints (may be empty)."""
+
+    return load_config().ubergraph_endpoints
 
 
 def get_gene_expr_config() -> Dict[str, Any]:

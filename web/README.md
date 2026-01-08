@@ -122,6 +122,7 @@ select among them by changing `WOBD_CONFIG_PATH`.
   - Toggle **Include FRINK**.
   - Choose gene expression mode: Off / SPARQL / Web-MCP / Local.
   - Toggles for **Show generated SPARQL** and **Show provenance**.
+  - Toggle **Apply query limit** - controls whether query results are limited to `max_rows` (from config, default: 200). Uncheck to get all results.
   - A list of example questions that pre-fill the main input.
 - **Main area**
   - Chat-like history of questions and answers.
@@ -129,6 +130,23 @@ select among them by changing `WOBD_CONFIG_PATH`.
   - Tabs per source (e.g., `nde`, `frink`, `gene_expression`) showing result
     tables.
   - Optional expanders for generated SPARQL and provenance.
+  - Info message when query limits are applied (with instructions on how to disable).
+
+### Query Limits
+
+By default, query results are limited to `max_rows` (configured in YAML, default: 200) for **NL→SPARQL queries** to ensure fast response times. **Preset queries** (example questions) do not have limits applied as they are trusted and optimized.
+
+You can disable query limits in two ways:
+
+1. **Sidebar toggle**: Uncheck "Apply query limit" in the sidebar before submitting your question.
+2. **Keywords in question**: Include any of these keywords in your question:
+   - "all results"
+   - "no limit"
+   - "remove limit"
+   - "unlimited"
+   - "show all"
+
+When limits are applied, an info message will appear in the results indicating the limit value and how to disable it.
 
 ---
 
