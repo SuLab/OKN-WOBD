@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VNN3: 1 Drug Effects, 9 Disease Associations</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .legend {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #555;
+        }
+        .instructions {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+        #network {
+            width: 1000px;
+            height: 700px;
+            border: 1px solid #ddd;
+            background: white;
+            margin: 0 auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .summary {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #666;
+        }
+        .controls {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .toggle-btn {
+            padding: 8px 16px;
+            font-size: 13px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: all 0.2s;
+        }
+        .toggle-btn.active {
+            background: #27ae60;
+            color: white;
+        }
+        .toggle-btn.inactive {
+            background: #e0e0e0;
+            color: #555;
+        }
+        .toggle-btn:hover {
+            opacity: 0.85;
+        }
+        #custom-tooltip {
+            position: fixed;
+            background: rgba(45, 52, 54, 0.95);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.5;
+            max-width: 400px;
+            pointer-events: none;
+            z-index: 10000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        #custom-tooltip b {
+            color: #f1c40f;
+        }
+        /* Hide native vis.js tooltip */
+        .vis-tooltip {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <h1>VNN3: 1 Drug Effects, 9 Disease Associations</h1>
+    <div class="legend"><div style="margin-bottom:5px;"><b>Nodes:</b> <span style="display:inline-block;margin-right:15px;"><span style="display:inline-block;width:12px;height:12px;background:#3498db;border-radius:50%;margin-right:5px;"></span>Gene</span> <span style="display:inline-block;margin-right:15px;"><span style="display:inline-block;width:12px;height:12px;background:#e74c3c;border-radius:50%;margin-right:5px;"></span>Disease</span> <span style="display:inline-block;margin-right:15px;"><span style="display:inline-block;width:12px;height:12px;background:#2ecc71;border-radius:50%;margin-right:5px;"></span>GO Term</span> <span style="display:inline-block;margin-right:15px;"><span style="display:inline-block;width:12px;height:12px;background:#9b59b6;border-radius:50%;margin-right:5px;"></span>Drug</span></div><div><b>Sources:</b> <span style="display:inline-block;margin-right:15px;"><span style="display:inline-block;width:20px;height:3px;background:#d62728;margin-right:5px;vertical-align:middle;"></span>GXA</span> <span style="display:inline-block;margin-right:15px;"><span style="display:inline-block;width:20px;height:3px;background:#1f77b4;margin-right:5px;vertical-align:middle;"></span>SPOKE-OKN</span> <span style="display:inline-block;margin-right:15px;"><span style="display:inline-block;width:20px;height:3px;background:#2ca02c;margin-right:5px;vertical-align:middle;"></span>Ubergraph</span></div></div>
+    <div class="controls">
+        <button id="physicsToggle" class="toggle-btn inactive" onclick="togglePhysics()">
+            ⚡ Auto-Layout: OFF
+        </button>
+        <button class="toggle-btn inactive" onclick="resetLayout()">
+            🔄 Reset Layout
+        </button>
+    </div>
+    <div class="instructions">Drag nodes to rearrange • Scroll to zoom • Hover for details</div>
+    <div id="network"></div>
+    <div id="custom-tooltip"></div>
+    <div class="summary">
+        31 nodes • 57 connections
+    </div>
+
+    <script type="text/javascript">
+        var nodes = new vis.DataSet([{"id": "gene:VNN3", "label": "VNN3", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 40, "font": {"size": 14, "color": "#2c3e50", "bold": true}, "title": "Gene: VNN3", "shape": "dot"}, {"id": "drug:700_milligram;_brodalumab;_15_", "label": "700 milligram; brodalumab", "color": {"background": "#9b59b6", "border": "#9b59b6", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 35, "font": {"size": 12, "color": "#2c3e50"}, "title": "Drug: 700 milligram; brodalumab; 15 day; lesional", "shape": "diamond"}, {"id": "disease:http_//www.ebi.ac.uk/efo/EFO_0000676", "label": "psoriasis", "color": {"background": "#e74c3c", "border": "#e74c3c", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Disease: psoriasis<br>ID: http://www.ebi.ac.uk/efo/EFO_0000676", "shape": "dot"}, {"id": "disease:http_//www.ebi.ac.uk/efo/EFO_0003834", "label": "cutaneous lupus erythemat", "color": {"background": "#e74c3c", "border": "#e74c3c", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Disease: cutaneous lupus erythematosus<br>ID: http://www.ebi.ac.uk/efo/EFO_0003834", "shape": "dot"}, {"id": "disease:DOID_2394", "label": "ovarian cancer", "color": {"background": "#e74c3c", "border": "#e74c3c", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Disease: ovarian cancer<br>ID: DOID_2394", "shape": "dot"}, {"id": "gene:ACOT13", "label": "ACOT13", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Related Gene: ACOT13 (shares: GO:0016787)", "shape": "dot"}, {"id": "disease:DOID_263", "label": "kidney cancer", "color": {"background": "#e74c3c", "border": "#e74c3c", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Disease: kidney cancer<br>ID: DOID_263", "shape": "dot"}, {"id": "gene:ACMSD", "label": "ACMSD", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Related Gene: ACMSD (shares: GO:0016787)", "shape": "dot"}, {"id": "disease:DOID_3571", "label": "liver cancer", "color": {"background": "#e74c3c", "border": "#e74c3c", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Disease: liver cancer<br>ID: DOID_3571", "shape": "dot"}, {"id": "gene:ACOT12", "label": "ACOT12", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Related Gene: ACOT12 (shares: GO:0016787)", "shape": "dot"}, {"id": "gene:ACOT4", "label": "ACOT4", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Related Gene: ACOT4 (shares: GO:0016787)", "shape": "dot"}, {"id": "gene:ACOT1", "label": "ACOT1", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Related Gene: ACOT1 (shares: GO:0016787)", "shape": "dot"}, {"id": "gene:MASP1", "label": "MASP1", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Related Gene: MASP1 (shares: GO:0016787)", "shape": "dot"}, {"id": "disease:DOID_10283", "label": "prostate cancer", "color": {"background": "#e74c3c", "border": "#e74c3c", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Disease: prostate cancer<br>ID: DOID_10283", "shape": "dot"}, {"id": "gene:ACOT8", "label": "ACOT8", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Related Gene: ACOT8 (shares: GO:0016787)", "shape": "dot"}, {"id": "gene:ACOT11", "label": "ACOT11", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Related Gene: ACOT11 (shares: GO:0016787)", "shape": "dot"}, {"id": "disease:DOID_9256", "label": "colorectal cancer", "color": {"background": "#e74c3c", "border": "#e74c3c", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Disease: colorectal cancer<br>ID: DOID_9256", "shape": "dot"}, {"id": "gene:ACOT2", "label": "ACOT2", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Related Gene: ACOT2 (shares: GO:0016787)", "shape": "dot"}, {"id": "disease:DOID_1793", "label": "pancreatic cancer", "color": {"background": "#e74c3c", "border": "#e74c3c", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Disease: pancreatic cancer<br>ID: DOID_1793", "shape": "dot"}, {"id": "gene:CTRC", "label": "CTRC", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Related Gene: CTRC (shares: GO:0016787)", "shape": "dot"}, {"id": "gene:APTX", "label": "APTX", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Related Gene: APTX (shares: GO:0016787)", "shape": "dot"}, {"id": "gene:TRHDE", "label": "TRHDE", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Related Gene: TRHDE (shares: GO:0016787)", "shape": "dot"}, {"id": "gene:CTSC", "label": "CTSC", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Related Gene: CTSC (shares: GO:0016787)", "shape": "dot"}, {"id": "disease:DOID_1781", "label": "thyroid cancer", "color": {"background": "#e74c3c", "border": "#e74c3c", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Disease: thyroid cancer<br>ID: DOID_1781", "shape": "dot"}, {"id": "gene:PCSK2", "label": "PCSK2", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Related Gene: PCSK2 (shares: GO:0016787)", "shape": "dot"}, {"id": "gene:FUCA1", "label": "FUCA1", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Related Gene: FUCA1 (shares: GO:0016787)", "shape": "dot"}, {"id": "gene:MASP2", "label": "MASP2", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Related Gene: MASP2 (shares: GO:0016787)", "shape": "dot"}, {"id": "gene:C1orf116", "label": "C1orf116", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Related Gene: C1orf116 (shares: GO:0008150)", "shape": "dot"}, {"id": "gene:RGN", "label": "RGN", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Related Gene: RGN (shares: GO:0016787)", "shape": "dot"}, {"id": "gene:CPA2", "label": "CPA2", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Related Gene: CPA2 (shares: GO:0016787)", "shape": "dot"}, {"id": "gene:DPEP1", "label": "DPEP1", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 25, "font": {"size": 12, "color": "#2c3e50"}, "title": "Related Gene: DPEP1 (shares: GO:0016787)", "shape": "dot"}]);
+        var edges = new vis.DataSet([{"from": "drug:700_milligram;_brodalumab;_15_", "to": "gene:VNN3", "color": {"color": "#d62728", "highlight": "#f1c40f"}, "title": "downregulates<br>Study: E-GEOD-53552<br>Assay: 'brodalumab; 700 milligram' vs 'placebo' in 'lesional' at '15 day'<br>log2FC=-3.20, p=0.000", "width": 2, "smooth": {"type": "continuous"}, "label": "downregulates", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "disease:http_//www.ebi.ac.uk/efo/EFO_0000676", "color": {"color": "#d62728", "highlight": "#f1c40f"}, "title": "upregulated in psoriasis<br>Study: E-GEOD-54456<br>Assay: 'psoriasis; lesional skin' vs 'normal; normal'<br>log2FC=8.30, p=0.000", "width": 2, "smooth": {"type": "continuous"}, "label": "upregulated", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "disease:http_//www.ebi.ac.uk/efo/EFO_0000676", "color": {"color": "#d62728", "highlight": "#f1c40f"}, "title": "upregulated in psoriasis<br>Study: E-GEOD-52471<br>Assay: 'psoriasis' vs 'normal' in 'Ovation RNA Amplification V2 kit'<br>log2FC=3.40, p=0.000", "width": 2, "smooth": {"type": "continuous"}, "label": "upregulated", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "disease:http_//www.ebi.ac.uk/efo/EFO_0003834", "color": {"color": "#d62728", "highlight": "#f1c40f"}, "title": "upregulated in cutaneous lupus erythematosus<br>Study: E-GEOD-52471<br>Assay: 'psoriasis' vs 'normal' in 'Ovation RNA Amplification V2 kit'<br>log2FC=3.40, p=0.000", "width": 2, "smooth": {"type": "continuous"}, "label": "upregulated", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "gene:ACOT13", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>shares  GO:0016787</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "shares  GO:0016787", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:ACOT13", "to": "disease:DOID_2394", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "gene:ACMSD", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>shares  GO:0016787</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "shares  GO:0016787", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:ACMSD", "to": "disease:DOID_263", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:ACMSD", "to": "disease:DOID_263", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:ACMSD", "to": "disease:DOID_3571", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "gene:ACOT12", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>shares  GO:0016787</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "shares  GO:0016787", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:ACOT12", "to": "disease:DOID_3571", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:ACOT12", "to": "disease:DOID_3571", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "gene:ACOT4", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>shares  GO:0016787</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "shares  GO:0016787", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:ACOT4", "to": "disease:DOID_263", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "gene:ACOT1", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>shares  GO:0016787</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "shares  GO:0016787", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:ACOT1", "to": "disease:DOID_263", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "gene:MASP1", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>shares  GO:0016787</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "shares  GO:0016787", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:MASP1", "to": "disease:DOID_3571", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:MASP1", "to": "disease:DOID_10283", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:MASP1", "to": "disease:DOID_263", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:MASP1", "to": "disease:DOID_3571", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "gene:ACOT8", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>shares  GO:0016787</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "shares  GO:0016787", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:ACOT8", "to": "disease:DOID_263", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "gene:ACOT11", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>shares  GO:0016787</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "shares  GO:0016787", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:ACOT11", "to": "disease:DOID_263", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:ACOT11", "to": "disease:DOID_9256", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "gene:ACOT2", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>shares  GO:0016787</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "shares  GO:0016787", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:ACOT2", "to": "disease:DOID_263", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "gene:CTRC", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>shares  GO:0016787</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "shares  GO:0016787", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:CTRC", "to": "disease:DOID_1793", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "gene:APTX", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>shares  GO:0016787</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "shares  GO:0016787", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:APTX", "to": "disease:DOID_263", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "gene:TRHDE", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>shares  GO:0016787</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "shares  GO:0016787", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:TRHDE", "to": "disease:DOID_263", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:TRHDE", "to": "disease:DOID_263", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "gene:CTSC", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>shares  GO:0016787</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "shares  GO:0016787", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:CTSC", "to": "disease:DOID_263", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "gene:PCSK2", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>shares  GO:0016787</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "shares  GO:0016787", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:PCSK2", "to": "disease:DOID_1781", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "gene:FUCA1", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>shares  GO:0016787</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "shares  GO:0016787", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:FUCA1", "to": "disease:DOID_263", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "gene:MASP2", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>shares  GO:0016787</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "shares  GO:0016787", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:MASP2", "to": "disease:DOID_3571", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:MASP2", "to": "disease:DOID_3571", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "gene:C1orf116", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>shares  GO:0008150</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "shares  GO:0008150", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:C1orf116", "to": "disease:DOID_263", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:C1orf116", "to": "disease:DOID_10283", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "gene:RGN", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>shares  GO:0016787</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "shares  GO:0016787", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:RGN", "to": "disease:DOID_263", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:RGN", "to": "disease:DOID_3571", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:RGN", "to": "disease:DOID_3571", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "gene:CPA2", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>shares  GO:0016787</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "shares  GO:0016787", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:CPA2", "to": "disease:DOID_1793", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:VNN3", "to": "gene:DPEP1", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>shares  GO:0016787</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "shares  GO:0016787", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:DPEP1", "to": "disease:DOID_263", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "gene:DPEP1", "to": "disease:DOID_9256", "color": {"color": "#9467bd", "highlight": "#f1c40f"}, "title": "<b>marker for</b><br>Source: SPOKE+Wikidata", "width": 2, "smooth": {"type": "continuous"}, "label": "marker for", "font": {"size": 10, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}}]);
+
+        var container = document.getElementById('network');
+        var data = { nodes: nodes, edges: edges };
+
+        var options = {
+            nodes: {
+                borderWidth: 2,
+                shadow: true,
+                font: {
+                    color: '#ffffff',
+                    face: 'arial',
+                }
+            },
+            edges: {
+                shadow: true,
+                smooth: {
+                    type: 'continuous'
+                }
+            },
+            physics: {
+                enabled: true,
+                barnesHut: {
+                    gravitationalConstant: -3000,
+                    centralGravity: 0.3,
+                    springLength: 150,
+                    springConstant: 0.04,
+                    damping: 0.09,
+                },
+                stabilization: {
+                    iterations: 150,
+                    fit: true
+                }
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 100,
+                dragNodes: true,
+                dragView: true,
+                zoomView: true,
+            }
+        };
+
+        var network = new vis.Network(container, data, options);
+
+        var physicsEnabled = false;
+
+        // Stop physics after initial stabilization
+        network.on("stabilizationIterationsDone", function () {
+            physicsEnabled = false;
+            network.setOptions({ physics: { enabled: false } });
+            updatePhysicsButton();
+        });
+
+        function togglePhysics() {
+            physicsEnabled = !physicsEnabled;
+            network.setOptions({ physics: { enabled: physicsEnabled } });
+            updatePhysicsButton();
+        }
+
+        function updatePhysicsButton() {
+            var btn = document.getElementById('physicsToggle');
+            if (physicsEnabled) {
+                btn.textContent = '⚡ Auto-Layout: ON';
+                btn.className = 'toggle-btn active';
+            } else {
+                btn.textContent = '⚡ Auto-Layout: OFF';
+                btn.className = 'toggle-btn inactive';
+            }
+        }
+
+        function resetLayout() {
+            // Re-enable physics and re-stabilize
+            physicsEnabled = true;
+            network.setOptions({ physics: { enabled: true } });
+            updatePhysicsButton();
+
+            // Reset node positions to trigger re-layout
+            var positions = network.getPositions();
+            var updates = [];
+            for (var nodeId in positions) {
+                updates.push({ id: nodeId, x: undefined, y: undefined });
+            }
+            nodes.update(updates);
+
+            // Restabilize the network
+            network.stabilize(150);
+        }
+
+        // Custom tooltip handling - replaces native vis.js tooltip
+        var tooltip = document.getElementById('custom-tooltip');
+
+        function showTooltip(content, params) {
+            if (!content) return;
+            tooltip.innerHTML = content;
+            tooltip.style.display = 'block';
+
+            // Get coordinates from vis.js params
+            var x, y;
+            if (params.event && params.event.srcEvent) {
+                x = params.event.srcEvent.clientX;
+                y = params.event.srcEvent.clientY;
+            } else if (params.pointer && params.pointer.DOM) {
+                // Fallback to DOM pointer coordinates + container offset
+                var rect = container.getBoundingClientRect();
+                x = rect.left + params.pointer.DOM.x;
+                y = rect.top + params.pointer.DOM.y;
+            } else {
+                return; // Can't position tooltip
+            }
+
+            tooltip.style.left = (x + 15) + 'px';
+            tooltip.style.top = (y + 15) + 'px';
+
+            // Adjust if going off screen
+            var rect = tooltip.getBoundingClientRect();
+            if (rect.right > window.innerWidth) {
+                tooltip.style.left = (x - rect.width - 15) + 'px';
+            }
+            if (rect.bottom > window.innerHeight) {
+                tooltip.style.top = (y - rect.height - 15) + 'px';
+            }
+        }
+
+        function hideTooltip() {
+            tooltip.style.display = 'none';
+        }
+
+        // Handle edge hover
+        network.on('hoverEdge', function(params) {
+            var edgeId = params.edge;
+            var edge = edges.get(edgeId);
+            var content = edge ? (edge.customTitle || edge.title) : null;
+            if (content) {
+                showTooltip(content, params);
+            }
+        });
+
+        network.on('blurEdge', function(params) {
+            hideTooltip();
+        });
+
+        // Handle node hover
+        network.on('hoverNode', function(params) {
+            var nodeId = params.node;
+            var node = nodes.get(nodeId);
+            var content = node ? (node.customTitle || node.title) : null;
+            if (content) {
+                showTooltip(content, params);
+            }
+        });
+
+        network.on('blurNode', function(params) {
+            hideTooltip();
+        });
+
+        // Hide tooltip when dragging or clicking
+        network.on('dragStart', function() {
+            hideTooltip();
+        });
+        network.on('click', function() {
+            hideTooltip();
+        });
+    </script>
+</body>
+</html>
