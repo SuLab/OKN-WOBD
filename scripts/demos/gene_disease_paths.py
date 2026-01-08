@@ -477,6 +477,7 @@ def main():
     parser.add_argument("--gene", "-g", dest="gene_arg", help="Gene symbol (alternative)")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     parser.add_argument("--output", "-o", help="Output JSON file")
+    parser.add_argument("--html", help="Output interactive HTML visualization")
 
     args = parser.parse_args()
 
@@ -566,6 +567,32 @@ def main():
         with open(args.output, 'w') as f:
             json.dump(output_data, f, indent=2)
         print(f"\nResults saved to: {args.output}")
+
+    # Generate interactive visualization
+    if args.html:
+        try:
+            from plotly_visualizer import PlotlyVisualizer
+
+            viz = PlotlyVisualizer()
+            conn_dicts = [c.to_dict() for c in connections]
+
+            # Create network graph
+            fig = viz.gene_disease_network(
+                conn_dicts,
+                title=f"{gene_symbol} Disease Connections",
+                gene_symbol=gene_symbol,
+            )
+            viz.save_html(fig, args.html)
+
+            # Also create source summary if multiple sources
+            if len(summary["by_source"]) > 1:
+                summary_file = args.html.replace(".html", "_sources.html")
+                fig2 = viz.source_summary(conn_dicts, title=f"{gene_symbol} Connections by Source")
+                viz.save_html(fig2, summary_file)
+
+        except ImportError:
+            print("\nWarning: plotly not installed. Skipping visualization.")
+            print("Install with: pip install plotly")
 
 
 if __name__ == "__main__":

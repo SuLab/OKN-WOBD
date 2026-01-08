@@ -215,6 +215,15 @@ pip install requests pandas SPARQLWrapper
 
 # For ARCHS4 client
 pip install archs4py
+
+# For interactive visualizations
+pip install plotly
+
+# For CellxGene client
+pip install cellxgene-census
+
+# For LLM summaries
+pip install anthropic
 ```
 
 ## External Resources
@@ -362,6 +371,38 @@ Natural language to SPARQL query translation using LLMs and FRINK context.
 ### Gene Neighborhood (`gene_neighborhood.py`)
 
 Finds genes in the genomic neighborhood of a target gene.
+
+### Plotly Visualizer (`plotly_visualizer.py`)
+
+Interactive visualization components for gene-disease analysis using Plotly.
+
+**Visualization Types:**
+| Method | Description |
+|--------|-------------|
+| `gene_disease_network()` | Interactive network graph of gene-disease connections |
+| `expression_comparison()` | Bar chart comparing drug vs disease fold changes |
+| `source_summary()` | Sunburst chart of connections by source and path type |
+| `disease_heatmap()` | Heatmap of gene-disease associations by path type |
+| `drug_disease_patterns()` | Dual-panel view of opposing expression patterns |
+
+```python
+from plotly_visualizer import PlotlyVisualizer
+
+viz = PlotlyVisualizer()
+
+# Create network graph
+fig = viz.gene_disease_network(connections, title="SFRP2 Connections")
+fig.show()  # Display in browser/notebook
+
+# Save to HTML
+viz.save_html(fig, "network.html")
+```
+
+**Integrated with gene_disease_paths.py:**
+```bash
+# Generate network visualization
+python gene_disease_paths.py SFRP2 --html sfrp2_network.html
+```
 
 ### Visualization (`visualize_results.py`)
 
