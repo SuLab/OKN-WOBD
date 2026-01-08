@@ -576,19 +576,22 @@ def main():
             viz = PlotlyVisualizer()
             conn_dicts = [c.to_dict() for c in connections]
 
-            # Create network graph
-            fig = viz.gene_disease_network(
+            # Create network graph (returns HTML string for vis.js)
+            html_content = viz.gene_disease_network(
                 conn_dicts,
                 title=f"{gene_symbol} Disease Connections",
                 gene_symbol=gene_symbol,
             )
-            viz.save_html(fig, args.html)
+            with open(args.html, "w") as f:
+                f.write(html_content)
+            print(f"\nNetwork visualization saved to: {args.html}")
 
             # Also create source summary if multiple sources
             if len(summary["by_source"]) > 1:
                 summary_file = args.html.replace(".html", "_sources.html")
                 fig2 = viz.source_summary(conn_dicts, title=f"{gene_symbol} Connections by Source")
                 viz.save_html(fig2, summary_file)
+                print(f"Source summary saved to: {summary_file}")
 
         except ImportError:
             print("\nWarning: plotly not installed. Skipping visualization.")

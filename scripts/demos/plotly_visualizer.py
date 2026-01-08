@@ -100,9 +100,9 @@ class PlotlyVisualizer:
         show_intermediates: bool = True,
         height: int = 700,
         width: int = 1000,
-    ) -> go.Figure:
+    ) -> str:
         """
-        Create an interactive network graph of gene-disease connections.
+        Create an interactive network graph with draggable nodes using vis.js.
 
         Args:
             connections: List of connection dicts with gene, disease, path_type, source, intermediate
@@ -113,10 +113,10 @@ class PlotlyVisualizer:
             width: Figure width in pixels
 
         Returns:
-            Plotly Figure object
+            HTML string containing the vis.js network
         """
         if not connections:
-            return self._empty_figure("No connections to display")
+            return "<p>No connections to display</p>"
 
         # Extract gene symbol if not provided
         if gene_symbol is None:
@@ -129,10 +129,13 @@ class PlotlyVisualizer:
         # Central gene node
         gene_id = f"gene:{gene_symbol}"
         nodes[gene_id] = {
+            "id": gene_id,
             "label": gene_symbol,
             "type": "gene",
             "color": COLORS["gene"],
             "size": 40,
+            "font": {"size": 14, "color": "#ffffff"},
+            "title": f"Gene: {gene_symbol}",
         }
 
         # Process connections
@@ -147,140 +150,255 @@ class PlotlyVisualizer:
             disease_node_id = f"disease:{disease_id}"
             if disease_node_id not in nodes:
                 nodes[disease_node_id] = {
-                    "label": disease_name,
+                    "id": disease_node_id,
+                    "label": self._truncate_label(disease_name, 20),
                     "type": "disease",
                     "color": COLORS["disease"],
                     "size": 25,
+                    "font": {"size": 11, "color": "#ffffff"},
+                    "title": f"Disease: {disease_name}\nID: {disease_id}",
                 }
 
             # Handle intermediate nodes
             if show_intermediates and intermediate:
-                # Parse intermediate (e.g., "GO:0051216: cartilage development" or "WNT4 (shares: GO:0031012)")
                 if intermediate.startswith("GO:"):
                     inter_id = f"go:{intermediate.split(':')[1].split()[0]}"
-                    inter_label = intermediate
+                    inter_label = intermediate.split(":")[0] + ":" + intermediate.split(":")[1].split()[0]
                     inter_type = "go_term"
+                    inter_title = intermediate
                 else:
-                    # Related gene
                     inter_id = f"gene:{intermediate.split()[0]}"
-                    inter_label = intermediate
+                    inter_label = intermediate.split()[0]
                     inter_type = "gene"
+                    inter_title = intermediate
 
                 if inter_id not in nodes:
                     nodes[inter_id] = {
+                        "id": inter_id,
                         "label": inter_label,
                         "type": inter_type,
                         "color": COLORS.get(inter_type, "#95a5a6"),
-                        "size": 20,
+                        "size": 18,
+                        "font": {"size": 10, "color": "#ffffff"},
+                        "title": inter_title,
                     }
 
-                # Gene -> Intermediate -> Disease
-                edges.append((gene_id, inter_id, {"path_type": path_type, "source": source}))
-                edges.append((inter_id, disease_node_id, {"path_type": path_type, "source": source}))
+                edges.append({
+                    "from": gene_id,
+                    "to": inter_id,
+                    "color": COLORS.get(path_type, "#95a5a6"),
+                    "title": f"{path_type} ({source})",
+                })
+                edges.append({
+                    "from": inter_id,
+                    "to": disease_node_id,
+                    "color": COLORS.get(path_type, "#95a5a6"),
+                    "title": f"{path_type} ({source})",
+                })
             else:
-                # Direct connection
-                edges.append((gene_id, disease_node_id, {"path_type": path_type, "source": source}))
+                edges.append({
+                    "from": gene_id,
+                    "to": disease_node_id,
+                    "color": COLORS.get(path_type, "#95a5a6"),
+                    "title": f"{path_type} ({source})",
+                })
 
-        # Layout nodes in a radial pattern
-        node_positions = self._radial_layout(nodes, gene_id)
+        # Convert to vis.js format
+        vis_nodes = list(nodes.values())
+        vis_edges = edges
 
-        # Create edge traces
-        edge_traces = []
-        for source_id, target_id, edge_data in edges:
-            x0, y0 = node_positions[source_id]
-            x1, y1 = node_positions[target_id]
-            path_type = edge_data.get("path_type", "associated")
+        # Generate HTML with vis.js
+        html = self._generate_visjs_html(vis_nodes, vis_edges, title, height, width, gene_symbol)
+        return html
 
-            edge_traces.append(go.Scatter(
-                x=[x0, x1, None],
-                y=[y0, y1, None],
-                mode="lines",
-                line=dict(
-                    width=1.5,
-                    color=COLORS.get(path_type, "#95a5a6"),
-                ),
-                hoverinfo="none",
-                showlegend=False,
-            ))
+    def _truncate_label(self, label: str, max_len: int) -> str:
+        """Truncate label for display."""
+        if len(label) <= max_len:
+            return label
+        return label[:max_len-2] + "..."
 
-        # Create node traces by type
-        node_traces = []
-        for node_type in ["gene", "disease", "go_term"]:
-            type_nodes = [(nid, ndata) for nid, ndata in nodes.items() if ndata["type"] == node_type]
-            if not type_nodes:
-                continue
+    def _generate_visjs_html(
+        self,
+        nodes: List[Dict],
+        edges: List[Dict],
+        title: str,
+        height: int,
+        width: int,
+        gene_symbol: str,
+    ) -> str:
+        """Generate standalone HTML with vis.js network."""
+        import json
 
-            x_vals = [node_positions[nid][0] for nid, _ in type_nodes]
-            y_vals = [node_positions[nid][1] for nid, _ in type_nodes]
-            labels = [ndata["label"] for _, ndata in type_nodes]
-            sizes = [ndata["size"] for _, ndata in type_nodes]
-            colors = [ndata["color"] for _, ndata in type_nodes]
+        # Prepare node data for vis.js
+        vis_nodes = []
+        for node in nodes:
+            vis_node = {
+                "id": node["id"],
+                "label": node["label"],
+                "color": {
+                    "background": node["color"],
+                    "border": node["color"],
+                    "highlight": {"background": "#f1c40f", "border": "#f39c12"},
+                },
+                "size": node["size"],
+                "font": node.get("font", {"size": 12, "color": "#ffffff"}),
+                "title": node.get("title", node["label"]),
+                "shape": "dot" if node["type"] != "gene" else "dot",
+            }
+            # Make central gene node fixed initially but draggable
+            if node["id"] == f"gene:{gene_symbol}":
+                vis_node["fixed"] = {"x": False, "y": False}
+                vis_node["physics"] = False  # Start stable
+            vis_nodes.append(vis_node)
 
-            node_traces.append(go.Scatter(
-                x=x_vals,
-                y=y_vals,
-                mode="markers+text",
-                marker=dict(
-                    size=sizes,
-                    color=colors,
-                    line=dict(width=2, color="white"),
-                ),
-                text=labels,
-                textposition="bottom center",
-                textfont=dict(size=10),
-                hoverinfo="text",
-                hovertext=labels,
-                name=node_type.replace("_", " ").title(),
-            ))
+        # Prepare edge data
+        vis_edges = []
+        for edge in edges:
+            vis_edges.append({
+                "from": edge["from"],
+                "to": edge["to"],
+                "color": {"color": edge["color"], "highlight": "#f1c40f"},
+                "title": edge.get("title", ""),
+                "width": 2,
+                "smooth": {"type": "continuous"},
+            })
 
-        # Create figure
-        fig = go.Figure(data=edge_traces + node_traces)
+        nodes_json = json.dumps(vis_nodes)
+        edges_json = json.dumps(vis_edges)
 
-        fig.update_layout(
-            title=dict(text=title, x=0.5, font=dict(size=18)),
-            showlegend=True,
-            legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=1.02,
-                xanchor="center",
-                x=0.5,
-            ),
-            hovermode="closest",
-            xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-            yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-            template=self.template,
-            height=height,
-            width=width,
-            margin=dict(l=20, r=20, t=80, b=20),
-        )
+        # Build legend HTML
+        legend_items = [
+            ("Gene", COLORS["gene"]),
+            ("Disease", COLORS["disease"]),
+            ("GO Term", COLORS["go_term"]),
+        ]
+        legend_html = " ".join([
+            f'<span style="display:inline-block;margin-right:15px;">'
+            f'<span style="display:inline-block;width:12px;height:12px;'
+            f'background:{color};border-radius:50%;margin-right:5px;"></span>{label}</span>'
+            for label, color in legend_items
+        ])
 
-        return fig
+        html = f'''<!DOCTYPE html>
+<html>
+<head>
+    <title>{title}</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }}
+        h1 {{
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }}
+        .legend {{
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #555;
+        }}
+        .instructions {{
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 10px;
+        }}
+        #network {{
+            width: {width}px;
+            height: {height}px;
+            border: 1px solid #ddd;
+            background: white;
+            margin: 0 auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }}
+        .summary {{
+            text-align: center;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #666;
+        }}
+    </style>
+</head>
+<body>
+    <h1>{title}</h1>
+    <div class="legend">{legend_html}</div>
+    <div class="instructions">Drag nodes to rearrange • Scroll to zoom • Hover for details</div>
+    <div id="network"></div>
+    <div class="summary">
+        {len(nodes)} nodes • {len(edges)} connections
+    </div>
 
-    def _radial_layout(self, nodes: Dict, center_id: str) -> Dict[str, Tuple[float, float]]:
-        """Calculate radial layout positions for nodes."""
-        import math
+    <script type="text/javascript">
+        var nodes = new vis.DataSet({nodes_json});
+        var edges = new vis.DataSet({edges_json});
 
-        positions = {}
-        positions[center_id] = (0, 0)
+        var container = document.getElementById('network');
+        var data = {{ nodes: nodes, edges: edges }};
 
-        # Group non-center nodes by type
-        type_groups = defaultdict(list)
-        for nid, ndata in nodes.items():
-            if nid != center_id:
-                type_groups[ndata["type"]].append(nid)
+        var options = {{
+            nodes: {{
+                borderWidth: 2,
+                shadow: true,
+                font: {{
+                    color: '#ffffff',
+                    face: 'arial',
+                }}
+            }},
+            edges: {{
+                shadow: true,
+                smooth: {{
+                    type: 'continuous'
+                }}
+            }},
+            physics: {{
+                enabled: true,
+                barnesHut: {{
+                    gravitationalConstant: -3000,
+                    centralGravity: 0.3,
+                    springLength: 150,
+                    springConstant: 0.04,
+                    damping: 0.09,
+                }},
+                stabilization: {{
+                    iterations: 150,
+                    fit: true
+                }}
+            }},
+            interaction: {{
+                hover: true,
+                tooltipDelay: 100,
+                dragNodes: true,
+                dragView: true,
+                zoomView: true,
+            }}
+        }};
 
-        # Assign positions in concentric rings by type
-        ring_radii = {"disease": 2.5, "go_term": 1.5, "gene": 1.8}
+        var network = new vis.Network(container, data, options);
 
-        for node_type, node_ids in type_groups.items():
-            radius = ring_radii.get(node_type, 2.0)
-            n = len(node_ids)
-            for i, nid in enumerate(node_ids):
-                angle = 2 * math.pi * i / n - math.pi / 2
-                positions[nid] = (radius * math.cos(angle), radius * math.sin(angle))
+        // Stop physics after initial stabilization for smoother dragging
+        network.on("stabilizationIterationsDone", function () {{
+            network.setOptions({{ physics: {{ enabled: false }} }});
+        }});
 
-        return positions
+        // Re-enable physics briefly when dragging ends to settle
+        network.on("dragEnd", function (params) {{
+            if (params.nodes.length > 0) {{
+                network.setOptions({{ physics: {{ enabled: true }} }});
+                setTimeout(function() {{
+                    network.setOptions({{ physics: {{ enabled: false }} }});
+                }}, 500);
+            }}
+        }});
+    </script>
+</body>
+</html>'''
+        return html
 
     def expression_comparison(
         self,
