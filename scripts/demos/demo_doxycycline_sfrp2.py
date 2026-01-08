@@ -62,22 +62,12 @@ def query_gxa_drug_gene(
         return []
 
     # Query for drug treatment studies affecting the gene
+    # Note: Drug names often appear in test_group_label, not project_title
     query = f'''
     SELECT DISTINCT ?study ?projectTitle ?geneSymbol ?log2fc ?pvalue
                     ?assayName ?testGroup ?refGroup
     WHERE {{
-        # Find studies with compound/treatment factors
-        VALUES ?factor {{ "compound" "treatment" "dose" }}
-        ?studyUri a biolink:Study ;
-                  spokegenelab:experimental_factors ?factor ;
-                  spokegenelab:project_title ?projectTitle ;
-                  biolink:name ?study ;
-                  biolink:has_output ?assayUri .
-
-        # Filter for drug name in title (case-insensitive)
-        FILTER(CONTAINS(LCASE(?projectTitle), "{drug_name.lower()}"))
-
-        # Get expression data
+        # Start with expression data for the target gene
         ?exprUri a biolink:GeneExpressionMixin ;
                  biolink:subject ?assayUri ;
                  biolink:object ?gene ;
@@ -88,10 +78,23 @@ def query_gxa_drug_gene(
         ?gene biolink:symbol ?geneSymbol .
         FILTER(?geneSymbol = "{gene_symbol}")
 
-        # Get assay details
+        # Get assay details - drug name is typically in test_group_label
         ?assayUri biolink:name ?assayName .
         OPTIONAL {{ ?assayUri spokegenelab:test_group_label ?testGroup }}
         OPTIONAL {{ ?assayUri spokegenelab:reference_group_label ?refGroup }}
+
+        # Filter for drug name in test group OR assay name (case-insensitive)
+        FILTER(
+            CONTAINS(LCASE(COALESCE(?testGroup, "")), "{drug_name.lower()}") ||
+            CONTAINS(LCASE(?assayName), "{drug_name.lower()}")
+        )
+
+        # Link to study with compound/treatment factor
+        VALUES ?factor {{ "compound" "treatment" "dose" }}
+        ?studyUri spokegenelab:experimental_factors ?factor ;
+                  biolink:has_output ?assayUri ;
+                  biolink:name ?study ;
+                  spokegenelab:project_title ?projectTitle .
     }}
     LIMIT 50
     '''
