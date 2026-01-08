@@ -119,6 +119,7 @@ def query_gxa_drug_gene(
                     'direction': direction,
                     'study': r.get('study', ''),
                     'title': r.get('projectTitle', ''),
+                    'assay': r.get('assayName', ''),
                     'test_group': r.get('testGroup', ''),
                     'ref_group': r.get('refGroup', ''),
                     'source': 'GXA',
@@ -160,7 +161,7 @@ def query_gxa_disease_gene(
     # Query for disease studies affecting the gene
     query = f'''
     SELECT DISTINCT ?study ?projectTitle ?geneSymbol ?log2fc ?pvalue
-                    ?diseaseName ?diseaseId ?testGroup ?refGroup
+                    ?diseaseName ?diseaseId ?assayName ?testGroup ?refGroup
     WHERE {{
         # Start with expression data for the target gene
         ?exprUri a biolink:GeneExpressionMixin ;
@@ -222,6 +223,7 @@ def query_gxa_disease_gene(
                     'direction': direction,
                     'study': r.get('study', ''),
                     'title': r.get('projectTitle', ''),
+                    'assay': r.get('assayName', ''),
                     'test_group': r.get('testGroup', ''),
                     'ref_group': r.get('refGroup', ''),
                     'source': 'GXA',
@@ -273,6 +275,8 @@ def build_graph(
         for r in gxa_drug_results:
             direction = r.get('direction', 'regulates')
             evidence = f"log2FC={r['log2fc']:.2f}, p={r['pvalue']:.3f}"
+            study_id = r.get('study', 'N/A')
+            assay_name = r.get('assay', r.get('test_group', 'N/A'))
 
             edges.append({
                 "from": drug_id,
@@ -280,7 +284,9 @@ def build_graph(
                 "label": direction,
                 "source": "GXA",
                 "evidence": evidence,
-                "title": f"{direction}<br>Study: {r.get('title', 'N/A')[:50]}",
+                "study_id": study_id,
+                "assay": assay_name,
+                "title": f"{direction}<br>Study: {study_id}<br>Assay: {assay_name}<br>{evidence}",
             })
 
     # Add disease expression edges from GXA (gene upregulated/downregulated in disease)
@@ -301,6 +307,8 @@ def build_graph(
         # Add gene → disease edge (expression in disease context)
         direction = r.get('direction', 'expressed')
         evidence = f"log2FC={r['log2fc']:.2f}, p={r['pvalue']:.3f}"
+        study_id = r.get('study', 'N/A')
+        assay_name = r.get('assay', r.get('test_group', 'N/A'))
 
         edges.append({
             "from": gene_id,
@@ -308,7 +316,9 @@ def build_graph(
             "label": direction,
             "source": "GXA",
             "evidence": evidence,
-            "title": f"{direction} in {disease_name}<br>{evidence}",
+            "study_id": study_id,
+            "assay": assay_name,
+            "title": f"{direction} in {disease_name}<br>Study: {study_id}<br>Assay: {assay_name}<br>{evidence}",
         })
 
     # Process gene-disease connections (from SPOKE, Ubergraph, Wikidata)

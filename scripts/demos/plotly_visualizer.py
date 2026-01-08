@@ -496,6 +496,27 @@ class PlotlyVisualizer:
         .toggle-btn:hover {{
             opacity: 0.85;
         }}
+        #custom-tooltip {{
+            position: fixed;
+            background: rgba(45, 52, 54, 0.95);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.5;
+            max-width: 400px;
+            pointer-events: none;
+            z-index: 10000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }}
+        #custom-tooltip b {{
+            color: #f1c40f;
+        }}
+        /* Hide native vis.js tooltip */
+        .vis-tooltip {{
+            display: none !important;
+        }}
     </style>
 </head>
 <body>
@@ -511,6 +532,7 @@ class PlotlyVisualizer:
     </div>
     <div class="instructions">Drag nodes to rearrange • Scroll to zoom • Hover for details</div>
     <div id="network"></div>
+    <div id="custom-tooltip"></div>
     <div class="summary">
         {len(nodes)} nodes • {len(edges)} connections
     </div>
@@ -605,6 +627,81 @@ class PlotlyVisualizer:
             // Restabilize the network
             network.stabilize(150);
         }}
+
+        // Custom tooltip handling - replaces native vis.js tooltip
+        var tooltip = document.getElementById('custom-tooltip');
+
+        function showTooltip(content, params) {{
+            if (!content) return;
+            tooltip.innerHTML = content;
+            tooltip.style.display = 'block';
+
+            // Get coordinates from vis.js params
+            var x, y;
+            if (params.event && params.event.srcEvent) {{
+                x = params.event.srcEvent.clientX;
+                y = params.event.srcEvent.clientY;
+            }} else if (params.pointer && params.pointer.DOM) {{
+                // Fallback to DOM pointer coordinates + container offset
+                var rect = container.getBoundingClientRect();
+                x = rect.left + params.pointer.DOM.x;
+                y = rect.top + params.pointer.DOM.y;
+            }} else {{
+                return; // Can't position tooltip
+            }}
+
+            tooltip.style.left = (x + 15) + 'px';
+            tooltip.style.top = (y + 15) + 'px';
+
+            // Adjust if going off screen
+            var rect = tooltip.getBoundingClientRect();
+            if (rect.right > window.innerWidth) {{
+                tooltip.style.left = (x - rect.width - 15) + 'px';
+            }}
+            if (rect.bottom > window.innerHeight) {{
+                tooltip.style.top = (y - rect.height - 15) + 'px';
+            }}
+        }}
+
+        function hideTooltip() {{
+            tooltip.style.display = 'none';
+        }}
+
+        // Handle edge hover
+        network.on('hoverEdge', function(params) {{
+            var edgeId = params.edge;
+            var edge = edges.get(edgeId);
+            var content = edge ? (edge.customTitle || edge.title) : null;
+            if (content) {{
+                showTooltip(content, params);
+            }}
+        }});
+
+        network.on('blurEdge', function(params) {{
+            hideTooltip();
+        }});
+
+        // Handle node hover
+        network.on('hoverNode', function(params) {{
+            var nodeId = params.node;
+            var node = nodes.get(nodeId);
+            var content = node ? (node.customTitle || node.title) : null;
+            if (content) {{
+                showTooltip(content, params);
+            }}
+        }});
+
+        network.on('blurNode', function(params) {{
+            hideTooltip();
+        }});
+
+        // Hide tooltip when dragging or clicking
+        network.on('dragStart', function() {{
+            hideTooltip();
+        }});
+        network.on('click', function() {{
+            hideTooltip();
+        }});
     </script>
 </body>
 </html>'''
