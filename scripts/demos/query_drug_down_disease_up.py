@@ -27,8 +27,8 @@ def find_drug_disease_genes(
     drug_fc_threshold: float = 2.0,
     disease_fc_threshold: float = 1.5,
     pvalue_threshold: float = 0.05,
-    limit: int = 300,
-    batch_size: int = 30
+    limit: int = 2000,
+    batch_size: int = 50
 ):
     """
     Find genes with opposing expression in drug treatment vs disease.
@@ -64,6 +64,7 @@ def find_drug_disease_genes(
     drug_query = f'''
     SELECT DISTINCT ?gene ?geneSymbol ?drugStudy ?drugTitle ?drugLog2fc
                     ?drugAssayName ?drugTestGroup ?drugRefGroup
+                    ?drugName ?drugId
     WHERE {{
         # Most selective first: expression with thresholds
         ?drugExpr a biolink:GeneExpressionMixin ;
@@ -90,6 +91,14 @@ def find_drug_disease_genes(
                       biolink:has_output ?drugAssayUri ;
                       biolink:name ?drugStudy ;
                       spokegenelab:project_title ?drugTitle .
+
+        # Get the drug/compound entity (similar to disease extraction)
+        OPTIONAL {{
+            ?drugStudyUri biolink:studies ?drug .
+            ?drug a biolink:ChemicalEntity ;
+                  biolink:name ?drugName ;
+                  biolink:id ?drugId .
+        }}
     }}
     LIMIT {limit}
     '''
@@ -115,7 +124,9 @@ def find_drug_disease_genes(
                 'log2fc': float(r.get('drugLog2fc', 0)),
                 'assay_name': r.get('drugAssayName', ''),
                 'test_group': r.get('drugTestGroup', ''),
-                'ref_group': r.get('drugRefGroup', '')
+                'ref_group': r.get('drugRefGroup', ''),
+                'drug_name': r.get('drugName', ''),
+                'drug_id': r.get('drugId', '')
             })
 
     print(f"  Unique genes: {len(drug_genes)}")
@@ -135,7 +146,7 @@ def find_drug_disease_genes(
 
         # Optimized query - no FILTER, filter in Python
         disease_query = f'''
-        SELECT ?gene ?diseaseStudy ?diseaseLog2fc ?diseasePval ?diseaseName ?diseaseId
+        SELECT ?gene ?diseaseStudy ?diseaseTitle ?diseaseLog2fc ?diseasePval ?diseaseName ?diseaseId
                ?diseaseAssayName ?diseaseTestGroup ?diseaseRefGroup
         WHERE {{
             VALUES ?gene {{ {values_str} }}
@@ -156,6 +167,7 @@ def find_drug_disease_genes(
             ?diseaseStudyUri spokegenelab:experimental_factors "disease" ;
                              biolink:has_output ?diseaseAssayUri ;
                              biolink:name ?diseaseStudy ;
+                             spokegenelab:project_title ?diseaseTitle ;
                              biolink:studies ?disease .
 
             # Get disease info
@@ -163,7 +175,7 @@ def find_drug_disease_genes(
                      biolink:name ?diseaseName ;
                      biolink:id ?diseaseId .
         }}
-        LIMIT 200
+        LIMIT 500
         '''
 
         try:
@@ -230,8 +242,11 @@ def find_drug_disease_genes(
                 'drug_log2fc': drug_entry['log2fc'],
                 'drug_test_group': drug_entry['test_group'],
                 'drug_ref_group': drug_entry['ref_group'],
+                'drug_name': drug_entry['drug_name'],
+                'drug_id': drug_entry['drug_id'],
                 # Disease info
                 'disease_study': r.get('diseaseStudy', ''),
+                'disease_title': r.get('diseaseTitle', ''),
                 'disease_log2fc': disease_log2fc,
                 'disease': disease,
                 'disease_id': disease_id,
@@ -248,7 +263,7 @@ def find_drug_disease_genes(
     return combined, drug_label, disease_label
 
 
-def print_results(results, drug_label, disease_label, max_display=15):
+def print_results(results, drug_label, disease_label, max_display=None):
     """Print results in a formatted way."""
     if not results:
         print("No matching genes found.")
@@ -256,27 +271,42 @@ def print_results(results, drug_label, disease_label, max_display=15):
 
     print(f"\nFound {len(results)} gene-drug-disease combinations:\n")
 
-    for i, r in enumerate(results[:max_display], 1):
-        drug_name = r['drug_title'][:50] if r['drug_title'] else r['drug_study']
+    display_results = results if max_display is None else results[:max_display]
+    for i, r in enumerate(display_results, 1):
+        # Full study titles
+        drug_study_name = r['drug_title'] if r['drug_title'] else r['drug_study']
+        disease_study_name = r['disease_title'] if r['disease_title'] else r['disease_study']
         drug_context = f"{r['drug_test_group']} vs {r['drug_ref_group']}" if r['drug_test_group'] else "N/A"
         disease_context = f"{r['disease_test_group']} vs {r['disease_ref_group']}" if r['disease_test_group'] else "N/A"
 
-        print(f"{i:2}. Gene: {r['gene']}")
-        print(f"    DRUG {drug_label} (log2FC={r['drug_log2fc']:.1f}):")
-        print(f"      Study: {drug_name}")
-        print(f"      Comparison: {drug_context[:70]}")
-        print(f"    DISEASE {disease_label} (log2FC={r['disease_log2fc']:.1f}):")
-        print(f"      Disease: {r['disease']}")
-        print(f"      Comparison: {disease_context[:70]}")
+        # Drug name (fall back to test_group if no structured drug entity)
+        drug_name = r['drug_name'] if r['drug_name'] else r['drug_test_group'] or "N/A"
+
+        print(f"{i:3}. Gene: {r['gene']}")
+        print(f"     DRUG {drug_label} (log2FC={r['drug_log2fc']:.1f}):")
+        print(f"       Drug/Compound: {drug_name}")
+        print(f"       Study: {drug_study_name}")
+        print(f"       Comparison: {drug_context}")
+        print(f"     DISEASE {disease_label} (log2FC={r['disease_log2fc']:.1f}):")
+        print(f"       Disease: {r['disease']}")
+        print(f"       Study: {disease_study_name}")
+        print(f"       Comparison: {disease_context}")
         print()
 
     # Summary
     unique_genes = len(set(r['gene'] for r in results))
+    unique_drugs = len(set(r['drug_name'] or r['drug_test_group'] for r in results))
     unique_diseases = len(set(r['disease'] for r in results))
-    unique_drugs = len(set(r['drug_title'] or r['drug_study'] for r in results))
+    unique_drug_studies = len(set(r['drug_title'] or r['drug_study'] for r in results))
+    unique_disease_studies = len(set(r['disease_title'] or r['disease_study'] for r in results))
 
-    print("-" * 60)
-    print(f"SUMMARY: {len(results)} combinations, {unique_genes} genes, {unique_drugs} drug studies, {unique_diseases} diseases")
+    print("-" * 80)
+    print(f"SUMMARY: {len(results)} combinations")
+    print(f"  Unique genes: {unique_genes}")
+    print(f"  Unique drugs/compounds: {unique_drugs}")
+    print(f"  Unique diseases: {unique_diseases}")
+    print(f"  Unique drug studies: {unique_drug_studies}")
+    print(f"  Unique disease studies: {unique_disease_studies}")
 
 
 def main():
