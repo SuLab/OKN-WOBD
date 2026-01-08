@@ -134,7 +134,7 @@ class PlotlyVisualizer:
             "type": "gene",
             "color": COLORS["gene"],
             "size": 40,
-            "font": {"size": 14, "color": "#ffffff"},
+            "font": {"size": 14, "color": "#2c3e50", "bold": True},
             "title": f"Gene: {gene_symbol}",
         }
 
@@ -155,7 +155,7 @@ class PlotlyVisualizer:
                     "type": "disease",
                     "color": COLORS["disease"],
                     "size": 25,
-                    "font": {"size": 11, "color": "#ffffff"},
+                    "font": {"size": 11, "color": "#2c3e50"},
                     "title": f"Disease: {disease_name}\nID: {disease_id}",
                 }
 
@@ -179,7 +179,7 @@ class PlotlyVisualizer:
                         "type": inter_type,
                         "color": COLORS.get(inter_type, "#95a5a6"),
                         "size": 18,
-                        "font": {"size": 10, "color": "#ffffff"},
+                        "font": {"size": 10, "color": "#2c3e50"},
                         "title": inter_title,
                     }
 
@@ -323,11 +323,43 @@ class PlotlyVisualizer:
             font-size: 13px;
             color: #666;
         }}
+        .controls {{
+            text-align: center;
+            margin-bottom: 15px;
+        }}
+        .toggle-btn {{
+            padding: 8px 16px;
+            font-size: 13px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: all 0.2s;
+        }}
+        .toggle-btn.active {{
+            background: #27ae60;
+            color: white;
+        }}
+        .toggle-btn.inactive {{
+            background: #e0e0e0;
+            color: #555;
+        }}
+        .toggle-btn:hover {{
+            opacity: 0.85;
+        }}
     </style>
 </head>
 <body>
     <h1>{title}</h1>
     <div class="legend">{legend_html}</div>
+    <div class="controls">
+        <button id="physicsToggle" class="toggle-btn inactive" onclick="togglePhysics()">
+            ⚡ Auto-Layout: OFF
+        </button>
+        <button class="toggle-btn inactive" onclick="resetLayout()">
+            🔄 Reset Layout
+        </button>
+    </div>
     <div class="instructions">Drag nodes to rearrange • Scroll to zoom • Hover for details</div>
     <div id="network"></div>
     <div class="summary">
@@ -381,20 +413,49 @@ class PlotlyVisualizer:
 
         var network = new vis.Network(container, data, options);
 
-        // Stop physics after initial stabilization for smoother dragging
+        var physicsEnabled = false;
+
+        // Stop physics after initial stabilization
         network.on("stabilizationIterationsDone", function () {{
+            physicsEnabled = false;
             network.setOptions({{ physics: {{ enabled: false }} }});
+            updatePhysicsButton();
         }});
 
-        // Re-enable physics briefly when dragging ends to settle
-        network.on("dragEnd", function (params) {{
-            if (params.nodes.length > 0) {{
-                network.setOptions({{ physics: {{ enabled: true }} }});
-                setTimeout(function() {{
-                    network.setOptions({{ physics: {{ enabled: false }} }});
-                }}, 500);
+        function togglePhysics() {{
+            physicsEnabled = !physicsEnabled;
+            network.setOptions({{ physics: {{ enabled: physicsEnabled }} }});
+            updatePhysicsButton();
+        }}
+
+        function updatePhysicsButton() {{
+            var btn = document.getElementById('physicsToggle');
+            if (physicsEnabled) {{
+                btn.textContent = '⚡ Auto-Layout: ON';
+                btn.className = 'toggle-btn active';
+            }} else {{
+                btn.textContent = '⚡ Auto-Layout: OFF';
+                btn.className = 'toggle-btn inactive';
             }}
-        }});
+        }}
+
+        function resetLayout() {{
+            // Re-enable physics and re-stabilize
+            physicsEnabled = true;
+            network.setOptions({{ physics: {{ enabled: true }} }});
+            updatePhysicsButton();
+
+            // Reset node positions to trigger re-layout
+            var positions = network.getPositions();
+            var updates = [];
+            for (var nodeId in positions) {{
+                updates.push({{ id: nodeId, x: undefined, y: undefined }});
+            }}
+            nodes.update(updates);
+
+            // Restabilize the network
+            network.stabilize(150);
+        }}
     </script>
 </body>
 </html>'''
