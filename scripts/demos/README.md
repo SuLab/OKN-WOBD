@@ -225,14 +225,195 @@ pip install archs4py
 - **Wikidata SPARQL**: https://query.wikidata.org/
 - **Ubergraph**: https://github.com/INCATools/ubergraph
 
+### FusekiClient (`fuseki_client.py`)
+
+Client for querying local Apache Fuseki SPARQL servers, particularly the GXA (Gene Expression Atlas) dataset.
+
+**Features:**
+- Query local Fuseki SPARQL endpoints
+- Pre-configured for GXA-v2 gene expression data
+- Automatic retry with exponential backoff
+- Reuses QueryResult from sparql_client.py
+
+```python
+from fuseki_client import FusekiClient
+
+client = FusekiClient(dataset='GXA-v2', timeout=120)
+
+# Simple query returning list of dicts
+results = client.query_simple('''
+    SELECT ?study ?title WHERE {
+        ?study a biolink:Study ;
+               spokegenelab:project_title ?title .
+    } LIMIT 10
+''')
+
+# Check if server is available
+if client.is_available():
+    print("Fuseki server is running")
+```
+
+### CellxGeneClient (`cellxgene_client.py`)
+
+Client for [CellxGene Census](https://chanzuckerberg.github.io/cellxgene-census/) single-cell RNA-seq data.
+
+**Features:**
+- Query cell-type-specific gene expression
+- Compare disease vs normal conditions
+- Filter by tissue, cell type, disease
+
+```python
+from cellxgene_client import CellxGeneClient
+
+with CellxGeneClient() as client:
+    # Get cell-type comparison for a gene
+    comparison = client.get_cell_type_comparison(
+        gene_symbol="ACTA2",
+        tissue="lung",
+        condition_a="normal",
+        condition_b="pulmonary fibrosis"
+    )
+```
+
+## Analysis Scripts
+
+### Gene-Disease Path Finder (`gene_disease_paths.py`)
+
+Finds connections between a gene and diseases using multiple knowledge graphs.
+
+**Data Sources:**
+- SPOKE-OKN: Direct gene-disease associations (markers, expression)
+- Wikidata: Genetic associations, GO term annotations
+- Ubergraph: GO term to disease phenotype mappings
+
+**Path Types:**
+| Type | Description |
+|------|-------------|
+| positive_marker | Gene is a positive marker for disease (SPOKE) |
+| negative_marker | Gene is a negative marker for disease (SPOKE) |
+| expressed_in | Gene differentially expressed in disease (SPOKE) |
+| genetic_association | Gene genetically associated with disease (Wikidata) |
+| go_pathway | Gene's GO term linked to disease phenotype (Ubergraph) |
+| shared_pathway | Gene shares GO term with disease-associated gene |
+
+```bash
+# Find disease connections for SFRP2
+python gene_disease_paths.py SFRP2
+
+# With verbose output and JSON export
+python gene_disease_paths.py SFRP2 --verbose -o sfrp2_paths.json
+```
+
+### Drug-Disease Expression Query (`query_drug_down_disease_up.py`)
+
+Finds genes with opposing expression patterns between drug treatment and disease using the local GXA Fuseki database.
+
+**Two patterns identified:**
+1. **Drug DOWN → Disease UP**: Drug suppresses a gene that is pathologically elevated
+2. **Drug UP → Disease DOWN**: Drug activates a gene that is pathologically suppressed
+
+**Requirements:** Local Fuseki server running with GXA-v2 dataset at `http://localhost:3030/GXA-v2/sparql`
+
+```bash
+python query_drug_down_disease_up.py
+```
+
+**Output includes:**
+- Gene symbol and expression fold changes
+- Drug study title and experimental comparison
+- Disease name and comparison context
+- Summary statistics
+
+### GO Term Disease Analyzer (`go_disease_analyzer.py`)
+
+Multi-layer analysis of gene expression for genes in a GO term within a disease context.
+
+**Layers:**
+1. **Knowledge Graph** (FRINK/Ubergraph): Discover genes annotated to GO term
+2. **Single-Cell** (CellxGene): Cell-type-specific expression changes
+3. **Bulk Validation** (ARCHS4): Independent validation in bulk RNA-seq
+4. **LLM Summary**: Natural language synthesis (requires ANTHROPIC_API_KEY)
+
+```bash
+# ECM genes in pulmonary fibrosis
+python go_disease_analyzer.py \
+    --go-term GO:0030198 \
+    --disease "pulmonary fibrosis" \
+    --tissue lung \
+    --output ecm_fibrosis.json
+
+# Inflammatory response in rheumatoid arthritis
+python go_disease_analyzer.py \
+    --go-term GO:0006954 \
+    --disease "rheumatoid arthritis" \
+    --tissue "synovial tissue"
+```
+
+## Context and Utility Scripts
+
+### FRINK Context Builder (`frink_context_builder.py`)
+
+Builds context files documenting FRINK knowledge graph schemas for LLM-assisted query generation.
+
+### FRINK NL2SPARQL (`frink_nl2sparql.py`)
+
+Natural language to SPARQL query translation using LLMs and FRINK context.
+
+### Gene Neighborhood (`gene_neighborhood.py`)
+
+Finds genes in the genomic neighborhood of a target gene.
+
+### Visualization (`visualize_results.py`)
+
+Generates provenance visualizations for multi-layer analysis results.
+
+## GXA Context File
+
+The `gxa_context.json` file documents the GXA-v2 dataset schema:
+
+```json
+{
+  "endpoint": "http://localhost:3030/GXA-v2/sparql",
+  "statistics": {
+    "total_triples": 10811134,
+    "studies": 1774,
+    "genes": 873159,
+    "diseases": 305
+  },
+  "schema": {
+    "classes": ["biolink:Study", "biolink:Assay", "biolink:Gene", ...],
+    "key_relationships": [...]
+  }
+}
+```
+
 ## Ontology References
 
 | Resource | Ontology | Example ID |
 |----------|----------|------------|
 | Disease | MONDO | MONDO:0005812 (influenza) |
+| Disease | DOID | DOID:1793 (pancreatic cancer) |
 | Species | NCBI Taxonomy | 9606 (human) |
 | Gene Function | GO | GO:0006915 (apoptosis) |
 | Phenotype | HP | HP:0001945 (fever) |
 | Chemical | CHEBI | CHEBI:15377 (water) |
 | Anatomy | UBERON | UBERON:0002048 (lung) |
 | Cell Type | CL | CL:0000084 (T cell) |
+
+## Environment Setup
+
+Some scripts require environment variables in a `.env` file:
+
+```bash
+# Copy example and edit
+cp .env.example .env
+
+# Required for ARCHS4
+ARCHS4_DATA_DIR=/path/to/archs4/h5files
+
+# Required for LLM summaries
+ANTHROPIC_API_KEY=your-api-key
+
+# Optional for caching
+DATA_DIR=/path/to/cache/dir
+```
