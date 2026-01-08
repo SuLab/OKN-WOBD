@@ -211,6 +211,118 @@ class PlotlyVisualizer:
         html = self._generate_visjs_html(vis_nodes, vis_edges, title, height, width, gene_symbol)
         return html
 
+    def provenance_network(
+        self,
+        nodes: List[Dict[str, Any]],
+        edges: List[Dict[str, Any]],
+        title: str = "Multi-Source Knowledge Graph",
+        height: int = 700,
+        width: int = 1000,
+        central_node_id: Optional[str] = None,
+    ) -> str:
+        """
+        Create an interactive network graph from explicit nodes and edges.
+
+        This method is designed for multi-source provenance visualization where
+        nodes and edges are pre-built with source attribution.
+
+        Args:
+            nodes: List of node dicts with keys:
+                - id: Unique node identifier (e.g., "drug:doxycycline")
+                - label: Display label
+                - type: Node type ("gene", "disease", "drug", "go_term")
+                - source: Data source (optional, for provenance)
+                - title: Hover tooltip text (optional)
+            edges: List of edge dicts with keys:
+                - from: Source node id
+                - to: Target node id
+                - label: Visible edge label (relationship type)
+                - source: Data source for coloring
+                - title: Hover tooltip text (optional)
+                - evidence: Additional evidence text (optional)
+            title: Chart title
+            height: Figure height in pixels
+            width: Figure width in pixels
+            central_node_id: ID of central node to fix initially
+
+        Returns:
+            HTML string containing the vis.js network
+        """
+        if not nodes:
+            return "<p>No nodes to display</p>"
+
+        # Build vis.js node data with proper formatting
+        vis_nodes = []
+        for node in nodes:
+            node_type = node.get("type", "gene")
+            color = COLORS.get(node_type, "#95a5a6")
+
+            vis_node = {
+                "id": node["id"],
+                "label": node.get("label", node["id"]),
+                "color": {
+                    "background": color,
+                    "border": color,
+                    "highlight": {"background": "#f1c40f", "border": "#f39c12"},
+                },
+                "size": node.get("size", 25 if node_type != "drug" else 35),
+                "font": {"size": 12, "color": "#2c3e50"},
+                "title": node.get("title", node.get("label", node["id"])),
+                "shape": "diamond" if node_type == "drug" else "dot",
+            }
+
+            # Make central node stable
+            if central_node_id and node["id"] == central_node_id:
+                vis_node["size"] = 40
+                vis_node["font"]["size"] = 14
+                vis_node["font"]["bold"] = True
+
+            vis_nodes.append(vis_node)
+
+        # Build vis.js edge data with source-based coloring and labels
+        vis_edges = []
+        for edge in edges:
+            source = edge.get("source", "Unknown")
+            edge_color = COLORS.get(source, "#95a5a6")
+
+            # Build tooltip with provenance
+            tooltip_parts = []
+            if edge.get("label"):
+                tooltip_parts.append(f"<b>{edge['label']}</b>")
+            tooltip_parts.append(f"Source: {source}")
+            if edge.get("evidence"):
+                tooltip_parts.append(f"Evidence: {edge['evidence']}")
+            tooltip = "<br>".join(tooltip_parts)
+
+            edge_data = {
+                "from": edge["from"],
+                "to": edge["to"],
+                "color": {"color": edge_color, "highlight": "#f1c40f"},
+                "title": edge.get("title", tooltip),
+                "width": edge.get("width", 2),
+                "smooth": {"type": "continuous"},
+            }
+
+            # Add visible edge label
+            if edge.get("label"):
+                edge_data["label"] = edge["label"]
+                edge_data["font"] = {
+                    "size": 10,
+                    "color": "#555",
+                    "strokeWidth": 3,
+                    "strokeColor": "#ffffff",
+                    "align": "middle",
+                }
+
+            vis_edges.append(edge_data)
+
+        # Generate HTML
+        html = self._generate_visjs_html(
+            vis_nodes, vis_edges, title, height, width,
+            gene_symbol=central_node_id or "central"
+        )
+        return html
+
     def _truncate_label(self, label: str, max_len: int) -> str:
         """Truncate label for display."""
         if len(label) <= max_len:
@@ -232,19 +344,24 @@ class PlotlyVisualizer:
         # Prepare node data for vis.js
         vis_nodes = []
         for node in nodes:
-            vis_node = {
-                "id": node["id"],
-                "label": node["label"],
-                "color": {
-                    "background": node["color"],
-                    "border": node["color"],
-                    "highlight": {"background": "#f1c40f", "border": "#f39c12"},
-                },
-                "size": node["size"],
-                "font": node.get("font", {"size": 12, "color": "#ffffff"}),
-                "title": node.get("title", node["label"]),
-                "shape": "dot" if node["type"] != "gene" else "dot",
-            }
+            # Check if node is already vis.js formatted (has nested color dict)
+            if isinstance(node.get("color"), dict):
+                vis_node = node.copy()
+            else:
+                # Convert from simple format to vis.js format
+                vis_node = {
+                    "id": node["id"],
+                    "label": node["label"],
+                    "color": {
+                        "background": node["color"],
+                        "border": node["color"],
+                        "highlight": {"background": "#f1c40f", "border": "#f39c12"},
+                    },
+                    "size": node["size"],
+                    "font": node.get("font", {"size": 12, "color": "#ffffff"}),
+                    "title": node.get("title", node["label"]),
+                    "shape": node.get("shape", "dot"),
+                }
             # Make central gene node fixed initially but draggable
             if node["id"] == f"gene:{gene_symbol}":
                 vis_node["fixed"] = {"x": False, "y": False}
@@ -254,30 +371,62 @@ class PlotlyVisualizer:
         # Prepare edge data
         vis_edges = []
         for edge in edges:
-            vis_edges.append({
-                "from": edge["from"],
-                "to": edge["to"],
-                "color": {"color": edge["color"], "highlight": "#f1c40f"},
-                "title": edge.get("title", ""),
-                "width": 2,
-                "smooth": {"type": "continuous"},
-            })
+            # Check if edge is already vis.js formatted (has nested color dict)
+            if isinstance(edge.get("color"), dict):
+                edge_data = edge.copy()
+            else:
+                edge_color = edge.get("color", "#95a5a6")
+                edge_data = {
+                    "from": edge["from"],
+                    "to": edge["to"],
+                    "color": {"color": edge_color, "highlight": "#f1c40f"},
+                    "title": edge.get("title", ""),
+                    "width": edge.get("width", 2),
+                    "smooth": {"type": "continuous"},
+                }
+                # Add visible edge label if provided
+                if edge.get("label"):
+                    edge_data["label"] = edge["label"]
+                    edge_data["font"] = {
+                        "size": 10,
+                        "color": "#555",
+                        "strokeWidth": 3,
+                        "strokeColor": "#ffffff",
+                        "align": "middle",
+                    }
+            vis_edges.append(edge_data)
 
         nodes_json = json.dumps(vis_nodes)
         edges_json = json.dumps(vis_edges)
 
-        # Build legend HTML
-        legend_items = [
+        # Build legend HTML - node types
+        node_type_items = [
             ("Gene", COLORS["gene"]),
             ("Disease", COLORS["disease"]),
             ("GO Term", COLORS["go_term"]),
+            ("Drug", COLORS["drug"]),
         ]
-        legend_html = " ".join([
+        node_legend = " ".join([
             f'<span style="display:inline-block;margin-right:15px;">'
             f'<span style="display:inline-block;width:12px;height:12px;'
             f'background:{color};border-radius:50%;margin-right:5px;"></span>{label}</span>'
-            for label, color in legend_items
+            for label, color in node_type_items
         ])
+
+        # Build legend HTML - data sources (for edges)
+        source_items = [
+            ("GXA", COLORS["GXA"]),
+            ("SPOKE-OKN", COLORS["SPOKE-OKN"]),
+            ("Ubergraph", COLORS["Ubergraph"]),
+        ]
+        source_legend = " ".join([
+            f'<span style="display:inline-block;margin-right:15px;">'
+            f'<span style="display:inline-block;width:20px;height:3px;'
+            f'background:{color};margin-right:5px;vertical-align:middle;"></span>{label}</span>'
+            for label, color in source_items
+        ])
+        legend_html = f'<div style="margin-bottom:5px;"><b>Nodes:</b> {node_legend}</div>' \
+                      f'<div><b>Sources:</b> {source_legend}</div>'
 
         html = f'''<!DOCTYPE html>
 <html>
