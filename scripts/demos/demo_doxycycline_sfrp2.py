@@ -132,8 +132,112 @@ def query_gxa_drug_gene(
         return []
 
 
+def query_gxa_disease_gene(
+    gene_symbol: str,
+    fc_threshold: float = 1.0,
+    pvalue_threshold: float = 0.05,
+) -> List[Dict[str, Any]]:
+    """
+    Query GXA for disease-related gene expression changes.
+
+    Returns list of expression results linking genes to diseases.
+    """
+    if not HAS_FUSEKI:
+        print("  [GXA] Fuseki client not available, skipping disease queries")
+        return []
+
+    print(f"\n[GXA] Querying for disease-related {gene_symbol} expression...")
+
+    try:
+        client = FusekiClient(dataset='GXA-v2', timeout=120)
+        if not client.is_available():
+            print("  Warning: Fuseki server not available")
+            return []
+    except Exception as e:
+        print(f"  Warning: Could not connect to Fuseki: {e}")
+        return []
+
+    # Query for disease studies affecting the gene
+    query = f'''
+    SELECT DISTINCT ?study ?projectTitle ?geneSymbol ?log2fc ?pvalue
+                    ?diseaseName ?diseaseId ?testGroup ?refGroup
+    WHERE {{
+        # Start with expression data for the target gene
+        ?exprUri a biolink:GeneExpressionMixin ;
+                 biolink:subject ?assayUri ;
+                 biolink:object ?gene ;
+                 spokegenelab:log2fc ?log2fc ;
+                 spokegenelab:adj_p_value ?pvalue .
+
+        # Filter for target gene
+        ?gene biolink:symbol ?geneSymbol .
+        FILTER(?geneSymbol = "{gene_symbol}")
+
+        # Get assay details
+        ?assayUri biolink:name ?assayName .
+        OPTIONAL {{ ?assayUri spokegenelab:test_group_label ?testGroup }}
+        OPTIONAL {{ ?assayUri spokegenelab:reference_group_label ?refGroup }}
+
+        # Link to disease study
+        ?studyUri spokegenelab:experimental_factors "disease" ;
+                  biolink:has_output ?assayUri ;
+                  biolink:name ?study ;
+                  spokegenelab:project_title ?projectTitle ;
+                  biolink:studies ?disease .
+
+        # Get disease info
+        ?disease a biolink:Disease ;
+                 biolink:name ?diseaseName .
+        OPTIONAL {{ ?disease biolink:id ?diseaseId }}
+    }}
+    LIMIT 100
+    '''
+
+    try:
+        results = client.query_simple(query)
+        print(f"  Found {len(results)} disease expression results")
+
+        # Filter by thresholds and exclude controls
+        exclude_patterns = ['healthy', 'normal', 'control', 'reference', 'pato_', 'efo_0001461']
+        filtered = []
+
+        for r in results:
+            log2fc = float(r.get('log2fc', 0))
+            pvalue = float(r.get('pvalue', 1)) if r.get('pvalue') else 1.0
+            disease_name = r.get('diseaseName', '')
+            disease_id = r.get('diseaseId', '')
+
+            # Skip controls/healthy
+            if any(pat in disease_name.lower() or pat in disease_id.lower() for pat in exclude_patterns):
+                continue
+
+            if abs(log2fc) >= fc_threshold and pvalue < pvalue_threshold:
+                direction = "upregulated" if log2fc > 0 else "downregulated"
+                filtered.append({
+                    'gene': gene_symbol,
+                    'disease': disease_name,
+                    'disease_id': disease_id,
+                    'log2fc': log2fc,
+                    'pvalue': pvalue,
+                    'direction': direction,
+                    'study': r.get('study', ''),
+                    'title': r.get('projectTitle', ''),
+                    'test_group': r.get('testGroup', ''),
+                    'ref_group': r.get('refGroup', ''),
+                    'source': 'GXA',
+                })
+
+        print(f"  After filtering: {len(filtered)} significant disease associations")
+        return filtered
+
+    except Exception as e:
+        print(f"  Error querying GXA for diseases: {e}")
+        return []
+
+
 def build_graph(
-    gxa_results: List[Dict],
+    gxa_drug_results: List[Dict],
+    gxa_disease_results: List[Dict],
     gene_disease_connections: List[Dict],
     drug_name: str,
     gene_symbol: str,
@@ -146,8 +250,17 @@ def build_graph(
     nodes = {}
     edges = []
 
-    # Add drug node if we have GXA results
-    if gxa_results:
+    # Always add central gene node
+    gene_id = f"gene:{gene_symbol}"
+    nodes[gene_id] = {
+        "id": gene_id,
+        "label": gene_symbol,
+        "type": "gene",
+        "title": f"Gene: {gene_symbol}",
+    }
+
+    # Add drug node and edges if we have GXA drug results
+    if gxa_drug_results:
         drug_id = f"drug:{drug_name.lower().replace(' ', '_')}"
         nodes[drug_id] = {
             "id": drug_id,
@@ -156,17 +269,8 @@ def build_graph(
             "title": f"Drug: {drug_name}",
         }
 
-        # Add central gene node
-        gene_id = f"gene:{gene_symbol}"
-        nodes[gene_id] = {
-            "id": gene_id,
-            "label": gene_symbol,
-            "type": "gene",
-            "title": f"Gene: {gene_symbol}",
-        }
-
         # Add drug → gene edges from GXA
-        for r in gxa_results:
+        for r in gxa_drug_results:
             direction = r.get('direction', 'regulates')
             evidence = f"log2FC={r['log2fc']:.2f}, p={r['pvalue']:.3f}"
 
@@ -178,15 +282,34 @@ def build_graph(
                 "evidence": evidence,
                 "title": f"{direction}<br>Study: {r.get('title', 'N/A')[:50]}",
             })
-    else:
-        # Just add gene node if no drug data
-        gene_id = f"gene:{gene_symbol}"
-        nodes[gene_id] = {
-            "id": gene_id,
-            "label": gene_symbol,
-            "type": "gene",
-            "title": f"Gene: {gene_symbol}",
-        }
+
+    # Add disease expression edges from GXA (gene upregulated/downregulated in disease)
+    for r in gxa_disease_results:
+        disease_name = r.get('disease', 'Unknown')
+        disease_id_raw = r.get('disease_id', disease_name)
+        disease_id = f"disease:{disease_id_raw.replace(' ', '_').replace(':', '_')}"
+
+        # Add disease node if not exists
+        if disease_id not in nodes:
+            nodes[disease_id] = {
+                "id": disease_id,
+                "label": disease_name[:25],
+                "type": "disease",
+                "title": f"Disease: {disease_name}<br>ID: {disease_id_raw}",
+            }
+
+        # Add gene → disease edge (expression in disease context)
+        direction = r.get('direction', 'expressed')
+        evidence = f"log2FC={r['log2fc']:.2f}, p={r['pvalue']:.3f}"
+
+        edges.append({
+            "from": gene_id,
+            "to": disease_id,
+            "label": direction,
+            "source": "GXA",
+            "evidence": evidence,
+            "title": f"{direction} in {disease_name}<br>{evidence}",
+        })
 
     # Process gene-disease connections (from SPOKE, Ubergraph, Wikidata)
     for conn in gene_disease_connections:
@@ -314,13 +437,16 @@ def main():
     print(f"\nGene: {args.gene}")
     print(f"Drug (GXA search): {args.drug}")
     print("\nData Sources:")
-    print("  1. GXA (local Fuseki) - Drug expression effects")
+    print("  1. GXA (local Fuseki) - Drug & disease expression effects")
     print("  2. SPOKE-OKN (FRINK) - Gene-disease relationships")
     print("  3. Ubergraph (FRINK) - GO pathway connections")
     print("  4. Wikidata - Gene annotations and shared pathways")
 
     # Query GXA for drug → gene expression
-    gxa_results = query_gxa_drug_gene(args.drug, args.gene)
+    gxa_drug_results = query_gxa_drug_gene(args.drug, args.gene)
+
+    # Query GXA for disease → gene expression
+    gxa_disease_results = query_gxa_disease_gene(args.gene)
 
     # Query knowledge graphs for gene → disease connections
     print(f"\n[Knowledge Graphs] Finding {args.gene} → disease connections...")
@@ -339,7 +465,7 @@ def main():
     # Build unified graph
     print("\n[Building Graph]")
     nodes, edges = build_graph(
-        gxa_results, conn_dicts,
+        gxa_drug_results, gxa_disease_results, conn_dicts,
         drug_name=args.drug.title(),
         gene_symbol=args.gene,
     )
@@ -362,7 +488,7 @@ def main():
     viz = PlotlyVisualizer()
 
     title = f"{args.gene} Knowledge Graph Integration"
-    if gxa_results:
+    if gxa_drug_results:
         title = f"{args.drug.title()} → {args.gene} → Disease Connections"
 
     html = viz.provenance_network(
