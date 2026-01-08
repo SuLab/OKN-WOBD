@@ -1,0 +1,17 @@
+# List 10 GeneLab Studies
+# Endpoint: https://frink.apps.renci.org/spoke-genelab/sparql
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX biolink: <https://w3id.org/biolink/vocab/>
+PREFIX genelab: <https://purl.org/okn/frink/kg/spoke-genelab/schema/>
+
+SELECT ?study ?label ?title ?organism ?project_type
+WHERE {
+  ?study rdf:type biolink:Study .
+  OPTIONAL { ?study rdfs:label ?label }
+  OPTIONAL { ?study genelab:project_title ?title }
+  OPTIONAL { ?study genelab:organism ?organism }
+  OPTIONAL { ?study genelab:project_type ?project_type }
+}
+LIMIT 10

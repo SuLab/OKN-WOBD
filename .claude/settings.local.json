@@ -22,7 +22,8 @@
       "WebFetch(domain:frink.renci.org)",
       "WebFetch(domain:frink.apps.renci.org)",
       "Bash(pip3 install:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

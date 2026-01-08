@@ -1,0 +1,24 @@
+# Get full details for a specific GeneLab study (OSD-100)
+# Endpoint: https://frink.apps.renci.org/spoke-genelab/sparql
+#
+# Replace OSD-100 with any study ID (e.g., OSD-690, OSD-137, etc.)
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX biolink: <https://w3id.org/biolink/vocab/>
+PREFIX genelab: <https://purl.org/okn/frink/kg/spoke-genelab/schema/>
+
+SELECT ?property ?value
+WHERE {
+  <https://purl.org/okn/frink/kg/spoke-genelab/node/OSD-100> ?property ?value .
+}
+
+# Example output properties:
+# - rdf:type → biolink:Study
+# - rdfs:label → "OSD-100"
+# - rdfs:comment → [study description]
+# - genelab:project_title → "Rodent Research 1"
+# - genelab:organism → "Mus musculus"
+# - genelab:project_type → "Spaceflight Study"
+# - genelab:taxonomy → http://purl.obolibrary.org/obo/NCBITaxon_10090
+# - genelab:PERFORMED_SpAS → [assay URIs]

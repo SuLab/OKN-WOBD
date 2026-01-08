@@ -6,7 +6,9 @@
       "Bash(cat:*)",
       "Bash(python frink_nl2sparql.py:*)",
       "Bash(python gene_neighborhood.py:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(git log:*)",
+      "Bash(find:*)"
     ]
   }
 }
