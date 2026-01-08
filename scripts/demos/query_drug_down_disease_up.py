@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """
-Query: Find genes down-regulated by drug/compound treatment
-       that are up-regulated in disease.
+Query: Find genes with opposing expression patterns between drug treatment and disease.
 
-This identifies potential therapeutic targets where a drug suppresses
-a gene that is pathologically elevated in disease.
+Two scenarios:
+1. Drug DOWN, Disease UP: Drug suppresses a gene that is pathologically elevated in disease
+2. Drug UP, Disease DOWN: Drug activates a gene that is pathologically suppressed in disease
+
+Both patterns identify potential therapeutic mechanisms.
 
 OPTIMIZATION NOTES:
 - Uses gene URIs directly instead of symbol text matching
@@ -20,20 +22,22 @@ from fuseki_client import FusekiClient
 
 
 def find_drug_disease_genes(
-    drug_fc_threshold: float = -2.0,
+    drug_direction: str = "down",
+    disease_direction: str = "up",
+    drug_fc_threshold: float = 2.0,
     disease_fc_threshold: float = 1.5,
     pvalue_threshold: float = 0.05,
     limit: int = 300,
     batch_size: int = 30
 ):
     """
-    Find genes that are:
-    1. Down-regulated by drug/compound treatment
-    2. Up-regulated in disease conditions
+    Find genes with opposing expression in drug treatment vs disease.
 
     Args:
-        drug_fc_threshold: log2FC threshold for down-regulation (negative)
-        disease_fc_threshold: log2FC threshold for up-regulation (positive)
+        drug_direction: "down" or "up" - direction of drug effect
+        disease_direction: "up" or "down" - direction of disease effect
+        drug_fc_threshold: absolute log2FC threshold (will be negated for down)
+        disease_fc_threshold: absolute log2FC threshold (will be negated for down)
         pvalue_threshold: adjusted p-value significance threshold
         limit: max number of drug-gene pairs to query
         batch_size: number of genes per batch in disease query
@@ -43,8 +47,20 @@ def find_drug_disease_genes(
     """
     client = FusekiClient(dataset='GXA-v2', timeout=120)
 
-    # Step 1: Get genes (with URIs) down-regulated by compounds/treatments
-    # Optimized: Uses VALUES for experimental factors instead of FILTER IN
+    # Set up thresholds based on direction
+    if drug_direction == "down":
+        drug_fc_filter = f"FILTER(?drugLog2fc < -{drug_fc_threshold})"
+        drug_label = "DOWN"
+    else:
+        drug_fc_filter = f"FILTER(?drugLog2fc > {drug_fc_threshold})"
+        drug_label = "UP"
+
+    if disease_direction == "down":
+        disease_label = "DOWN"
+    else:
+        disease_label = "UP"
+
+    # Step 1: Get genes regulated by compounds/treatments
     drug_query = f'''
     SELECT DISTINCT ?gene ?geneSymbol ?drugStudy ?drugTitle ?drugLog2fc
                     ?drugAssayName ?drugTestGroup ?drugRefGroup
@@ -57,7 +73,7 @@ def find_drug_disease_genes(
                   biolink:object ?gene .
 
         # Numeric filters immediately after binding
-        FILTER(?drugLog2fc < {drug_fc_threshold})
+        {drug_fc_filter}
         FILTER(?drugPval < {pvalue_threshold})
 
         # Get gene symbol
@@ -78,7 +94,7 @@ def find_drug_disease_genes(
     LIMIT {limit}
     '''
 
-    print("Step 1: Querying genes down-regulated by drugs/compounds...")
+    print(f"Step 1: Querying genes {drug_label}-regulated by drugs/compounds...")
     drug_results = client.query_simple(drug_query)
     print(f"  Found {len(drug_results)} drug-gene pairs")
 
@@ -107,21 +123,17 @@ def find_drug_disease_genes(
     if not drug_genes:
         return []
 
-    # Step 2: Check which genes are up-regulated in disease
-    # Process in batches using gene URIs directly (no text matching)
+    # Step 2: Check which genes have opposite regulation in disease
     gene_uris = list(drug_genes.keys())
     all_disease_results = []
 
-    print(f"Step 2: Checking disease up-regulation in {len(gene_uris)//batch_size + 1} batches...")
+    print(f"Step 2: Checking disease {disease_label}-regulation in {len(gene_uris)//batch_size + 1} batches...")
 
     for i in range(0, len(gene_uris), batch_size):
         batch = gene_uris[i:i+batch_size]
-        # Build VALUES clause with full URIs
         values_str = ' '.join([f'<{uri}>' for uri in batch])
 
-        # Optimized query:
-        # - Uses gene URIs directly (no symbol lookup)
-        # - No FILTER operations - filter in Python post-processing
+        # Optimized query - no FILTER, filter in Python
         disease_query = f'''
         SELECT ?gene ?diseaseStudy ?diseaseLog2fc ?diseasePval ?diseaseName ?diseaseId
                ?diseaseAssayName ?diseaseTestGroup ?diseaseRefGroup
@@ -181,18 +193,22 @@ def find_drug_disease_genes(
         disease_log2fc = float(r.get('diseaseLog2fc', 0))
         disease_pval = float(r.get('diseasePval', 1)) if r.get('diseasePval') else 1.0
 
-        # Python-side filtering (faster than SPARQL FILTER)
-        # 1. Check fold change threshold
-        if disease_log2fc <= disease_fc_threshold:
-            filtered_fc += 1
-            continue
+        # Python-side filtering based on disease direction
+        if disease_direction == "up":
+            if disease_log2fc <= disease_fc_threshold:
+                filtered_fc += 1
+                continue
+        else:  # down
+            if disease_log2fc >= -disease_fc_threshold:
+                filtered_fc += 1
+                continue
 
-        # 2. Check p-value threshold
+        # Check p-value threshold
         if disease_pval >= pvalue_threshold:
             filtered_pval += 1
             continue
 
-        # 3. Exclude controls/healthy by ID or name
+        # Exclude controls/healthy by ID or name
         disease_id_lower = disease_id.lower()
         disease_lower = disease.lower()
         if any(pat in disease_id_lower or pat in disease_lower for pat in exclude_patterns):
@@ -223,41 +239,33 @@ def find_drug_disease_genes(
                 'disease_ref_group': r.get('diseaseRefGroup', '')
             })
 
-    # Sort by disease fold change (highest first)
-    combined.sort(key=lambda x: -x['disease_log2fc'])
+    # Sort by absolute disease fold change (highest first)
+    combined.sort(key=lambda x: -abs(x['disease_log2fc']))
 
-    print(f"  Filtered out: {filtered_fc} (low FC), {filtered_pval} (high p-val), {filtered_control} (controls)")
+    print(f"  Filtered out: {filtered_fc} (FC threshold), {filtered_pval} (high p-val), {filtered_control} (controls)")
     print(f"  Remaining: {len(combined)} gene-disease pairs")
 
-    return combined
+    return combined, drug_label, disease_label
 
 
-def main():
-    print("=" * 80)
-    print("GENES DOWN-REGULATED BY DRUGS, UP-REGULATED IN DISEASE")
-    print("(Optimized: No SPARQL FILTERs in disease query - Python filtering)")
-    print("=" * 80)
-    print()
-
-    results = find_drug_disease_genes()
-
+def print_results(results, drug_label, disease_label, max_display=15):
+    """Print results in a formatted way."""
     if not results:
         print("No matching genes found.")
         return
 
-    # Print results - detailed format with assay context
     print(f"\nFound {len(results)} gene-drug-disease combinations:\n")
 
-    for i, r in enumerate(results[:20], 1):
+    for i, r in enumerate(results[:max_display], 1):
         drug_name = r['drug_title'][:50] if r['drug_title'] else r['drug_study']
         drug_context = f"{r['drug_test_group']} vs {r['drug_ref_group']}" if r['drug_test_group'] else "N/A"
         disease_context = f"{r['disease_test_group']} vs {r['disease_ref_group']}" if r['disease_test_group'] else "N/A"
 
         print(f"{i:2}. Gene: {r['gene']}")
-        print(f"    DRUG DOWN-REG (log2FC={r['drug_log2fc']:.1f}):")
+        print(f"    DRUG {drug_label} (log2FC={r['drug_log2fc']:.1f}):")
         print(f"      Study: {drug_name}")
         print(f"      Comparison: {drug_context[:70]}")
-        print(f"    DISEASE UP-REG (log2FC={r['disease_log2fc']:.1f}):")
+        print(f"    DISEASE {disease_label} (log2FC={r['disease_log2fc']:.1f}):")
         print(f"      Disease: {r['disease']}")
         print(f"      Comparison: {disease_context[:70]}")
         print()
@@ -267,11 +275,49 @@ def main():
     unique_diseases = len(set(r['disease'] for r in results))
     unique_drugs = len(set(r['drug_title'] or r['drug_study'] for r in results))
 
+    print("-" * 60)
+    print(f"SUMMARY: {len(results)} combinations, {unique_genes} genes, {unique_drugs} drug studies, {unique_diseases} diseases")
+
+
+def main():
     print("=" * 80)
-    print(f"SUMMARY: {len(results)} gene-disease combinations")
-    print(f"         {unique_genes} unique genes")
-    print(f"         {unique_drugs} unique drug studies")
-    print(f"         {unique_diseases} unique diseases")
+    print("DRUG-DISEASE OPPOSING EXPRESSION PATTERNS")
+    print("(Optimized: No SPARQL FILTERs in disease query - Python filtering)")
+    print("=" * 80)
+
+    # Pattern 1: Drug DOWN, Disease UP
+    # Drug suppresses a gene that is pathologically elevated
+    print("\n" + "=" * 80)
+    print("PATTERN 1: Drug DOWN-regulates → Disease UP-regulates")
+    print("(Drug suppresses genes that are pathologically elevated in disease)")
+    print("=" * 80 + "\n")
+
+    results1, drug_label1, disease_label1 = find_drug_disease_genes(
+        drug_direction="down",
+        disease_direction="up"
+    )
+    print_results(results1, drug_label1, disease_label1)
+
+    # Pattern 2: Drug UP, Disease DOWN
+    # Drug activates a gene that is pathologically suppressed
+    print("\n" + "=" * 80)
+    print("PATTERN 2: Drug UP-regulates → Disease DOWN-regulates")
+    print("(Drug activates genes that are pathologically suppressed in disease)")
+    print("=" * 80 + "\n")
+
+    results2, drug_label2, disease_label2 = find_drug_disease_genes(
+        drug_direction="up",
+        disease_direction="down"
+    )
+    print_results(results2, drug_label2, disease_label2)
+
+    # Overall summary
+    print("\n" + "=" * 80)
+    print("OVERALL SUMMARY")
+    print("=" * 80)
+    print(f"Pattern 1 (Drug DOWN → Disease UP): {len(results1)} combinations")
+    print(f"Pattern 2 (Drug UP → Disease DOWN): {len(results2)} combinations")
+    print(f"Total: {len(results1) + len(results2)} therapeutic gene-disease associations")
     print("=" * 80)
 
 
