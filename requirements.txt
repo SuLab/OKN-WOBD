@@ -1,4 +1,10 @@
+# Core CLI dependencies
 click>=8.1,<9
 requests>=2.31,<3
 rdflib>=7.0,<8
+
+# Web app dependencies
+streamlit>=1.40.0
+PyYAML>=6.0.1
+openai>=1.0.0
 

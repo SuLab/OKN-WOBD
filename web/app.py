@@ -8,6 +8,7 @@ from wobd_web.config import CONFIG_ENV_VAR, load_config
 from wobd_web.executor import run_plan
 from wobd_web.models import AnswerBundle
 from wobd_web.router import build_query_plan
+from wobd_web.nl_to_sparql import set_openai_api_key
 
 
 # EXAMPLE_QUESTIONS: List[str] = [
@@ -36,6 +37,20 @@ def main() -> None:
 
     st.set_page_config(page_title="WOBD Web", layout="wide")
     _init_session_state()
+
+    # Check for OpenAI API key (Streamlit secrets or environment variable)
+    try:
+        OPENAI_API_KEY = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
+    except (FileNotFoundError, AttributeError, KeyError):
+        # Fall back to environment variable if secrets not available (e.g., local development)
+        OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    
+    if not OPENAI_API_KEY:
+        st.error("Missing OPENAI_API_KEY. Set it in Streamlit Community Cloud → App Settings → Secrets, or as an environment variable.")
+        st.stop()
+    
+    # Set the API key for the NL→SPARQL module
+    set_openai_api_key(OPENAI_API_KEY)
 
     cfg = load_config()
 

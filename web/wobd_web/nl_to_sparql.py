@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import os
-from typing import Literal
+from typing import Literal, Optional
 
 from openai import OpenAI
 
@@ -19,9 +19,20 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 """
 
 
+# Module-level storage for OpenAI API key (set by app.py)
+_OPENAI_API_KEY: Optional[str] = None
+
+
+def set_openai_api_key(api_key: str) -> None:
+    """Set the OpenAI API key for this module."""
+    global _OPENAI_API_KEY
+    _OPENAI_API_KEY = api_key
+
+
 def _get_client_and_model() -> tuple[OpenAI, LLMConfig]:
     cfg = load_config()
-    api_key = os.environ.get("OPENAI_API_KEY")
+    # Use module-level key if set (from Streamlit secrets), otherwise fall back to environment variable
+    api_key = _OPENAI_API_KEY or os.environ.get("OPENAI_API_KEY")
     if not api_key:
         raise RuntimeError(
             "OPENAI_API_KEY is not set. Please provide an API key to enable NL→SPARQL."
@@ -162,5 +173,6 @@ def generate_sparql(
 __all__ = [
     "TargetKind",
     "generate_sparql",
+    "set_openai_api_key",
 ]
 
