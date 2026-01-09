@@ -23,7 +23,16 @@
       "WebFetch(domain:frink.apps.renci.org)",
       "Bash(pip3 install:*)",
       "Bash(python3:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(xargs:*)",
+      "Bash(open:*)",
+      "Bash(git -C /Users/bgood/Documents/GitHub/OKN-WOBD status)",
+      "Bash(git -C /Users/bgood/Documents/GitHub/OKN-WOBD diff --stat)",
+      "Bash(git -C /Users/bgood/Documents/GitHub/OKN-WOBD log --oneline -5)",
+      "Bash(git -C /Users/bgood/Documents/GitHub/OKN-WOBD add scripts/demos/demo_doxycycline_sfrp2.py scripts/demos/plotly_visualizer.py scripts/demos/demo_provenance_graph.html)",
+      "Bash(git -C /Users/bgood/Documents/GitHub/OKN-WOBD commit -m \"$\\(cat <<''EOF''\nAdd study ID and assay to GXA edges, fix HTML tooltip rendering\n\n- Include study ID and assay name in GXA drug and disease expression edges\n- Add custom tooltip implementation that properly renders HTML\n- Hide native vis.js tooltip via CSS to prevent escaped HTML display\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
