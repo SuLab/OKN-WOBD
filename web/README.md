@@ -116,6 +116,27 @@ select among them by changing `WOBD_CONFIG_PATH`.
 
 ---
 
+## Deployment to Streamlit Community Cloud
+
+The web app can be deployed to Streamlit Community Cloud. The deployment uses `web/pyproject.toml` (PEP 621 format with setuptools) for dependency management.
+
+### Deployment Steps
+
+1. **Connect your repository** to Streamlit Community Cloud
+2. **Configure app settings**:
+   - **Main file**: `web/app.py`
+   - **Python version**: 3.11 or higher
+3. **Set secrets in Streamlit** (App Settings → Secrets):
+   ```toml
+   OPENAI_API_KEY = "sk-your-api-key-here"
+   WOBD_CONFIG_PATH = "web/configs/demo.yaml"  # Optional: defaults to demo.yaml if not set
+   ```
+4. **Dependencies**: Streamlit Cloud will automatically install dependencies from `web/pyproject.toml`
+
+The app will use `web/configs/demo.yaml` by default. To use a different config file, set `WOBD_CONFIG_PATH` in Streamlit secrets (as shown above) or as an environment variable in the Streamlit Cloud settings.
+
+---
+
 ## UI overview
 
 - **Sidebar**

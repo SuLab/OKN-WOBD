@@ -134,15 +134,28 @@ def load_config(force_reload: bool = False) -> AppConfig:
     Load and validate the WOBD web configuration.
 
     Precedence:
-    1. Use path from WOBD_CONFIG_PATH if set.
-    2. Otherwise fall back to `web/configs/demo.local.yaml`.
+    1. Use path from Streamlit secrets (WOBD_CONFIG_PATH) if available.
+    2. Use path from WOBD_CONFIG_PATH environment variable if set.
+    3. Otherwise fall back to `web/configs/demo.local.yaml`.
     """
 
     global _CACHED_CONFIG
     if _CACHED_CONFIG is not None and not force_reload:
         return _CACHED_CONFIG
 
-    env_path = os.environ.get(CONFIG_ENV_VAR)
+    # Check Streamlit secrets first, then environment variable
+    config_path: Optional[str] = None
+    try:
+        import streamlit as st
+        config_path = st.secrets.get("WOBD_CONFIG_PATH")
+    except (ImportError, FileNotFoundError, AttributeError, KeyError):
+        # Streamlit not available or secrets not configured - fall back to env var
+        pass
+    
+    if not config_path:
+        config_path = os.environ.get(CONFIG_ENV_VAR)
+    
+    env_path = config_path
     path = Path(env_path).expanduser() if env_path else _default_config_path()
 
     raw = _load_yaml(path)

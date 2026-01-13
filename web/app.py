@@ -52,11 +52,18 @@ def main() -> None:
     # Set the API key for the NL→SPARQL module
     set_openai_api_key(OPENAI_API_KEY)
 
+    # Get config path for display (check secrets first, then env var)
+    config_path_display: str
+    try:
+        config_path_display = st.secrets.get("WOBD_CONFIG_PATH") or os.environ.get(CONFIG_ENV_VAR, 'web/configs/demo.local.yaml')
+    except (FileNotFoundError, AttributeError, KeyError):
+        config_path_display = os.environ.get(CONFIG_ENV_VAR, 'web/configs/demo.local.yaml')
+    
     cfg = load_config()
 
     st.title("WOBD Web")
     st.caption(
-        f"Config: {os.environ.get(CONFIG_ENV_VAR, 'web/configs/demo.local.yaml')} | "
+        f"Config: {config_path_display} | "
         f"LLM model: {cfg.llm.model}"
     )
 
