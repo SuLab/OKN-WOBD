@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import type { ChatMessage } from "@/types";
 
 interface ChatHistoryProps {
@@ -18,18 +18,9 @@ export function ChatHistory({
   onRetryWithoutLimit,
   onSelectPartialMatch,
 }: ChatHistoryProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages]);
-
   if (messages.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex items-center justify-center h-full min-h-0">
         <div className="text-center space-y-2">
           <p className="text-slate-600 dark:text-slate-400">No messages yet</p>
           <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -46,7 +37,7 @@ export function ChatHistory({
   }
 
   return (
-    <div ref={scrollRef} className="overflow-y-auto h-full pl-2 pr-2">
+    <div className="pl-2 pr-2 min-h-0">
       <div className="space-y-4">
         {messages.map((message, index) => (
           <MessageBubble

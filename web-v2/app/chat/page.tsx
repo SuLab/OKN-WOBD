@@ -38,24 +38,49 @@ export default function ChatPage() {
   // Handle initial query from URL
   const hasProcessedInitialQuery = useRef(false);
   const lastQueryRef = useRef<string | null>(null);
+  const [messagesInitialized, setMessagesInitialized] = useState(false);
+
+  // Mark messages as initialized after first load from storage
+  useEffect(() => {
+    // After messages are loaded from storage (or determined to be empty), mark as initialized
+    if (!messagesInitialized) {
+      // Use a small delay to ensure storage load completes
+      const timer = setTimeout(() => {
+        setMessagesInitialized(true);
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [messagesInitialized]);
+
   useEffect(() => {
     const q = searchParams.get("q");
-    // Reset the ref if messages are cleared (messages.length === 0) or if query changed
+
+    // Reset the ref if messages are cleared
     if (messages.length === 0) {
       hasProcessedInitialQuery.current = false;
+      lastQueryRef.current = null;
     }
-    // Process query if: query exists, no messages, we haven't processed this specific query yet, AND messages weren't just manually cleared
-    if (q && messages.length === 0 && (q !== lastQueryRef.current || !hasProcessedInitialQuery.current) && !wasClearedRef.current) {
+
+    // Process query if:
+    // 1. Query exists in URL
+    // 2. Messages have been initialized (loaded from storage or determined to be empty)
+    // 3. It's a different query than last processed (or we haven't processed any yet)
+    // 4. Messages weren't just manually cleared
+    if (q &&
+      messagesInitialized &&
+      (q !== lastQueryRef.current || !hasProcessedInitialQuery.current) &&
+      !wasClearedRef.current) {
       hasProcessedInitialQuery.current = true;
       lastQueryRef.current = q;
       handleMessage({ text: q, lane: "template" });
     }
+
     // Reset the cleared flag after checking
     if (wasClearedRef.current && messages.length === 0) {
       wasClearedRef.current = false;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, messages.length]);
+  }, [searchParams, messages.length, messagesInitialized]);
 
   // Save messages to storage whenever they change
   useEffect(() => {
@@ -359,6 +384,12 @@ export default function ChatPage() {
       // Reset the initial query ref so new queries from URL can be processed (but only on next navigation)
       hasProcessedInitialQuery.current = false;
       lastQueryRef.current = null;
+      // Reset message count ref
+      lastMessageCountRef.current = 0;
+      // Reset scroll position to top
+      if (chatContainerRef.current) {
+        chatContainerRef.current.scrollTop = 0;
+      }
     }
   }
 
@@ -432,19 +463,53 @@ export default function ChatPage() {
   }
 
 
-  // Scroll to bottom when loading state changes or new messages arrive
+  // Track the last message count to detect when new messages are added
+  const lastMessageCountRef = useRef(0);
+
+  // Reset scroll position when messages are cleared
   useEffect(() => {
-    if (isLoading || messages.length > 0) {
-      setTimeout(() => {
-        if (chatContainerRef.current) {
-          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-        }
-        if (isLoadingRef.current) {
-          isLoadingRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
-        }
-      }, 100);
+    if (messages.length === 0) {
+      // Reset scroll to top when messages are cleared
+      if (chatContainerRef.current) {
+        chatContainerRef.current.scrollTop = 0;
+      }
+      lastMessageCountRef.current = 0;
     }
-  }, [isLoading, messages.length]);
+  }, [messages.length]);
+
+  // Scroll to bottom when new messages arrive (before loading indicator)
+  useEffect(() => {
+    if (messages.length > lastMessageCountRef.current) {
+      // New message was added - scroll to bottom to show it
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+          }
+        }, 100);
+      });
+      lastMessageCountRef.current = messages.length;
+    }
+  }, [messages.length]);
+
+  // Scroll to loading indicator when loading state changes (but only after messages have rendered)
+  useEffect(() => {
+    if (isLoading) {
+      // Wait for messages to render, then scroll to loading indicator
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          if (chatContainerRef.current) {
+            // Ensure we're at the bottom first
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+          }
+          // Then scroll loading indicator into view (use "nearest" to avoid hiding content above)
+          if (isLoadingRef.current) {
+            isLoadingRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }
+        }, 200);
+      });
+    }
+  }, [isLoading]);
 
   return (
     <div className="flex h-[calc(100vh-80px)] bg-white dark:bg-slate-950 overflow-hidden">
