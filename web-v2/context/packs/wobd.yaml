@@ -32,7 +32,7 @@ guardrails:
 templates:
   - id: dataset_search
     description: "Find datasets by keywords/healthCondition"
-    required_slots: ["keywords"]
+    required_slots: []  # All slots are optional; template accepts keywords, health_conditions, species, or drugs
   - id: entity_lookup
     description: "Resolve CURIE/URI/label to entity"
     required_slots: ["q"]
@@ -50,8 +50,20 @@ intent_routing:
   default_lane: "template"
   open_query_threshold: 0.55
 
-
-
-
+graphs_metadata:
+  - id: nde
+    description: "NIAID biomedical datasets"
+    good_for: ["dataset_search"]
+    uses_ontologies: ["MONDO", "NCBITaxon"]
+    queryable_by:
+      - entity_type: "Disease"
+        property: "schema:healthCondition"
+      - entity_type: "Species"
+        property: "schema:species"
+  
+  - id: ubergraph
+    description: "Merged biomedical ontologies"
+    good_for: ["entity_lookup", "ontology_reasoning"]
+    # provides_ontologies is defined in context/graphs/ubergraph.yaml with full list
 
 

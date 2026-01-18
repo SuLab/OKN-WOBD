@@ -160,7 +160,70 @@ export interface ChatMessage {
     repair_attempt?: RunRecord["repair_attempt"];
     preflight_result?: RunRecord["preflight_result"];
   };
+  plan_id?: string;
+  step_id?: string;
+  query_plan?: QueryPlan;
+  is_plan_preview?: boolean;
 }
+
+// Graph metadata
+export interface GraphMetadata {
+  id: string;
+  endpoint?: string;
+  description: string;
+  good_for: string[]; // ["entity_lookup", "dataset_search", "entity_relationships"]
+  provides_ontologies?: string[];
+  uses_ontologies?: string[];
+  notable_relationships?: string[];
+  example_predicates?: string[];
+  queryable_by?: Array<{
+    entity_type: string;
+    property: string;
+  }>;
+}
+
+// Multi-hop query planning
+export interface QueryStep {
+  id: string;
+  intent: Intent;
+  target_graphs: string[];
+  depends_on: string[];
+  uses_results_from?: string;
+  status: "pending" | "running" | "complete" | "failed";
+  results?: SPARQLResult;
+  sparql?: string;
+  error?: string;
+  latency_ms?: number;
+  description?: string;
+}
+
+export interface QueryPlan {
+  id: string;
+  steps: QueryStep[];
+  original_query: string;
+  created_at: number;
+  graph_routing_rationale?: string;
+}
+
+// Result context passing between steps
+export interface StepResultContext {
+  step_id: string;
+  entities_resolved?: Record<string, string>;
+  dataset_ids?: string[];
+  disease_iris?: string[];
+  disease_labels?: string[]; // For fallback text search when IRI mapping fails
+  gene_iris?: string[];
+  species_iris?: string[];
+  drug_iris?: string[];
+}
+
+// Execution events for streaming
+export type ExecutionEvent =
+  | { type: "plan_generated"; plan: QueryPlan }
+  | { type: "step_started"; step: QueryStep }
+  | { type: "step_completed"; step: QueryStep; context: StepResultContext }
+  | { type: "step_failed"; step: QueryStep; error: string }
+  | { type: "plan_completed"; results: QueryStep[] };
 
 
 

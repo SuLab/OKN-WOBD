@@ -1,0 +1,14 @@
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT DISTINCT ?p ?pLabel ?o
+FROM <https://purl.org/okn/frink/kg/wikidata>
+WHERE {
+  wd:Q18216 ?p ?o .
+  OPTIONAL {
+    ?p rdfs:label ?pLabel .
+    FILTER(LANG(?pLabel) = "en")
+  }
+}
+LIMIT 50

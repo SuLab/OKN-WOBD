@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import type { ChatMessage } from "@/types";
+import { QueryPlanPreview } from "./QueryPlanPreview";
 
 interface ChatHistoryProps {
   messages: ChatMessage[];
@@ -82,16 +83,16 @@ function MessageBubble({
   const hasPartialMatches = partialMatches.length > 0;
   const hasHighConfidenceMatches = message.ontology_state?.grounded_mondo_terms?.some(t => (t.matchScore || 0) >= 2) || false;
   const fallbackUsed = message.ontology_state?.fallback_used || false;
-  
+
   // Get entity type for display
   const entityType = message.ontology_state?.entity_type || "entity";
-  const entityTypeLabel = entityType === "disease" || entityType === "condition" 
-    ? "disease" 
+  const entityTypeLabel = entityType === "disease" || entityType === "condition"
+    ? "disease"
     : entityType === "species" || entityType === "organism"
-    ? "species/organism"
-    : entityType === "drug"
-    ? "drug"
-    : "entity";
+      ? "species/organism"
+      : entityType === "drug"
+        ? "drug"
+        : "entity";
 
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"} ${isSelected ? "px-1" : ""}`}>
@@ -113,6 +114,13 @@ function MessageBubble({
           <CollapsibleSPARQL query={message.content} />
         ) : (
           <div className="whitespace-pre-wrap break-words text-sm">{message.content}</div>
+        )}
+
+        {/* Query plan preview - only show for plan preview messages */}
+        {!isUser && message.is_plan_preview && message.query_plan && (
+          <div className="mt-3">
+            <QueryPlanPreview plan={message.query_plan} />
+          </div>
         )}
 
         {/* Partial matches selection UI - only show if no high-confidence matches AND fallback was not used */}
@@ -301,7 +309,7 @@ function CollapsibleSPARQL({ query }: { query: string }) {
               </svg>
             )}
           </button>
-          
+
           <div className="p-3 pr-12 bg-slate-800/50 rounded border border-slate-700 overflow-x-auto">
             <pre className="text-xs font-mono text-slate-300 whitespace-pre-wrap break-words">
               {query}

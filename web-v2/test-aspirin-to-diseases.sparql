@@ -1,0 +1,22 @@
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT DISTINCT ?disease ?diseaseLabel ?mondoIRI
+FROM <https://purl.org/okn/frink/kg/wikidata>
+WHERE {
+  # Aspirin treats these diseases
+  wd:Q18216 wdt:P2175 ?disease .
+  
+  # Get disease label
+  ?disease rdfs:label ?diseaseLabel .
+  FILTER(LANG(?diseaseLabel) = "en")
+  
+  # Try to find MONDO mapping
+  OPTIONAL {
+    ?disease skos:exactMatch ?mondoIRI .
+    FILTER(STRSTARTS(STR(?mondoIRI), "http://purl.obolibrary.org/obo/MONDO_"))
+  }
+}
+LIMIT 10

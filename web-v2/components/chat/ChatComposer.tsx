@@ -102,12 +102,12 @@ export function ChatComposer({ initialValue = "", onMessage }: ChatComposerProps
     // Only reset if we're not in the middle of a command switch
     // IMPORTANT: Don't reset if we're currently modifying a query OR if we're in raw mode with content
     // ALSO: Don't reset if the user just manually clicked a mode button
-    const shouldNotReset = isModifying || 
-                           manualModeChangeRef.current ||
-                           (lane === "raw" && sparqlValue.trim().length > 0) ||
-                           lastCommandRef.current === "/sparql" || 
-                           lastCommandRef.current === "/text";
-    
+    const shouldNotReset = isModifying ||
+      manualModeChangeRef.current ||
+      (lane === "raw" && sparqlValue.trim().length > 0) ||
+      lastCommandRef.current === "/sparql" ||
+      lastCommandRef.current === "/text";
+
     if (!textTrimmed && !sparqlTrimmed && !shouldNotReset) {
       // Only reset to template if we're not already there and we haven't just switched modes
       if (lane !== "template") {
@@ -178,7 +178,7 @@ export function ChatComposer({ initialValue = "", onMessage }: ChatComposerProps
   // Helper function that takes instruction directly (for quick actions)
   async function handleModifyQueryWithInstruction(instruction: string) {
     if (!instruction.trim() || !sparqlValue.trim()) return;
-    
+
     setIsModifying(true);
     try {
       const response = await fetch("/api/tools/sparql/modify", {
@@ -195,7 +195,7 @@ export function ChatComposer({ initialValue = "", onMessage }: ChatComposerProps
       }
 
       const result = await response.json();
-      
+
       // Check if validation failed and the fallback (original query) was returned
       if (result.fallback_used && result.validation_errors) {
         console.warn("[ChatComposer] Query modification produced invalid SPARQL:", result.validation_errors);
@@ -203,7 +203,7 @@ export function ChatComposer({ initialValue = "", onMessage }: ChatComposerProps
         setShowModifyInput(false);
         return;
       }
-      
+
       // Only update if we got a valid modified query
       if (result.modified_query && result.modified_query.trim().length > 0) {
         setSparqlValue(result.modified_query);
@@ -232,10 +232,10 @@ export function ChatComposer({ initialValue = "", onMessage }: ChatComposerProps
   // Handle mode switching via clicks
   const handleModeClick = (newLane: Lane) => {
     console.log(`[ChatComposer] Switching from ${lane} to ${newLane}`);
-    
+
     // Mark that this is a manual mode change
     manualModeChangeRef.current = true;
-    
+
     if (newLane === "raw") {
       // Switching TO raw mode
       if (lane !== "raw") {
@@ -257,7 +257,7 @@ export function ChatComposer({ initialValue = "", onMessage }: ChatComposerProps
     }
     shouldFocusRef.current = true;
     setLane(newLane);
-    
+
     // Reset the manual flag after a short delay (after useEffect has run)
     setTimeout(() => {
       manualModeChangeRef.current = false;
@@ -376,7 +376,7 @@ export function ChatComposer({ initialValue = "", onMessage }: ChatComposerProps
               autoFocus={shouldAutoFocus}
             />
           </div>
-          
+
           {/* AI Modify feature */}
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
@@ -396,7 +396,7 @@ export function ChatComposer({ initialValue = "", onMessage }: ChatComposerProps
                 </span>
               )}
             </div>
-            
+
             {showModifyInput && (
               <div className="space-y-2">
                 {/* Quick actions */}
@@ -414,7 +414,7 @@ export function ChatComposer({ initialValue = "", onMessage }: ChatComposerProps
                     </button>
                   ))}
                 </div>
-                
+
                 {/* Custom instruction input */}
                 <div className="flex gap-2">
                   <input

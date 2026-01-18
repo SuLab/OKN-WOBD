@@ -1,20 +1,20 @@
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-  try {
-    const { sparql } = await request.json();
+    try {
+        const { sparql } = await request.json();
 
-    if (!sparql) {
-      return NextResponse.json(
-        { error: "Missing sparql parameter" },
-        { status: 400 }
-      );
-    }
+        if (!sparql) {
+            return NextResponse.json(
+                { error: "Missing sparql parameter" },
+                { status: 400 }
+            );
+        }
 
-    // Use the same LLM endpoint pattern as other API routes
-    const llmUrl = new URL("/api/tools/llm/complete", request.url).toString();
-    
-    const systemPrompt = `You are a SPARQL query explainer. Your task is to read a SPARQL query and explain what it does in simple, plain English.
+        // Use the same LLM endpoint pattern as other API routes
+        const llmUrl = new URL("/api/tools/llm/complete", request.url).toString();
+
+        const systemPrompt = `You are a SPARQL query explainer. Your task is to read a SPARQL query and explain what it does in simple, plain English.
 
 Your explanation should:
 1. Be concise (1-2 sentences)
@@ -33,43 +33,43 @@ Do NOT include:
 - Prefixes or namespaces
 - Implementation details`;
 
-    const userPrompt = `Explain this query in plain English:
+        const userPrompt = `Explain this query in plain English:
 
 ${sparql}
 
 Plain English explanation:`;
 
-    const llmResponse = await fetch(llmUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        provider: "openai",
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.3,
-        max_tokens: 150,
-        use_shared: true,
-      }),
-    });
+        const llmResponse = await fetch(llmUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                provider: "openai",
+                model: "gpt-4o-mini",
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: userPrompt },
+                ],
+                temperature: 0.3,
+                max_tokens: 150,
+                use_shared: true,
+            }),
+        });
 
-    if (!llmResponse.ok) {
-      throw new Error(`LLM request failed: ${llmResponse.statusText}`);
+        if (!llmResponse.ok) {
+            throw new Error(`LLM request failed: ${llmResponse.statusText}`);
+        }
+
+        const llmResult = await llmResponse.json();
+        const summary = (llmResult.text || "").trim();
+
+        return NextResponse.json({
+            summary,
+        });
+    } catch (error: any) {
+        console.error("[SPARQL Summarize] Error:", error);
+        return NextResponse.json(
+            { error: error.message || "Failed to summarize query" },
+            { status: 500 }
+        );
     }
-
-    const llmResult = await llmResponse.json();
-    const summary = (llmResult.text || "").trim();
-
-    return NextResponse.json({
-      summary,
-    });
-  } catch (error: any) {
-    console.error("[SPARQL Summarize] Error:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to summarize query" },
-      { status: 500 }
-    );
-  }
 }

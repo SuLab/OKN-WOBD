@@ -74,9 +74,8 @@ export async function POST(request: Request) {
       if (llmResult.used_llm) {
         intent = llmResult.intent;
       } else if (llmResult.error) {
-        intent.notes = `${intent.notes || ""} | LLM slot filling skipped: ${
-          llmResult.error
-        }`.trim();
+        intent.notes = `${intent.notes || ""} | LLM slot filling skipped: ${llmResult.error
+          }`.trim();
       }
     }
 
@@ -92,19 +91,19 @@ export async function POST(request: Request) {
         // Store ontology state in intent slots
         intent.slots.ontology_state = ontologyState;
         intent.ontology_workflow = true;
-        
+
         // Handle different entity types: diseases use health_conditions, species use species slot
         if (ontologyState.grounded_mondo_terms.length > 0) {
           const entityType = ontologyState.entity_type || "disease";
-          
+
           // Collect all high-confidence matches (score >= 2) from all grounded entities
           // When we have multiple entity types (disease, species, drug), we want to include ALL of them
           // even if they have different scores, so we can populate multiple slots
           const identifiedEntities = ontologyState.debug_info?.identified_entities || [];
           const hasMultipleEntityTypes = new Set(identifiedEntities.map((e: any) => e.domain.toLowerCase())).size > 1;
-          
+
           let selectedTerms: typeof ontologyState.grounded_mondo_terms = [];
-          
+
           if (hasMultipleEntityTypes) {
             // When we have multiple entity types, include ALL terms with score >= 1
             // This ensures we get disease, species, and drug terms all together
@@ -120,7 +119,7 @@ export async function POST(request: Request) {
               .filter(term => (term.matchScore || 0) === 3);
             const score2Terms = ontologyState.grounded_mondo_terms
               .filter(term => (term.matchScore || 0) === 2);
-            
+
             if (score4Terms.length > 0) {
               selectedTerms = score4Terms.slice(0, 5);
             } else if (score3Terms.length > 0) {
@@ -131,17 +130,17 @@ export async function POST(request: Request) {
               selectedTerms = [ontologyState.grounded_mondo_terms[0]];
             }
           }
-          
+
           // Group terms by their entity type (from identified_entities)
           // This allows us to populate multiple slots when we have entities of different types
           const diseaseTerms: typeof selectedTerms = [];
           const speciesTerms: typeof selectedTerms = [];
           const drugTerms: typeof selectedTerms = [];
-          
+
           for (const term of selectedTerms) {
             // Determine the ontology type from the IRI pattern (more reliable than label matching)
             const iri = term.mondo || "";
-            
+
             if (iri.includes("/MONDO_") || iri.includes("purl.obolibrary.org/obo/MONDO")) {
               // MONDO IRI -> disease
               diseaseTerms.push(term);
@@ -153,14 +152,14 @@ export async function POST(request: Request) {
               drugTerms.push(term);
             } else {
               // Fallback: try to match by label with identified entities
-              const matchingEntity = identifiedEntities.find((e: any) => 
+              const matchingEntity = identifiedEntities.find((e: any) =>
                 e.term.toLowerCase() === term.label?.toLowerCase() ||
                 term.label?.toLowerCase().includes(e.term.toLowerCase()) ||
                 e.term.toLowerCase().includes(term.label?.toLowerCase())
               );
-              
+
               const domain = matchingEntity?.domain?.toLowerCase() || entityType;
-              
+
               if (domain === "species" || domain === "organism") {
                 speciesTerms.push(term);
               } else if (domain === "drug" || domain === "medication") {
@@ -170,39 +169,39 @@ export async function POST(request: Request) {
               }
             }
           }
-          
+
           // Set slots for each entity type found
           if (diseaseTerms.length > 0) {
             intent.slots.health_conditions = diseaseTerms.map(t => t.mondo);
-            console.log(`[Intent] Using ${diseaseTerms.length} disease terms (MONDO):`, 
+            console.log(`[Intent] Using ${diseaseTerms.length} disease terms (MONDO):`,
               diseaseTerms.map(t => `${t.obo_id || t.mondo} (${t.label}, score: ${t.matchScore})`).join(", "));
           }
-          
+
           if (speciesTerms.length > 0) {
             intent.slots.species = speciesTerms.map(t => t.mondo);
-            console.log(`[Intent] Using ${speciesTerms.length} species terms (UniProt):`, 
+            console.log(`[Intent] Using ${speciesTerms.length} species terms (UniProt):`,
               speciesTerms.map(t => `${t.obo_id || t.mondo} (${t.label}, score: ${t.matchScore})`).join(", "));
           }
-          
+
           if (drugTerms.length > 0) {
             intent.slots.drugs = drugTerms.map(t => t.mondo);
-            console.log(`[Intent] Using ${drugTerms.length} drug terms (Wikidata):`, 
+            console.log(`[Intent] Using ${drugTerms.length} drug terms (Wikidata):`,
               drugTerms.map(t => `${t.obo_id || t.mondo} (${t.label}, score: ${t.matchScore})`).join(", "));
           }
-          
+
           intent.slots.nde_encoding = ontologyState.nde_encoding || "iri";
         } else {
           // Mark fallback if no grounded terms found
           const entityType = ontologyState.entity_type || "disease";
           intent.notes = `${intent.notes || ""} | Ontology workflow: no ${entityType} terms found, will use fallback`.trim();
         }
-        
+
         // Check for gene expression queries and add appropriate graphs
-        const hasGene = ontologyState.entity_type === "gene" || 
+        const hasGene = ontologyState.entity_type === "gene" ||
           ontologyState.debug_info?.identified_entities?.some((e: any) => e.domain === "gene");
-        const hasGeneExpression = ontologyState.debug_info?.has_gene_expression || 
+        const hasGeneExpression = ontologyState.debug_info?.has_gene_expression ||
           ontologyState.debug_info?.identified_entities?.some((e: any) => e.domain === "gene_expression");
-        
+
         if (hasGene || hasGeneExpression) {
           // Add gene expression graphs to the intent
           const geneGraphs = ontologyState.debug_info?.recommended_graphs || [
@@ -210,22 +209,21 @@ export async function POST(request: Request) {
             "spoke-okn",
             "gene-expression-atlas-okn"
           ];
-          
+
           // Merge with existing graphs (avoid duplicates)
           const existingGraphs = intent.graphs || [];
           intent.graphs = [...new Set([...existingGraphs, ...geneGraphs])];
-          
+
           intent.notes = `${intent.notes || ""} | Gene expression query detected, using gene expression graphs: ${geneGraphs.join(", ")}`.trim();
           console.log(`[Intent] Gene expression query detected, added graphs: ${geneGraphs.join(", ")}`);
         }
-        
+
         intent.notes = `${intent.notes || ""} | Ontology-grounded workflow used`.trim();
       } catch (error: any) {
         // If ontology processing fails, continue with normal flow
         console.error("Ontology workflow error:", error);
-        intent.notes = `${intent.notes || ""} | Ontology workflow failed: ${
-          error.message
-        }`.trim();
+        intent.notes = `${intent.notes || ""} | Ontology workflow failed: ${error.message
+          }`.trim();
         // Still mark as attempted so UI can show the error
         intent.ontology_workflow = true;
         intent.slots.ontology_state = {

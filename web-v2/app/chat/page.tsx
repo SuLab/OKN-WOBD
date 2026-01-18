@@ -1,6 +1,7 @@
+/** @refresh reset */
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { ChatHistory } from "@/components/chat/ChatHistory";
 import { ChatComposer } from "@/components/chat/ChatComposer";
@@ -17,8 +18,21 @@ import {
   executeOpenQuery,
   executeRawSPARQL,
 } from "@/lib/chat/query-executor";
+import { needsMultiHop } from "@/lib/agents/complexity-detector";
+import { planMultiHopQuery } from "@/lib/agents/query-planner";
+import { executeQueryPlan } from "@/lib/agents/query-executor";
+import type { ContextPack } from "@/lib/context-packs/types";
 
-export default function ChatPage() {
+// Wrap ChatPage with Suspense to prevent Fast Refresh issues
+export default function ChatPageWrapper() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ChatPage />
+    </Suspense>
+  );
+}
+
+function ChatPage() {
   const searchParams = useSearchParams();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
@@ -149,6 +163,18 @@ export default function ChatPage() {
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
+    // Check if multi-hop is needed (only for template lane)
+    if (lane === "template" && needsMultiHop(text)) {
+      try {
+        await handleMultiHopQuery(text, abortController);
+      } catch (error: any) {
+        console.error("[ChatPage] Multi-hop query error:", error);
+        // Error is already handled in handleMultiHopQuery
+      }
+      return;
+    }
+
+    // Single-hop flow
     try {
       let result;
       if (lane === "raw") {
@@ -195,6 +221,124 @@ export default function ChatPage() {
     } finally {
       setIsLoading(false);
       // Clear processing query ref after completion
+      processingQueryRef.current = null;
+      abortControllerRef.current = null;
+    }
+  }
+
+  async function handleMultiHopQuery(text: string, abortController: AbortController) {
+    // Wrap entire function in try-catch to prevent synchronous errors from breaking React
+    try {
+      // Load context pack via API
+      const packId = "wobd";
+      const packResponse = await fetch(`/api/context-packs?pack_id=${packId}`);
+      if (!packResponse.ok) {
+        throw new Error("Failed to load context pack");
+      }
+      const pack: ContextPack = await packResponse.json();
+
+      // Generate plan
+      const llmEndpoint = "/api/tools/llm/complete";
+      const plan = await planMultiHopQuery(text, pack, llmEndpoint);
+
+      // Show plan preview (configurable: auto-execute or wait for approval)
+      const autoExecute = true; // TODO: Make this a user setting
+
+      const planPreviewMessage: ChatMessage = {
+        id: generateMessageId(),
+        role: "assistant",
+        content: `Generated query plan with ${plan.steps.length} steps`,
+        timestamp: new Date().toISOString(),
+        lane: "template",
+        query_plan: plan,
+        plan_id: plan.id,
+        is_plan_preview: true,
+      };
+      setMessages(prev => [...prev, planPreviewMessage]);
+
+      if (!autoExecute) {
+        setIsLoading(false);
+        processingQueryRef.current = null;
+        abortControllerRef.current = null;
+        return;
+      }
+
+      // Execute plan with streaming
+      for await (const event of executeQueryPlan(plan, pack)) {
+        // Check if query was aborted
+        if (abortController.signal.aborted) {
+          return;
+        }
+
+        if (event.type === "step_completed") {
+          // Update messages with step results
+          const stepMessage: ChatMessage = {
+            id: generateMessageId(),
+            role: "assistant",
+            content: `Step ${event.step.id} completed: ${event.step.description}`,
+            timestamp: new Date().toISOString(),
+            lane: "template",
+            plan_id: plan.id,
+            step_id: event.step.id,
+            intent: event.step.intent,
+            sparql: event.step.sparql,
+            results: event.step.results,
+            metadata: {
+              latency_ms: event.step.latency_ms,
+              row_count: event.step.results?.results?.bindings?.length || 0,
+            },
+          };
+          setMessages(prev => [...prev, stepMessage]);
+          setSelectedMessageId(stepMessage.id);
+        } else if (event.type === "step_failed") {
+          const errorMessage: ChatMessage = {
+            id: generateMessageId(),
+            role: "error",
+            content: `Step ${event.step.id} failed: ${event.error}`,
+            timestamp: new Date().toISOString(),
+            lane: "template",
+            plan_id: plan.id,
+            step_id: event.step.id,
+            error: event.error,
+          };
+          setMessages(prev => [...prev, errorMessage]);
+        } else if (event.type === "plan_completed") {
+          // Synthesize final results
+          const finalStep = event.results[event.results.length - 1];
+          const finalMessage: ChatMessage = {
+            id: generateMessageId(),
+            role: "assistant",
+            content: `Query plan completed. Final results: ${finalStep.results?.results?.bindings?.length || 0} rows`,
+            timestamp: new Date().toISOString(),
+            lane: "template",
+            plan_id: plan.id,
+            results: finalStep.results,
+            sparql: finalStep.sparql,
+            metadata: {
+              row_count: finalStep.results?.results?.bindings?.length || 0,
+              latency_ms: finalStep.latency_ms,
+            },
+          };
+          setMessages(prev => [...prev, finalMessage]);
+          setSelectedMessageId(finalMessage.id);
+        }
+      }
+    } catch (error: any) {
+      // Don't show error if query was cancelled
+      if (error.name === "AbortError" || abortController.signal.aborted) {
+        return;
+      }
+
+      const errorMessage: ChatMessage = {
+        id: generateMessageId(),
+        role: "error",
+        content: `Multi-hop query failed: ${error.message}`,
+        timestamp: new Date().toISOString(),
+        error: error.message,
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
       processingQueryRef.current = null;
       abortControllerRef.current = null;
     }

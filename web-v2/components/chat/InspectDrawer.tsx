@@ -4,8 +4,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import type { ChatMessage } from "@/types";
 import { ResultsTable } from "./ResultsTable";
 import { SparqlEditor } from "./SparqlEditor";
-import { 
-  downloadResultsAsCSV, 
+import { QueryPlanVisualization } from "./QueryPlanVisualization";
+import {
+  downloadResultsAsCSV,
   downloadResultsAsTSV,
   downloadProcessedDataAsCSV,
   downloadProcessedDataAsTSV,
@@ -15,7 +16,7 @@ interface InspectDrawerProps {
   message: ChatMessage | null;
 }
 
-type Tab = "results" | "sparql" | "intent" | "context" | "ontology" | "debug";
+type Tab = "results" | "sparql" | "intent" | "context" | "ontology" | "debug" | "plan";
 
 export function InspectDrawer({ message }: InspectDrawerProps) {
   // Default to results tab if message has results, otherwise SPARQL
@@ -188,17 +189,18 @@ export function InspectDrawer({ message }: InspectDrawerProps) {
     { id: "intent", label: "Intent" },
     { id: "context", label: "Context" },
     ...(message?.ontology_state ? [{ id: "ontology" as Tab, label: "Ontology" }] : []),
+    ...(message?.plan_id ? [{ id: "plan" as Tab, label: "Query Plan" }] : []),
     { id: "debug", label: "Debug" },
   ];
 
   function handleDownload(format: "csv" | "tsv", processedData?: any[]) {
     if (!message || !message.results) return;
-    
+
     const vars = message.results.head.vars;
-    const filename = format === "csv" 
+    const filename = format === "csv"
       ? `results_${message.id}.csv`
       : `results_${message.id}.tsv`;
-    
+
     if (processedData) {
       // Use processed (grouped) data - entity arrays will be comma-separated
       if (format === "csv") {
@@ -822,11 +824,11 @@ export function InspectDrawer({ message }: InspectDrawerProps) {
                       {message.ontology_state.debug_info.ontology_query_executed !== undefined && (
                         <p className="text-slate-600 dark:text-slate-400">
                           {(() => {
-                            const ontologyName = message.ontology_state.entity_type === "drug" || message.ontology_state.entity_type === "medication" 
-                              ? "Wikidata" 
-                              : message.ontology_state.entity_type === "species" 
-                              ? "NCBITaxon" 
-                              : "MONDO";
+                            const ontologyName = message.ontology_state.entity_type === "drug" || message.ontology_state.entity_type === "medication"
+                              ? "Wikidata"
+                              : message.ontology_state.entity_type === "species"
+                                ? "NCBITaxon"
+                                : "MONDO";
                             const executed = message.ontology_state.debug_info.ontology_query_executed ?? false;
                             return `${ontologyName} query executed: ${executed ? "Yes" : "No"}`;
                           })()}
@@ -835,11 +837,11 @@ export function InspectDrawer({ message }: InspectDrawerProps) {
                       {message.ontology_state.debug_info.ontology_query_result_count !== undefined && (
                         <p className="text-slate-600 dark:text-slate-400">
                           {(() => {
-                            const ontologyName = message.ontology_state.entity_type === "drug" || message.ontology_state.entity_type === "medication" 
-                              ? "Wikidata" 
-                              : message.ontology_state.entity_type === "species" 
-                              ? "NCBITaxon" 
-                              : "MONDO";
+                            const ontologyName = message.ontology_state.entity_type === "drug" || message.ontology_state.entity_type === "medication"
+                              ? "Wikidata"
+                              : message.ontology_state.entity_type === "species"
+                                ? "NCBITaxon"
+                                : "MONDO";
                             const count = message.ontology_state.debug_info.ontology_query_result_count ?? 0;
                             return `${ontologyName} query returned: ${count} results`;
                           })()}
@@ -848,20 +850,20 @@ export function InspectDrawer({ message }: InspectDrawerProps) {
                       {message.ontology_state.debug_info.ontology_query_result_count === 0 && (
                         <p className="text-yellow-600 dark:text-yellow-400 text-xs mt-2">
                           ⚠️ No {(() => {
-                            const ontologyName = message.ontology_state.entity_type === "drug" || message.ontology_state.entity_type === "medication" 
-                              ? "Wikidata" 
-                              : message.ontology_state.entity_type === "species" 
-                              ? "NCBITaxon" 
-                              : "MONDO";
+                            const ontologyName = message.ontology_state.entity_type === "drug" || message.ontology_state.entity_type === "medication"
+                              ? "Wikidata"
+                              : message.ontology_state.entity_type === "species"
+                                ? "NCBITaxon"
+                                : "MONDO";
                             return ontologyName;
                           })()} terms found. This could mean:
                           <ul className="list-disc list-inside ml-4 mt-1">
                             <li>The terms don't exist in {(() => {
-                              const ontologyName = message.ontology_state.entity_type === "drug" || message.ontology_state.entity_type === "medication" 
-                                ? "Wikidata" 
-                                : message.ontology_state.entity_type === "species" 
-                                ? "NCBITaxon" 
-                                : "MONDO/Ubergraph";
+                              const ontologyName = message.ontology_state.entity_type === "drug" || message.ontology_state.entity_type === "medication"
+                                ? "Wikidata"
+                                : message.ontology_state.entity_type === "species"
+                                  ? "NCBITaxon"
+                                  : "MONDO/Ubergraph";
                               return ontologyName;
                             })()}</li>
                             <li>The query syntax needs adjustment</li>
@@ -879,6 +881,13 @@ export function InspectDrawer({ message }: InspectDrawerProps) {
               </p>
             )}
           </div>
+        )}
+
+        {activeTab === "plan" && message.query_plan && (
+          <QueryPlanVisualization
+            plan={message.query_plan}
+            allMessages={[]}
+          />
         )}
 
         {activeTab === "debug" && (

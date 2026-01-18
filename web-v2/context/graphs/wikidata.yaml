@@ -1,0 +1,14 @@
+id: wikidata
+endpoint: "https://query.wikidata.org/sparql"
+description: "Wikidata for drugs, genes, species, and disease relationships"
+good_for: ["entity_lookup", "entity_relationships"]
+provides_ontologies: ["Wikidata", "MONDO", "ChEBI", "NCBITaxon"]
+notable_relationships:
+  - "Drugs to disease indications (wdt:P2176) with MONDO mappings (wdt:P6680)"
+  - "Genes to disease associations (wdt:P2293)"
+  - "Species taxonomy (NCBITaxon via wdt:P685)"
+example_predicates:
+  - "wdt:P2176 (drug used for treatment)"
+  - "wdt:P2293 (genetic association)"
+  - "wdt:P6680 (exact match to MONDO)"
+  - "wdt:P351 (Entrez Gene ID)"

@@ -1,0 +1,22 @@
+id: nde
+endpoint: "https://frink.apps.renci.org/nde/sparql"
+description: "NIAID biomedical datasets with disease, species, and publication metadata"
+good_for: ["dataset_search"]
+uses_ontologies: ["MONDO", "NCBITaxon"]
+notable_relationships:
+  - "Datasets to diseases via schema:healthCondition (MONDO IRIs)"
+  - "Datasets to species via schema:species (UniProt taxonomy IRIs)"
+  - "Datasets to infectious agents via schema:infectiousAgent"
+example_predicates:
+  - "schema:healthCondition (links to disease entities)"
+  - "schema:species (links to species/organism entities)"
+  - "schema:infectiousAgent (links to pathogen entities)"
+  - "schema:name (dataset name)"
+  - "schema:description (dataset description)"
+queryable_by:
+  - entity_type: "Disease"
+    property: "schema:healthCondition"
+  - entity_type: "Species"
+    property: "schema:species"
+  - entity_type: "Pathogen"
+    property: "schema:infectiousAgent"
