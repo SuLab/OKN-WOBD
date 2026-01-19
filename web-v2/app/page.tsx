@@ -10,7 +10,7 @@ export default function LandingPage() {
             Ask WOBD...
           </h1>
           <p className="text-slate-600 dark:text-slate-400 text-lg">
-            Query biomedical datasets with natural language, templates, or raw SPARQL
+            Query biomedical datasets with template-based, LLM-generated, or user-generated SPARQL
           </p>
         </div>
 

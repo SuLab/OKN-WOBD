@@ -1,16 +1,38 @@
 # WOBD Web v2
 
-Exa-style chat UI for WOBD with templated and open SPARQL querying. This is a Next.js application that provides a provider-neutral Tool Service API and a modern web interface for querying biomedical datasets.
+Exa-style chat UI for WOBD with template-based, LLM-generated, and user-generated SPARQL querying. This is a Next.js application that provides a provider-neutral Tool Service API and a modern web interface for querying biomedical datasets.
 
 ## Architecture Overview
 
 WOBD Web v2 implements a tiered querying system with three "lanes":
 
-- **Lane A — Template (default)**: LLM outputs intent JSON, app generates SPARQL from vetted templates
-- **Lane B — Open Query (fallback)**: LLM generates SPARQL directly, constrained by context pack schema hints
-- **Lane C — Raw SPARQL (expert)**: User directly edits/pastes SPARQL
+- **Lane A — Template-based SPARQL (default)**: LLM outputs intent JSON, app generates SPARQL from vetted templates
+- **Lane B — LLM-generated SPARQL (fallback)**: LLM generates SPARQL directly from natural language, constrained by context pack schema hints
+- **Lane C — User-generated SPARQL (expert)**: User directly writes/pastes SPARQL
 
 All queries are executed through a Tool Service API that enforces safety guardrails, SERVICE policies, and budget limits.
+
+### Query Types Explained
+
+The system supports three types of SPARQL query generation:
+
+1. **Template-based SPARQL (Lane A - Default)**: 
+   - LLM outputs structured intent JSON
+   - App generates SPARQL from vetted, tested templates
+   - Most reliable, predictable, and cost-effective
+   - Best for common query patterns
+
+2. **LLM-generated SPARQL (Lane B - Fallback)**:
+   - LLM generates SPARQL directly from natural language
+   - More flexible for novel or complex queries
+   - Constrained by context pack schema hints and guardrails
+   - Requires LLM API calls (higher cost)
+
+3. **User-generated SPARQL (Lane C - Expert)**:
+   - User writes/pastes SPARQL directly
+   - Full control for expert users
+   - No LLM involved (no cost)
+   - Requires SPARQL knowledge
 
 ## Quick Start
 
@@ -124,8 +146,8 @@ The chat interface supports special `@` commands for graph discovery and query s
   - Full mode available via API for schema-based suggestions
 
 ### Mode Switching
-- `/text` - Switch to Text Query mode (LLM generates SPARQL directly)
-- `/sparql` - Switch to Raw SPARQL editor mode
+- `/text` or `/open` - Switch to LLM-generated SPARQL mode (Lane B - LLM generates SPARQL directly)
+- `/sparql` - Switch to User-generated SPARQL editor mode (Lane C - write SPARQL directly)
 
 ## Tool Service API
 
@@ -147,7 +169,9 @@ The Tool Service API provides stable HTTP endpoints for all WOBD operations:
 
 ### Natural Language / LLM
 - `POST /api/tools/nl/intent` - Classify intent and route to lane
-- `POST /api/tools/nl/intent-to-sparql` - Generate SPARQL from intent
+- `POST /api/tools/nl/intent-to-sparql` - Generate SPARQL from intent (template-based, Lane A)
+- `POST /api/tools/nl/open-query` - Generate SPARQL directly from natural language (LLM-generated, Lane B) (template-based, Lane A)
+- `POST /api/tools/nl/open-query` - Generate SPARQL directly from natural language (LLM-generated, Lane B)
 
 ### LLM Proxy
 - `POST /api/tools/llm/test-key` - Test API key
@@ -204,10 +228,10 @@ All SPARQL queries are validated before execution:
 - [ ] Template → SPARQL generation
 
 ### Phase 4: Lane B & C
-- [ ] Open Query NL→SPARQL with guardrails
+- [ ] LLM-generated SPARQL (Lane B) with guardrails
 - [ ] SPARQL repair attempts
 - [ ] Preflight probes
-- [ ] Raw SPARQL editor
+- [ ] User-generated SPARQL editor (Lane C)
 
 ### Phase 5: UI Components
 - [ ] Full chat UI with history

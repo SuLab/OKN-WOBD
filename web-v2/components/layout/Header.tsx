@@ -12,7 +12,7 @@ export function Header() {
             </Link>
             <div className="flex items-center gap-4">
                 <span className="text-xs text-slate-600 dark:text-slate-400 hidden md:inline">
-                    FRINK + OKN graphs · Template / Open / Raw SPARQL
+                    FRINK + OKN graphs · Template-based / LLM-generated / User-generated SPARQL
                 </span>
                 <ThemeToggle />
             </div>

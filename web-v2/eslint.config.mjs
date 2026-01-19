@@ -15,7 +15,7 @@ export default [
       'build/**',
       '*.config.js',
       '*.config.mjs',
-      'test-phase4.js', // Test file, can have different rules
+      'test-llm-sparql-generation.js', // Test file, can have different rules
     ],
   },
   {

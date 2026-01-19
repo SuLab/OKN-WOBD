@@ -306,23 +306,42 @@ function ChatPage() {
           setMessages(prev => [...prev, errorMessage]);
         } else if (event.type === "plan_completed") {
           // Synthesize final results
-          const finalStep = event.results[event.results.length - 1];
-          const finalMessage: ChatMessage = {
-            id: generateMessageId(),
-            role: "assistant",
-            content: `Query plan completed. Final results: ${finalStep.results?.results?.bindings?.length || 0} rows`,
-            timestamp: new Date().toISOString(),
-            lane: "template",
-            plan_id: plan.id,
-            results: finalStep.results,
-            sparql: finalStep.sparql,
-            metadata: {
-              row_count: finalStep.results?.results?.bindings?.length || 0,
-              latency_ms: finalStep.latency_ms,
-            },
-          };
-          setMessages(prev => [...prev, finalMessage]);
-          setSelectedMessageId(finalMessage.id);
+          // Find the last step that has results (skip entity_resolution steps for final display)
+          const stepsWithResults = event.results.filter(s =>
+            s.results && s.intent.task !== "entity_resolution"
+          );
+          const finalStep = stepsWithResults[stepsWithResults.length - 1] || event.results[event.results.length - 1];
+
+          if (finalStep && finalStep.results) {
+            const finalMessage: ChatMessage = {
+              id: generateMessageId(),
+              role: "assistant",
+              content: `Query plan completed. Final results: ${finalStep.results?.results?.bindings?.length || 0} rows`,
+              timestamp: new Date().toISOString(),
+              lane: "template",
+              plan_id: plan.id,
+              results: finalStep.results,
+              sparql: finalStep.sparql,
+              metadata: {
+                row_count: finalStep.results?.results?.bindings?.length || 0,
+                latency_ms: finalStep.latency_ms,
+              },
+            };
+            setMessages(prev => [...prev, finalMessage]);
+            setSelectedMessageId(finalMessage.id);
+          } else {
+            // No results found - show summary
+            const finalMessage: ChatMessage = {
+              id: generateMessageId(),
+              role: "assistant",
+              content: `Query plan completed. No results found.`,
+              timestamp: new Date().toISOString(),
+              lane: "template",
+              plan_id: plan.id,
+            };
+            setMessages(prev => [...prev, finalMessage]);
+            setSelectedMessageId(finalMessage.id);
+          }
         }
       }
     } catch (error: any) {

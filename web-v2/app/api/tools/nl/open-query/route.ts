@@ -6,7 +6,7 @@ import { checkBudget, recordUsage } from "@/lib/llm/budget";
 import { getBYOKKey } from "@/lib/keys/manager";
 import type { LLMRequest } from "@/lib/llm/providers/types";
 
-// Lane B: Open Query NL→SPARQL generation using LLM directly
+// Lane B: LLM-generated SPARQL - LLM generates SPARQL directly from natural language
 export async function POST(request: Request) {
     try {
         const body = await request.json();
@@ -27,10 +27,10 @@ export async function POST(request: Request) {
             );
         }
 
-        // Check if open query is allowed
+        // Check if LLM-generated SPARQL (Lane B) is allowed
         if (!pack.guardrails.allow_open_nl2sparql) {
             return NextResponse.json(
-                { error: "Open query NL→SPARQL is disabled for this context pack" },
+                { error: "LLM-generated SPARQL (Lane B) is disabled for this context pack" },
                 { status: 403 }
             );
         }

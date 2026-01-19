@@ -5,7 +5,7 @@ import { Header } from "@/components/layout/Header";
 
 export const metadata = {
   title: "WOBD Web v2",
-  description: "Exa-style chat UI for WOBD with templated and open SPARQL querying"
+  description: "Exa-style chat UI for WOBD with template-based, LLM-generated, and user-generated SPARQL querying"
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
