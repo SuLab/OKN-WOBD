@@ -103,6 +103,7 @@ web-v2/
 │   ├── keys/             # BYOK key management
 │   └── runs/             # Run record storage
 ├── context/packs/        # Context pack definitions (YAML)
+├── context/graphs/       # Graph context (*_global.json); wikidata is hand-maintained
 └── types/                # Shared TypeScript types
 ```
 
@@ -140,6 +141,10 @@ templates:
   - id: dataset_search
     required_slots: ["keywords"]
 ```
+
+### Graph context files
+
+Graph metadata is loaded from `context/graphs/*_global.json`. Most of these are produced by `scripts/build_graph_context.py` (see `scripts/README.md`). **`wikidata_global.json` is hand-maintained** because SPARQL introspection of the Wikidata graph often returns 503; it is curated from Wikidata’s property documentation and from the project’s usage in the ontology and query-planner code.
 
 ## Chat Commands
 

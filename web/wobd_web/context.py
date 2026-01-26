@@ -16,8 +16,7 @@ def load_nde_context() :  # -> Dict[str, Any]:
     """
     Load the static NDE context JSON if present.
 
-    Expects a file at `web/context/nde_global.json`, typically copied from
-    the omnigraph-agent `dist/context/nde_global.json`. If the file is
+    Expects a file at `web/context/nde_global.json`. If the file is
     missing or invalid, returns an empty dict so callers can fail gracefully.
     """
 

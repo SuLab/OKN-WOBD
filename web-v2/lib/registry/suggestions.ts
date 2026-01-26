@@ -74,7 +74,7 @@ interface GraphContent {
 
 /**
  * Query actual content from a graph to discover real values
- * First tries to load from omnigraph context, then falls back to live queries
+ * First tries to load from graph context (*_global.json), then falls back to live queries
  */
 async function discoverGraphContent(graphShortname: string): Promise<GraphContent> {
     const graphIri = `https://purl.org/okn/frink/kg/${graphShortname}`;
@@ -87,7 +87,7 @@ async function discoverGraphContent(graphShortname: string): Promise<GraphConten
         commonProperties: [],
     };
 
-    // Try to load from omnigraph context first
+    // Try to load from graph context first
     try {
         const context = await graphContextLoader.loadContext(graphShortname);
         if (context) {
@@ -112,10 +112,10 @@ async function discoverGraphContent(graphShortname: string): Promise<GraphConten
             }
         }
     } catch (error) {
-        console.warn(`Failed to load omnigraph context for ${graphShortname}:`, error);
+        console.warn(`Failed to load graph context for ${graphShortname}:`, error);
     }
 
-    // Fall back to live queries if omnigraph context is unavailable or incomplete
+    // Fall back to live queries if graph context is unavailable or incomplete
     try {
         // Query 1: Find real health conditions; nde uses schema:name on disease entities, also try rdfs:label/skos:prefLabel
         const healthConditionsQuery = `
@@ -417,10 +417,10 @@ export async function getGraphSuggestions(
 
     for (const shortname of graphShortnames) {
         try {
-            // Load graph context (from omnigraph if available)
+            // Load graph context (from local/GitHub if available)
             const graphContext = await graphContextLoader.loadContext(shortname);
 
-            // Discover actual content from the graph (uses omnigraph if available, queries if not)
+            // Discover actual content from the graph (uses context file if available, live queries if not)
             const content = await discoverGraphContent(shortname);
 
             // Get graph info for label

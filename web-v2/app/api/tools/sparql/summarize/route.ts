@@ -57,7 +57,8 @@ Plain English explanation:`;
         });
 
         if (!llmResponse.ok) {
-            throw new Error(`LLM request failed: ${llmResponse.statusText}`);
+            console.warn("[SPARQL Summarize] LLM request failed:", llmResponse.status, llmResponse.statusText);
+            return NextResponse.json({ summary: "" });
         }
 
         const llmResult = await llmResponse.json();

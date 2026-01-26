@@ -1,0 +1,65 @@
+{
+  "endpoint": "https://frink.apps.renci.org/wikidata/sparql",
+  "description": "Wikidata for drugs, genes, species, and disease relationships. Use wdt: for direct properties.",
+  "good_for": ["entity_lookup", "entity_relationships"],
+  "uses_ontologies": ["Wikidata", "MONDO", "ChEBI", "NCBITaxon"],
+  "notable_relationships": [
+    "Drug → disease: wdt:P2175 (medical condition treated); inverse: wdt:P2176 (drug used for treatment)",
+    "Disease → MONDO: wdt:P5270 or wdtn:P5270 (exact match to MONDO)",
+    "Gene–disease: wdt:P2293 (genetic association)",
+    "Gene ID: wdt:P351 (Entrez Gene ID)",
+    "Taxonomy: wdt:P685 (NCBI Taxonomy ID)"
+  ],
+  "example_predicates": [
+    "wdt:P2175 (drug treats disease)",
+    "wdt:P2176 (disease treated by drug)",
+    "wdt:P2293 (genetic association)",
+    "wdt:P351 (Entrez Gene ID)",
+    "wdt:P5270 / wdtn:P5270 (MONDO mapping)",
+    "wdt:P685 (NCBI taxon ID)",
+    "rdfs:label"
+  ],
+  "prefixes": {
+    "wd": "http://www.wikidata.org/entity/",
+    "wdt": "http://www.wikidata.org/prop/direct/",
+    "wdtn": "http://www.wikidata.org/prop/direct-normalized/",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+  },
+  "classes": [
+    { "iri": "http://www.wikidata.org/entity/Q12140", "count": 0 },
+    { "iri": "http://www.wikidata.org/entity/Q7187", "count": 0 },
+    { "iri": "http://www.wikidata.org/entity/Q12136", "count": 0 }
+  ],
+  "properties": {
+    "http://www.wikidata.org/prop/direct/P2175": {
+      "iri": "http://www.wikidata.org/prop/direct/P2175",
+      "count": 0,
+      "curie": "wdt:P2175"
+    },
+    "http://www.wikidata.org/prop/direct/P2176": {
+      "iri": "http://www.wikidata.org/prop/direct/P2176",
+      "count": 0,
+      "curie": "wdt:P2176"
+    },
+    "http://www.wikidata.org/prop/direct/P2293": {
+      "iri": "http://www.wikidata.org/prop/direct/P2293",
+      "count": 0,
+      "curie": "wdt:P2293"
+    },
+    "http://www.wikidata.org/prop/direct/P351": {
+      "iri": "http://www.wikidata.org/prop/direct/P351",
+      "count": 0,
+      "curie": "wdt:P351"
+    },
+    "http://www.wikidata.org/prop/direct/P5270": {
+      "iri": "http://www.wikidata.org/prop/direct/P5270",
+      "count": 0,
+      "curie": "wdt:P5270"
+    },
+    "http://www.wikidata.org/prop/direct/P685": {
+      "iri": "http://www.wikidata.org/prop/direct/P685",
+      "count": 0,
+      "curie": "wdt:P685"
+    }
+  }
+}

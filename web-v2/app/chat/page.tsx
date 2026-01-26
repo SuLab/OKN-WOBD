@@ -2,7 +2,6 @@
 "use client";
 
 import { useEffect, useState, useRef, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
 import { ChatHistory } from "@/components/chat/ChatHistory";
 import { ChatComposer } from "@/components/chat/ChatComposer";
 import { InspectDrawer } from "@/components/chat/InspectDrawer";
@@ -34,7 +33,6 @@ export default function ChatPageWrapper() {
 }
 
 function ChatPage() {
-  const searchParams = useSearchParams();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,61 +40,28 @@ function ChatPage() {
   const isLoadingRef = useRef<HTMLDivElement>(null);
   const processingQueryRef = useRef<string | null>(null); // Track currently processing query to prevent duplicates
   const processingMessageIdsRef = useRef<Set<string>>(new Set()); // Track message IDs being processed to prevent duplicates
-  const wasClearedRef = useRef(false); // Track if messages were manually cleared to prevent auto-query
   const abortControllerRef = useRef<AbortController | null>(null); // Track abort controller for canceling queries
 
-  // Load messages from storage on mount
+  // Load messages from storage on mount. If user came from home (HeroSearch or
+  // ExampleQuestions), a query is in sessionStorage: run it and clear the key.
+  // On refresh or direct /chat, no key exists, so the text box stays empty and
+  // no query runs.
   useEffect(() => {
     const stored = loadMessagesFromStorage();
     setMessages(stored);
+    const pending = sessionStorage.getItem("wobd_pending_query");
+    if (pending) {
+      // Defer so setMessages(stored) commits first. Remove the key only when we
+      // are about to process; otherwise Strict Mode unmount can clear the
+      // timer before it fires, and we'd lose the query on remount.
+      const t = setTimeout(() => {
+        sessionStorage.removeItem("wobd_pending_query");
+        handleMessage({ text: pending, lane: "template" });
+      }, 0);
+      return () => clearTimeout(t);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only on mount; handleMessage is stable enough
   }, []);
-
-  // Handle initial query from URL
-  const hasProcessedInitialQuery = useRef(false);
-  const lastQueryRef = useRef<string | null>(null);
-  const [messagesInitialized, setMessagesInitialized] = useState(false);
-
-  // Mark messages as initialized after first load from storage
-  useEffect(() => {
-    // After messages are loaded from storage (or determined to be empty), mark as initialized
-    if (!messagesInitialized) {
-      // Use a small delay to ensure storage load completes
-      const timer = setTimeout(() => {
-        setMessagesInitialized(true);
-      }, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [messagesInitialized]);
-
-  useEffect(() => {
-    const q = searchParams.get("q");
-
-    // Reset the ref if messages are cleared
-    if (messages.length === 0) {
-      hasProcessedInitialQuery.current = false;
-      lastQueryRef.current = null;
-    }
-
-    // Process query if:
-    // 1. Query exists in URL
-    // 2. Messages have been initialized (loaded from storage or determined to be empty)
-    // 3. It's a different query than last processed (or we haven't processed any yet)
-    // 4. Messages weren't just manually cleared
-    if (q &&
-      messagesInitialized &&
-      (q !== lastQueryRef.current || !hasProcessedInitialQuery.current) &&
-      !wasClearedRef.current) {
-      hasProcessedInitialQuery.current = true;
-      lastQueryRef.current = q;
-      handleMessage({ text: q, lane: "template" });
-    }
-
-    // Reset the cleared flag after checking
-    if (wasClearedRef.current && messages.length === 0) {
-      wasClearedRef.current = false;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, messages.length, messagesInitialized]);
 
   // Save messages to storage whenever they change
   useEffect(() => {
@@ -631,15 +596,9 @@ function ChatPage() {
 
   function handleClearMessages() {
     if (confirm("Are you sure you want to clear all messages? This cannot be undone.")) {
-      // Set flag to prevent auto-query from URL after clearing
-      wasClearedRef.current = true;
       setMessages([]);
       clearMessagesFromStorage();
       setSelectedMessageId(null);
-      // Reset the initial query ref so new queries from URL can be processed (but only on next navigation)
-      hasProcessedInitialQuery.current = false;
-      lastQueryRef.current = null;
-      // Reset message count ref
       lastMessageCountRef.current = 0;
       // Reset scroll position to top
       if (chatContainerRef.current) {
@@ -827,7 +786,7 @@ function ChatPage() {
         <div className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex-shrink-0">
           <div className="p-4">
             <ChatComposer
-              initialValue={searchParams.get("q") || ""}
+              initialValue=""
               onMessage={handleMessage}
             />
           </div>

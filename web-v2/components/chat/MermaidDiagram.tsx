@@ -30,6 +30,7 @@ export function MermaidDiagram({ code, id }: MermaidDiagramProps) {
           startOnLoad: false,
           theme: "neutral",
           securityLevel: "loose",
+          suppressErrorRendering: true,
         });
 
         const uid = `mermaid-${id.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
@@ -74,6 +75,7 @@ export function MermaidDiagram({ code, id }: MermaidDiagramProps) {
   return (
     <div
       className="mermaid-diagram mt-2 flex justify-center overflow-x-auto rounded-lg bg-white dark:bg-slate-900/50 p-3"
+      style={{ transform: 'scale(1.5)', transformOrigin: 'top center' }}
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   );

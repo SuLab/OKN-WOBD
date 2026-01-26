@@ -221,10 +221,12 @@ function MessageBubble({
           </div>
         )}
 
-        {/* Timestamp */}
-        <div className="mt-1 text-xs opacity-60">
-          {new Date(message.timestamp).toLocaleTimeString()}
-        </div>
+        {/* Timestamp - hide for diagram messages */}
+        {!message.mermaid && (
+          <div className="mt-1 text-xs opacity-60">
+            {new Date(message.timestamp).toLocaleTimeString()}
+          </div>
+        )}
       </div>
     </div>
   );

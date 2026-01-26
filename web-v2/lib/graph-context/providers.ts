@@ -6,26 +6,23 @@
 
 import fs from "fs/promises";
 import path from "path";
-import { GraphContext, GraphContextProvider, OmnigraphFormat } from "./types";
-import { adaptOmnigraphToContext } from "./omnigraph-adapter";
+import { GraphContext, GraphContextProvider, ContextFileFormat } from "./types";
+import { adaptContextFileToGraphContext } from "./context-adapter";
 
 /**
- * GitHub provider for omnigraph context files
+ * GitHub provider for graph context files (*_global.json)
  */
-export class OmnigraphGitHubProvider implements GraphContextProvider {
+export class GitHubContextProvider implements GraphContextProvider {
     private baseUrl: string;
     private cache: Map<string, { context: GraphContext; timestamp: number }> = new Map();
     private cacheTTL: number = 24 * 60 * 60 * 1000; // 24 hours
 
     constructor(baseUrl?: string) {
-        // Use environment variable or default to twhetzel/omnigraph-agent main branch
-        this.baseUrl = baseUrl ||
-            process.env.OMNIGRAPH_CONTEXT_URL ||
-            "https://raw.githubusercontent.com/twhetzel/omnigraph-agent/main/dist/context";
+        this.baseUrl = baseUrl ?? process.env.GITHUB_CONTEXT_URL ?? "";
     }
 
-    getSource(): "omnigraph" {
-        return "omnigraph";
+    getSource(): "github" {
+        return "github";
     }
 
     supports(graphShortname: string): boolean {
@@ -35,6 +32,8 @@ export class OmnigraphGitHubProvider implements GraphContextProvider {
     }
 
     async loadContext(graphShortname: string): Promise<GraphContext | null> {
+        if (!this.baseUrl) return null;
+
         // Check cache first
         const cached = this.cache.get(graphShortname);
         if (cached && Date.now() - cached.timestamp < this.cacheTTL) {
@@ -47,13 +46,13 @@ export class OmnigraphGitHubProvider implements GraphContextProvider {
 
             if (!response.ok) {
                 if (response.status === 404) {
-                    return null; // Graph not found in omnigraph
+                    return null; // Graph not found
                 }
                 throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
             }
 
-            const omnigraph: OmnigraphFormat = await response.json();
-            const context = adaptOmnigraphToContext(graphShortname, omnigraph, "omnigraph");
+            const contextFile: ContextFileFormat = await response.json();
+            const context = adaptContextFileToGraphContext(graphShortname, contextFile, "github");
 
             // Cache the result
             this.cache.set(graphShortname, {
@@ -63,7 +62,7 @@ export class OmnigraphGitHubProvider implements GraphContextProvider {
 
             return context;
         } catch (error) {
-            console.error(`Error loading omnigraph context for ${graphShortname}:`, error);
+            console.error(`Error loading GitHub context for ${graphShortname}:`, error);
             return null;
         }
     }
@@ -81,7 +80,7 @@ export class OmnigraphGitHubProvider implements GraphContextProvider {
 }
 
 /**
- * Local file provider for cached omnigraph context files
+ * Local file provider for *_global.json context files
  */
 export class LocalFileProvider implements GraphContextProvider {
     private contextDir: string;
@@ -114,8 +113,8 @@ export class LocalFileProvider implements GraphContextProvider {
             }
 
             const fileContent = await fs.readFile(filePath, "utf-8");
-            const omnigraph: OmnigraphFormat = JSON.parse(fileContent);
-            const context = adaptOmnigraphToContext(graphShortname, omnigraph, "local");
+            const contextFile: ContextFileFormat = JSON.parse(fileContent);
+            const context = adaptContextFileToGraphContext(graphShortname, contextFile, "local");
 
             return context;
         } catch (error) {
@@ -134,8 +133,8 @@ export class LocalFileProvider implements GraphContextProvider {
 
             const filePath = path.join(this.contextDir, `${context.graph_shortname}_global.json`);
 
-            // Convert back to omnigraph format for storage
-            const omnigraph: OmnigraphFormat = {
+            // Convert back to context file format for storage
+            const contextFile: ContextFileFormat = {
                 endpoint: context.endpoint,
                 prefixes: context.prefixes,
                 classes: context.classes.map((cls) => ({
@@ -145,7 +144,7 @@ export class LocalFileProvider implements GraphContextProvider {
                 dataset_properties: context.properties,
             };
 
-            await fs.writeFile(filePath, JSON.stringify(omnigraph, null, 2), "utf-8");
+            await fs.writeFile(filePath, JSON.stringify(contextFile, null, 2), "utf-8");
         } catch (error) {
             console.error(`Error saving local context for ${context.graph_shortname}:`, error);
             throw error;

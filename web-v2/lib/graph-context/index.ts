@@ -7,5 +7,5 @@
 export * from "./types";
 export * from "./loader";
 export * from "./providers";
-export * from "./omnigraph-adapter";
+export * from "./context-adapter";
 

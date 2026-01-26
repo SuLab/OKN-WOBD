@@ -6,7 +6,7 @@
  */
 
 import { GraphContext, GraphContextProvider } from "./types";
-import { OmnigraphGitHubProvider, LocalFileProvider } from "./providers";
+import { GitHubContextProvider, LocalFileProvider } from "./providers";
 
 export class GraphContextLoader {
     private providers: GraphContextProvider[] = [];
@@ -15,11 +15,13 @@ export class GraphContextLoader {
         if (providers) {
             this.providers = providers;
         } else {
-            // Default providers: try local first, then GitHub
-            this.providers = [
-                new LocalFileProvider(),
-                new OmnigraphGitHubProvider(),
-            ];
+            // Default: LocalFileProvider first; GitHubContextProvider only when not disabled
+            const providersList: GraphContextProvider[] = [new LocalFileProvider()];
+            const disabled = process.env.DISABLE_GITHUB_CONTEXT === "1" || process.env.DISABLE_GITHUB_CONTEXT === "true";
+            if (!disabled) {
+                providersList.push(new GitHubContextProvider());
+            }
+            this.providers = providersList;
         }
     }
 
@@ -36,7 +38,7 @@ export class GraphContextLoader {
             const context = await provider.loadContext(graphShortname);
             if (context) {
                 // If we got it from GitHub and we have a local provider, cache it
-                if (context.source === "omnigraph" && provider instanceof OmnigraphGitHubProvider) {
+                if (context.source === "github" && provider instanceof GitHubContextProvider) {
                     const localProvider = this.providers.find((p) => p instanceof LocalFileProvider) as LocalFileProvider;
                     if (localProvider) {
                         // Cache asynchronously (don't wait)
@@ -83,7 +85,7 @@ export class GraphContextLoader {
      */
     clearCache(graphShortname?: string): void {
         for (const provider of this.providers) {
-            if (provider instanceof OmnigraphGitHubProvider) {
+            if (provider instanceof GitHubContextProvider) {
                 provider.clearCache(graphShortname);
             }
         }
