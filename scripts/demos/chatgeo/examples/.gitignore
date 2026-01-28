@@ -1,0 +1,17 @@
+# Ignore generated output files from example runs
+*/results.json
+*/genes.tsv
+*/enrichment.tsv
+*/summary.txt
+*/command.sh
+
+# Keep the README and script
+!README.md
+!run_all_examples.py
+
+# Python cache
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store

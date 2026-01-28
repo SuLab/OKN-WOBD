@@ -1,0 +1,114 @@
+======================================================================
+ChatGEO Demo: ARCHS4 Sample Finder
+Run at: 2026-01-23T13:43:37.000751
+======================================================================
+ARCHS4_DATA_DIR: /Users/bgood/scripps/data/archs4
+
+======================================================================
+Example 1: POOLED MODE - Pulmonary Fibrosis
+  Use case: Single differential expression analysis
+======================================================================
+============================================================
+POOLED SAMPLES (Single DE Analysis)
+============================================================
+
+TEST SAMPLES
+  Query: pulmonary fibrosis|fibrosis|fibrotic|scarring
+  Samples selected: 200
+  Total available: 4723
+
+CONTROL SAMPLES
+  Query: (lung|pulmonary|respiratory).*(healthy|control|normal)
+  Samples selected: 200
+  Total available: 2948
+
+SUMMARY
+  Overlap removed: 32
+  Subsampled: Yes
+  Ready for DE: Yes
+============================================================
+
+Sample IDs ready for DE analysis:
+  Test samples: 200 IDs
+  Control samples: 200 IDs
+
+======================================================================
+Example 2: STUDY-MATCHED MODE - Pulmonary Fibrosis
+  Use case: Within-study DE with meta-analysis
+======================================================================
+============================================================
+STUDY-MATCHED SAMPLES (Multiple DE Analyses)
+============================================================
+
+SEARCH SUMMARY
+  Test query: pulmonary fibrosis|fibrosis|fibrotic|scarring
+  Control query: (lung|pulmonary|respiratory).*(healthy|control|normal)
+  Total test found: 4723
+  Total control found: 2948
+  Overlap removed: 32
+
+STUDY MATCHING
+  Studies with both test & control: 13
+  Studies with test only: 110
+  Studies with control only: 426
+
+MATCHED STUDIES (13 total)
+------------------------------------------------------------
+  Study ID         Test  Control    Total
+------------------------------------------------------------
+  GSE227136          64       34       98
+  GSE231693          20       20       40
+  GSE231694          20       20       40
+  GSE92592           20       19       39
+  GSE226249          18        9       27
+  GSE99621           18        8       26
+  GSE185492          12       12       24
+  GSE245059          16        3       19
+  GSE97038            8        8       16
+  GSE135893          11        5       16
+  GSE132771           6       10       16
+  GSE119007           6        6       12
+  GSE225549           6        6       12
+------------------------------------------------------------
+  TOTAL             225      160      385
+============================================================
+
+Top study details:
+  Study: GSE227136
+  Test samples: 64
+    - VUILD93-MF...
+    - VUILDD95-MF...
+    - VUILD96-LF...
+
+======================================================================
+Example 3: Mode Comparison - Liver Fibrosis
+======================================================================
+
+POOLED MODE:
+  Test samples: 500 (from 38772 total)
+  Control samples: 0 (from 0 total)
+  → Ready for 1 DE analysis
+
+STUDY-MATCHED MODE:
+  Matched studies: 0
+  Test samples in matched: 0
+  Control samples in matched: 0
+  → Ready for 0 within-study DE analyses
+
+======================================================================
+Example 4: Query Strategy Comparison for 'liver fibrosis'
+======================================================================
+
+TEXT Strategy:
+  Samples: 31
+  Studies: 3
+  Time: 21682.7ms
+
+PATTERN Strategy:
+  Samples: 38772
+  Studies: 2406
+  Time: 68497.4ms
+
+======================================================================
+Demo complete!
+======================================================================
