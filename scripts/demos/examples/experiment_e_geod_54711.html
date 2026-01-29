@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Experiment: E-GEOD-54711</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .study-info {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .legend {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: #555;
+        }
+        .instructions {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+        #network {
+            width: 1100px;
+            height: 700px;
+            border: 1px solid #ddd;
+            background: white;
+            margin: 0 auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .summary {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #666;
+        }
+        .controls {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .toggle-btn {
+            padding: 8px 16px;
+            font-size: 13px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: all 0.2s;
+        }
+        .toggle-btn.active {
+            background: #27ae60;
+            color: white;
+        }
+        .toggle-btn.inactive {
+            background: #e0e0e0;
+            color: #555;
+        }
+        #custom-tooltip {
+            position: fixed;
+            background: rgba(45, 52, 54, 0.95);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.5;
+            max-width: 400px;
+            pointer-events: none;
+            z-index: 10000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        #custom-tooltip b {
+            color: #f1c40f;
+        }
+        .vis-tooltip {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <h1>Experiment: E-GEOD-54711</h1>
+    
+    <div style="background:#f8f9fa;padding:12px 15px;border-radius:6px;margin-bottom:15px;font-size:13px;max-width:1100px;margin:0 auto 15px auto;">
+        <div style="font-weight:bold;color:#2c3e50;margin-bottom:5px;">Parent vs. Induced drug tolerant cells Microarray Analysis</div>
+        <div style="color:#666;">
+            <b>Study ID:</b> E-GEOD-54711 |
+            <b>GEO:</b> GSE54711 |
+            <b>Organism:</b> Homo sapiens |
+            <b>Factors:</b> compound, dose
+        </div>
+    </div>
+    
+    <div class="legend"><span style="display:inline-block;margin-right:12px;"><span style="color:#2c3e50;font-size:14px;margin-right:4px;">■</span>Study</span> <span style="display:inline-block;margin-right:12px;"><span style="color:#e74c3c;font-size:14px;margin-right:4px;">●</span>Disease</span> <span style="display:inline-block;margin-right:12px;"><span style="color:#9b59b6;font-size:14px;margin-right:4px;">◆</span>Drug/Compound</span> <span style="display:inline-block;margin-right:12px;"><span style="color:#3498db;font-size:14px;margin-right:4px;">●</span>Assay</span> <span style="display:inline-block;margin-right:12px;"><span style="color:#e74c3c;font-size:14px;margin-right:4px;">●</span>Gene (up)</span> <span style="display:inline-block;margin-right:12px;"><span style="color:#3498db;font-size:14px;margin-right:4px;">●</span>Gene (down)</span> <span style="display:inline-block;margin-right:12px;"><span style="color:#2ecc71;font-size:14px;margin-right:4px;">▲</span>GO/Pathway</span></div>
+    <div class="controls">
+        <button id="physicsToggle" class="toggle-btn inactive" onclick="togglePhysics()">
+            ⚡ Auto-Layout: OFF
+        </button>
+        <button class="toggle-btn inactive" onclick="resetLayout()">
+            🔄 Reset Layout
+        </button>
+    </div>
+    <div class="instructions">Drag nodes to rearrange • Scroll to zoom • Hover for details</div>
+    <div id="network"></div>
+    <div id="custom-tooltip"></div>
+    <div class="summary">
+        25 nodes • 24 connections
+    </div>
+
+    <script type="text/javascript">
+        var nodes = new vis.DataSet([{"id": "study:E-GEOD-54711", "label": "Parent vs. Induced drug tolerant cells M...", "color": {"background": "#2c3e50", "border": "#2c3e50", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 45, "font": {"size": 12, "color": "#ffffff", "bold": true}, "title": "<b>Study: E-GEOD-54711</b><br>Title: Parent vs. Induced drug tolerant cells Microarray Analysis<br>Organism: Homo sapiens<br>Factors: compound, dose", "shape": "box", "fixed": {"x": false, "y": false}, "physics": false}, {"id": "disease:melanoma", "label": "melanoma", "color": {"background": "#e74c3c", "border": "#e74c3c", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 30, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Disease:</b> melanoma<br>ID: https://spoke.ucsf.edu/genelab/Disease/melanoma", "shape": "dot"}, {"id": "assay:0", "label": "'PLX4032; 500 nanomolar' ", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 35, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Assay:</b> 'PLX4032; 500 nanomolar' vs 'DMSO'<br>Test: 500 nanomolar; PLX4032<br>Reference: DMSO", "shape": "dot"}, {"id": "gene:ANGPTL7", "label": "ANGPTL7", "color": {"background": "#e74c3c", "border": "#e74c3c", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Gene:</b> ANGPTL7<br>log2FC: 4.40<br>p-value: 1.08e-07<br>Direction: UPREGULATED", "shape": "dot"}, {"id": "gene:STK32A", "label": "STK32A", "color": {"background": "#e74c3c", "border": "#e74c3c", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Gene:</b> STK32A<br>log2FC: 4.00<br>p-value: 3.53e-07<br>Direction: UPREGULATED", "shape": "dot"}, {"id": "gene:SLITRK6", "label": "SLITRK6", "color": {"background": "#e74c3c", "border": "#e74c3c", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Gene:</b> SLITRK6<br>log2FC: 4.00<br>p-value: 3.26e-07<br>Direction: UPREGULATED", "shape": "dot"}, {"id": "gene:DCT", "label": "DCT", "color": {"background": "#e74c3c", "border": "#e74c3c", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Gene:</b> DCT<br>log2FC: 4.00<br>p-value: 8.05e-08<br>Direction: UPREGULATED", "shape": "dot"}, {"id": "gene:TFAP2A-AS1", "label": "TFAP2A-AS1", "color": {"background": "#e74c3c", "border": "#e74c3c", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Gene:</b> TFAP2A-AS1<br>log2FC: 4.00<br>p-value: 1.17e-07<br>Direction: UPREGULATED", "shape": "dot"}, {"id": "gene:RFTN2", "label": "RFTN2", "color": {"background": "#e74c3c", "border": "#e74c3c", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Gene:</b> RFTN2<br>log2FC: 4.00<br>p-value: 9.34e-08<br>Direction: UPREGULATED", "shape": "dot"}, {"id": "gene:BCAN", "label": "BCAN", "color": {"background": "#e74c3c", "border": "#e74c3c", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Gene:</b> BCAN<br>log2FC: 3.80<br>p-value: 9.01e-08<br>Direction: UPREGULATED", "shape": "dot"}, {"id": "gene:ID2", "label": "ID2", "color": {"background": "#e74c3c", "border": "#e74c3c", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Gene:</b> ID2<br>log2FC: 3.80<br>p-value: 3.53e-07<br>Direction: UPREGULATED", "shape": "dot"}, {"id": "gene:MMP2", "label": "MMP2", "color": {"background": "#e74c3c", "border": "#e74c3c", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Gene:</b> MMP2<br>log2FC: 3.70<br>p-value: 9.01e-08<br>Direction: UPREGULATED", "shape": "dot"}, {"id": "gene:IGFBP5", "label": "IGFBP5", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Gene:</b> IGFBP5<br>log2FC: -5.50<br>p-value: 7.40e-08<br>Direction: DOWNREGULATED", "shape": "dot"}, {"id": "gene:LIF", "label": "LIF", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Gene:</b> LIF<br>log2FC: -5.30<br>p-value: 6.81e-08<br>Direction: DOWNREGULATED", "shape": "dot"}, {"id": "gene:SPRY4", "label": "SPRY4", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Gene:</b> SPRY4<br>log2FC: -5.30<br>p-value: 3.53e-07<br>Direction: DOWNREGULATED", "shape": "dot"}, {"id": "gene:FCRLA", "label": "FCRLA", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Gene:</b> FCRLA<br>log2FC: -4.80<br>p-value: 9.01e-08<br>Direction: DOWNREGULATED", "shape": "dot"}, {"id": "gene:CD96", "label": "CD96", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Gene:</b> CD96<br>log2FC: -4.70<br>p-value: 9.01e-08<br>Direction: DOWNREGULATED", "shape": "dot"}, {"id": "gene:HAPLN1", "label": "HAPLN1", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Gene:</b> HAPLN1<br>log2FC: -4.50<br>p-value: 8.05e-08<br>Direction: DOWNREGULATED", "shape": "dot"}, {"id": "gene:ETV4", "label": "ETV4", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Gene:</b> ETV4<br>log2FC: -4.20<br>p-value: 9.01e-08<br>Direction: DOWNREGULATED", "shape": "dot"}, {"id": "gene:TNC", "label": "TNC", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Gene:</b> TNC<br>log2FC: -4.20<br>p-value: 8.05e-08<br>Direction: DOWNREGULATED", "shape": "dot"}, {"id": "gene:CYB5R2", "label": "CYB5R2", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Gene:</b> CYB5R2<br>log2FC: -3.90<br>p-value: 1.04e-06<br>Direction: DOWNREGULATED", "shape": "dot"}, {"id": "gene:KIAA0040", "label": "KIAA0040", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Gene:</b> KIAA0040<br>log2FC: -3.80<br>p-value: 9.49e-08<br>Direction: DOWNREGULATED", "shape": "dot"}, {"id": "go:GO_0042254", "label": "ribosome biogenesis", "color": {"background": "#2ecc71", "border": "#2ecc71", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Pathway/GO Term:</b> ribosome biogenesis<br>ID: GO:0042254<br>p-value: 1.03e-09", "shape": "triangle"}, {"id": "go:R-CEL-69206", "label": "G1/S Transition", "color": {"background": "#2ecc71", "border": "#2ecc71", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Pathway/GO Term:</b> G1/S Transition<br>ID: R-CEL-69206<br>p-value: 1.76e-08", "shape": "triangle"}, {"id": "go:R-CEL-69306", "label": "DNA Replication", "color": {"background": "#2ecc71", "border": "#2ecc71", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 22, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Pathway/GO Term:</b> DNA Replication<br>ID: R-CEL-69306<br>p-value: 1.25e-07", "shape": "triangle"}]);
+        var edges = new vis.DataSet([{"from": "study:E-GEOD-54711", "to": "disease:melanoma", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Study investigates this disease", "width": 2, "smooth": {"type": "continuous"}, "label": "studies", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "study:E-GEOD-54711", "to": "assay:0", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Test: 500 nanomolar; PLX4032 vs Ref: DMSO", "width": 2, "smooth": {"type": "continuous"}, "label": "has assay", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "gene:ANGPTL7", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Upregulated (log2FC=4.40, p=1.08e-07)", "width": 2, "smooth": {"type": "continuous"}, "label": "+4.4", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "gene:STK32A", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Upregulated (log2FC=4.00, p=3.53e-07)", "width": 2, "smooth": {"type": "continuous"}, "label": "+4.0", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "gene:SLITRK6", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Upregulated (log2FC=4.00, p=3.26e-07)", "width": 2, "smooth": {"type": "continuous"}, "label": "+4.0", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "gene:DCT", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Upregulated (log2FC=4.00, p=8.05e-08)", "width": 2, "smooth": {"type": "continuous"}, "label": "+4.0", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "gene:TFAP2A-AS1", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Upregulated (log2FC=4.00, p=1.17e-07)", "width": 2, "smooth": {"type": "continuous"}, "label": "+4.0", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "gene:RFTN2", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Upregulated (log2FC=4.00, p=9.34e-08)", "width": 2, "smooth": {"type": "continuous"}, "label": "+4.0", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "gene:BCAN", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Upregulated (log2FC=3.80, p=9.01e-08)", "width": 2, "smooth": {"type": "continuous"}, "label": "+3.8", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "gene:ID2", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Upregulated (log2FC=3.80, p=3.53e-07)", "width": 2, "smooth": {"type": "continuous"}, "label": "+3.8", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "gene:MMP2", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Upregulated (log2FC=3.70, p=9.01e-08)", "width": 2, "smooth": {"type": "continuous"}, "label": "+3.7", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "gene:IGFBP5", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Downregulated (log2FC=-5.50, p=7.40e-08)", "width": 2, "smooth": {"type": "continuous"}, "label": "-5.5", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "gene:LIF", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Downregulated (log2FC=-5.30, p=6.81e-08)", "width": 2, "smooth": {"type": "continuous"}, "label": "-5.3", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "gene:SPRY4", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Downregulated (log2FC=-5.30, p=3.53e-07)", "width": 2, "smooth": {"type": "continuous"}, "label": "-5.3", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "gene:FCRLA", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Downregulated (log2FC=-4.80, p=9.01e-08)", "width": 2, "smooth": {"type": "continuous"}, "label": "-4.8", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "gene:CD96", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Downregulated (log2FC=-4.70, p=9.01e-08)", "width": 2, "smooth": {"type": "continuous"}, "label": "-4.7", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "gene:HAPLN1", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Downregulated (log2FC=-4.50, p=8.05e-08)", "width": 2, "smooth": {"type": "continuous"}, "label": "-4.5", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "gene:ETV4", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Downregulated (log2FC=-4.20, p=9.01e-08)", "width": 2, "smooth": {"type": "continuous"}, "label": "-4.2", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "gene:TNC", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Downregulated (log2FC=-4.20, p=8.05e-08)", "width": 2, "smooth": {"type": "continuous"}, "label": "-4.2", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "gene:CYB5R2", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Downregulated (log2FC=-3.90, p=1.04e-06)", "width": 2, "smooth": {"type": "continuous"}, "label": "-3.9", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "gene:KIAA0040", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Downregulated (log2FC=-3.80, p=9.49e-08)", "width": 2, "smooth": {"type": "continuous"}, "label": "-3.8", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "go:GO_0042254", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Enriched pathway (p=1.03e-09)", "width": 2, "smooth": {"type": "continuous"}, "label": "enriched", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "go:R-CEL-69206", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Enriched pathway (p=1.76e-08)", "width": 2, "smooth": {"type": "continuous"}, "label": "enriched", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}, {"from": "assay:0", "to": "go:R-CEL-69306", "color": {"color": "#7f8c8d", "highlight": "#f1c40f"}, "title": "Enriched pathway (p=1.25e-07)", "width": 2, "smooth": {"type": "continuous"}, "label": "enriched", "font": {"size": 9, "color": "#555", "strokeWidth": 2, "strokeColor": "#ffffff", "align": "middle"}}]);
+
+        var container = document.getElementById('network');
+        var data = { nodes: nodes, edges: edges };
+
+        var options = {
+            nodes: {
+                borderWidth: 2,
+                shadow: true,
+                font: {
+                    color: '#ffffff',
+                    face: 'arial',
+                }
+            },
+            edges: {
+                shadow: true,
+                smooth: {
+                    type: 'continuous'
+                }
+            },
+            physics: {
+                enabled: true,
+                barnesHut: {
+                    gravitationalConstant: -2500,
+                    centralGravity: 0.25,
+                    springLength: 120,
+                    springConstant: 0.04,
+                    damping: 0.09,
+                },
+                stabilization: {
+                    iterations: 200,
+                    fit: true
+                }
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 100,
+                dragNodes: true,
+                dragView: true,
+                zoomView: true,
+            }
+        };
+
+        var network = new vis.Network(container, data, options);
+        var physicsEnabled = false;
+
+        network.on("stabilizationIterationsDone", function () {
+            physicsEnabled = false;
+            network.setOptions({ physics: { enabled: false } });
+            updatePhysicsButton();
+        });
+
+        function togglePhysics() {
+            physicsEnabled = !physicsEnabled;
+            network.setOptions({ physics: { enabled: physicsEnabled } });
+            updatePhysicsButton();
+        }
+
+        function updatePhysicsButton() {
+            var btn = document.getElementById('physicsToggle');
+            if (physicsEnabled) {
+                btn.textContent = '⚡ Auto-Layout: ON';
+                btn.className = 'toggle-btn active';
+            } else {
+                btn.textContent = '⚡ Auto-Layout: OFF';
+                btn.className = 'toggle-btn inactive';
+            }
+        }
+
+        function resetLayout() {
+            physicsEnabled = true;
+            network.setOptions({ physics: { enabled: true } });
+            updatePhysicsButton();
+            var positions = network.getPositions();
+            var updates = [];
+            for (var nodeId in positions) {
+                updates.push({ id: nodeId, x: undefined, y: undefined });
+            }
+            nodes.update(updates);
+            network.stabilize(200);
+        }
+
+        var tooltip = document.getElementById('custom-tooltip');
+
+        function showTooltip(content, params) {
+            if (!content) return;
+            tooltip.innerHTML = content;
+            tooltip.style.display = 'block';
+            var x, y;
+            if (params.event && params.event.srcEvent) {
+                x = params.event.srcEvent.clientX;
+                y = params.event.srcEvent.clientY;
+            } else if (params.pointer && params.pointer.DOM) {
+                var rect = container.getBoundingClientRect();
+                x = rect.left + params.pointer.DOM.x;
+                y = rect.top + params.pointer.DOM.y;
+            } else {
+                return;
+            }
+            tooltip.style.left = (x + 15) + 'px';
+            tooltip.style.top = (y + 15) + 'px';
+            var rect = tooltip.getBoundingClientRect();
+            if (rect.right > window.innerWidth) {
+                tooltip.style.left = (x - rect.width - 15) + 'px';
+            }
+            if (rect.bottom > window.innerHeight) {
+                tooltip.style.top = (y - rect.height - 15) + 'px';
+            }
+        }
+
+        function hideTooltip() {
+            tooltip.style.display = 'none';
+        }
+
+        network.on('hoverEdge', function(params) {
+            var edgeId = params.edge;
+            var edge = edges.get(edgeId);
+            var content = edge ? edge.title : null;
+            if (content) showTooltip(content, params);
+        });
+
+        network.on('blurEdge', hideTooltip);
+
+        network.on('hoverNode', function(params) {
+            var nodeId = params.node;
+            var node = nodes.get(nodeId);
+            var content = node ? node.title : null;
+            if (content) showTooltip(content, params);
+        });
+
+        network.on('blurNode', hideTooltip);
+        network.on('dragStart', hideTooltip);
+        network.on('click', hideTooltip);
+    </script>
+</body>
+</html>
