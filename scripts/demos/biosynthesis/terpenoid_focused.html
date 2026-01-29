@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Terpenoid Biosynthesis: Gene-Assay Network</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0; padding: 20px; background: #f8f9fa;
+        }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 8px; font-size: 24px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 15px; font-size: 14px; }
+        .legend { text-align: center; margin-bottom: 12px; font-size: 13px; color: #555; }
+        .legend div { margin: 4px 0; }
+        .controls { text-align: center; margin-bottom: 10px; }
+        .btn {
+            padding: 8px 16px; font-size: 13px; border: none; border-radius: 5px;
+            cursor: pointer; margin: 0 5px; transition: all 0.2s;
+        }
+        .btn.active { background: #27ae60; color: white; }
+        .btn.inactive { background: #e0e0e0; color: #555; }
+        .btn:hover { opacity: 0.85; }
+        .instructions { text-align: center; font-size: 12px; color: #888; margin-bottom: 8px; }
+        .main-container {
+            display: flex; gap: 20px; align-items: flex-start;
+        }
+        #network {
+            flex: 1; height: 650px; border: 1px solid #ddd;
+            background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        #details-panel {
+            width: 320px; min-height: 200px; max-height: 650px; overflow-y: auto;
+            background: white; border: 1px solid #ddd; border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 15px;
+        }
+        #details-panel h3 {
+            margin: 0 0 10px 0; color: #2c3e50; font-size: 16px;
+            border-bottom: 2px solid #3498db; padding-bottom: 8px;
+        }
+        #details-panel .detail-type {
+            display: inline-block; padding: 3px 8px; border-radius: 4px;
+            font-size: 11px; font-weight: bold; text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        #details-panel .detail-type.go_term { background: #27ae60; color: white; }
+        #details-panel .detail-type.gene { background: #3498db; color: white; }
+        #details-panel .detail-type.study { background: #9b59b6; color: white; }
+        #details-panel .detail-type.assay { background: #e67e22; color: white; }
+        #details-panel .detail-label {
+            font-size: 12px; color: #888; margin-top: 12px; margin-bottom: 4px;
+        }
+        #details-panel .detail-value {
+            font-size: 14px; color: #2c3e50; line-height: 1.5;
+        }
+        #details-panel .detail-value.description {
+            background: #f8f9fa; padding: 10px; border-radius: 4px;
+            border-left: 3px solid #3498db;
+        }
+        #details-panel .placeholder {
+            color: #aaa; font-style: italic; text-align: center; padding: 40px 20px;
+        }
+        .summary { text-align: center; margin-top: 12px; font-size: 13px; color: #666; }
+        #tooltip {
+            position: fixed; background: rgba(40,44,52,0.95); color: white;
+            padding: 10px 14px; border-radius: 6px; font-size: 13px; line-height: 1.5;
+            max-width: 350px; pointer-events: none; z-index: 10000; display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        #tooltip b { color: #f1c40f; }
+        .vis-tooltip { display: none !important; }
+    </style>
+</head>
+<body>
+    <h1>Terpenoid Biosynthesis: Gene-Assay Network</h1>
+    <div class="subtitle">Genes annotated to terpenoid biosynthesis showing significant upregulation</div>
+    <div class="legend">
+        <div><b>Nodes:</b> <span style="display:inline-flex;align-items:center;margin-right:20px;"><span style="display:inline-block;width:16px;height:16px;background:#27ae60;border-radius:3px;margin-right:6px;"></span>Go Term</span> <span style="display:inline-flex;align-items:center;margin-right:20px;"><span style="display:inline-block;width:16px;height:16px;background:#3498db;border-radius:50%;margin-right:6px;"></span>Gene</span> <span style="display:inline-flex;align-items:center;margin-right:20px;"><span style="display:inline-block;width:16px;height:16px;background:#e67e22;border-radius:3px;margin-right:6px;"></span>Assay</span> <span style="display:inline-flex;align-items:center;margin-right:20px;"><span style="display:inline-block;width:16px;height:16px;background:#9b59b6;border-radius:3px;margin-right:6px;"></span>Study</span></div>
+        <div><b>Data Sources:</b> <span style="display:inline-flex;align-items:center;margin-right:20px;"><span style="display:inline-block;width:24px;height:3px;background:#27ae60;margin-right:6px;"></span>Ubergraph</span> <span style="display:inline-flex;align-items:center;margin-right:20px;"><span style="display:inline-block;width:24px;height:3px;background:#f39c12;margin-right:6px;"></span>UniProt</span> <span style="display:inline-flex;align-items:center;margin-right:20px;"><span style="display:inline-block;width:24px;height:3px;background:#e74c3c;margin-right:6px;"></span>GXA</span></div>
+    </div>
+    <div class="controls">
+        <button id="physicsBtn" class="btn inactive" onclick="togglePhysics()">⚡ Auto-Layout: OFF</button>
+        <button class="btn inactive" onclick="resetLayout()">🔄 Reset</button>
+        <button class="btn inactive" onclick="network.fit({animation:true})">🔍 Fit</button>
+    </div>
+    <div class="instructions">Drag nodes • Scroll to zoom • Click node for details</div>
+    <div class="main-container">
+        <div id="network"></div>
+        <div id="details-panel">
+            <div class="placeholder">Click a node to see details</div>
+        </div>
+    </div>
+    <div id="tooltip"></div>
+    <div class="summary">
+        32 nodes • 29 connections<br>
+        Gene Ontology (Ubergraph) → UniProt annotations → GXA expression
+    </div>
+    <script>
+        var nodes = new vis.DataSet([{"id": "go:GO:0016123", "label": "GO:0016123\nxanthophyll biosynthetic ...", "color": {"background": "#27ae60", "border": "#27ae60", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "diamond", "size": 25, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>GO:0016123</b><br>xanthophyll biosynthetic process<br><br>Source: Gene Ontology", "fullDescription": "xanthophyll biosynthetic process", "source": "Gene Ontology (via Ubergraph)", "nodeType": "go_term"}, {"id": "go:GO:0016102", "label": "GO:0016102\nditerpenoid biosynthetic ...", "color": {"background": "#27ae60", "border": "#27ae60", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "diamond", "size": 25, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>GO:0016102</b><br>diterpenoid biosynthetic process<br><br>Source: Gene Ontology", "fullDescription": "diterpenoid biosynthetic process", "source": "Gene Ontology (via Ubergraph)", "nodeType": "go_term"}, {"id": "go:GO:0016114", "label": "GO:0016114\nterpenoid biosynthetic pr...", "color": {"background": "#27ae60", "border": "#27ae60", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "diamond", "size": 25, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>GO:0016114</b><br>terpenoid biosynthetic process<br><br>Source: Gene Ontology", "fullDescription": "terpenoid biosynthetic process", "source": "Gene Ontology (via Ubergraph)", "nodeType": "go_term"}, {"id": "go:GO:0016104", "label": "GO:0016104\ntriterpenoid biosynthetic...", "color": {"background": "#27ae60", "border": "#27ae60", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "diamond", "size": 25, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>GO:0016104</b><br>triterpenoid biosynthetic process<br><br>Source: Gene Ontology", "fullDescription": "triterpenoid biosynthetic process", "source": "Gene Ontology (via Ubergraph)", "nodeType": "go_term"}, {"id": "go:GO:0009686", "label": "GO:0009686\ngibberellin biosynthetic ...", "color": {"background": "#27ae60", "border": "#27ae60", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "diamond", "size": 25, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>GO:0009686</b><br>gibberellin biosynthetic process<br><br>Source: Gene Ontology", "fullDescription": "gibberellin biosynthetic process", "source": "Gene Ontology (via Ubergraph)", "nodeType": "go_term"}, {"id": "go:GO:0016099", "label": "GO:0016099\nmonoterpenoid biosyntheti...", "color": {"background": "#27ae60", "border": "#27ae60", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "diamond", "size": 25, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>GO:0016099</b><br>monoterpenoid biosynthetic process<br><br>Source: Gene Ontology", "fullDescription": "monoterpenoid biosynthetic process", "source": "Gene Ontology (via Ubergraph)", "nodeType": "go_term"}, {"id": "gene:AT5G07200", "label": "AT5G07200", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "dot", "size": 20, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>AT5G07200</b>Gibberellin 20 oxidase 3<br>GO: GO:0009686<br>Source: UniProt", "fullDescription": "Gibberellin 20 oxidase 3 | Annotated to: GO:0009686", "source": "UniProt", "nodeType": "gene"}, {"id": "gene:AT5G51810", "label": "AT5G51810", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "dot", "size": 20, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>AT5G51810</b>Gibberellin 20 oxidase 2<br>GO: GO:0009686<br>Source: UniProt", "fullDescription": "Gibberellin 20 oxidase 2 | Annotated to: GO:0009686", "source": "UniProt", "nodeType": "gene"}, {"id": "gene:AT1G78960", "label": "AT1G78960", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "dot", "size": 20, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>AT1G78960</b>Terpene cyclase/mutase family member<br>GO: GO:0016104<br>Source: UniProt", "fullDescription": "Terpene cyclase/mutase family member | Annotated to: GO:0016104", "source": "UniProt", "nodeType": "gene"}, {"id": "gene:AT4G21200", "label": "AT4G21200", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "dot", "size": 20, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>AT4G21200</b>Gibberellin 2-beta-dioxygenase 8<br>GO: GO:0009686<br>Source: UniProt", "fullDescription": "Gibberellin 2-beta-dioxygenase 8 | Annotated to: GO:0009686", "source": "UniProt", "nodeType": "gene"}, {"id": "gene:AT5G52570", "label": "AT5G52570", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "dot", "size": 20, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>AT5G52570</b>Beta-carotene 3-hydroxylase 2, chloroplastic<br>GO: GO:0016123<br>Source: UniProt", "fullDescription": "Beta-carotene 3-hydroxylase 2, chloroplastic | Annotated to: GO:0016123", "source": "UniProt", "nodeType": "gene"}, {"id": "gene:AT1G61120", "label": "AT1G61120", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "dot", "size": 20, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>AT1G61120</b>(E,E)-geranyllinalool synthase<br>GO: GO:0016102<br>Source: UniProt", "fullDescription": "(E,E)-geranyllinalool synthase | Annotated to: GO:0016102", "source": "UniProt", "nodeType": "gene"}, {"id": "gene:AT2G24210", "label": "AT2G24210", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "dot", "size": 20, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>AT2G24210</b>Tricyclene synthase, chloroplastic<br>GO: GO:0016099, GO:0016102<br>Source: UniProt", "fullDescription": "Tricyclene synthase, chloroplastic | Annotated to: GO:0016099, GO:0016102", "source": "UniProt", "nodeType": "gene"}, {"id": "gene:AT3G25180", "label": "AT3G25180", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "dot", "size": 20, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>AT3G25180</b>Dimethylnonatriene synthase<br>GO: GO:0016114<br>Source: UniProt", "fullDescription": "Dimethylnonatriene synthase | Annotated to: GO:0016114", "source": "UniProt", "nodeType": "gene"}, {"id": "gene:AT4G16730", "label": "AT4G16730", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "dot", "size": 20, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>AT4G16730</b><br>GO: GO:0016102<br>Source: UniProt", "fullDescription": "Annotated to: GO:0016102", "source": "UniProt", "nodeType": "gene"}, {"id": "gene:AT1G61680", "label": "AT1G61680", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "dot", "size": 20, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>AT1G61680</b>S-(+)-linalool synthase, chloroplastic<br>GO: GO:0016114<br>Source: UniProt", "fullDescription": "S-(+)-linalool synthase, chloroplastic | Annotated to: GO:0016114", "source": "UniProt", "nodeType": "gene"}, {"id": "study:E-GEOD-5751", "label": "E-GEOD-5751\nTranscription profiling of Arabidop...", "color": {"background": "#9b59b6", "border": "#9b59b6", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "triangle", "size": 22, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>E-GEOD-5751</b><br>Transcription profiling of Arabidopsis early post-germinative embryo and endosperm<br><br>Source: GXA (Gene Expression Atlas)", "fullDescription": "Transcription profiling of Arabidopsis early post-germinative embryo and endosperm", "source": "GXA (Gene Expression Atlas)", "nodeType": "study"}, {"id": "assay:E-GEOD-5751-g5_g3", "label": "g5_g3", "color": {"background": "#e67e22", "border": "#e67e22", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "box", "size": 12, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>E-GEOD-5751-g5_g3</b><br>Study: E-GEOD-5751<br><br>Source: GXA", "fullDescription": "Experimental contrast from study E-GEOD-5751", "source": "GXA (Gene Expression Atlas)", "nodeType": "assay"}, {"id": "study:E-GEOD-30223", "label": "E-GEOD-30223\nExpression data of germinating Arab...", "color": {"background": "#9b59b6", "border": "#9b59b6", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "triangle", "size": 22, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>E-GEOD-30223</b><br>Expression data of germinating Arabidopsis seeds<br><br>Source: GXA (Gene Expression Atlas)", "fullDescription": "Expression data of germinating Arabidopsis seeds", "source": "GXA (Gene Expression Atlas)", "nodeType": "study"}, {"id": "assay:E-GEOD-30223-g5_g4", "label": "g5_g4", "color": {"background": "#e67e22", "border": "#e67e22", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "box", "size": 12, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>E-GEOD-30223-g5_g4</b><br>Study: E-GEOD-30223<br><br>Source: GXA", "fullDescription": "Experimental contrast from study E-GEOD-30223", "source": "GXA (Gene Expression Atlas)", "nodeType": "assay"}, {"id": "study:E-GEOD-40245", "label": "E-GEOD-40245\nIdentification of glucose-TOR signa...", "color": {"background": "#9b59b6", "border": "#9b59b6", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "triangle", "size": 22, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>E-GEOD-40245</b><br>Identification of glucose-TOR signaling early target genes in Arabidopsis seedling autotrophic transition stage<br><br>Source: GXA (Gene Expression Atlas)", "fullDescription": "Identification of glucose-TOR signaling early target genes in Arabidopsis seedling autotrophic transition stage", "source": "GXA (Gene Expression Atlas)", "nodeType": "study"}, {"id": "assay:E-GEOD-40245-g2_g1", "label": "g2_g1", "color": {"background": "#e67e22", "border": "#e67e22", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "box", "size": 12, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>E-GEOD-40245-g2_g1</b><br>Study: E-GEOD-40245<br><br>Source: GXA", "fullDescription": "Experimental contrast from study E-GEOD-40245", "source": "GXA (Gene Expression Atlas)", "nodeType": "assay"}, {"id": "study:E-GEOD-35580", "label": "E-GEOD-35580\nCell type-specific auxin responses ...", "color": {"background": "#9b59b6", "border": "#9b59b6", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "triangle", "size": 22, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>E-GEOD-35580</b><br>Cell type-specific auxin responses in the Arabidopsis thaliana root<br><br>Source: GXA (Gene Expression Atlas)", "fullDescription": "Cell type-specific auxin responses in the Arabidopsis thaliana root", "source": "GXA (Gene Expression Atlas)", "nodeType": "study"}, {"id": "assay:E-GEOD-35580-g6_g1", "label": "g6_g1", "color": {"background": "#e67e22", "border": "#e67e22", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "box", "size": 12, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>E-GEOD-35580-g6_g1</b><br>Study: E-GEOD-35580<br><br>Source: GXA", "fullDescription": "Experimental contrast from study E-GEOD-35580", "source": "GXA (Gene Expression Atlas)", "nodeType": "assay"}, {"id": "study:E-GEOD-39463", "label": "E-GEOD-39463\nTime-course RNA-seq analysis of the...", "color": {"background": "#9b59b6", "border": "#9b59b6", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "triangle", "size": 22, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>E-GEOD-39463</b><br>Time-course RNA-seq analysis of the barley MLA1 immune receptor-mediated response to barley powdery mildew fungus Bgh in Arabidopsis thaliana<br><br>Source: GXA (Gene Expression Atlas)", "fullDescription": "Time-course RNA-seq analysis of the barley MLA1 immune receptor-mediated response to barley powdery mildew fungus Bgh in Arabidopsis thaliana", "source": "GXA (Gene Expression Atlas)", "nodeType": "study"}, {"id": "assay:E-GEOD-39463-g4_g3", "label": "g4_g3", "color": {"background": "#e67e22", "border": "#e67e22", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "box", "size": 12, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>E-GEOD-39463-g4_g3</b><br>Study: E-GEOD-39463<br><br>Source: GXA", "fullDescription": "Experimental contrast from study E-GEOD-39463", "source": "GXA (Gene Expression Atlas)", "nodeType": "assay"}, {"id": "study:E-GEOD-18978", "label": "E-GEOD-18978\nArabidopsis thaliana mutant leaves ...", "color": {"background": "#9b59b6", "border": "#9b59b6", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "triangle", "size": 22, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>E-GEOD-18978</b><br>Arabidopsis thaliana mutant leaves treated with Pseudomonas syringae ES4326<br><br>Source: GXA (Gene Expression Atlas)", "fullDescription": "Arabidopsis thaliana mutant leaves treated with Pseudomonas syringae ES4326", "source": "GXA (Gene Expression Atlas)", "nodeType": "study"}, {"id": "assay:E-GEOD-18978-g8_g7", "label": "g8_g7", "color": {"background": "#e67e22", "border": "#e67e22", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "box", "size": 12, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>E-GEOD-18978-g8_g7</b><br>Study: E-GEOD-18978<br><br>Source: GXA", "fullDescription": "Experimental contrast from study E-GEOD-18978", "source": "GXA (Gene Expression Atlas)", "nodeType": "assay"}, {"id": "study:E-GEOD-4733", "label": "E-GEOD-4733\nTranscription profiling of Arabidop...", "color": {"background": "#9b59b6", "border": "#9b59b6", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "triangle", "size": 22, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>E-GEOD-4733</b><br>Transcription profiling of Arabidopsis male-sterile opr3 mutant stamens treated with jasmonate or its precursor, 12-oxophytodienoic acid<br><br>Source: GXA (Gene Expression Atlas)", "fullDescription": "Transcription profiling of Arabidopsis male-sterile opr3 mutant stamens treated with jasmonate or its precursor, 12-oxophytodienoic acid", "source": "GXA (Gene Expression Atlas)", "nodeType": "study"}, {"id": "assay:E-GEOD-4733-g6_g7", "label": "g6_g7", "color": {"background": "#e67e22", "border": "#e67e22", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "box", "size": 12, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>E-GEOD-4733-g6_g7</b><br>Study: E-GEOD-4733<br><br>Source: GXA", "fullDescription": "Experimental contrast from study E-GEOD-4733", "source": "GXA (Gene Expression Atlas)", "nodeType": "assay"}, {"id": "study:E-GEOD-41779", "label": "E-GEOD-41779\nCurrent injection and distal wound ...", "color": {"background": "#9b59b6", "border": "#9b59b6", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "triangle", "size": 22, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>E-GEOD-41779</b><br>Current injection and distal wound response in Arabidopsis thaliana<br><br>Source: GXA (Gene Expression Atlas)", "fullDescription": "Current injection and distal wound response in Arabidopsis thaliana", "source": "GXA (Gene Expression Atlas)", "nodeType": "study"}, {"id": "assay:E-GEOD-41779-g4_g2", "label": "g4_g2", "color": {"background": "#e67e22", "border": "#e67e22", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "shape": "box", "size": 12, "font": {"size": 11, "color": "#2c3e50", "multi": true}, "title": "<b>E-GEOD-41779-g4_g2</b><br>Study: E-GEOD-41779<br><br>Source: GXA", "fullDescription": "Experimental contrast from study E-GEOD-41779", "source": "GXA (Gene Expression Atlas)", "nodeType": "assay"}]);
+        var edges = new vis.DataSet([{"from": "gene:AT5G07200", "to": "go:GO:0009686", "label": "annotated_to", "color": {"color": "#f39c12", "highlight": "#f1c40f"}, "title": "<b>annotated_to</b><br>AT5G07200 \u2192 GO:0009686<br>Source: UniProt", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "gene:AT5G51810", "to": "go:GO:0009686", "label": "annotated_to", "color": {"color": "#f39c12", "highlight": "#f1c40f"}, "title": "<b>annotated_to</b><br>AT5G51810 \u2192 GO:0009686<br>Source: UniProt", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "gene:AT1G78960", "to": "go:GO:0016104", "label": "annotated_to", "color": {"color": "#f39c12", "highlight": "#f1c40f"}, "title": "<b>annotated_to</b><br>AT1G78960 \u2192 GO:0016104<br>Source: UniProt", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "gene:AT4G21200", "to": "go:GO:0009686", "label": "annotated_to", "color": {"color": "#f39c12", "highlight": "#f1c40f"}, "title": "<b>annotated_to</b><br>AT4G21200 \u2192 GO:0009686<br>Source: UniProt", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "gene:AT5G52570", "to": "go:GO:0016123", "label": "annotated_to", "color": {"color": "#f39c12", "highlight": "#f1c40f"}, "title": "<b>annotated_to</b><br>AT5G52570 \u2192 GO:0016123<br>Source: UniProt", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "gene:AT1G61120", "to": "go:GO:0016102", "label": "annotated_to", "color": {"color": "#f39c12", "highlight": "#f1c40f"}, "title": "<b>annotated_to</b><br>AT1G61120 \u2192 GO:0016102<br>Source: UniProt", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "gene:AT2G24210", "to": "go:GO:0016102", "label": "annotated_to", "color": {"color": "#f39c12", "highlight": "#f1c40f"}, "title": "<b>annotated_to</b><br>AT2G24210 \u2192 GO:0016102<br>Source: UniProt", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "gene:AT2G24210", "to": "go:GO:0016099", "label": "annotated_to", "color": {"color": "#f39c12", "highlight": "#f1c40f"}, "title": "<b>annotated_to</b><br>AT2G24210 \u2192 GO:0016099<br>Source: UniProt", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "gene:AT3G25180", "to": "go:GO:0016114", "label": "annotated_to", "color": {"color": "#f39c12", "highlight": "#f1c40f"}, "title": "<b>annotated_to</b><br>AT3G25180 \u2192 GO:0016114<br>Source: UniProt", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "gene:AT4G16730", "to": "go:GO:0016102", "label": "annotated_to", "color": {"color": "#f39c12", "highlight": "#f1c40f"}, "title": "<b>annotated_to</b><br>AT4G16730 \u2192 GO:0016102<br>Source: UniProt", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "gene:AT1G61680", "to": "go:GO:0016114", "label": "annotated_to", "color": {"color": "#f39c12", "highlight": "#f1c40f"}, "title": "<b>annotated_to</b><br>AT1G61680 \u2192 GO:0016114<br>Source: UniProt", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "study:E-GEOD-5751", "to": "assay:E-GEOD-5751-g5_g3", "label": "has_assay", "color": {"color": "#e74c3c", "highlight": "#f1c40f"}, "title": "<b>has_assay</b><br>E-GEOD-5751 \u2192 E-GEOD-5751-g5_g3<br>Source: GXA", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "assay:E-GEOD-5751-g5_g3", "to": "gene:AT5G07200", "label": "\u21915.7 (p=1.5e-09)", "color": {"color": "#e74c3c", "highlight": "#f1c40f"}, "title": "<b>upregulated</b><br>log2FC: 5.7<br>adj. p-value: 1.5028169E-9<br><br>Source: GXA", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "study:E-GEOD-30223", "to": "assay:E-GEOD-30223-g5_g4", "label": "has_assay", "color": {"color": "#e74c3c", "highlight": "#f1c40f"}, "title": "<b>has_assay</b><br>E-GEOD-30223 \u2192 E-GEOD-30223-g5_g4<br>Source: GXA", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "assay:E-GEOD-30223-g5_g4", "to": "gene:AT5G51810", "label": "\u21916.4 (p=5.1e-11)", "color": {"color": "#e74c3c", "highlight": "#f1c40f"}, "title": "<b>upregulated</b><br>log2FC: 6.4<br>adj. p-value: 5.0517417E-11<br><br>Source: GXA", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "study:E-GEOD-40245", "to": "assay:E-GEOD-40245-g2_g1", "label": "has_assay", "color": {"color": "#e74c3c", "highlight": "#f1c40f"}, "title": "<b>has_assay</b><br>E-GEOD-40245 \u2192 E-GEOD-40245-g2_g1<br>Source: GXA", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "assay:E-GEOD-40245-g2_g1", "to": "gene:AT1G78960", "label": "\u21916.4 (p=1.9e-06)", "color": {"color": "#e74c3c", "highlight": "#f1c40f"}, "title": "<b>upregulated</b><br>log2FC: 6.4<br>adj. p-value: 1.9245747E-6<br><br>Source: GXA", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "study:E-GEOD-35580", "to": "assay:E-GEOD-35580-g6_g1", "label": "has_assay", "color": {"color": "#e74c3c", "highlight": "#f1c40f"}, "title": "<b>has_assay</b><br>E-GEOD-35580 \u2192 E-GEOD-35580-g6_g1<br>Source: GXA", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "assay:E-GEOD-35580-g6_g1", "to": "gene:AT4G21200", "label": "\u21916.1 (p=1.0e-07)", "color": {"color": "#e74c3c", "highlight": "#f1c40f"}, "title": "<b>upregulated</b><br>log2FC: 6.1<br>adj. p-value: 1.03876765E-7<br><br>Source: GXA", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "study:E-GEOD-39463", "to": "assay:E-GEOD-39463-g4_g3", "label": "has_assay", "color": {"color": "#e74c3c", "highlight": "#f1c40f"}, "title": "<b>has_assay</b><br>E-GEOD-39463 \u2192 E-GEOD-39463-g4_g3<br>Source: GXA", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "assay:E-GEOD-39463-g4_g3", "to": "gene:AT5G52570", "label": "\u21914.9 (p=0.0e+00)", "color": {"color": "#e74c3c", "highlight": "#f1c40f"}, "title": "<b>upregulated</b><br>log2FC: 4.9<br>adj. p-value: 0.0<br><br>Source: GXA", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "study:E-GEOD-18978", "to": "assay:E-GEOD-18978-g8_g7", "label": "has_assay", "color": {"color": "#e74c3c", "highlight": "#f1c40f"}, "title": "<b>has_assay</b><br>E-GEOD-18978 \u2192 E-GEOD-18978-g8_g7<br>Source: GXA", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "assay:E-GEOD-18978-g8_g7", "to": "gene:AT1G61120", "label": "\u21917.5 (p=2.3e-07)", "color": {"color": "#e74c3c", "highlight": "#f1c40f"}, "title": "<b>upregulated</b><br>log2FC: 7.5<br>adj. p-value: 2.3037241E-7<br><br>Source: GXA", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "study:E-GEOD-4733", "to": "assay:E-GEOD-4733-g6_g7", "label": "has_assay", "color": {"color": "#e74c3c", "highlight": "#f1c40f"}, "title": "<b>has_assay</b><br>E-GEOD-4733 \u2192 E-GEOD-4733-g6_g7<br>Source: GXA", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "assay:E-GEOD-4733-g6_g7", "to": "gene:AT2G24210", "label": "\u21916.0 (p=1.6e-05)", "color": {"color": "#e74c3c", "highlight": "#f1c40f"}, "title": "<b>upregulated</b><br>log2FC: 6.0<br>adj. p-value: 1.5717442E-5<br><br>Source: GXA", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "study:E-GEOD-41779", "to": "assay:E-GEOD-41779-g4_g2", "label": "has_assay", "color": {"color": "#e74c3c", "highlight": "#f1c40f"}, "title": "<b>has_assay</b><br>E-GEOD-41779 \u2192 E-GEOD-41779-g4_g2<br>Source: GXA", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "assay:E-GEOD-41779-g4_g2", "to": "gene:AT3G25180", "label": "\u21915.7 (p=9.2e-09)", "color": {"color": "#e74c3c", "highlight": "#f1c40f"}, "title": "<b>upregulated</b><br>log2FC: 5.7<br>adj. p-value: 9.1955945E-9<br><br>Source: GXA", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "assay:E-GEOD-4733-g6_g7", "to": "gene:AT4G16730", "label": "\u21916.8 (p=2.4e-07)", "color": {"color": "#e74c3c", "highlight": "#f1c40f"}, "title": "<b>upregulated</b><br>log2FC: 6.8<br>adj. p-value: 2.3524875E-7<br><br>Source: GXA", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}, {"from": "assay:E-GEOD-4733-g6_g7", "to": "gene:AT1G61680", "label": "\u21916.3 (p=1.7e-05)", "color": {"color": "#e74c3c", "highlight": "#f1c40f"}, "title": "<b>upregulated</b><br>log2FC: 6.3<br>adj. p-value: 1.6961294E-5<br><br>Source: GXA", "width": 2, "font": {"size": 10, "color": "#333", "strokeWidth": 2, "strokeColor": "#fff"}, "smooth": {"type": "continuous"}, "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}}]);
+        var container = document.getElementById('network');
+        var options = {
+            nodes: { borderWidth: 2, shadow: true },
+            edges: { shadow: true, smooth: { type: 'continuous' } },
+            physics: {
+                enabled: true,
+                barnesHut: { gravitationalConstant: -5000, springLength: 150, springConstant: 0.04 },
+                stabilization: { iterations: 200, fit: true }
+            },
+            interaction: { hover: true, tooltipDelay: 100 }
+        };
+        var network = new vis.Network(container, { nodes: nodes, edges: edges }, options);
+        var physicsOn = false;
+
+        network.on("stabilizationIterationsDone", function() {
+            physicsOn = false;
+            network.setOptions({ physics: { enabled: false } });
+            updateBtn();
+        });
+
+        function togglePhysics() {
+            physicsOn = !physicsOn;
+            network.setOptions({ physics: { enabled: physicsOn } });
+            updateBtn();
+        }
+        function updateBtn() {
+            var b = document.getElementById('physicsBtn');
+            b.textContent = physicsOn ? '⚡ Auto-Layout: ON' : '⚡ Auto-Layout: OFF';
+            b.className = physicsOn ? 'btn active' : 'btn inactive';
+        }
+        function resetLayout() {
+            physicsOn = true;
+            network.setOptions({ physics: { enabled: true } });
+            updateBtn();
+            var pos = network.getPositions();
+            var upd = [];
+            for (var id in pos) upd.push({ id: id, x: undefined, y: undefined });
+            nodes.update(upd);
+            network.stabilize(200);
+        }
+
+        var tooltip = document.getElementById('tooltip');
+        function showTip(content, e) {
+            if (!content) return;
+            tooltip.innerHTML = content;
+            tooltip.style.display = 'block';
+            tooltip.style.left = (e.event.srcEvent.clientX + 15) + 'px';
+            tooltip.style.top = (e.event.srcEvent.clientY + 15) + 'px';
+        }
+        function hideTip() { tooltip.style.display = 'none'; }
+
+        network.on('hoverNode', function(e) { var n = nodes.get(e.node); if (n) showTip(n.title, e); });
+        network.on('blurNode', hideTip);
+        network.on('hoverEdge', function(e) { var ed = edges.get(e.edge); if (ed) showTip(ed.title, e); });
+        network.on('blurEdge', hideTip);
+        network.on('dragStart', hideTip);
+
+        // Click handler for details panel
+        var detailsPanel = document.getElementById('details-panel');
+
+        network.on('click', function(params) {
+            hideTip();
+            if (params.nodes.length > 0) {
+                var nodeId = params.nodes[0];
+                var node = nodes.get(nodeId);
+                if (node) {
+                    showDetails(node);
+                }
+            } else {
+                clearDetails();
+            }
+        });
+
+        function showDetails(node) {
+            var typeLabel = node.nodeType.replace('_', ' ');
+            var idParts = node.id.split(':');
+            var displayId = idParts.length > 1 ? idParts.slice(1).join(':') : node.id;
+
+            var html = '<span class="detail-type ' + node.nodeType + '">' + typeLabel + '</span>';
+            html += '<h3>' + displayId + '</h3>';
+
+            if (node.fullDescription) {
+                html += '<div class="detail-label">Description</div>';
+                html += '<div class="detail-value description">' + node.fullDescription + '</div>';
+            }
+
+            if (node.source) {
+                html += '<div class="detail-label">Data Source</div>';
+                html += '<div class="detail-value">' + node.source + '</div>';
+            }
+
+            // Show connected nodes
+            var connectedEdges = network.getConnectedEdges(node.id);
+            var connectedNodes = network.getConnectedNodes(node.id);
+            if (connectedNodes.length > 0) {
+                html += '<div class="detail-label">Connections (' + connectedNodes.length + ')</div>';
+                html += '<div class="detail-value">';
+                connectedNodes.forEach(function(connId) {
+                    var connNode = nodes.get(connId);
+                    if (connNode) {
+                        var connIdParts = connId.split(':');
+                        var connDisplay = connIdParts.length > 1 ? connIdParts.slice(1).join(':') : connId;
+                        html += '<div style="margin:3px 0;">• ' + connDisplay + ' <span style="color:#888;">(' + connNode.nodeType.replace('_',' ') + ')</span></div>';
+                    }
+                });
+                html += '</div>';
+            }
+
+            detailsPanel.innerHTML = html;
+        }
+
+        function clearDetails() {
+            detailsPanel.innerHTML = '<div class="placeholder">Click a node to see details</div>';
+        }
+    </script>
+</body>
+</html>

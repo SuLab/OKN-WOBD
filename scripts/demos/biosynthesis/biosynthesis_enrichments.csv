@@ -1,0 +1,791 @@
+study_id,study_title,assay,go_id,go_term_name,adj_pvalue
+E-GEOD-60424,E-GEOD-60424,https://spoke.ucsf.edu/genelab/E-GEOD-60424-g17_g18,GO:0002181,cytoplasmic translation,0.0
+E-GEOD-51878,E-GEOD-51878,https://spoke.ucsf.edu/genelab/E-GEOD-51878-g1_g2,GO:0002181,cytoplasmic translation,1.8004333E-35
+E-GEOD-53280,E-GEOD-53280,https://spoke.ucsf.edu/genelab/E-GEOD-53280-g2_g1,GO:0002181,cytoplasmic translation,4.0362164E-34
+E-GEOD-57116,E-GEOD-57116,https://spoke.ucsf.edu/genelab/E-GEOD-57116-g3_g2,GO:0002181,cytoplasmic translation,1.629338E-30
+E-GEOD-60424,E-GEOD-60424,https://spoke.ucsf.edu/genelab/E-GEOD-60424-g5_g3,GO:0002181,cytoplasmic translation,2.6704023E-28
+E-GEOD-56788,E-GEOD-56788,https://spoke.ucsf.edu/genelab/E-GEOD-56788-g2_g15,GO:0002181,cytoplasmic translation,6.159195E-28
+E-GEOD-23336,E-GEOD-23336,https://spoke.ucsf.edu/genelab/E-GEOD-23336-g2_g1,GO:0032543,mitochondrial translation,3.778563E-22
+E-GEOD-41586,E-GEOD-41586,https://spoke.ucsf.edu/genelab/E-GEOD-41586-g3_g1,GO:0002181,cytoplasmic translation,6.9836185E-21
+E-GEOD-57728,E-GEOD-57728,https://spoke.ucsf.edu/genelab/E-GEOD-57728-g4_g2,GO:0070125,mitochondrial translational elongation,5.50574E-19
+E-GEOD-32706,E-GEOD-32706,https://spoke.ucsf.edu/genelab/E-GEOD-32706-g1_g3,GO:0006695,cholesterol biosynthetic process,1.1629522E-18
+E-GEOD-57027,E-GEOD-57027,https://spoke.ucsf.edu/genelab/E-GEOD-57027-g1_g2,GO:0002181,cytoplasmic translation,2.9318712E-17
+E-GEOD-44674,E-GEOD-44674,https://spoke.ucsf.edu/genelab/E-GEOD-44674-g4_g10,GO:0002181,cytoplasmic translation,6.649701E-17
+E-GEOD-44674,E-GEOD-44674,https://spoke.ucsf.edu/genelab/E-GEOD-44674-g4_g1,GO:0002181,cytoplasmic translation,8.0974285E-17
+E-GEOD-41586,E-GEOD-41586,https://spoke.ucsf.edu/genelab/E-GEOD-41586-g3_g2,GO:0002181,cytoplasmic translation,2.721236E-16
+E-GEOD-48767,E-GEOD-48767,https://spoke.ucsf.edu/genelab/E-GEOD-48767-g2_g1,GO:0015995,chlorophyll biosynthetic process,4.84304E-16
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g4_g13,GO:0016126,sterol biosynthetic process,4.902755E-16
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g4_g13,GO:0006695,cholesterol biosynthetic process,1.0819098E-15
+E-GEOD-52194,E-GEOD-52194,https://spoke.ucsf.edu/genelab/E-GEOD-52194-g3_g2,GO:0002181,cytoplasmic translation,2.0014076E-15
+E-GEOD-35288,E-GEOD-35288,https://spoke.ucsf.edu/genelab/E-GEOD-35288-g2_g1,GO:0002181,cytoplasmic translation,2.259359E-15
+E-GEOD-32706,E-GEOD-32706,https://spoke.ucsf.edu/genelab/E-GEOD-32706-g1_g3,GO:0016126,sterol biosynthetic process,1.5833092E-14
+E-GEOD-40643,E-GEOD-40643,https://spoke.ucsf.edu/genelab/E-GEOD-40643-g1_g2,GO:0070125,mitochondrial translational elongation,9.948565E-14
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g4_g13,GO:0006694,steroid biosynthetic process,1.2108885E-13
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g1_g10,GO:0006694,steroid biosynthetic process,1.6665594E-13
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g1_g10,GO:0016126,sterol biosynthetic process,4.5044437E-13
+E-GEOD-5741,E-GEOD-5741,https://spoke.ucsf.edu/genelab/E-GEOD-5741-g1_g2,GO:0006695,cholesterol biosynthetic process,5.1703807E-13
+E-GEOD-5741,E-GEOD-5741,https://spoke.ucsf.edu/genelab/E-GEOD-5741-g1_g2,GO:0016126,sterol biosynthetic process,5.1703807E-13
+E-GEOD-57728,E-GEOD-57728,https://spoke.ucsf.edu/genelab/E-GEOD-57728-g3_g1,GO:0070125,mitochondrial translational elongation,6.4053195E-13
+E-GEOD-57806,E-GEOD-57806,https://spoke.ucsf.edu/genelab/E-GEOD-57806-g2_g1,GO:0002181,cytoplasmic translation,4.170995E-12
+E-GEOD-55187,E-GEOD-55187,https://spoke.ucsf.edu/genelab/E-GEOD-55187-g4_g2,GO:0032543,mitochondrial translation,4.2678014E-12
+E-GEOD-59089,E-GEOD-59089,https://spoke.ucsf.edu/genelab/E-GEOD-59089-g1_g3,GO:0070125,mitochondrial translational elongation,4.8463867E-12
+E-GEOD-32706,E-GEOD-32706,https://spoke.ucsf.edu/genelab/E-GEOD-32706-g1_g3,GO:0006694,steroid biosynthetic process,6.376446E-12
+E-GEOD-41678,E-GEOD-41678,https://spoke.ucsf.edu/genelab/E-GEOD-41678-g8_g6,GO:0070125,mitochondrial translational elongation,7.379715E-12
+E-GEOD-52194,E-GEOD-52194,https://spoke.ucsf.edu/genelab/E-GEOD-52194-g3_g1,GO:0002181,cytoplasmic translation,7.818278E-12
+E-GEOD-39214,E-GEOD-39214,https://spoke.ucsf.edu/genelab/E-GEOD-39214-g1_g2,GO:0002181,cytoplasmic translation,9.550934E-12
+E-GEOD-30030,E-GEOD-30030,https://spoke.ucsf.edu/genelab/E-GEOD-30030-g4_g3,GO:0002181,cytoplasmic translation,2.2289726E-11
+E-GEOD-44392,E-GEOD-44392,https://spoke.ucsf.edu/genelab/E-GEOD-44392-g4_g1,GO:0070125,mitochondrial translational elongation,2.447047E-11
+E-GEOD-49284,E-GEOD-49284,https://spoke.ucsf.edu/genelab/E-GEOD-49284-g29_g9,GO:0070125,mitochondrial translational elongation,3.2320015E-11
+E-GEOD-39685,E-GEOD-39685,https://spoke.ucsf.edu/genelab/E-GEOD-39685-g2_g3,GO:0070125,mitochondrial translational elongation,3.6280715E-11
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g1_g10,GO:0006695,cholesterol biosynthetic process,4.6103874E-11
+E-GEOD-52463,E-GEOD-52463,https://spoke.ucsf.edu/genelab/E-GEOD-52463-g2_g1,GO:0016126,sterol biosynthetic process,5.900577E-11
+E-GEOD-52194,E-GEOD-52194,https://spoke.ucsf.edu/genelab/E-GEOD-52194-g3_g4,GO:0002181,cytoplasmic translation,6.34207E-11
+E-GEOD-23764,E-GEOD-23764,https://spoke.ucsf.edu/genelab/E-GEOD-23764-g4_g1,GO:0006412,translation,1.3463172E-10
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g3_g12,GO:0006695,cholesterol biosynthetic process,1.6813706E-10
+E-GEOD-33204,E-GEOD-33204,https://spoke.ucsf.edu/genelab/E-GEOD-33204-g8_g7,GO:0006412,translation,2.3536642E-10
+E-GEOD-34055,E-GEOD-34055,https://spoke.ucsf.edu/genelab/E-GEOD-34055-g4_g2,GO:0070125,mitochondrial translational elongation,3.77985E-10
+E-GEOD-40695,E-GEOD-40695,https://spoke.ucsf.edu/genelab/E-GEOD-40695-g1_g2,GO:0006695,cholesterol biosynthetic process,4.5080206E-10
+E-GEOD-18980,E-GEOD-18980,https://spoke.ucsf.edu/genelab/E-GEOD-18980-g2_g1,GO:0008652,cellular amino acid biosynthetic process,4.8183574E-10
+E-GEOD-38879,E-GEOD-38879,https://spoke.ucsf.edu/genelab/E-GEOD-38879-g2_g1,GO:0019761,glucosinolate biosynthetic process,5.5339316E-10
+E-GEOD-34015,E-GEOD-34015,https://spoke.ucsf.edu/genelab/E-GEOD-34015-g2_g1,GO:0070125,mitochondrial translational elongation,6.3607736E-10
+E-GEOD-59089,E-GEOD-59089,https://spoke.ucsf.edu/genelab/E-GEOD-59089-g1_g5,GO:0070125,mitochondrial translational elongation,6.648339E-10
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g86_g89,GO:0002181,cytoplasmic translation,6.820114E-10
+E-GEOD-33455,E-GEOD-33455,https://spoke.ucsf.edu/genelab/E-GEOD-33455-g2_g1,GO:0070125,mitochondrial translational elongation,7.024648E-10
+E-GEOD-49644,E-GEOD-49644,https://spoke.ucsf.edu/genelab/E-GEOD-49644-g2_g4,GO:0070125,mitochondrial translational elongation,7.7980084E-10
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g154_g157,GO:0006695,cholesterol biosynthetic process,1.0058476E-9
+E-GEOD-5741,E-GEOD-5741,https://spoke.ucsf.edu/genelab/E-GEOD-5741-g1_g2,GO:0006694,steroid biosynthetic process,1.2449998E-9
+E-GEOD-58365,E-GEOD-58365,https://spoke.ucsf.edu/genelab/E-GEOD-58365-g2_g1,GO:0002181,cytoplasmic translation,1.2626535E-9
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g56_g57,GO:0070125,mitochondrial translational elongation,1.4366717E-9
+E-GEOD-49608,E-GEOD-49608,https://spoke.ucsf.edu/genelab/E-GEOD-49608-g5_g7,GO:0002181,cytoplasmic translation,1.8648014E-9
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g56_g58,GO:0070125,mitochondrial translational elongation,1.8913253E-9
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g154_g157,GO:0016126,sterol biosynthetic process,2.3254547E-9
+E-GEOD-5636,E-GEOD-5636,https://spoke.ucsf.edu/genelab/E-GEOD-5636-g4_g5,GO:0019761,glucosinolate biosynthetic process,2.5126714E-9
+E-GEOD-52463,E-GEOD-52463,https://spoke.ucsf.edu/genelab/E-GEOD-52463-g2_g1,GO:0006695,cholesterol biosynthetic process,2.5137559E-9
+E-GEOD-44674,E-GEOD-44674,https://spoke.ucsf.edu/genelab/E-GEOD-44674-g8_g5,GO:0002181,cytoplasmic translation,3.0898912E-9
+E-GEOD-56825,E-GEOD-56825,https://spoke.ucsf.edu/genelab/E-GEOD-56825-g4_g2,GO:0006412,translation,3.152992E-9
+E-GEOD-51742,E-GEOD-51742,https://spoke.ucsf.edu/genelab/E-GEOD-51742-g6_g4,GO:0030244,cellulose biosynthetic process,3.49951E-9
+E-GEOD-59089,E-GEOD-59089,https://spoke.ucsf.edu/genelab/E-GEOD-59089-g1_g2,GO:0070125,mitochondrial translational elongation,4.060664E-9
+E-GEOD-23764,E-GEOD-23764,https://spoke.ucsf.edu/genelab/E-GEOD-23764-g4_g2,GO:0070125,mitochondrial translational elongation,4.8765383E-9
+E-GEOD-5686,E-GEOD-5686,https://spoke.ucsf.edu/genelab/E-GEOD-5686-g13_g6,GO:0002181,cytoplasmic translation,5.003049E-9
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g9_g18,GO:0006694,steroid biosynthetic process,5.877282E-9
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g9_g18,GO:0006695,cholesterol biosynthetic process,5.877282E-9
+E-GEOD-22533,E-GEOD-22533,https://spoke.ucsf.edu/genelab/E-GEOD-22533-g4_g1,GO:0070125,mitochondrial translational elongation,6.3805063E-9
+E-GEOD-44674,E-GEOD-44674,https://spoke.ucsf.edu/genelab/E-GEOD-44674-g7_g4,GO:0002181,cytoplasmic translation,7.844548E-9
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g3_g12,GO:0016126,sterol biosynthetic process,8.100247E-9
+E-GEOD-41678,E-GEOD-41678,https://spoke.ucsf.edu/genelab/E-GEOD-41678-g8_g6,GO:0006368,transcription elongation from RNA polymerase II promoter,8.253058E-9
+E-GEOD-56084,E-GEOD-56084,https://spoke.ucsf.edu/genelab/E-GEOD-56084-g2_g1,GO:0070125,mitochondrial translational elongation,8.566923E-9
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g9_g18,GO:0016126,sterol biosynthetic process,8.69607E-9
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g7_g16,GO:0006695,cholesterol biosynthetic process,9.426869E-9
+E-GEOD-57466,E-GEOD-57466,https://spoke.ucsf.edu/genelab/E-GEOD-57466-g4_g2,GO:0006782,protoporphyrinogen IX biosynthetic process,1.0367808E-8
+E-GEOD-34015,E-GEOD-34015,https://spoke.ucsf.edu/genelab/E-GEOD-34015-g2_g1,GO:0002181,cytoplasmic translation,1.0945287E-8
+E-GEOD-51878,E-GEOD-51878,https://spoke.ucsf.edu/genelab/E-GEOD-51878-g3_g2,GO:0002181,cytoplasmic translation,1.1449812E-8
+E-GEOD-23764,E-GEOD-23764,https://spoke.ucsf.edu/genelab/E-GEOD-23764-g4_g3,GO:0070125,mitochondrial translational elongation,1.7128219E-8
+E-GEOD-18791,E-GEOD-18791,https://spoke.ucsf.edu/genelab/E-GEOD-18791-g11_g2,GO:0070125,mitochondrial translational elongation,1.8251493E-8
+E-GEOD-18791,E-GEOD-18791,https://spoke.ucsf.edu/genelab/E-GEOD-18791-g11_g3,GO:0070125,mitochondrial translational elongation,1.8971848E-8
+E-GEOD-40695,E-GEOD-40695,https://spoke.ucsf.edu/genelab/E-GEOD-40695-g1_g2,GO:0016126,sterol biosynthetic process,2.035941E-8
+E-GEOD-19639,E-GEOD-19639,https://spoke.ucsf.edu/genelab/E-GEOD-19639-g6_g4,GO:0070125,mitochondrial translational elongation,2.0462677E-8
+E-GEOD-56785,E-GEOD-56785,https://spoke.ucsf.edu/genelab/E-GEOD-56785-g1_g6,GO:0002181,cytoplasmic translation,2.2769713E-8
+E-GEOD-17347,E-GEOD-17347,https://spoke.ucsf.edu/genelab/E-GEOD-17347-g4_g2,GO:0070125,mitochondrial translational elongation,2.5419656E-8
+E-GEOD-58082,E-GEOD-58082,https://spoke.ucsf.edu/genelab/E-GEOD-58082-g2_g1,GO:0015995,chlorophyll biosynthetic process,2.733711E-8
+E-GEOD-5281,E-GEOD-5281,https://spoke.ucsf.edu/genelab/E-GEOD-5281-g8_g2,GO:0070125,mitochondrial translational elongation,2.8732268E-8
+E-GEOD-40595,E-GEOD-40595,https://spoke.ucsf.edu/genelab/E-GEOD-40595-g3_g4,GO:0070125,mitochondrial translational elongation,3.642217E-8
+E-GEOD-39214,E-GEOD-39214,https://spoke.ucsf.edu/genelab/E-GEOD-39214-g1_g2,GO:0015995,chlorophyll biosynthetic process,3.6447815E-8
+E-GEOD-5686,E-GEOD-5686,https://spoke.ucsf.edu/genelab/E-GEOD-5686-g8_g15,GO:0002181,cytoplasmic translation,3.9019604E-8
+E-GEOD-49608,E-GEOD-49608,https://spoke.ucsf.edu/genelab/E-GEOD-49608-g1_g3,GO:0002181,cytoplasmic translation,5.0194444E-8
+E-GEOD-55859,E-GEOD-55859,https://spoke.ucsf.edu/genelab/E-GEOD-55859-g2_g1,GO:0070125,mitochondrial translational elongation,5.024219E-8
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g2_g11,GO:0016126,sterol biosynthetic process,6.534344E-8
+E-GEOD-17385,E-GEOD-17385,https://spoke.ucsf.edu/genelab/E-GEOD-17385-g2_g1,GO:0070125,mitochondrial translational elongation,6.65556E-8
+E-GEOD-19519,E-GEOD-19519,https://spoke.ucsf.edu/genelab/E-GEOD-19519-g2_g4,GO:0070125,mitochondrial translational elongation,7.247821E-8
+E-GEOD-20318,E-GEOD-20318,https://spoke.ucsf.edu/genelab/E-GEOD-20318-g2_g1,GO:0070125,mitochondrial translational elongation,7.4743205E-8
+E-GEOD-24187,E-GEOD-24187,https://spoke.ucsf.edu/genelab/E-GEOD-24187-g3_g7,GO:0016126,sterol biosynthetic process,8.072651E-8
+E-GEOD-60424,E-GEOD-60424,https://spoke.ucsf.edu/genelab/E-GEOD-60424-g25_g23,GO:0002181,cytoplasmic translation,9.0776695E-8
+E-GEOD-32526,E-GEOD-32526,https://spoke.ucsf.edu/genelab/E-GEOD-32526-g1_g3,GO:0070125,mitochondrial translational elongation,9.8261204E-8
+E-GEOD-57806,E-GEOD-57806,https://spoke.ucsf.edu/genelab/E-GEOD-57806-g2_g1,GO:0019761,glucosinolate biosynthetic process,1.0052919E-7
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g2_g11,GO:0006695,cholesterol biosynthetic process,1.0240544E-7
+E-GEOD-49284,E-GEOD-49284,https://spoke.ucsf.edu/genelab/E-GEOD-49284-g31_g11,GO:0070125,mitochondrial translational elongation,1.07941965E-7
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g150_g153,GO:0070125,mitochondrial translational elongation,1.122801E-7
+E-GEOD-32706,E-GEOD-32706,https://spoke.ucsf.edu/genelab/E-GEOD-32706-g1_g3,GO:0006633,fatty acid biosynthetic process,1.133489E-7
+E-GEOD-58351,E-GEOD-58351,https://spoke.ucsf.edu/genelab/E-GEOD-58351-g1_g2,GO:0032543,mitochondrial translation,1.1557325E-7
+E-GEOD-55884,E-GEOD-55884,https://spoke.ucsf.edu/genelab/E-GEOD-55884-g1_g2,GO:0002181,cytoplasmic translation,1.1805107E-7
+E-GEOD-22139,E-GEOD-22139,https://spoke.ucsf.edu/genelab/E-GEOD-22139-g4_g2,GO:0070125,mitochondrial translational elongation,1.2465748E-7
+E-GEOD-24187,E-GEOD-24187,https://spoke.ucsf.edu/genelab/E-GEOD-24187-g3_g6,GO:0006695,cholesterol biosynthetic process,1.3974636E-7
+E-GEOD-23764,E-GEOD-23764,https://spoke.ucsf.edu/genelab/E-GEOD-23764-g4_g1,GO:0070125,mitochondrial translational elongation,1.4968286E-7
+E-GEOD-40695,E-GEOD-40695,https://spoke.ucsf.edu/genelab/E-GEOD-40695-g1_g2,GO:0006694,steroid biosynthetic process,1.7746464E-7
+E-GEOD-43463,E-GEOD-43463,https://spoke.ucsf.edu/genelab/E-GEOD-43463-g8_g4,GO:0030639,polyketide biosynthetic process,1.8150325E-7
+E-GEOD-40968,E-GEOD-40968,https://spoke.ucsf.edu/genelab/E-GEOD-40968-g4_g1,GO:0070125,mitochondrial translational elongation,1.8352597E-7
+E-GEOD-60340,E-GEOD-60340,https://spoke.ucsf.edu/genelab/E-GEOD-60340-g7_g6,GO:0002181,cytoplasmic translation,2.1577543E-7
+E-GEOD-26525,E-GEOD-26525,https://spoke.ucsf.edu/genelab/E-GEOD-26525-g1_g4,GO:0006412,translation,2.2778805E-7
+E-GEOD-53280,E-GEOD-53280,https://spoke.ucsf.edu/genelab/E-GEOD-53280-g2_g1,GO:0042776,mitochondrial ATP synthesis coupled proton transport,2.3339746E-7
+E-GEOD-57466,E-GEOD-57466,https://spoke.ucsf.edu/genelab/E-GEOD-57466-g4_g2,GO:0032544,plastid translation,3.1470867E-7
+E-GEOD-48767,E-GEOD-48767,https://spoke.ucsf.edu/genelab/E-GEOD-48767-g2_g1,GO:0019253,reductive pentose-phosphate cycle,3.1575237E-7
+E-GEOD-17347,E-GEOD-17347,https://spoke.ucsf.edu/genelab/E-GEOD-17347-g3_g1,GO:0070125,mitochondrial translational elongation,3.4846803E-7
+E-GEOD-49284,E-GEOD-49284,https://spoke.ucsf.edu/genelab/E-GEOD-49284-g32_g12,GO:0070125,mitochondrial translational elongation,3.5684104E-7
+E-GEOD-34437,E-GEOD-34437,https://spoke.ucsf.edu/genelab/E-GEOD-34437-g4_g3,GO:0070125,mitochondrial translational elongation,3.639716E-7
+E-GEOD-34523,E-GEOD-34523,https://spoke.ucsf.edu/genelab/E-GEOD-34523-g3_g2,GO:0070125,mitochondrial translational elongation,3.7629766E-7
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g3_g12,GO:0006694,steroid biosynthetic process,4.1451332E-7
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g2_g11,GO:0006694,steroid biosynthetic process,4.3242494E-7
+E-GEOD-56677,E-GEOD-56677,https://spoke.ucsf.edu/genelab/E-GEOD-56677-g9_g3,GO:0070125,mitochondrial translational elongation,4.7939733E-7
+E-GEOD-44379,E-GEOD-44379,https://spoke.ucsf.edu/genelab/E-GEOD-44379-g2_g1,GO:0002181,cytoplasmic translation,5.047108E-7
+E-GEOD-19519,E-GEOD-19519,https://spoke.ucsf.edu/genelab/E-GEOD-19519-g1_g3,GO:0070125,mitochondrial translational elongation,5.2544203E-7
+E-GEOD-47399,E-GEOD-47399,https://spoke.ucsf.edu/genelab/E-GEOD-47399-g2_g1,GO:0002181,cytoplasmic translation,5.546434E-7
+E-GEOD-51720,E-GEOD-51720,https://spoke.ucsf.edu/genelab/E-GEOD-51720-g14_g9,GO:0019253,reductive pentose-phosphate cycle,6.2338125E-7
+E-GEOD-24187,E-GEOD-24187,https://spoke.ucsf.edu/genelab/E-GEOD-24187-g3_g1,GO:0006695,cholesterol biosynthetic process,6.276908E-7
+E-GEOD-24187,E-GEOD-24187,https://spoke.ucsf.edu/genelab/E-GEOD-24187-g3_g1,GO:0016126,sterol biosynthetic process,6.276908E-7
+E-GEOD-19519,E-GEOD-19519,https://spoke.ucsf.edu/genelab/E-GEOD-19519-g1_g3,GO:0042795,snRNA transcription by RNA polymerase II,6.931543E-7
+E-GEOD-51878,E-GEOD-51878,https://spoke.ucsf.edu/genelab/E-GEOD-51878-g3_g1,GO:0002181,cytoplasmic translation,7.0057587E-7
+E-GEOD-41678,E-GEOD-41678,https://spoke.ucsf.edu/genelab/E-GEOD-41678-g8_g6,GO:0032543,mitochondrial translation,7.9875434E-7
+E-GEOD-22584,E-GEOD-22584,https://spoke.ucsf.edu/genelab/E-GEOD-22584-g1_g2,GO:0008652,cellular amino acid biosynthetic process,8.4419946E-7
+E-GEOD-53201,E-GEOD-53201,https://spoke.ucsf.edu/genelab/E-GEOD-53201-g1_g5,GO:0006695,cholesterol biosynthetic process,9.64895E-7
+E-GEOD-53201,E-GEOD-53201,https://spoke.ucsf.edu/genelab/E-GEOD-53201-g1_g5,GO:0016126,sterol biosynthetic process,9.64895E-7
+E-GEOD-24187,E-GEOD-24187,https://spoke.ucsf.edu/genelab/E-GEOD-24187-g3_g7,GO:0006695,cholesterol biosynthetic process,1.0239103E-6
+E-GEOD-20719,E-GEOD-20719,https://spoke.ucsf.edu/genelab/E-GEOD-20719-g1_g2,GO:0070125,mitochondrial translational elongation,1.1157687E-6
+E-GEOD-30249,E-GEOD-30249,https://spoke.ucsf.edu/genelab/E-GEOD-30249-g7_g3,GO:0044550,secondary metabolite biosynthetic process,1.1163902E-6
+E-GEOD-21679,E-GEOD-21679,https://spoke.ucsf.edu/genelab/E-GEOD-21679-g1_g2,GO:0006412,translation,1.1420681E-6
+E-GEOD-22351,E-GEOD-22351,https://spoke.ucsf.edu/genelab/E-GEOD-22351-g1_g2,GO:0006695,cholesterol biosynthetic process,1.156303E-6
+E-GEOD-57466,E-GEOD-57466,https://spoke.ucsf.edu/genelab/E-GEOD-57466-g4_g2,GO:0006779,porphyrin-containing compound biosynthetic process,1.1809926E-6
+E-GEOD-56825,E-GEOD-56825,https://spoke.ucsf.edu/genelab/E-GEOD-56825-g4_g2,GO:0002181,cytoplasmic translation,1.2876314E-6
+E-GEOD-43883,E-GEOD-43883,https://spoke.ucsf.edu/genelab/E-GEOD-43883-g4_g2,GO:0006412,translation,1.3202057E-6
+E-GEOD-23610,E-GEOD-23610,https://spoke.ucsf.edu/genelab/E-GEOD-23610-g1_g2,GO:0070125,mitochondrial translational elongation,1.3247061E-6
+E-GEOD-18791,E-GEOD-18791,https://spoke.ucsf.edu/genelab/E-GEOD-18791-g11_g6,GO:0070125,mitochondrial translational elongation,1.3561241E-6
+E-GEOD-24187,E-GEOD-24187,https://spoke.ucsf.edu/genelab/E-GEOD-24187-g3_g6,GO:0016126,sterol biosynthetic process,1.7022812E-6
+E-GEOD-44392,E-GEOD-44392,https://spoke.ucsf.edu/genelab/E-GEOD-44392-g5_g4,GO:0070125,mitochondrial translational elongation,1.7064528E-6
+E-GEOD-60424,E-GEOD-60424,https://spoke.ucsf.edu/genelab/E-GEOD-60424-g25_g26,GO:0002181,cytoplasmic translation,1.8685396E-6
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g7_g16,GO:0002181,cytoplasmic translation,1.8701342E-6
+E-GEOD-5681,E-GEOD-5681,https://spoke.ucsf.edu/genelab/E-GEOD-5681-g4_g1,GO:0006412,translation,1.9626107E-6
+E-GEOD-22351,E-GEOD-22351,https://spoke.ucsf.edu/genelab/E-GEOD-22351-g1_g2,GO:0016126,sterol biosynthetic process,2.096063E-6
+E-GEOD-17159,E-GEOD-17159,https://spoke.ucsf.edu/genelab/E-GEOD-17159-g4_g3,GO:0015995,chlorophyll biosynthetic process,2.1405515E-6
+E-GEOD-35166,E-GEOD-35166,https://spoke.ucsf.edu/genelab/E-GEOD-35166-g3_g2,GO:0015995,chlorophyll biosynthetic process,2.1684123E-6
+E-GEOD-52707,E-GEOD-52707,https://spoke.ucsf.edu/genelab/E-GEOD-52707-g2_g3,GO:0070125,mitochondrial translational elongation,2.2135753E-6
+E-GEOD-34748,E-GEOD-34748,https://spoke.ucsf.edu/genelab/E-GEOD-34748-g1_g2,GO:0002181,cytoplasmic translation,2.218836E-6
+E-GEOD-23330,E-GEOD-23330,https://spoke.ucsf.edu/genelab/E-GEOD-23330-g2_g3,GO:0008652,cellular amino acid biosynthetic process,2.388816E-6
+E-GEOD-5281,E-GEOD-5281,https://spoke.ucsf.edu/genelab/E-GEOD-5281-g10_g4,GO:0070125,mitochondrial translational elongation,2.4503406E-6
+E-GEOD-18304,E-GEOD-18304,https://spoke.ucsf.edu/genelab/E-GEOD-18304-g1_g2,GO:0006694,steroid biosynthetic process,2.6726418E-6
+E-GEOD-39685,E-GEOD-39685,https://spoke.ucsf.edu/genelab/E-GEOD-39685-g2_g3,GO:0032543,mitochondrial translation,2.8947995E-6
+E-GEOD-35700,E-GEOD-35700,https://spoke.ucsf.edu/genelab/E-GEOD-35700-g4_g2,GO:0019761,glucosinolate biosynthetic process,3.1269738E-6
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g150_g152,GO:0070125,mitochondrial translational elongation,3.1979368E-6
+E-GEOD-35198,E-GEOD-35198,https://spoke.ucsf.edu/genelab/E-GEOD-35198-g2_g1,GO:0070125,mitochondrial translational elongation,3.269199E-6
+E-GEOD-33643,E-GEOD-33643,https://spoke.ucsf.edu/genelab/E-GEOD-33643-g7_g3,GO:0070125,mitochondrial translational elongation,3.3261197E-6
+E-GEOD-46867,E-GEOD-46867,https://spoke.ucsf.edu/genelab/E-GEOD-46867-g6_g4,GO:0008652,cellular amino acid biosynthetic process,3.4369384E-6
+E-GEOD-55282,E-GEOD-55282,https://spoke.ucsf.edu/genelab/E-GEOD-55282-g4_g3,GO:0002181,cytoplasmic translation,3.6968086E-6
+E-GEOD-35700,E-GEOD-35700,https://spoke.ucsf.edu/genelab/E-GEOD-35700-g4_g2,GO:0008652,cellular amino acid biosynthetic process,4.0782334E-6
+E-GEOD-34055,E-GEOD-34055,https://spoke.ucsf.edu/genelab/E-GEOD-34055-g4_g3,GO:0070125,mitochondrial translational elongation,4.4770395E-6
+E-GEOD-44674,E-GEOD-44674,https://spoke.ucsf.edu/genelab/E-GEOD-44674-g9_g6,GO:0002181,cytoplasmic translation,4.5265056E-6
+E-GEOD-20318,E-GEOD-20318,https://spoke.ucsf.edu/genelab/E-GEOD-20318-g2_g1,GO:0042795,snRNA transcription by RNA polymerase II,4.535866E-6
+E-GEOD-44342,E-GEOD-44342,https://spoke.ucsf.edu/genelab/E-GEOD-44342-g2_g1,GO:0019761,glucosinolate biosynthetic process,4.5527286E-6
+E-GEOD-57253,E-GEOD-57253,https://spoke.ucsf.edu/genelab/E-GEOD-57253-g5_g3,GO:0002181,cytoplasmic translation,4.675279E-6
+E-GEOD-51885,E-GEOD-51885,https://spoke.ucsf.edu/genelab/E-GEOD-51885-g5_g3,GO:0006694,steroid biosynthetic process,4.7552107E-6
+E-GEOD-51885,E-GEOD-51885,https://spoke.ucsf.edu/genelab/E-GEOD-51885-g5_g3,GO:0016126,sterol biosynthetic process,4.7552107E-6
+E-GEOD-31348,E-GEOD-31348,https://spoke.ucsf.edu/genelab/E-GEOD-31348-g1_g5,GO:0070125,mitochondrial translational elongation,5.02021E-6
+E-GEOD-45564,E-GEOD-45564,https://spoke.ucsf.edu/genelab/E-GEOD-45564-g2_g1,GO:0016126,sterol biosynthetic process,5.403736E-6
+E-GEOD-18304,E-GEOD-18304,https://spoke.ucsf.edu/genelab/E-GEOD-18304-g1_g2,GO:0016126,sterol biosynthetic process,5.417517E-6
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g29_g30,GO:0070125,mitochondrial translational elongation,5.848916E-6
+E-GEOD-24365,E-GEOD-24365,https://spoke.ucsf.edu/genelab/E-GEOD-24365-g2_g1,GO:0015995,chlorophyll biosynthetic process,6.23832E-6
+E-GEOD-36766,E-GEOD-36766,https://spoke.ucsf.edu/genelab/E-GEOD-36766-g1_g2,GO:0070125,mitochondrial translational elongation,6.2916897E-6
+E-GEOD-49608,E-GEOD-49608,https://spoke.ucsf.edu/genelab/E-GEOD-49608-g5_g6,GO:0002181,cytoplasmic translation,6.412858E-6
+E-GEOD-29137,E-GEOD-29137,https://spoke.ucsf.edu/genelab/E-GEOD-29137-g8_g6,GO:0070125,mitochondrial translational elongation,6.5600934E-6
+E-GEOD-56691,E-GEOD-56691,https://spoke.ucsf.edu/genelab/E-GEOD-56691-g4_g1,GO:0070125,mitochondrial translational elongation,6.5755216E-6
+E-GEOD-60548,E-GEOD-60548,https://spoke.ucsf.edu/genelab/E-GEOD-60548-g1_g4,GO:0002181,cytoplasmic translation,6.6127495E-6
+E-GEOD-5617,E-GEOD-5617,https://spoke.ucsf.edu/genelab/E-GEOD-5617-g14_g9,GO:0015995,chlorophyll biosynthetic process,7.075613E-6
+E-GEOD-52463,E-GEOD-52463,https://spoke.ucsf.edu/genelab/E-GEOD-52463-g2_g1,GO:0006694,steroid biosynthetic process,7.316678E-6
+E-GEOD-47399,E-GEOD-47399,https://spoke.ucsf.edu/genelab/E-GEOD-47399-g2_g1,GO:0070125,mitochondrial translational elongation,7.3296915E-6
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g7_g16,GO:0016126,sterol biosynthetic process,7.500797E-6
+E-GEOD-30030,E-GEOD-30030,https://spoke.ucsf.edu/genelab/E-GEOD-30030-g7_g6,GO:0015995,chlorophyll biosynthetic process,7.656936E-6
+E-GEOD-20987,E-GEOD-20987,https://spoke.ucsf.edu/genelab/E-GEOD-20987-g1_g2,GO:0032543,mitochondrial translation,8.275244E-6
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g7_g16,GO:0006694,steroid biosynthetic process,8.29884E-6
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g6_g15,GO:0006695,cholesterol biosynthetic process,9.141589E-6
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g3_g12,GO:0008299,isoprenoid biosynthetic process,9.1884685E-6
+E-GEOD-58351,E-GEOD-58351,https://spoke.ucsf.edu/genelab/E-GEOD-58351-g1_g3,GO:0032543,mitochondrial translation,9.834558E-6
+E-GEOD-22947,E-GEOD-22947,https://spoke.ucsf.edu/genelab/E-GEOD-22947-g5_g7,GO:0019253,reductive pentose-phosphate cycle,9.942203E-6
+E-GEOD-31348,E-GEOD-31348,https://spoke.ucsf.edu/genelab/E-GEOD-31348-g1_g4,GO:0002181,cytoplasmic translation,1.00304205E-5
+E-GEOD-49284,E-GEOD-49284,https://spoke.ucsf.edu/genelab/E-GEOD-49284-g13_g1,GO:0006412,translation,1.0056253E-5
+E-GEOD-34523,E-GEOD-34523,https://spoke.ucsf.edu/genelab/E-GEOD-34523-g3_g2,GO:0032543,mitochondrial translation,1.0167646E-5
+E-GEOD-51885,E-GEOD-51885,https://spoke.ucsf.edu/genelab/E-GEOD-51885-g5_g4,GO:0006694,steroid biosynthetic process,1.0978079E-5
+E-GEOD-31348,E-GEOD-31348,https://spoke.ucsf.edu/genelab/E-GEOD-31348-g1_g4,GO:0070125,mitochondrial translational elongation,1.1434252E-5
+E-GEOD-34670,E-GEOD-34670,https://spoke.ucsf.edu/genelab/E-GEOD-34670-g2_g1,GO:0002181,cytoplasmic translation,1.14436925E-5
+E-GEOD-49608,E-GEOD-49608,https://spoke.ucsf.edu/genelab/E-GEOD-49608-g5_g8,GO:0002181,cytoplasmic translation,1.2006622E-5
+E-GEOD-43463,E-GEOD-43463,https://spoke.ucsf.edu/genelab/E-GEOD-43463-g7_g3,GO:0030639,polyketide biosynthetic process,1.2447271E-5
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g52_g55,GO:0002181,cytoplasmic translation,1.2467668E-5
+E-GEOD-53280,E-GEOD-53280,https://spoke.ucsf.edu/genelab/E-GEOD-53280-g2_g1,GO:0006754,ATP biosynthetic process,1.2669806E-5
+E-GEOD-51885,E-GEOD-51885,https://spoke.ucsf.edu/genelab/E-GEOD-51885-g5_g3,GO:0006695,cholesterol biosynthetic process,1.2980411E-5
+E-GEOD-20318,E-GEOD-20318,https://spoke.ucsf.edu/genelab/E-GEOD-20318-g2_g1,GO:0006368,transcription elongation from RNA polymerase II promoter,1.3322572E-5
+E-GEOD-28728,E-GEOD-28728,https://spoke.ucsf.edu/genelab/E-GEOD-28728-g4_g1,GO:0032543,mitochondrial translation,1.4009368E-5
+E-GEOD-45564,E-GEOD-45564,https://spoke.ucsf.edu/genelab/E-GEOD-45564-g2_g1,GO:0006694,steroid biosynthetic process,1.4570686E-5
+E-GEOD-60340,E-GEOD-60340,https://spoke.ucsf.edu/genelab/E-GEOD-60340-g7_g5,GO:0002181,cytoplasmic translation,1.4654809E-5
+E-GEOD-33643,E-GEOD-33643,https://spoke.ucsf.edu/genelab/E-GEOD-33643-g7_g8,GO:0016126,sterol biosynthetic process,1.6795702E-5
+E-GEOD-23211,E-GEOD-23211,https://spoke.ucsf.edu/genelab/E-GEOD-23211-g2_g1,GO:0002181,cytoplasmic translation,1.7199895E-5
+E-GEOD-54711,E-GEOD-54711,https://spoke.ucsf.edu/genelab/E-GEOD-54711-g2_g1,GO:0070125,mitochondrial translational elongation,1.8024615E-5
+E-GEOD-46538,E-GEOD-46538,https://spoke.ucsf.edu/genelab/E-GEOD-46538-g3_g1,GO:0070125,mitochondrial translational elongation,1.8487695E-5
+E-GEOD-54962,E-GEOD-54962,https://spoke.ucsf.edu/genelab/E-GEOD-54962-g4_g3,GO:0032543,mitochondrial translation,1.9925496E-5
+E-GEOD-57494,E-GEOD-57494,https://spoke.ucsf.edu/genelab/E-GEOD-57494-g8_g6,GO:0002181,cytoplasmic translation,2.0070996E-5
+E-GEOD-54962,E-GEOD-54962,https://spoke.ucsf.edu/genelab/E-GEOD-54962-g4_g3,GO:0070125,mitochondrial translational elongation,2.0355832E-5
+E-GEOD-31594,E-GEOD-31594,https://spoke.ucsf.edu/genelab/E-GEOD-31594-g8_g12,GO:0002181,cytoplasmic translation,2.0734336E-5
+E-GEOD-57252,E-GEOD-57252,https://spoke.ucsf.edu/genelab/E-GEOD-57252-g1_g5,GO:0009695,jasmonic acid biosynthetic process,2.15657E-5
+E-GEOD-38430,E-GEOD-38430,https://spoke.ucsf.edu/genelab/E-GEOD-38430-g2_g1,GO:0007307,eggshell chorion gene amplification,2.1753887E-5
+E-GEOD-33643,E-GEOD-33643,https://spoke.ucsf.edu/genelab/E-GEOD-33643-g7_g4,GO:0016126,sterol biosynthetic process,2.2197306E-5
+E-GEOD-32526,E-GEOD-32526,https://spoke.ucsf.edu/genelab/E-GEOD-32526-g2_g4,GO:0070125,mitochondrial translational elongation,2.318511E-5
+E-GEOD-44392,E-GEOD-44392,https://spoke.ucsf.edu/genelab/E-GEOD-44392-g2_g1,GO:0070125,mitochondrial translational elongation,2.3415876E-5
+E-GEOD-43865,E-GEOD-43865,https://spoke.ucsf.edu/genelab/E-GEOD-43865-g12_g4,GO:0002181,cytoplasmic translation,2.3643803E-5
+E-GEOD-40643,E-GEOD-40643,https://spoke.ucsf.edu/genelab/E-GEOD-40643-g1_g2,GO:0032543,mitochondrial translation,2.461008E-5
+E-GEOD-44674,E-GEOD-44674,https://spoke.ucsf.edu/genelab/E-GEOD-44674-g7_g4,GO:0015986,ATP synthesis coupled proton transport,2.5024763E-5
+E-GEOD-39690,E-GEOD-39690,https://spoke.ucsf.edu/genelab/E-GEOD-39690-g2_g4,GO:0045489,pectin biosynthetic process,2.5675685E-5
+E-GEOD-22278,E-GEOD-22278,https://spoke.ucsf.edu/genelab/E-GEOD-22278-g5_g2,GO:0002181,cytoplasmic translation,2.670804E-5
+E-GEOD-29187,E-GEOD-29187,https://spoke.ucsf.edu/genelab/E-GEOD-29187-g3_g4,GO:0019761,glucosinolate biosynthetic process,2.8523327E-5
+E-GEOD-48350,E-GEOD-48350,https://spoke.ucsf.edu/genelab/E-GEOD-48350-g6_g2,GO:0070125,mitochondrial translational elongation,2.949936E-5
+E-GEOD-22351,E-GEOD-22351,https://spoke.ucsf.edu/genelab/E-GEOD-22351-g1_g2,GO:0006694,steroid biosynthetic process,3.0662875E-5
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g1_g10,GO:0006633,fatty acid biosynthetic process,3.39956E-5
+E-GEOD-43714,E-GEOD-43714,https://spoke.ucsf.edu/genelab/E-GEOD-43714-g4_g3,GO:0008654,phospholipid biosynthetic process,3.5698948E-5
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g121_g124,GO:0070125,mitochondrial translational elongation,3.5897527E-5
+E-GEOD-18980,E-GEOD-18980,https://spoke.ucsf.edu/genelab/E-GEOD-18980-g2_g1,GO:0019761,glucosinolate biosynthetic process,3.6247464E-5
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g121_g123,GO:0070125,mitochondrial translational elongation,3.662186E-5
+E-GEOD-52942,E-GEOD-52942,https://spoke.ucsf.edu/genelab/E-GEOD-52942-g2_g1,GO:0006412,translation,3.7038768E-5
+E-GEOD-51720,E-GEOD-51720,https://spoke.ucsf.edu/genelab/E-GEOD-51720-g33_g24,GO:0019253,reductive pentose-phosphate cycle,3.7091017E-5
+E-GEOD-37781,E-GEOD-37781,https://spoke.ucsf.edu/genelab/E-GEOD-37781-g1_g3,GO:0006352,"DNA-templated transcription, initiation",3.8099774E-5
+E-GEOD-18304,E-GEOD-18304,https://spoke.ucsf.edu/genelab/E-GEOD-18304-g1_g2,GO:0006695,cholesterol biosynthetic process,3.8982045E-5
+E-GEOD-32706,E-GEOD-32706,https://spoke.ucsf.edu/genelab/E-GEOD-32706-g1_g3,GO:0006636,unsaturated fatty acid biosynthetic process,3.900129E-5
+E-GEOD-39685,E-GEOD-39685,https://spoke.ucsf.edu/genelab/E-GEOD-39685-g2_g1,GO:0070125,mitochondrial translational elongation,3.9421946E-5
+E-GEOD-58805,E-GEOD-58805,https://spoke.ucsf.edu/genelab/E-GEOD-58805-g1_g2,GO:0019252,starch biosynthetic process,3.9847404E-5
+E-GEOD-45564,E-GEOD-45564,https://spoke.ucsf.edu/genelab/E-GEOD-45564-g2_g1,GO:0006695,cholesterol biosynthetic process,4.0876756E-5
+E-GEOD-51720,E-GEOD-51720,https://spoke.ucsf.edu/genelab/E-GEOD-51720-g21_g19,GO:0019253,reductive pentose-phosphate cycle,4.1114086E-5
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g111_g113,GO:0070125,mitochondrial translational elongation,4.1535568E-5
+E-GEOD-51720,E-GEOD-51720,https://spoke.ucsf.edu/genelab/E-GEOD-51720-g14_g13,GO:0019253,reductive pentose-phosphate cycle,4.1829873E-5
+E-GEOD-37031,E-GEOD-37031,https://spoke.ucsf.edu/genelab/E-GEOD-37031-g2_g1,GO:0070125,mitochondrial translational elongation,4.199646E-5
+E-GEOD-57027,E-GEOD-57027,https://spoke.ucsf.edu/genelab/E-GEOD-57027-g1_g3,GO:0002181,cytoplasmic translation,4.3058615E-5
+E-GEOD-2192,E-GEOD-2192,https://spoke.ucsf.edu/genelab/E-GEOD-2192-g2_g8,GO:0006412,translation,4.6863734E-5
+E-GEOD-54962,E-GEOD-54962,https://spoke.ucsf.edu/genelab/E-GEOD-54962-g4_g1,GO:0042795,snRNA transcription by RNA polymerase II,4.7858E-5
+E-GEOD-19519,E-GEOD-19519,https://spoke.ucsf.edu/genelab/E-GEOD-19519-g1_g3,GO:0006368,transcription elongation from RNA polymerase II promoter,4.851906E-5
+E-GEOD-58261,E-GEOD-58261,https://spoke.ucsf.edu/genelab/E-GEOD-58261-g2_g3,GO:0006636,unsaturated fatty acid biosynthetic process,4.982735E-5
+E-GEOD-16797,E-GEOD-16797,https://spoke.ucsf.edu/genelab/E-GEOD-16797-g4_g1,GO:0002181,cytoplasmic translation,4.9831437E-5
+E-GEOD-30249,E-GEOD-30249,https://spoke.ucsf.edu/genelab/E-GEOD-30249-g6_g2,GO:0015995,chlorophyll biosynthetic process,5.1706294E-5
+E-GEOD-38959,E-GEOD-38959,https://spoke.ucsf.edu/genelab/E-GEOD-38959-g2_g1,GO:0070125,mitochondrial translational elongation,5.19654E-5
+E-GEOD-19264,E-GEOD-19264,https://spoke.ucsf.edu/genelab/E-GEOD-19264-g3_g6,GO:0002181,cytoplasmic translation,5.3594114E-5
+E-GEOD-40127,E-GEOD-40127,https://spoke.ucsf.edu/genelab/E-GEOD-40127-g2_g1,GO:0006412,translation,5.392528E-5
+E-GEOD-43463,E-GEOD-43463,https://spoke.ucsf.edu/genelab/E-GEOD-43463-g6_g2,GO:0030639,polyketide biosynthetic process,5.4068005E-5
+E-GEOD-2565,E-GEOD-2565,https://spoke.ucsf.edu/genelab/E-GEOD-2565-g3_g12,GO:0006412,translation,5.4127995E-5
+E-GEOD-35700,E-GEOD-35700,https://spoke.ucsf.edu/genelab/E-GEOD-35700-g3_g1,GO:0008652,cellular amino acid biosynthetic process,5.4644708E-5
+E-GEOD-41827,E-GEOD-41827,https://spoke.ucsf.edu/genelab/E-GEOD-41827-g1_g2,GO:0006351,"transcription, DNA-templated",5.527127E-5
+E-GEOD-57252,E-GEOD-57252,https://spoke.ucsf.edu/genelab/E-GEOD-57252-g1_g6,GO:0009813,flavonoid biosynthetic process,5.6331923E-5
+E-GEOD-57252,E-GEOD-57252,https://spoke.ucsf.edu/genelab/E-GEOD-57252-g1_g3,GO:0015995,chlorophyll biosynthetic process,5.8878388E-5
+E-GEOD-24187,E-GEOD-24187,https://spoke.ucsf.edu/genelab/E-GEOD-24187-g3_g1,GO:0006694,steroid biosynthetic process,5.9200273E-5
+E-GEOD-34655,E-GEOD-34655,https://spoke.ucsf.edu/genelab/E-GEOD-34655-g1_g4,GO:0015995,chlorophyll biosynthetic process,6.0398812E-5
+E-GEOD-28728,E-GEOD-28728,https://spoke.ucsf.edu/genelab/E-GEOD-28728-g4_g3,GO:0002181,cytoplasmic translation,6.127604E-5
+E-GEOD-34655,E-GEOD-34655,https://spoke.ucsf.edu/genelab/E-GEOD-34655-g3_g4,GO:0019253,reductive pentose-phosphate cycle,6.130269E-5
+E-GEOD-33455,E-GEOD-33455,https://spoke.ucsf.edu/genelab/E-GEOD-33455-g4_g3,GO:0070125,mitochondrial translational elongation,6.3344465E-5
+E-GEOD-36035,E-GEOD-36035,https://spoke.ucsf.edu/genelab/E-GEOD-36035-g4_g2,GO:0070125,mitochondrial translational elongation,6.3362946E-5
+E-GEOD-18791,E-GEOD-18791,https://spoke.ucsf.edu/genelab/E-GEOD-18791-g11_g4,GO:0070125,mitochondrial translational elongation,6.542452E-5
+E-GEOD-44674,E-GEOD-44674,https://spoke.ucsf.edu/genelab/E-GEOD-44674-g9_g6,GO:0032543,mitochondrial translation,6.799454E-5
+E-GEOD-16722,E-GEOD-16722,https://spoke.ucsf.edu/genelab/E-GEOD-16722-g6_g3,GO:0002181,cytoplasmic translation,7.016849E-5
+E-GEOD-2192,E-GEOD-2192,https://spoke.ucsf.edu/genelab/E-GEOD-2192-g2_g10,GO:0006412,translation,7.064058E-5
+E-GEOD-5681,E-GEOD-5681,https://spoke.ucsf.edu/genelab/E-GEOD-5681-g4_g3,GO:0070125,mitochondrial translational elongation,7.0642185E-5
+E-GEOD-53280,E-GEOD-53280,https://spoke.ucsf.edu/genelab/E-GEOD-53280-g2_g1,GO:0015986,ATP synthesis coupled proton transport,7.12865E-5
+E-GEOD-55282,E-GEOD-55282,https://spoke.ucsf.edu/genelab/E-GEOD-55282-g4_g1,GO:0070125,mitochondrial translational elongation,7.4508076E-5
+E-GEOD-18912,E-GEOD-18912,https://spoke.ucsf.edu/genelab/E-GEOD-18912-g2_g1,GO:0070125,mitochondrial translational elongation,7.493483E-5
+E-GEOD-38332,E-GEOD-38332,https://spoke.ucsf.edu/genelab/E-GEOD-38332-g2_g1,GO:0070125,mitochondrial translational elongation,7.725874E-5
+E-GEOD-54962,E-GEOD-54962,https://spoke.ucsf.edu/genelab/E-GEOD-54962-g4_g1,GO:0070125,mitochondrial translational elongation,7.784874E-5
+E-GEOD-45581,E-GEOD-45581,https://spoke.ucsf.edu/genelab/E-GEOD-45581-g3_g2,GO:0002181,cytoplasmic translation,7.9355705E-5
+E-GEOD-46867,E-GEOD-46867,https://spoke.ucsf.edu/genelab/E-GEOD-46867-g6_g4,GO:0002181,cytoplasmic translation,8.245213E-5
+E-GEOD-43713,E-GEOD-43713,https://spoke.ucsf.edu/genelab/E-GEOD-43713-g3_g1,GO:0032543,mitochondrial translation,8.436615E-5
+E-GEOD-21681,E-GEOD-21681,https://spoke.ucsf.edu/genelab/E-GEOD-21681-g11_g5,GO:0006412,translation,8.439872E-5
+E-GEOD-16722,E-GEOD-16722,https://spoke.ucsf.edu/genelab/E-GEOD-16722-g3_g8,GO:0008652,cellular amino acid biosynthetic process,8.541644E-5
+E-GEOD-57896,E-GEOD-57896,https://spoke.ucsf.edu/genelab/E-GEOD-57896-g5_g7,GO:0006694,steroid biosynthetic process,8.56663E-5
+E-GEOD-43463,E-GEOD-43463,https://spoke.ucsf.edu/genelab/E-GEOD-43463-g8_g4,GO:0009813,flavonoid biosynthetic process,9.006719E-5
+E-GEOD-51720,E-GEOD-51720,https://spoke.ucsf.edu/genelab/E-GEOD-51720-g21_g16,GO:0019253,reductive pentose-phosphate cycle,9.0262096E-5
+E-GEOD-58603,E-GEOD-58603,https://spoke.ucsf.edu/genelab/E-GEOD-58603-g8_g2,GO:0015995,chlorophyll biosynthetic process,9.132124E-5
+E-GEOD-35700,E-GEOD-35700,https://spoke.ucsf.edu/genelab/E-GEOD-35700-g4_g2,GO:0006633,fatty acid biosynthetic process,9.15292E-5
+E-GEOD-41678,E-GEOD-41678,https://spoke.ucsf.edu/genelab/E-GEOD-41678-g19_g15,GO:0070125,mitochondrial translational elongation,9.325296E-5
+E-GEOD-33455,E-GEOD-33455,https://spoke.ucsf.edu/genelab/E-GEOD-33455-g2_g1,GO:0032543,mitochondrial translation,9.4659474E-5
+E-GEOD-16797,E-GEOD-16797,https://spoke.ucsf.edu/genelab/E-GEOD-16797-g4_g1,GO:0070125,mitochondrial translational elongation,1.0026366E-4
+E-GEOD-51651,E-GEOD-51651,https://spoke.ucsf.edu/genelab/E-GEOD-51651-g2_g1,GO:0006412,translation,1.02757236E-4
+E-GEOD-37031,E-GEOD-37031,https://spoke.ucsf.edu/genelab/E-GEOD-37031-g2_g1,GO:0006695,cholesterol biosynthetic process,1.0683526E-4
+E-GEOD-39687,E-GEOD-39687,https://spoke.ucsf.edu/genelab/E-GEOD-39687-g4_g3,GO:0032544,plastid translation,1.0732252E-4
+E-GEOD-52202,E-GEOD-52202,https://spoke.ucsf.edu/genelab/E-GEOD-52202-g2_g1,GO:0030208,dermatan sulfate biosynthetic process,1.11897025E-4
+E-GEOD-41678,E-GEOD-41678,https://spoke.ucsf.edu/genelab/E-GEOD-41678-g19_g15,GO:0006368,transcription elongation from RNA polymerase II promoter,1.133544E-4
+E-GEOD-57252,E-GEOD-57252,https://spoke.ucsf.edu/genelab/E-GEOD-57252-g1_g2,GO:0005992,trehalose biosynthetic process,1.14487426E-4
+E-GEOD-59966,E-GEOD-59966,https://spoke.ucsf.edu/genelab/E-GEOD-59966-g1_g2,GO:0071897,DNA biosynthetic process,1.1925006E-4
+E-GEOD-33643,E-GEOD-33643,https://spoke.ucsf.edu/genelab/E-GEOD-33643-g7_g2,GO:0070125,mitochondrial translational elongation,1.2021686E-4
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g111_g112,GO:0042795,snRNA transcription by RNA polymerase II,1.2273637E-4
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g111_g112,GO:0070125,mitochondrial translational elongation,1.2273637E-4
+E-GEOD-37031,E-GEOD-37031,https://spoke.ucsf.edu/genelab/E-GEOD-37031-g2_g1,GO:0016126,sterol biosynthetic process,1.2588275E-4
+E-GEOD-34925,E-GEOD-34925,https://spoke.ucsf.edu/genelab/E-GEOD-34925-g1_g2,GO:0006367,transcription initiation from RNA polymerase II promoter,1.2917056E-4
+E-GEOD-57896,E-GEOD-57896,https://spoke.ucsf.edu/genelab/E-GEOD-57896-g5_g7,GO:0006695,cholesterol biosynthetic process,1.3265178E-4
+E-GEOD-51885,E-GEOD-51885,https://spoke.ucsf.edu/genelab/E-GEOD-51885-g5_g4,GO:0016126,sterol biosynthetic process,1.3578644E-4
+E-GEOD-20493,E-GEOD-20493,https://spoke.ucsf.edu/genelab/E-GEOD-20493-g4_g2,GO:0002181,cytoplasmic translation,1.3604977E-4
+E-GEOD-45284,E-GEOD-45284,https://spoke.ucsf.edu/genelab/E-GEOD-45284-g2_g1,GO:0071897,DNA biosynthetic process,1.3742673E-4
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g6_g15,GO:0006694,steroid biosynthetic process,1.4441756E-4
+E-GEOD-18791,E-GEOD-18791,https://spoke.ucsf.edu/genelab/E-GEOD-18791-g11_g3,GO:0032543,mitochondrial translation,1.5223889E-4
+E-GEOD-25073,E-GEOD-25073,https://spoke.ucsf.edu/genelab/E-GEOD-25073-g2_g1,GO:0002181,cytoplasmic translation,1.5306321E-4
+E-GEOD-57252,E-GEOD-57252,https://spoke.ucsf.edu/genelab/E-GEOD-57252-g1_g7,GO:0009695,jasmonic acid biosynthetic process,1.6110108E-4
+E-GEOD-57252,E-GEOD-57252,https://spoke.ucsf.edu/genelab/E-GEOD-57252-g1_g7,GO:0031408,oxylipin biosynthetic process,1.6110108E-4
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g154_g157,GO:0006694,steroid biosynthetic process,1.630712E-4
+E-GEOD-23820,E-GEOD-23820,https://spoke.ucsf.edu/genelab/E-GEOD-23820-g2_g1,GO:0010025,wax biosynthetic process,1.6350076E-4
+E-GEOD-39752,E-GEOD-39752,https://spoke.ucsf.edu/genelab/E-GEOD-39752-g1_g2,GO:0006633,fatty acid biosynthetic process,1.6440869E-4
+E-GEOD-54073,E-GEOD-54073,https://spoke.ucsf.edu/genelab/E-GEOD-54073-g1_g2,GO:0006412,translation,1.6450664E-4
+E-GEOD-49284,E-GEOD-49284,https://spoke.ucsf.edu/genelab/E-GEOD-49284-g16_g4,GO:0070125,mitochondrial translational elongation,1.6531124E-4
+E-GEOD-40422,E-GEOD-40422,https://spoke.ucsf.edu/genelab/E-GEOD-40422-g2_g1,GO:0070125,mitochondrial translational elongation,1.6671175E-4
+E-GEOD-5735,E-GEOD-5735,https://spoke.ucsf.edu/genelab/E-GEOD-5735-g2_g1,GO:0009813,flavonoid biosynthetic process,1.6956693E-4
+E-GEOD-41827,E-GEOD-41827,https://spoke.ucsf.edu/genelab/E-GEOD-41827-g1_g2,GO:0070125,mitochondrial translational elongation,1.7377557E-4
+E-GEOD-18791,E-GEOD-18791,https://spoke.ucsf.edu/genelab/E-GEOD-18791-g11_g4,GO:0032543,mitochondrial translation,1.8331419E-4
+E-GEOD-40750,E-GEOD-40750,https://spoke.ucsf.edu/genelab/E-GEOD-40750-g2_g1,GO:0006694,steroid biosynthetic process,1.87409E-4
+E-GEOD-23940,E-GEOD-23940,https://spoke.ucsf.edu/genelab/E-GEOD-23940-g2_g1,GO:0002181,cytoplasmic translation,1.9068625E-4
+E-GEOD-53201,E-GEOD-53201,https://spoke.ucsf.edu/genelab/E-GEOD-53201-g1_g5,GO:0006694,steroid biosynthetic process,1.9623635E-4
+E-GEOD-35428,E-GEOD-35428,https://spoke.ucsf.edu/genelab/E-GEOD-35428-g8_g7,GO:0070125,mitochondrial translational elongation,1.9722813E-4
+E-GEOD-57116,E-GEOD-57116,https://spoke.ucsf.edu/genelab/E-GEOD-57116-g3_g2,GO:0070125,mitochondrial translational elongation,2.0371619E-4
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g4_g13,GO:0008299,isoprenoid biosynthetic process,2.0689104E-4
+E-GEOD-57896,E-GEOD-57896,https://spoke.ucsf.edu/genelab/E-GEOD-57896-g6_g10,GO:0006695,cholesterol biosynthetic process,2.0716834E-4
+E-GEOD-56785,E-GEOD-56785,https://spoke.ucsf.edu/genelab/E-GEOD-56785-g1_g5,GO:0002181,cytoplasmic translation,2.0783258E-4
+E-GEOD-22278,E-GEOD-22278,https://spoke.ucsf.edu/genelab/E-GEOD-22278-g5_g1,GO:0002181,cytoplasmic translation,2.1221765E-4
+E-GEOD-41678,E-GEOD-41678,https://spoke.ucsf.edu/genelab/E-GEOD-41678-g19_g16,GO:0070125,mitochondrial translational elongation,2.1348224E-4
+E-GEOD-44250,E-GEOD-44250,https://spoke.ucsf.edu/genelab/E-GEOD-44250-g1_g2,GO:0006412,translation,2.1539444E-4
+E-GEOD-5641,E-GEOD-5641,https://spoke.ucsf.edu/genelab/E-GEOD-5641-g2_g1,GO:0019761,glucosinolate biosynthetic process,2.1971954E-4
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g150_g151,GO:0046854,phosphatidylinositol phosphate biosynthetic process,2.221571E-4
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g82_g85,GO:0070125,mitochondrial translational elongation,2.2292548E-4
+E-GEOD-57896,E-GEOD-57896,https://spoke.ucsf.edu/genelab/E-GEOD-57896-g5_g7,GO:0016126,sterol biosynthetic process,2.2622506E-4
+E-GEOD-42780,E-GEOD-42780,https://spoke.ucsf.edu/genelab/E-GEOD-42780-g5_g6,GO:0006412,translation,2.3413413E-4
+E-GEOD-2515,E-GEOD-2515,https://spoke.ucsf.edu/genelab/E-GEOD-2515-g1_g2,GO:0006412,translation,2.350707E-4
+E-GEOD-32526,E-GEOD-32526,https://spoke.ucsf.edu/genelab/E-GEOD-32526-g1_g3,GO:0006351,"transcription, DNA-templated",2.3651103E-4
+E-GEOD-43551,E-GEOD-43551,https://spoke.ucsf.edu/genelab/E-GEOD-43551-g6_g3,GO:0030244,cellulose biosynthetic process,2.4901834E-4
+E-GEOD-19194,E-GEOD-19194,https://spoke.ucsf.edu/genelab/E-GEOD-19194-g2_g4,GO:0032543,mitochondrial translation,2.5079018E-4
+E-GEOD-45417,E-GEOD-45417,https://spoke.ucsf.edu/genelab/E-GEOD-45417-g3_g1,GO:0070125,mitochondrial translational elongation,2.5373188E-4
+E-GEOD-51720,E-GEOD-51720,https://spoke.ucsf.edu/genelab/E-GEOD-51720-g33_g22,GO:0019253,reductive pentose-phosphate cycle,2.605604E-4
+E-GEOD-43865,E-GEOD-43865,https://spoke.ucsf.edu/genelab/E-GEOD-43865-g12_g4,GO:0009813,flavonoid biosynthetic process,2.6112783E-4
+E-GEOD-17610,E-GEOD-17610,https://spoke.ucsf.edu/genelab/E-GEOD-17610-g1_g3,GO:0019761,glucosinolate biosynthetic process,2.6852742E-4
+E-GEOD-50572,E-GEOD-50572,https://spoke.ucsf.edu/genelab/E-GEOD-50572-g4_g2,GO:0070125,mitochondrial translational elongation,2.7602687E-4
+E-GEOD-29967,E-GEOD-29967,https://spoke.ucsf.edu/genelab/E-GEOD-29967-g1_g2,GO:0002181,cytoplasmic translation,2.7628063E-4
+E-GEOD-34331,E-GEOD-34331,https://spoke.ucsf.edu/genelab/E-GEOD-34331-g1_g2,GO:0006694,steroid biosynthetic process,2.7788788E-4
+E-GEOD-47812,E-GEOD-47812,https://spoke.ucsf.edu/genelab/E-GEOD-47812-g4_g2,GO:0002181,cytoplasmic translation,2.7952596E-4
+E-GEOD-35166,E-GEOD-35166,https://spoke.ucsf.edu/genelab/E-GEOD-35166-g3_g2,GO:0008652,cellular amino acid biosynthetic process,2.810264E-4
+E-GEOD-29137,E-GEOD-29137,https://spoke.ucsf.edu/genelab/E-GEOD-29137-g8_g7,GO:0070125,mitochondrial translational elongation,3.0692032E-4
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g3_g12,GO:0002181,cytoplasmic translation,3.0699704E-4
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g111_g114,GO:0070125,mitochondrial translational elongation,3.1105033E-4
+E-GEOD-33643,E-GEOD-33643,https://spoke.ucsf.edu/genelab/E-GEOD-33643-g7_g5,GO:0016126,sterol biosynthetic process,3.1615203E-4
+E-GEOD-34331,E-GEOD-34331,https://spoke.ucsf.edu/genelab/E-GEOD-34331-g1_g2,GO:0016126,sterol biosynthetic process,3.1733286E-4
+E-GEOD-50526,E-GEOD-50526,https://spoke.ucsf.edu/genelab/E-GEOD-50526-g8_g3,GO:0006633,fatty acid biosynthetic process,3.178984E-4
+E-GEOD-55048,E-GEOD-55048,https://spoke.ucsf.edu/genelab/E-GEOD-55048-g1_g2,GO:0046951,ketone body biosynthetic process,3.202378E-4
+E-GEOD-60823,E-GEOD-60823,https://spoke.ucsf.edu/genelab/E-GEOD-60823-g4_g3,GO:0002181,cytoplasmic translation,3.2338753E-4
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g121_g122,GO:0070125,mitochondrial translational elongation,3.2907882E-4
+E-GEOD-29187,E-GEOD-29187,https://spoke.ucsf.edu/genelab/E-GEOD-29187-g1_g6,GO:0008652,cellular amino acid biosynthetic process,3.334547E-4
+E-GEOD-18791,E-GEOD-18791,https://spoke.ucsf.edu/genelab/E-GEOD-18791-g11_g5,GO:0032543,mitochondrial translation,3.4731513E-4
+E-GEOD-18791,E-GEOD-18791,https://spoke.ucsf.edu/genelab/E-GEOD-18791-g11_g5,GO:0070125,mitochondrial translational elongation,3.4731513E-4
+E-GEOD-41678,E-GEOD-41678,https://spoke.ucsf.edu/genelab/E-GEOD-41678-g8_g5,GO:0070125,mitochondrial translational elongation,3.4750794E-4
+E-GEOD-56084,E-GEOD-56084,https://spoke.ucsf.edu/genelab/E-GEOD-56084-g2_g1,GO:0042795,snRNA transcription by RNA polymerase II,3.481461E-4
+E-GEOD-33950,E-GEOD-33950,https://spoke.ucsf.edu/genelab/E-GEOD-33950-g1_g2,GO:0070125,mitochondrial translational elongation,3.517159E-4
+E-GEOD-21656,E-GEOD-21656,https://spoke.ucsf.edu/genelab/E-GEOD-21656-g2_g1,GO:0006633,fatty acid biosynthetic process,3.5222343E-4
+E-GEOD-26525,E-GEOD-26525,https://spoke.ucsf.edu/genelab/E-GEOD-26525-g2_g5,GO:0070125,mitochondrial translational elongation,3.560394E-4
+E-GEOD-50526,E-GEOD-50526,https://spoke.ucsf.edu/genelab/E-GEOD-50526-g8_g3,GO:0030244,cellulose biosynthetic process,3.589367E-4
+E-GEOD-17636,E-GEOD-17636,https://spoke.ucsf.edu/genelab/E-GEOD-17636-g1_g2,GO:0070125,mitochondrial translational elongation,3.6836058E-4
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g6_g15,GO:0016126,sterol biosynthetic process,3.7476583E-4
+E-GEOD-4733,E-GEOD-4733,https://spoke.ucsf.edu/genelab/E-GEOD-4733-g6_g2,GO:0019344,cysteine biosynthetic process,3.8342623E-4
+E-GEOD-42781,E-GEOD-42781,https://spoke.ucsf.edu/genelab/E-GEOD-42781-g2_g3,GO:0016126,sterol biosynthetic process,3.9348338E-4
+E-GEOD-60340,E-GEOD-60340,https://spoke.ucsf.edu/genelab/E-GEOD-60340-g7_g3,GO:0002181,cytoplasmic translation,3.966704E-4
+E-GEOD-5686,E-GEOD-5686,https://spoke.ucsf.edu/genelab/E-GEOD-5686-g11_g5,GO:0019761,glucosinolate biosynthetic process,3.9682223E-4
+E-GEOD-50526,E-GEOD-50526,https://spoke.ucsf.edu/genelab/E-GEOD-50526-g9_g6,GO:0008652,cellular amino acid biosynthetic process,3.9776615E-4
+E-GEOD-56235,E-GEOD-56235,https://spoke.ucsf.edu/genelab/E-GEOD-56235-g2_g1,GO:0006695,cholesterol biosynthetic process,4.0487794E-4
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g56_g58,GO:0032543,mitochondrial translation,4.1693778E-4
+E-GEOD-34331,E-GEOD-34331,https://spoke.ucsf.edu/genelab/E-GEOD-34331-g1_g2,GO:0006695,cholesterol biosynthetic process,4.202645E-4
+E-GEOD-4183,E-GEOD-4183,https://spoke.ucsf.edu/genelab/E-GEOD-4183-g3_g4,GO:0070125,mitochondrial translational elongation,4.2171235E-4
+E-GEOD-16964,E-GEOD-16964,https://spoke.ucsf.edu/genelab/E-GEOD-16964-g4_g3,GO:0008652,cellular amino acid biosynthetic process,4.25266E-4
+E-GEOD-37940,E-GEOD-37940,https://spoke.ucsf.edu/genelab/E-GEOD-37940-g1_g2,GO:0002181,cytoplasmic translation,4.2898982E-4
+E-GEOD-45724,E-GEOD-45724,https://spoke.ucsf.edu/genelab/E-GEOD-45724-g4_g2,GO:0002181,cytoplasmic translation,4.3888143E-4
+E-GEOD-41136,E-GEOD-41136,https://spoke.ucsf.edu/genelab/E-GEOD-41136-g12_g8,GO:0002181,cytoplasmic translation,4.4513625E-4
+E-GEOD-5728,E-GEOD-5728,https://spoke.ucsf.edu/genelab/E-GEOD-5728-g2_g1,GO:0019761,glucosinolate biosynthetic process,4.4799375E-4
+E-GEOD-41136,E-GEOD-41136,https://spoke.ucsf.edu/genelab/E-GEOD-41136-g11_g7,GO:0002181,cytoplasmic translation,4.6312736E-4
+E-GEOD-35006,E-GEOD-35006,https://spoke.ucsf.edu/genelab/E-GEOD-35006-g6_g5,GO:0006412,translation,4.6554333E-4
+E-GEOD-16738,E-GEOD-16738,https://spoke.ucsf.edu/genelab/E-GEOD-16738-g3_g4,GO:0006164,purine nucleotide biosynthetic process,4.7607583E-4
+E-GEOD-56026,E-GEOD-56026,https://spoke.ucsf.edu/genelab/E-GEOD-56026-g2_g1,GO:0016126,sterol biosynthetic process,4.7613375E-4
+E-GEOD-46867,E-GEOD-46867,https://spoke.ucsf.edu/genelab/E-GEOD-46867-g6_g2,GO:0008652,cellular amino acid biosynthetic process,4.938152E-4
+E-GEOD-45581,E-GEOD-45581,https://spoke.ucsf.edu/genelab/E-GEOD-45581-g3_g1,GO:0002181,cytoplasmic translation,5.0238566E-4
+E-GEOD-3749,E-GEOD-3749,https://spoke.ucsf.edu/genelab/E-GEOD-3749-g4_g2,GO:0032543,mitochondrial translation,5.0871633E-4
+E-GEOD-56026,E-GEOD-56026,https://spoke.ucsf.edu/genelab/E-GEOD-56026-g3_g1,GO:0042795,snRNA transcription by RNA polymerase II,5.198539E-4
+E-GEOD-38023,E-GEOD-38023,https://spoke.ucsf.edu/genelab/E-GEOD-38023-g9_g11,GO:0008652,cellular amino acid biosynthetic process,5.216848E-4
+E-GEOD-58603,E-GEOD-58603,https://spoke.ucsf.edu/genelab/E-GEOD-58603-g10_g12,GO:0015995,chlorophyll biosynthetic process,5.2214786E-4
+E-GEOD-39733,E-GEOD-39733,https://spoke.ucsf.edu/genelab/E-GEOD-39733-g3_g4,GO:0070125,mitochondrial translational elongation,5.413774E-4
+E-GEOD-17508,E-GEOD-17508,https://spoke.ucsf.edu/genelab/E-GEOD-17508-g1_g2,GO:0006412,translation,5.456705E-4
+E-GEOD-24187,E-GEOD-24187,https://spoke.ucsf.edu/genelab/E-GEOD-24187-g3_g6,GO:0006694,steroid biosynthetic process,5.602613E-4
+E-GEOD-24187,E-GEOD-24187,https://spoke.ucsf.edu/genelab/E-GEOD-24187-g3_g6,GO:0009303,rRNA transcription,5.602613E-4
+E-GEOD-48786,E-GEOD-48786,https://spoke.ucsf.edu/genelab/E-GEOD-48786-g2_g1,GO:0002181,cytoplasmic translation,5.6252006E-4
+E-GEOD-18791,E-GEOD-18791,https://spoke.ucsf.edu/genelab/E-GEOD-18791-g11_g10,GO:0070125,mitochondrial translational elongation,5.6838454E-4
+E-GEOD-57252,E-GEOD-57252,https://spoke.ucsf.edu/genelab/E-GEOD-57252-g1_g4,GO:0046467,membrane lipid biosynthetic process,5.7850307E-4
+E-GEOD-44250,E-GEOD-44250,https://spoke.ucsf.edu/genelab/E-GEOD-44250-g1_g2,GO:0008652,cellular amino acid biosynthetic process,5.90409E-4
+E-GEOD-19264,E-GEOD-19264,https://spoke.ucsf.edu/genelab/E-GEOD-19264-g2_g5,GO:0002181,cytoplasmic translation,5.979288E-4
+E-GEOD-51720,E-GEOD-51720,https://spoke.ucsf.edu/genelab/E-GEOD-51720-g14_g8,GO:0019253,reductive pentose-phosphate cycle,6.039772E-4
+E-GEOD-21920,E-GEOD-21920,https://spoke.ucsf.edu/genelab/E-GEOD-21920-g2_g3,GO:0015995,chlorophyll biosynthetic process,6.128353E-4
+E-GEOD-30249,E-GEOD-30249,https://spoke.ucsf.edu/genelab/E-GEOD-30249-g8_g4,GO:0005992,trehalose biosynthetic process,6.247635E-4
+E-GEOD-38879,E-GEOD-38879,https://spoke.ucsf.edu/genelab/E-GEOD-38879-g2_g1,GO:0019253,reductive pentose-phosphate cycle,6.2555633E-4
+E-GEOD-41405,E-GEOD-41405,https://spoke.ucsf.edu/genelab/E-GEOD-41405-g1_g6,GO:0070125,mitochondrial translational elongation,6.289455E-4
+E-GEOD-51720,E-GEOD-51720,https://spoke.ucsf.edu/genelab/E-GEOD-51720-g7_g3,GO:0019253,reductive pentose-phosphate cycle,6.343588E-4
+E-GEOD-35057,E-GEOD-35057,https://spoke.ucsf.edu/genelab/E-GEOD-35057-g7_g3,GO:0019761,glucosinolate biosynthetic process,6.435914E-4
+E-GEOD-44674,E-GEOD-44674,https://spoke.ucsf.edu/genelab/E-GEOD-44674-g4_g10,GO:0032543,mitochondrial translation,6.521313E-4
+E-GEOD-32706,E-GEOD-32706,https://spoke.ucsf.edu/genelab/E-GEOD-32706-g1_g2,GO:0006633,fatty acid biosynthetic process,6.5457384E-4
+E-GEOD-48121,E-GEOD-48121,https://spoke.ucsf.edu/genelab/E-GEOD-48121-g3_g2,GO:0006412,translation,6.5802736E-4
+E-GEOD-32876,E-GEOD-32876,https://spoke.ucsf.edu/genelab/E-GEOD-32876-g1_g2,GO:0006412,translation,6.6111656E-4
+E-GEOD-53105,E-GEOD-53105,https://spoke.ucsf.edu/genelab/E-GEOD-53105-g4_g2,GO:0006779,porphyrin-containing compound biosynthetic process,6.6180516E-4
+E-GEOD-35700,E-GEOD-35700,https://spoke.ucsf.edu/genelab/E-GEOD-35700-g3_g1,GO:0019761,glucosinolate biosynthetic process,6.624586E-4
+E-GEOD-25250,E-GEOD-25250,https://spoke.ucsf.edu/genelab/E-GEOD-25250-g4_g12,GO:0006412,translation,6.6910236E-4
+E-GEOD-24365,E-GEOD-24365,https://spoke.ucsf.edu/genelab/E-GEOD-24365-g2_g1,GO:0006782,protoporphyrinogen IX biosynthetic process,6.889583E-4
+E-GEOD-26679,E-GEOD-26679,https://spoke.ucsf.edu/genelab/E-GEOD-26679-g4_g2,GO:0008652,cellular amino acid biosynthetic process,6.9126184E-4
+E-GEOD-38281,E-GEOD-38281,https://spoke.ucsf.edu/genelab/E-GEOD-38281-g1_g2,GO:0009058,biosynthetic process,6.9273316E-4
+E-GEOD-47812,E-GEOD-47812,https://spoke.ucsf.edu/genelab/E-GEOD-47812-g4_g2,GO:0008652,cellular amino acid biosynthetic process,7.0316513E-4
+E-GEOD-37286,E-GEOD-37286,https://spoke.ucsf.edu/genelab/E-GEOD-37286-g8_g10,GO:0016126,sterol biosynthetic process,7.0693856E-4
+E-GEOD-45284,E-GEOD-45284,https://spoke.ucsf.edu/genelab/E-GEOD-45284-g4_g3,GO:0006695,cholesterol biosynthetic process,7.09476E-4
+E-GEOD-5686,E-GEOD-5686,https://spoke.ucsf.edu/genelab/E-GEOD-5686-g11_g5,GO:0009058,biosynthetic process,7.174573E-4
+E-GEOD-34655,E-GEOD-34655,https://spoke.ucsf.edu/genelab/E-GEOD-34655-g3_g4,GO:0015995,chlorophyll biosynthetic process,7.2710286E-4
+E-GEOD-36509,E-GEOD-36509,https://spoke.ucsf.edu/genelab/E-GEOD-36509-g3_g1,GO:0042795,snRNA transcription by RNA polymerase II,7.277161E-4
+E-GEOD-5617,E-GEOD-5617,https://spoke.ucsf.edu/genelab/E-GEOD-5617-g12_g9,GO:0015995,chlorophyll biosynthetic process,7.309478E-4
+E-GEOD-41136,E-GEOD-41136,https://spoke.ucsf.edu/genelab/E-GEOD-41136-g10_g6,GO:0002181,cytoplasmic translation,7.34056E-4
+E-GEOD-28728,E-GEOD-28728,https://spoke.ucsf.edu/genelab/E-GEOD-28728-g4_g3,GO:0006367,transcription initiation from RNA polymerase II promoter,7.395521E-4
+E-GEOD-28728,E-GEOD-28728,https://spoke.ucsf.edu/genelab/E-GEOD-28728-g4_g1,GO:0002181,cytoplasmic translation,7.45069E-4
+E-GEOD-47205,E-GEOD-47205,https://spoke.ucsf.edu/genelab/E-GEOD-47205-g1_g2,GO:0006779,porphyrin-containing compound biosynthetic process,7.5337524E-4
+E-GEOD-5686,E-GEOD-5686,https://spoke.ucsf.edu/genelab/E-GEOD-5686-g4_g1,GO:0019761,glucosinolate biosynthetic process,7.669286E-4
+E-GEOD-45724,E-GEOD-45724,https://spoke.ucsf.edu/genelab/E-GEOD-45724-g4_g2,GO:0008652,cellular amino acid biosynthetic process,7.669692E-4
+E-GEOD-49608,E-GEOD-49608,https://spoke.ucsf.edu/genelab/E-GEOD-49608-g1_g4,GO:0002181,cytoplasmic translation,7.6822704E-4
+E-GEOD-18791,E-GEOD-18791,https://spoke.ucsf.edu/genelab/E-GEOD-18791-g11_g6,GO:0032543,mitochondrial translation,7.685979E-4
+E-GEOD-33643,E-GEOD-33643,https://spoke.ucsf.edu/genelab/E-GEOD-33643-g7_g10,GO:0070125,mitochondrial translational elongation,7.7029207E-4
+E-GEOD-51720,E-GEOD-51720,https://spoke.ucsf.edu/genelab/E-GEOD-51720-g33_g26,GO:0019253,reductive pentose-phosphate cycle,7.709444E-4
+E-GEOD-49284,E-GEOD-49284,https://spoke.ucsf.edu/genelab/E-GEOD-49284-g13_g1,GO:0032543,mitochondrial translation,7.763304E-4
+E-GEOD-34055,E-GEOD-34055,https://spoke.ucsf.edu/genelab/E-GEOD-34055-g4_g2,GO:0006368,transcription elongation from RNA polymerase II promoter,8.0580806E-4
+E-GEOD-5637,E-GEOD-5637,https://spoke.ucsf.edu/genelab/E-GEOD-5637-g2_g3,GO:0008652,cellular amino acid biosynthetic process,8.0912386E-4
+E-GEOD-32659,E-GEOD-32659,https://spoke.ucsf.edu/genelab/E-GEOD-32659-g1_g2,GO:0019761,glucosinolate biosynthetic process,8.383333E-4
+E-GEOD-16089,E-GEOD-16089,https://spoke.ucsf.edu/genelab/E-GEOD-16089-g2_g1,GO:0070125,mitochondrial translational elongation,8.453952E-4
+E-GEOD-49596,E-GEOD-49596,https://spoke.ucsf.edu/genelab/E-GEOD-49596-g5_g7,GO:0008652,cellular amino acid biosynthetic process,8.505748E-4
+E-GEOD-41405,E-GEOD-41405,https://spoke.ucsf.edu/genelab/E-GEOD-41405-g1_g8,GO:0070125,mitochondrial translational elongation,8.6851174E-4
+E-GEOD-16722,E-GEOD-16722,https://spoke.ucsf.edu/genelab/E-GEOD-16722-g3_g8,GO:0002181,cytoplasmic translation,8.8863313E-4
+E-GEOD-34209,E-GEOD-34209,https://spoke.ucsf.edu/genelab/E-GEOD-34209-g4_g3,GO:0008652,cellular amino acid biosynthetic process,9.074137E-4
+E-GEOD-41678,E-GEOD-41678,https://spoke.ucsf.edu/genelab/E-GEOD-41678-g8_g7,GO:0016126,sterol biosynthetic process,9.430066E-4
+E-GEOD-60835,E-GEOD-60835,https://spoke.ucsf.edu/genelab/E-GEOD-60835-g3_g4,GO:0010025,wax biosynthetic process,9.5766643E-4
+E-GEOD-5281,E-GEOD-5281,https://spoke.ucsf.edu/genelab/E-GEOD-5281-g8_g2,GO:0032543,mitochondrial translation,9.652695E-4
+E-GEOD-29406,E-GEOD-29406,https://spoke.ucsf.edu/genelab/E-GEOD-29406-g1_g2,GO:0070125,mitochondrial translational elongation,9.6629607E-4
+E-GEOD-32566,E-GEOD-32566,https://spoke.ucsf.edu/genelab/E-GEOD-32566-g4_g2,GO:0008652,cellular amino acid biosynthetic process,9.792324E-4
+E-GEOD-26525,E-GEOD-26525,https://spoke.ucsf.edu/genelab/E-GEOD-26525-g2_g3,GO:0070125,mitochondrial translational elongation,9.91196E-4
+E-GEOD-31839,E-GEOD-31839,https://spoke.ucsf.edu/genelab/E-GEOD-31839-g1_g2,GO:0006094,gluconeogenesis,0.00100219
+E-GEOD-4733,E-GEOD-4733,https://spoke.ucsf.edu/genelab/E-GEOD-4733-g6_g2,GO:0008652,cellular amino acid biosynthetic process,0.0010107143
+E-GEOD-35006,E-GEOD-35006,https://spoke.ucsf.edu/genelab/E-GEOD-35006-g4_g3,GO:0070125,mitochondrial translational elongation,0.0010166358
+E-GEOD-22139,E-GEOD-22139,https://spoke.ucsf.edu/genelab/E-GEOD-22139-g4_g2,GO:0002181,cytoplasmic translation,0.0010202829
+E-GEOD-32697,E-GEOD-32697,https://spoke.ucsf.edu/genelab/E-GEOD-32697-g1_g2,GO:0006412,translation,0.0010238703
+E-GEOD-53604,E-GEOD-53604,https://spoke.ucsf.edu/genelab/E-GEOD-53604-g2_g1,GO:0016126,sterol biosynthetic process,0.0010255079
+E-GEOD-5741,E-GEOD-5741,https://spoke.ucsf.edu/genelab/E-GEOD-5741-g1_g2,GO:0006633,fatty acid biosynthetic process,0.0010270568
+E-GEOD-16238,E-GEOD-16238,https://spoke.ucsf.edu/genelab/E-GEOD-16238-g2_g1,GO:0070125,mitochondrial translational elongation,0.0010306621
+E-GEOD-35166,E-GEOD-35166,https://spoke.ucsf.edu/genelab/E-GEOD-35166-g3_g1,GO:0008652,cellular amino acid biosynthetic process,0.0010707567
+E-GEOD-39091,E-GEOD-39091,https://spoke.ucsf.edu/genelab/E-GEOD-39091-g13_g11,GO:0070125,mitochondrial translational elongation,0.0010752014
+E-GEOD-40750,E-GEOD-40750,https://spoke.ucsf.edu/genelab/E-GEOD-40750-g2_g1,GO:0016126,sterol biosynthetic process,0.0010960043
+E-GEOD-36509,E-GEOD-36509,https://spoke.ucsf.edu/genelab/E-GEOD-36509-g3_g1,GO:0006368,transcription elongation from RNA polymerase II promoter,0.0011060467
+E-GEOD-2362,E-GEOD-2362,https://spoke.ucsf.edu/genelab/E-GEOD-2362-g1_g3,GO:0006695,cholesterol biosynthetic process,0.0011068846
+E-GEOD-41678,E-GEOD-41678,https://spoke.ucsf.edu/genelab/E-GEOD-41678-g19_g17,GO:0006412,translation,0.0011114186
+E-GEOD-49284,E-GEOD-49284,https://spoke.ucsf.edu/genelab/E-GEOD-49284-g24_g8,GO:0006412,translation,0.0011476065
+E-GEOD-51704,E-GEOD-51704,https://spoke.ucsf.edu/genelab/E-GEOD-51704-g10_g9,GO:0006412,translation,0.0011498362
+E-GEOD-16797,E-GEOD-16797,https://spoke.ucsf.edu/genelab/E-GEOD-16797-g4_g1,GO:0032543,mitochondrial translation,0.0011531791
+E-GEOD-18329,E-GEOD-18329,https://spoke.ucsf.edu/genelab/E-GEOD-18329-g3_g6,GO:0008652,cellular amino acid biosynthetic process,0.0011541686
+E-GEOD-19314,E-GEOD-19314,https://spoke.ucsf.edu/genelab/E-GEOD-19314-g2_g4,GO:0002181,cytoplasmic translation,0.0011648705
+E-GEOD-56026,E-GEOD-56026,https://spoke.ucsf.edu/genelab/E-GEOD-56026-g2_g1,GO:0006695,cholesterol biosynthetic process,0.001171119
+E-GEOD-29814,E-GEOD-29814,https://spoke.ucsf.edu/genelab/E-GEOD-29814-g1_g4,GO:0008652,cellular amino acid biosynthetic process,0.0011779405
+E-GEOD-60823,E-GEOD-60823,https://spoke.ucsf.edu/genelab/E-GEOD-60823-g4_g3,GO:0008652,cellular amino acid biosynthetic process,0.0011803752
+E-GEOD-35700,E-GEOD-35700,https://spoke.ucsf.edu/genelab/E-GEOD-35700-g3_g1,GO:0009073,aromatic amino acid family biosynthetic process,0.0011928324
+E-GEOD-33643,E-GEOD-33643,https://spoke.ucsf.edu/genelab/E-GEOD-33643-g7_g3,GO:0002181,cytoplasmic translation,0.0011968089
+E-GEOD-32193,E-GEOD-32193,https://spoke.ucsf.edu/genelab/E-GEOD-32193-g3_g2,GO:0019761,glucosinolate biosynthetic process,0.001197931
+E-GEOD-19743,E-GEOD-19743,https://spoke.ucsf.edu/genelab/E-GEOD-19743-g6_g4,GO:0002181,cytoplasmic translation,0.001214841
+E-GEOD-19743,E-GEOD-19743,https://spoke.ucsf.edu/genelab/E-GEOD-19743-g6_g4,GO:0070125,mitochondrial translational elongation,0.001214841
+E-GEOD-41678,E-GEOD-41678,https://spoke.ucsf.edu/genelab/E-GEOD-41678-g19_g18,GO:0070125,mitochondrial translational elongation,0.0012188796
+E-GEOD-29967,E-GEOD-29967,https://spoke.ucsf.edu/genelab/E-GEOD-29967-g4_g5,GO:0002181,cytoplasmic translation,0.0012216696
+E-GEOD-5699,E-GEOD-5699,https://spoke.ucsf.edu/genelab/E-GEOD-5699-g2_g1,GO:0006633,fatty acid biosynthetic process,0.0012385419
+E-GEOD-43767,E-GEOD-43767,https://spoke.ucsf.edu/genelab/E-GEOD-43767-g5_g2,GO:0070125,mitochondrial translational elongation,0.0012647078
+E-GEOD-56691,E-GEOD-56691,https://spoke.ucsf.edu/genelab/E-GEOD-56691-g4_g1,GO:0002181,cytoplasmic translation,0.0012688152
+E-GEOD-1692,E-GEOD-1692,https://spoke.ucsf.edu/genelab/E-GEOD-1692-g1_g3,GO:0070125,mitochondrial translational elongation,0.001270058
+E-GEOD-58007,E-GEOD-58007,https://spoke.ucsf.edu/genelab/E-GEOD-58007-g2_g1,GO:0015995,chlorophyll biosynthetic process,0.001312743
+E-GEOD-37211,E-GEOD-37211,https://spoke.ucsf.edu/genelab/E-GEOD-37211-g4_g6,GO:0006633,fatty acid biosynthetic process,0.0013174788
+E-GEOD-31587,E-GEOD-31587,https://spoke.ucsf.edu/genelab/E-GEOD-31587-g5_g3,GO:0002181,cytoplasmic translation,0.0013487476
+E-GEOD-30249,E-GEOD-30249,https://spoke.ucsf.edu/genelab/E-GEOD-30249-g5_g1,GO:0019438,aromatic compound biosynthetic process,0.001359185
+E-GEOD-37014,E-GEOD-37014,https://spoke.ucsf.edu/genelab/E-GEOD-37014-g2_g1,GO:0002181,cytoplasmic translation,0.0013832502
+E-GEOD-5637,E-GEOD-5637,https://spoke.ucsf.edu/genelab/E-GEOD-5637-g5_g6,GO:0019761,glucosinolate biosynthetic process,0.0013861213
+E-GEOD-47812,E-GEOD-47812,https://spoke.ucsf.edu/genelab/E-GEOD-47812-g3_g1,GO:0008652,cellular amino acid biosynthetic process,0.001406261
+E-GEOD-28728,E-GEOD-28728,https://spoke.ucsf.edu/genelab/E-GEOD-28728-g4_g2,GO:0002181,cytoplasmic translation,0.0014251423
+E-GEOD-51704,E-GEOD-51704,https://spoke.ucsf.edu/genelab/E-GEOD-51704-g4_g3,GO:0016126,sterol biosynthetic process,0.0014377494
+E-GEOD-41136,E-GEOD-41136,https://spoke.ucsf.edu/genelab/E-GEOD-41136-g11_g3,GO:0002181,cytoplasmic translation,0.0014428643
+E-GEOD-41972,E-GEOD-41972,https://spoke.ucsf.edu/genelab/E-GEOD-41972-g2_g1,GO:0042795,snRNA transcription by RNA polymerase II,0.0014487254
+E-GEOD-57027,E-GEOD-57027,https://spoke.ucsf.edu/genelab/E-GEOD-57027-g1_g2,GO:0070125,mitochondrial translational elongation,0.0014894383
+E-GEOD-59294,E-GEOD-59294,https://spoke.ucsf.edu/genelab/E-GEOD-59294-g4_g5,GO:0070125,mitochondrial translational elongation,0.0015403286
+E-GEOD-18858,E-GEOD-18858,https://spoke.ucsf.edu/genelab/E-GEOD-18858-g50_g36,GO:0016126,sterol biosynthetic process,0.0015406794
+E-GEOD-49284,E-GEOD-49284,https://spoke.ucsf.edu/genelab/E-GEOD-49284-g13_g1,GO:0070125,mitochondrial translational elongation,0.0015511282
+E-GEOD-51720,E-GEOD-51720,https://spoke.ucsf.edu/genelab/E-GEOD-51720-g21_g17,GO:0019253,reductive pentose-phosphate cycle,0.001552105
+E-GEOD-3231,E-GEOD-3231,https://spoke.ucsf.edu/genelab/E-GEOD-3231-g5_g4,GO:0016126,sterol biosynthetic process,0.0015569633
+E-GEOD-19136,E-GEOD-19136,https://spoke.ucsf.edu/genelab/E-GEOD-19136-g2_g1,GO:0070125,mitochondrial translational elongation,0.001578423
+E-GEOD-46153,E-GEOD-46153,https://spoke.ucsf.edu/genelab/E-GEOD-46153-g9_g4,GO:0006164,purine nucleotide biosynthetic process,0.0016160569
+E-GEOD-18982,E-GEOD-18982,https://spoke.ucsf.edu/genelab/E-GEOD-18982-g4_g3,GO:0008652,cellular amino acid biosynthetic process,0.0016320889
+E-GEOD-24978,E-GEOD-24978,https://spoke.ucsf.edu/genelab/E-GEOD-24978-g2_g1,GO:0007307,eggshell chorion gene amplification,0.0016444975
+E-GEOD-38879,E-GEOD-38879,https://spoke.ucsf.edu/genelab/E-GEOD-38879-g2_g1,GO:0009718,anthocyanin-containing compound biosynthetic process,0.0016576488
+E-GEOD-44674,E-GEOD-44674,https://spoke.ucsf.edu/genelab/E-GEOD-44674-g4_g10,GO:0015986,ATP synthesis coupled proton transport,0.0016777623
+E-GEOD-35288,E-GEOD-35288,https://spoke.ucsf.edu/genelab/E-GEOD-35288-g2_g1,GO:0005992,trehalose biosynthetic process,0.0016987184
+E-GEOD-55282,E-GEOD-55282,https://spoke.ucsf.edu/genelab/E-GEOD-55282-g4_g3,GO:0070125,mitochondrial translational elongation,0.0017197661
+E-GEOD-37373,E-GEOD-37373,https://spoke.ucsf.edu/genelab/E-GEOD-37373-g1_g2,GO:0042795,snRNA transcription by RNA polymerase II,0.0017212812
+E-GEOD-34655,E-GEOD-34655,https://spoke.ucsf.edu/genelab/E-GEOD-34655-g1_g2,GO:0015995,chlorophyll biosynthetic process,0.0017541122
+E-GEOD-31348,E-GEOD-31348,https://spoke.ucsf.edu/genelab/E-GEOD-31348-g1_g4,GO:0032543,mitochondrial translation,0.0017605231
+E-GEOD-44356,E-GEOD-44356,https://spoke.ucsf.edu/genelab/E-GEOD-44356-g6_g5,GO:0006695,cholesterol biosynthetic process,0.0017641826
+E-GEOD-43463,E-GEOD-43463,https://spoke.ucsf.edu/genelab/E-GEOD-43463-g6_g2,GO:0009813,flavonoid biosynthetic process,0.0017780492
+E-GEOD-53604,E-GEOD-53604,https://spoke.ucsf.edu/genelab/E-GEOD-53604-g2_g1,GO:0006412,translation,0.0017825784
+E-GEOD-57935,E-GEOD-57935,https://spoke.ucsf.edu/genelab/E-GEOD-57935-g4_g2,GO:0006351,"transcription, DNA-templated",0.0018088734
+E-GEOD-33204,E-GEOD-33204,https://spoke.ucsf.edu/genelab/E-GEOD-33204-g6_g3,GO:0006412,translation,0.0018252273
+E-GEOD-46867,E-GEOD-46867,https://spoke.ucsf.edu/genelab/E-GEOD-46867-g5_g3,GO:0002181,cytoplasmic translation,0.0018341937
+E-GEOD-37286,E-GEOD-37286,https://spoke.ucsf.edu/genelab/E-GEOD-37286-g5_g6,GO:0006412,translation,0.0018546013
+E-GEOD-37286,E-GEOD-37286,https://spoke.ucsf.edu/genelab/E-GEOD-37286-g5_g6,GO:0016126,sterol biosynthetic process,0.0018546013
+E-GEOD-19743,E-GEOD-19743,https://spoke.ucsf.edu/genelab/E-GEOD-19743-g3_g2,GO:0002181,cytoplasmic translation,0.001860984
+E-GEOD-57116,E-GEOD-57116,https://spoke.ucsf.edu/genelab/E-GEOD-57116-g3_g2,GO:0042776,mitochondrial ATP synthesis coupled proton transport,0.0018859988
+E-GEOD-43818,E-GEOD-43818,https://spoke.ucsf.edu/genelab/E-GEOD-43818-g7_g3,GO:0008652,cellular amino acid biosynthetic process,0.001886205
+E-GEOD-57252,E-GEOD-57252,https://spoke.ucsf.edu/genelab/E-GEOD-57252-g1_g2,GO:0009695,jasmonic acid biosynthetic process,0.0018965236
+E-GEOD-53201,E-GEOD-53201,https://spoke.ucsf.edu/genelab/E-GEOD-53201-g1_g4,GO:0006695,cholesterol biosynthetic process,0.0019220071
+E-GEOD-45284,E-GEOD-45284,https://spoke.ucsf.edu/genelab/E-GEOD-45284-g4_g3,GO:0016126,sterol biosynthetic process,0.0019275501
+E-GEOD-22139,E-GEOD-22139,https://spoke.ucsf.edu/genelab/E-GEOD-22139-g6_g3,GO:0070125,mitochondrial translational elongation,0.001938097
+E-GEOD-34654,E-GEOD-34654,https://spoke.ucsf.edu/genelab/E-GEOD-34654-g2_g1,GO:0019761,glucosinolate biosynthetic process,0.0020043077
+E-GEOD-39157,E-GEOD-39157,https://spoke.ucsf.edu/genelab/E-GEOD-39157-g3_g1,GO:0002181,cytoplasmic translation,0.002005011
+E-GEOD-16066,E-GEOD-16066,https://spoke.ucsf.edu/genelab/E-GEOD-16066-g2_g1,GO:0016126,sterol biosynthetic process,0.00204947
+E-GEOD-40549,E-GEOD-40549,https://spoke.ucsf.edu/genelab/E-GEOD-40549-g10_g5,GO:0015986,ATP synthesis coupled proton transport,0.002079976
+E-GEOD-35166,E-GEOD-35166,https://spoke.ucsf.edu/genelab/E-GEOD-35166-g3_g1,GO:0015995,chlorophyll biosynthetic process,0.002091561
+E-GEOD-52942,E-GEOD-52942,https://spoke.ucsf.edu/genelab/E-GEOD-52942-g2_g1,GO:0002181,cytoplasmic translation,0.0021204446
+E-GEOD-35198,E-GEOD-35198,https://spoke.ucsf.edu/genelab/E-GEOD-35198-g2_g1,GO:0008654,phospholipid biosynthetic process,0.0021224015
+E-GEOD-51212,E-GEOD-51212,https://spoke.ucsf.edu/genelab/E-GEOD-51212-g4_g3,GO:0042795,snRNA transcription by RNA polymerase II,0.0021281494
+E-GEOD-51720,E-GEOD-51720,https://spoke.ucsf.edu/genelab/E-GEOD-51720-g21_g19,GO:0002181,cytoplasmic translation,0.0021438317
+E-GEOD-60548,E-GEOD-60548,https://spoke.ucsf.edu/genelab/E-GEOD-60548-g1_g3,GO:0002181,cytoplasmic translation,0.0021579573
+E-GEOD-57252,E-GEOD-57252,https://spoke.ucsf.edu/genelab/E-GEOD-57252-g1_g4,GO:0009228,thiamine biosynthetic process,0.0021929396
+E-GEOD-5617,E-GEOD-5617,https://spoke.ucsf.edu/genelab/E-GEOD-5617-g10_g9,GO:0015995,chlorophyll biosynthetic process,0.002199494
+E-GEOD-41678,E-GEOD-41678,https://spoke.ucsf.edu/genelab/E-GEOD-41678-g8_g7,GO:0006695,cholesterol biosynthetic process,0.0022183808
+E-GEOD-41678,E-GEOD-41678,https://spoke.ucsf.edu/genelab/E-GEOD-41678-g8_g7,GO:0042795,snRNA transcription by RNA polymerase II,0.0022183808
+E-GEOD-24365,E-GEOD-24365,https://spoke.ucsf.edu/genelab/E-GEOD-24365-g2_g1,GO:0015986,ATP synthesis coupled proton transport,0.0022223913
+E-GEOD-18791,E-GEOD-18791,https://spoke.ucsf.edu/genelab/E-GEOD-18791-g11_g2,GO:0032543,mitochondrial translation,0.0022371016
+E-GEOD-27149,E-GEOD-27149,https://spoke.ucsf.edu/genelab/E-GEOD-27149-g9_g3,GO:0006412,translation,0.0022656552
+E-GEOD-50865,E-GEOD-50865,https://spoke.ucsf.edu/genelab/E-GEOD-50865-g1_g3,GO:0006351,"transcription, DNA-templated",0.0022687477
+E-GEOD-52046,E-GEOD-52046,https://spoke.ucsf.edu/genelab/E-GEOD-52046-g2_g1,GO:0009813,flavonoid biosynthetic process,0.0022770786
+E-GEOD-4733,E-GEOD-4733,https://spoke.ucsf.edu/genelab/E-GEOD-4733-g6_g2,GO:0019761,glucosinolate biosynthetic process,0.002280011
+E-GEOD-41972,E-GEOD-41972,https://spoke.ucsf.edu/genelab/E-GEOD-41972-g2_g1,GO:0006368,transcription elongation from RNA polymerase II promoter,0.0022989584
+E-GEOD-57198,E-GEOD-57198,https://spoke.ucsf.edu/genelab/E-GEOD-57198-g1_g2,GO:0006368,transcription elongation from RNA polymerase II promoter,0.0023486915
+E-GEOD-36509,E-GEOD-36509,https://spoke.ucsf.edu/genelab/E-GEOD-36509-g4_g6,GO:0006695,cholesterol biosynthetic process,0.0023888415
+E-GEOD-17159,E-GEOD-17159,https://spoke.ucsf.edu/genelab/E-GEOD-17159-g4_g3,GO:0006779,porphyrin-containing compound biosynthetic process,0.0024017864
+E-GEOD-28297,E-GEOD-28297,https://spoke.ucsf.edu/genelab/E-GEOD-28297-g6_g1,GO:0006412,translation,0.0024338092
+E-GEOD-21920,E-GEOD-21920,https://spoke.ucsf.edu/genelab/E-GEOD-21920-g7_g5,GO:0015995,chlorophyll biosynthetic process,0.0024372155
+E-GEOD-50865,E-GEOD-50865,https://spoke.ucsf.edu/genelab/E-GEOD-50865-g2_g4,GO:0032543,mitochondrial translation,0.002461017
+E-GEOD-2828,E-GEOD-2828,https://spoke.ucsf.edu/genelab/E-GEOD-2828-g1_g4,GO:0032543,mitochondrial translation,0.0024877284
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g154_g155,GO:0070125,mitochondrial translational elongation,0.0025025704
+E-GEOD-3749,E-GEOD-3749,https://spoke.ucsf.edu/genelab/E-GEOD-3749-g4_g1,GO:0032543,mitochondrial translation,0.0025173358
+E-GEOD-59089,E-GEOD-59089,https://spoke.ucsf.edu/genelab/E-GEOD-59089-g1_g4,GO:0070125,mitochondrial translational elongation,0.002532905
+E-GEOD-32254,E-GEOD-32254,https://spoke.ucsf.edu/genelab/E-GEOD-32254-g3_g1,GO:0008654,phospholipid biosynthetic process,0.0025338172
+E-GEOD-37031,E-GEOD-37031,https://spoke.ucsf.edu/genelab/E-GEOD-37031-g2_g1,GO:0006694,steroid biosynthetic process,0.0025722526
+E-GEOD-41678,E-GEOD-41678,https://spoke.ucsf.edu/genelab/E-GEOD-41678-g19_g16,GO:0002181,cytoplasmic translation,0.0025970023
+E-GEOD-33950,E-GEOD-33950,https://spoke.ucsf.edu/genelab/E-GEOD-33950-g1_g2,GO:0006351,"transcription, DNA-templated",0.0026110823
+E-GEOD-4883,E-GEOD-4883,https://spoke.ucsf.edu/genelab/E-GEOD-4883-g1_g2,GO:0002181,cytoplasmic translation,0.0026432502
+E-GEOD-2362,E-GEOD-2362,https://spoke.ucsf.edu/genelab/E-GEOD-2362-g1_g3,GO:0016126,sterol biosynthetic process,0.002683193
+E-GEOD-16082,E-GEOD-16082,https://spoke.ucsf.edu/genelab/E-GEOD-16082-g2_g1,GO:0070125,mitochondrial translational elongation,0.0026932743
+E-GEOD-16722,E-GEOD-16722,https://spoke.ucsf.edu/genelab/E-GEOD-16722-g3_g4,GO:0002181,cytoplasmic translation,0.0027599384
+E-GEOD-37031,E-GEOD-37031,https://spoke.ucsf.edu/genelab/E-GEOD-37031-g2_g1,GO:0070987,error-free translesion synthesis,0.0028053832
+E-GEOD-2565,E-GEOD-2565,https://spoke.ucsf.edu/genelab/E-GEOD-2565-g2_g11,GO:0016126,sterol biosynthetic process,0.0028321943
+E-GEOD-34897,E-GEOD-34897,https://spoke.ucsf.edu/genelab/E-GEOD-34897-g8_g6,GO:0015995,chlorophyll biosynthetic process,0.0028629585
+E-GEOD-54584,E-GEOD-54584,https://spoke.ucsf.edu/genelab/E-GEOD-54584-g5_g3,GO:0006695,cholesterol biosynthetic process,0.002894379
+E-GEOD-19686,E-GEOD-19686,https://spoke.ucsf.edu/genelab/E-GEOD-19686-g1_g2,GO:0006695,cholesterol biosynthetic process,0.002908393
+E-GEOD-19686,E-GEOD-19686,https://spoke.ucsf.edu/genelab/E-GEOD-19686-g1_g2,GO:0016126,sterol biosynthetic process,0.002908393
+E-GEOD-51885,E-GEOD-51885,https://spoke.ucsf.edu/genelab/E-GEOD-51885-g5_g4,GO:0006695,cholesterol biosynthetic process,0.0029247405
+E-GEOD-38879,E-GEOD-38879,https://spoke.ucsf.edu/genelab/E-GEOD-38879-g2_g1,GO:0019438,aromatic compound biosynthetic process,0.0029789482
+E-GEOD-59133,E-GEOD-59133,https://spoke.ucsf.edu/genelab/E-GEOD-59133-g1_g4,GO:0008652,cellular amino acid biosynthetic process,0.0029790988
+E-GEOD-59781,E-GEOD-59781,https://spoke.ucsf.edu/genelab/E-GEOD-59781-g2_g1,GO:0002181,cytoplasmic translation,0.0029802457
+E-GEOD-39091,E-GEOD-39091,https://spoke.ucsf.edu/genelab/E-GEOD-39091-g1_g2,GO:0070125,mitochondrial translational elongation,0.0029912568
+E-GEOD-58558,E-GEOD-58558,https://spoke.ucsf.edu/genelab/E-GEOD-58558-g6_g4,GO:0032543,mitochondrial translation,0.0030053686
+E-GEOD-41405,E-GEOD-41405,https://spoke.ucsf.edu/genelab/E-GEOD-41405-g1_g7,GO:0070125,mitochondrial translational elongation,0.0030345898
+E-GEOD-44077,E-GEOD-44077,https://spoke.ucsf.edu/genelab/E-GEOD-44077-g3_g2,GO:0070125,mitochondrial translational elongation,0.003041632
+E-GEOD-41405,E-GEOD-41405,https://spoke.ucsf.edu/genelab/E-GEOD-41405-g1_g3,GO:0070125,mitochondrial translational elongation,0.0030593267
+E-GEOD-30531,E-GEOD-30531,https://spoke.ucsf.edu/genelab/E-GEOD-30531-g3_g8,GO:0006351,"transcription, DNA-templated",0.0030610422
+E-GEOD-34635,E-GEOD-34635,https://spoke.ucsf.edu/genelab/E-GEOD-34635-g1_g7,GO:0042795,snRNA transcription by RNA polymerase II,0.0030858107
+E-GEOD-4847,E-GEOD-4847,https://spoke.ucsf.edu/genelab/E-GEOD-4847-g6_g3,GO:0009699,phenylpropanoid biosynthetic process,0.0030876044
+E-GEOD-21396,E-GEOD-21396,https://spoke.ucsf.edu/genelab/E-GEOD-21396-g33_g32,GO:0002181,cytoplasmic translation,0.0030892089
+E-GEOD-21396,E-GEOD-21396,https://spoke.ucsf.edu/genelab/E-GEOD-21396-g33_g32,GO:0045492,xylan biosynthetic process,0.0030892089
+E-GEOD-53514,E-GEOD-53514,https://spoke.ucsf.edu/genelab/E-GEOD-53514-g4_g6,GO:0070125,mitochondrial translational elongation,0.0031314269
+E-GEOD-33643,E-GEOD-33643,https://spoke.ucsf.edu/genelab/E-GEOD-33643-g7_g9,GO:0016126,sterol biosynthetic process,0.0031537998
+E-GEOD-31455,E-GEOD-31455,https://spoke.ucsf.edu/genelab/E-GEOD-31455-g2_g3,GO:0070125,mitochondrial translational elongation,0.003178422
+E-GEOD-41678,E-GEOD-41678,https://spoke.ucsf.edu/genelab/E-GEOD-41678-g8_g7,GO:0006366,transcription by RNA polymerase II,0.003201311
+E-GEOD-48403,E-GEOD-48403,https://spoke.ucsf.edu/genelab/E-GEOD-48403-g2_g1,GO:0006695,cholesterol biosynthetic process,0.0032113006
+E-GEOD-48403,E-GEOD-48403,https://spoke.ucsf.edu/genelab/E-GEOD-48403-g2_g1,GO:0016126,sterol biosynthetic process,0.0032113006
+E-GEOD-24187,E-GEOD-24187,https://spoke.ucsf.edu/genelab/E-GEOD-24187-g3_g7,GO:0006694,steroid biosynthetic process,0.003226518
+E-GEOD-57116,E-GEOD-57116,https://spoke.ucsf.edu/genelab/E-GEOD-57116-g3_g2,GO:0006754,ATP biosynthetic process,0.0032588886
+E-GEOD-58261,E-GEOD-58261,https://spoke.ucsf.edu/genelab/E-GEOD-58261-g2_g3,GO:0006695,cholesterol biosynthetic process,0.0032595296
+E-GEOD-58261,E-GEOD-58261,https://spoke.ucsf.edu/genelab/E-GEOD-58261-g2_g3,GO:0016126,sterol biosynthetic process,0.0032595296
+E-GEOD-30492,E-GEOD-30492,https://spoke.ucsf.edu/genelab/E-GEOD-30492-g4_g1,GO:0008652,cellular amino acid biosynthetic process,0.0032605282
+E-GEOD-31348,E-GEOD-31348,https://spoke.ucsf.edu/genelab/E-GEOD-31348-g1_g5,GO:0002181,cytoplasmic translation,0.0032758631
+E-GEOD-43713,E-GEOD-43713,https://spoke.ucsf.edu/genelab/E-GEOD-43713-g3_g1,GO:0006351,"transcription, DNA-templated",0.0032874784
+E-GEOD-46456,E-GEOD-46456,https://spoke.ucsf.edu/genelab/E-GEOD-46456-g4_g2,GO:0006633,fatty acid biosynthetic process,0.0032986363
+E-GEOD-19136,E-GEOD-19136,https://spoke.ucsf.edu/genelab/E-GEOD-19136-g2_g1,GO:0006695,cholesterol biosynthetic process,0.003318004
+E-GEOD-21679,E-GEOD-21679,https://spoke.ucsf.edu/genelab/E-GEOD-21679-g1_g2,GO:0002181,cytoplasmic translation,0.003387814
+E-GEOD-23952,E-GEOD-23952,https://spoke.ucsf.edu/genelab/E-GEOD-23952-g2_g1,GO:0070125,mitochondrial translational elongation,0.0033935339
+E-GEOD-33267,E-GEOD-33267,https://spoke.ucsf.edu/genelab/E-GEOD-33267-g28_g17,GO:0070125,mitochondrial translational elongation,0.0034002706
+E-GEOD-53604,E-GEOD-53604,https://spoke.ucsf.edu/genelab/E-GEOD-53604-g2_g1,GO:0006695,cholesterol biosynthetic process,0.0034131238
+E-GEOD-17500,E-GEOD-17500,https://spoke.ucsf.edu/genelab/E-GEOD-17500-g2_g1,GO:0015995,chlorophyll biosynthetic process,0.0034154123
+E-GEOD-54924,E-GEOD-54924,https://spoke.ucsf.edu/genelab/E-GEOD-54924-g3_g2,GO:0006269,"DNA replication, synthesis of RNA primer",0.0034193632
+E-GEOD-31977,E-GEOD-31977,https://spoke.ucsf.edu/genelab/E-GEOD-31977-g5_g2,GO:0008652,cellular amino acid biosynthetic process,0.0034494286
+E-GEOD-58261,E-GEOD-58261,https://spoke.ucsf.edu/genelab/E-GEOD-58261-g2_g3,GO:0006633,fatty acid biosynthetic process,0.0035648225
+E-GEOD-50526,E-GEOD-50526,https://spoke.ucsf.edu/genelab/E-GEOD-50526-g8_g1,GO:0015995,chlorophyll biosynthetic process,0.0035748866
+E-GEOD-46590,E-GEOD-46590,https://spoke.ucsf.edu/genelab/E-GEOD-46590-g1_g2,GO:0006351,"transcription, DNA-templated",0.0036325753
+E-GEOD-4324,E-GEOD-4324,https://spoke.ucsf.edu/genelab/E-GEOD-4324-g15_g8,GO:0006412,translation,0.0036408836
+E-GEOD-46884,E-GEOD-46884,https://spoke.ucsf.edu/genelab/E-GEOD-46884-g2_g3,GO:0006412,translation,0.0036961995
+E-GEOD-60590,E-GEOD-60590,https://spoke.ucsf.edu/genelab/E-GEOD-60590-g2_g1,GO:0015986,ATP synthesis coupled proton transport,0.0037213096
+E-GEOD-60590,E-GEOD-60590,https://spoke.ucsf.edu/genelab/E-GEOD-60590-g2_g1,GO:0042776,mitochondrial ATP synthesis coupled proton transport,0.0037213096
+E-GEOD-56026,E-GEOD-56026,https://spoke.ucsf.edu/genelab/E-GEOD-56026-g4_g1,GO:0006695,cholesterol biosynthetic process,0.0037669316
+E-GEOD-60585,E-GEOD-60585,https://spoke.ucsf.edu/genelab/E-GEOD-60585-g4_g5,GO:0002181,cytoplasmic translation,0.0037831229
+E-GEOD-34635,E-GEOD-34635,https://spoke.ucsf.edu/genelab/E-GEOD-34635-g1_g6,GO:0006367,transcription initiation from RNA polymerase II promoter,0.0038135592
+E-GEOD-57466,E-GEOD-57466,https://spoke.ucsf.edu/genelab/E-GEOD-57466-g3_g1,GO:0019438,aromatic compound biosynthetic process,0.0038173723
+E-GEOD-31664,E-GEOD-31664,https://spoke.ucsf.edu/genelab/E-GEOD-31664-g3_g1,GO:0008652,cellular amino acid biosynthetic process,0.0038407315
+E-GEOD-56026,E-GEOD-56026,https://spoke.ucsf.edu/genelab/E-GEOD-56026-g3_g1,GO:0006412,translation,0.0038507774
+E-GEOD-57806,E-GEOD-57806,https://spoke.ucsf.edu/genelab/E-GEOD-57806-g2_g1,GO:0006414,translational elongation,0.0038618587
+E-GEOD-26262,E-GEOD-26262,https://spoke.ucsf.edu/genelab/E-GEOD-26262-g2_g3,GO:0070125,mitochondrial translational elongation,0.0039428286
+E-GEOD-56788,E-GEOD-56788,https://spoke.ucsf.edu/genelab/E-GEOD-56788-g2_g6,GO:0002181,cytoplasmic translation,0.0039499416
+E-GEOD-17400,E-GEOD-17400,https://spoke.ucsf.edu/genelab/E-GEOD-17400-g4_g3,GO:0006412,translation,0.0039569335
+E-GEOD-53201,E-GEOD-53201,https://spoke.ucsf.edu/genelab/E-GEOD-53201-g1_g4,GO:0016126,sterol biosynthetic process,0.0040139747
+E-GEOD-50526,E-GEOD-50526,https://spoke.ucsf.edu/genelab/E-GEOD-50526-g9_g4,GO:0008652,cellular amino acid biosynthetic process,0.004035336
+E-GEOD-47205,E-GEOD-47205,https://spoke.ucsf.edu/genelab/E-GEOD-47205-g1_g2,GO:0032543,mitochondrial translation,0.0040427814
+E-GEOD-5616,E-GEOD-5616,https://spoke.ucsf.edu/genelab/E-GEOD-5616-g6_g3,GO:0015995,chlorophyll biosynthetic process,0.00405806
+E-GEOD-37373,E-GEOD-37373,https://spoke.ucsf.edu/genelab/E-GEOD-37373-g1_g2,GO:0006351,"transcription, DNA-templated",0.0041897194
+E-GEOD-37161,E-GEOD-37161,https://spoke.ucsf.edu/genelab/E-GEOD-37161-g5_g4,GO:0008652,cellular amino acid biosynthetic process,0.0042407615
+E-GEOD-35700,E-GEOD-35700,https://spoke.ucsf.edu/genelab/E-GEOD-35700-g3_g1,GO:0009813,flavonoid biosynthetic process,0.004244073
+E-GEOD-56026,E-GEOD-56026,https://spoke.ucsf.edu/genelab/E-GEOD-56026-g3_g1,GO:0006351,"transcription, DNA-templated",0.0042761336
+E-GEOD-56235,E-GEOD-56235,https://spoke.ucsf.edu/genelab/E-GEOD-56235-g2_g1,GO:0006694,steroid biosynthetic process,0.0043655834
+E-GEOD-47812,E-GEOD-47812,https://spoke.ucsf.edu/genelab/E-GEOD-47812-g3_g1,GO:0002181,cytoplasmic translation,0.004399469
+E-GEOD-29187,E-GEOD-29187,https://spoke.ucsf.edu/genelab/E-GEOD-29187-g1_g6,GO:0006633,fatty acid biosynthetic process,0.004420498
+E-GEOD-57140,E-GEOD-57140,https://spoke.ucsf.edu/genelab/E-GEOD-57140-g4_g1,GO:0015995,chlorophyll biosynthetic process,0.0044552013
+E-GEOD-38138,E-GEOD-38138,https://spoke.ucsf.edu/genelab/E-GEOD-38138-g3_g4,GO:0016126,sterol biosynthetic process,0.0044676396
+E-GEOD-18980,E-GEOD-18980,https://spoke.ucsf.edu/genelab/E-GEOD-18980-g2_g1,GO:0009073,aromatic amino acid family biosynthetic process,0.0044752206
+E-GEOD-30784,E-GEOD-30784,https://spoke.ucsf.edu/genelab/E-GEOD-30784-g2_g1,GO:0032964,collagen biosynthetic process,0.0044791074
+E-GEOD-51704,E-GEOD-51704,https://spoke.ucsf.edu/genelab/E-GEOD-51704-g4_g3,GO:0006695,cholesterol biosynthetic process,0.004490435
+E-GEOD-19273,E-GEOD-19273,https://spoke.ucsf.edu/genelab/E-GEOD-19273-g4_g3,GO:0019761,glucosinolate biosynthetic process,0.0044967406
+E-GEOD-51885,E-GEOD-51885,https://spoke.ucsf.edu/genelab/E-GEOD-51885-g5_g4,GO:0008654,phospholipid biosynthetic process,0.004500173
+E-GEOD-52610,E-GEOD-52610,https://spoke.ucsf.edu/genelab/E-GEOD-52610-g2_g1,GO:0002181,cytoplasmic translation,0.004523807
+E-GEOD-22584,E-GEOD-22584,https://spoke.ucsf.edu/genelab/E-GEOD-22584-g1_g2,GO:0002181,cytoplasmic translation,0.0045401044
+E-GEOD-51704,E-GEOD-51704,https://spoke.ucsf.edu/genelab/E-GEOD-51704-g10_g9,GO:0070125,mitochondrial translational elongation,0.0045828633
+E-GEOD-60585,E-GEOD-60585,https://spoke.ucsf.edu/genelab/E-GEOD-60585-g4_g6,GO:0002181,cytoplasmic translation,0.0046358705
+E-GEOD-48433,E-GEOD-48433,https://spoke.ucsf.edu/genelab/E-GEOD-48433-g11_g13,GO:0070125,mitochondrial translational elongation,0.0047071725
+E-GEOD-3231,E-GEOD-3231,https://spoke.ucsf.edu/genelab/E-GEOD-3231-g5_g2,GO:0032543,mitochondrial translation,0.0047536795
+E-GEOD-19136,E-GEOD-19136,https://spoke.ucsf.edu/genelab/E-GEOD-19136-g2_g1,GO:0016126,sterol biosynthetic process,0.0047656805
+E-GEOD-60835,E-GEOD-60835,https://spoke.ucsf.edu/genelab/E-GEOD-60835-g3_g2,GO:0015995,chlorophyll biosynthetic process,0.0047837016
+E-GEOD-38487,E-GEOD-38487,https://spoke.ucsf.edu/genelab/E-GEOD-38487-g1_g2,GO:0031408,oxylipin biosynthetic process,0.004799581
+E-GEOD-36272,E-GEOD-36272,https://spoke.ucsf.edu/genelab/E-GEOD-36272-g10_g7,GO:0008652,cellular amino acid biosynthetic process,0.0048624277
+E-GEOD-29577,E-GEOD-29577,https://spoke.ucsf.edu/genelab/E-GEOD-29577-g2_g1,GO:0008652,cellular amino acid biosynthetic process,0.004871836
+E-GEOD-30249,E-GEOD-30249,https://spoke.ucsf.edu/genelab/E-GEOD-30249-g7_g3,GO:0045492,xylan biosynthetic process,0.0049154055
+E-GEOD-16333,E-GEOD-16333,https://spoke.ucsf.edu/genelab/E-GEOD-16333-g6_g4,GO:0015995,chlorophyll biosynthetic process,0.0049160477
+E-GEOD-2192,E-GEOD-2192,https://spoke.ucsf.edu/genelab/E-GEOD-2192-g2_g10,GO:0032543,mitochondrial translation,0.004926403
+E-GEOD-57140,E-GEOD-57140,https://spoke.ucsf.edu/genelab/E-GEOD-57140-g4_g2,GO:0015995,chlorophyll biosynthetic process,0.0049756193
+E-GEOD-40245,E-GEOD-40245,https://spoke.ucsf.edu/genelab/E-GEOD-40245-g2_g1,GO:0002181,cytoplasmic translation,0.005045135
+E-GEOD-37940,E-GEOD-37940,https://spoke.ucsf.edu/genelab/E-GEOD-37940-g1_g2,GO:0006414,translational elongation,0.00505649
+E-GEOD-5509,E-GEOD-5509,https://spoke.ucsf.edu/genelab/E-GEOD-5509-g7_g5,GO:0006694,steroid biosynthetic process,0.005092639
+E-GEOD-4847,E-GEOD-4847,https://spoke.ucsf.edu/genelab/E-GEOD-4847-g6_g3,GO:0009809,lignin biosynthetic process,0.0050971466
+E-GEOD-20556,E-GEOD-20556,https://spoke.ucsf.edu/genelab/E-GEOD-20556-g4_g3,GO:0009699,phenylpropanoid biosynthetic process,0.005099953
+E-GEOD-35700,E-GEOD-35700,https://spoke.ucsf.edu/genelab/E-GEOD-35700-g4_g2,GO:0009695,jasmonic acid biosynthetic process,0.0051021776
+E-GEOD-34773,E-GEOD-34773,https://spoke.ucsf.edu/genelab/E-GEOD-34773-g3_g1,GO:0006412,translation,0.005132124
+E-GEOD-49608,E-GEOD-49608,https://spoke.ucsf.edu/genelab/E-GEOD-49608-g1_g4,GO:0042795,snRNA transcription by RNA polymerase II,0.005254685
+E-GEOD-41678,E-GEOD-41678,https://spoke.ucsf.edu/genelab/E-GEOD-41678-g19_g18,GO:0042795,snRNA transcription by RNA polymerase II,0.0052565667
+E-GEOD-33204,E-GEOD-33204,https://spoke.ucsf.edu/genelab/E-GEOD-33204-g15_g10,GO:0006412,translation,0.0052715694
+E-GEOD-18667,E-GEOD-18667,https://spoke.ucsf.edu/genelab/E-GEOD-18667-g3_g4,GO:0019344,cysteine biosynthetic process,0.005361212
+E-GEOD-54295,E-GEOD-54295,https://spoke.ucsf.edu/genelab/E-GEOD-54295-g3_g1,GO:0019432,triglyceride biosynthetic process,0.0053822403
+E-GEOD-30030,E-GEOD-30030,https://spoke.ucsf.edu/genelab/E-GEOD-30030-g7_g6,GO:0006779,porphyrin-containing compound biosynthetic process,0.005415097
+E-GEOD-60387,E-GEOD-60387,https://spoke.ucsf.edu/genelab/E-GEOD-60387-g4_g3,GO:0015995,chlorophyll biosynthetic process,0.00543068
+E-GEOD-5735,E-GEOD-5735,https://spoke.ucsf.edu/genelab/E-GEOD-5735-g2_g1,GO:0051555,flavonol biosynthetic process,0.0055882614
+E-GEOD-41405,E-GEOD-41405,https://spoke.ucsf.edu/genelab/E-GEOD-41405-g1_g3,GO:0006695,cholesterol biosynthetic process,0.0056581013
+E-GEOD-43521,E-GEOD-43521,https://spoke.ucsf.edu/genelab/E-GEOD-43521-g2_g1,GO:0006654,phosphatidic acid biosynthetic process,0.00566495
+E-GEOD-40354,E-GEOD-40354,https://spoke.ucsf.edu/genelab/E-GEOD-40354-g14_g11,GO:0019761,glucosinolate biosynthetic process,0.005719824
+E-GEOD-51883,E-GEOD-51883,https://spoke.ucsf.edu/genelab/E-GEOD-51883-g1_g8,GO:0006351,"transcription, DNA-templated",0.005727738
+E-GEOD-33950,E-GEOD-33950,https://spoke.ucsf.edu/genelab/E-GEOD-33950-g1_g2,GO:0032543,mitochondrial translation,0.0057366616
+E-GEOD-60823,E-GEOD-60823,https://spoke.ucsf.edu/genelab/E-GEOD-60823-g4_g3,GO:0006414,translational elongation,0.00573998
+E-GEOD-18985,E-GEOD-18985,https://spoke.ucsf.edu/genelab/E-GEOD-18985-g1_g2,GO:0009686,gibberellin biosynthetic process,0.0057530277
+E-GEOD-33643,E-GEOD-33643,https://spoke.ucsf.edu/genelab/E-GEOD-33643-g7_g6,GO:0070125,mitochondrial translational elongation,0.0057763318
+E-GEOD-29187,E-GEOD-29187,https://spoke.ucsf.edu/genelab/E-GEOD-29187-g3_g2,GO:0019344,cysteine biosynthetic process,0.0057805106
+E-GEOD-38141,E-GEOD-38141,https://spoke.ucsf.edu/genelab/E-GEOD-38141-g3_g2,GO:0006694,steroid biosynthetic process,0.0057874853
+E-GEOD-52610,E-GEOD-52610,https://spoke.ucsf.edu/genelab/E-GEOD-52610-g4_g2,GO:0015995,chlorophyll biosynthetic process,0.0058428226
+E-GEOD-24187,E-GEOD-24187,https://spoke.ucsf.edu/genelab/E-GEOD-24187-g3_g2,GO:0006695,cholesterol biosynthetic process,0.005921562
+E-GEOD-5617,E-GEOD-5617,https://spoke.ucsf.edu/genelab/E-GEOD-5617-g3_g1,GO:0009686,gibberellin biosynthetic process,0.0059619355
+E-GEOD-30718,E-GEOD-30718,https://spoke.ucsf.edu/genelab/E-GEOD-30718-g3_g2,GO:0070125,mitochondrial translational elongation,0.0059827333
+E-GEOD-29589,E-GEOD-29589,https://spoke.ucsf.edu/genelab/E-GEOD-29589-g1_g4,GO:0006694,steroid biosynthetic process,0.0060047256
+E-GEOD-18105,E-GEOD-18105,https://spoke.ucsf.edu/genelab/E-GEOD-18105-g3_g4,GO:0002181,cytoplasmic translation,0.006154469
+E-GEOD-19136,E-GEOD-19136,https://spoke.ucsf.edu/genelab/E-GEOD-19136-g2_g3,GO:0070125,mitochondrial translational elongation,0.006162597
+E-GEOD-35700,E-GEOD-35700,https://spoke.ucsf.edu/genelab/E-GEOD-35700-g3_g1,GO:0006633,fatty acid biosynthetic process,0.006212298
+E-GEOD-37827,E-GEOD-37827,https://spoke.ucsf.edu/genelab/E-GEOD-37827-g20_g10,GO:0002181,cytoplasmic translation,0.006230677
+E-GEOD-18791,E-GEOD-18791,https://spoke.ucsf.edu/genelab/E-GEOD-18791-g11_g9,GO:0070125,mitochondrial translational elongation,0.006241283
+E-GEOD-21397,E-GEOD-21397,https://spoke.ucsf.edu/genelab/E-GEOD-21397-g11_g1,GO:0002181,cytoplasmic translation,0.0062620156
+E-GEOD-31564,E-GEOD-31564,https://spoke.ucsf.edu/genelab/E-GEOD-31564-g4_g1,GO:0008654,phospholipid biosynthetic process,0.0062824967
+E-GEOD-22139,E-GEOD-22139,https://spoke.ucsf.edu/genelab/E-GEOD-22139-g6_g3,GO:0032543,mitochondrial translation,0.0062935916
+E-GEOD-2565,E-GEOD-2565,https://spoke.ucsf.edu/genelab/E-GEOD-2565-g2_g11,GO:0006695,cholesterol biosynthetic process,0.0063290945
+E-GEOD-2565,E-GEOD-2565,https://spoke.ucsf.edu/genelab/E-GEOD-2565-g2_g11,GO:0008299,isoprenoid biosynthetic process,0.0063290945
+E-GEOD-58603,E-GEOD-58603,https://spoke.ucsf.edu/genelab/E-GEOD-58603-g10_g12,GO:0006412,translation,0.006403546
+E-GEOD-18975,E-GEOD-18975,https://spoke.ucsf.edu/genelab/E-GEOD-18975-g6_g26,GO:0042218,1-aminocyclopropane-1-carboxylate biosynthetic process,0.0064040897
+E-GEOD-33643,E-GEOD-33643,https://spoke.ucsf.edu/genelab/E-GEOD-33643-g7_g8,GO:0006694,steroid biosynthetic process,0.0064093466
+E-GEOD-28049,E-GEOD-28049,https://spoke.ucsf.edu/genelab/E-GEOD-28049-g1_g2,GO:0070125,mitochondrial translational elongation,0.0064843376
+E-GEOD-40076,E-GEOD-40076,https://spoke.ucsf.edu/genelab/E-GEOD-40076-g8_g6,GO:0019252,starch biosynthetic process,0.0064882655
+E-GEOD-17482,E-GEOD-17482,https://spoke.ucsf.edu/genelab/E-GEOD-17482-g3_g2,GO:0006412,translation,0.0065397196
+E-GEOD-55552,E-GEOD-55552,https://spoke.ucsf.edu/genelab/E-GEOD-55552-g2_g3,GO:0006695,cholesterol biosynthetic process,0.0065995953
+E-GEOD-20222,E-GEOD-20222,https://spoke.ucsf.edu/genelab/E-GEOD-20222-g2_g3,GO:0009813,flavonoid biosynthetic process,0.006665562
+E-GEOD-28297,E-GEOD-28297,https://spoke.ucsf.edu/genelab/E-GEOD-28297-g7_g2,GO:0008652,cellular amino acid biosynthetic process,0.006682613
+E-GEOD-431,E-GEOD-431,https://spoke.ucsf.edu/genelab/E-GEOD-431-g1_g2,GO:0009699,phenylpropanoid biosynthetic process,0.006684954
+E-GEOD-28297,E-GEOD-28297,https://spoke.ucsf.edu/genelab/E-GEOD-28297-g10_g5,GO:0002181,cytoplasmic translation,0.0066859503
+E-GEOD-29327,E-GEOD-29327,https://spoke.ucsf.edu/genelab/E-GEOD-29327-g1_g2,GO:0070125,mitochondrial translational elongation,0.0067941123
+E-GEOD-4600,E-GEOD-4600,https://spoke.ucsf.edu/genelab/E-GEOD-4600-g1_g4,GO:0006695,cholesterol biosynthetic process,0.006833225
+E-GEOD-19264,E-GEOD-19264,https://spoke.ucsf.edu/genelab/E-GEOD-19264-g9_g3,GO:0042793,plastid transcription,0.0069429963
+E-GEOD-41136,E-GEOD-41136,https://spoke.ucsf.edu/genelab/E-GEOD-41136-g9_g5,GO:0006412,translation,0.006986425
+E-GEOD-41136,E-GEOD-41136,https://spoke.ucsf.edu/genelab/E-GEOD-41136-g9_g5,GO:0045489,pectin biosynthetic process,0.006986425
+E-GEOD-53321,E-GEOD-53321,https://spoke.ucsf.edu/genelab/E-GEOD-53321-g5_g2,GO:0046854,phosphatidylinositol phosphate biosynthetic process,0.0069882665
+E-GEOD-21920,E-GEOD-21920,https://spoke.ucsf.edu/genelab/E-GEOD-21920-g2_g4,GO:0015995,chlorophyll biosynthetic process,0.0070031877
+E-GEOD-45757,E-GEOD-45757,https://spoke.ucsf.edu/genelab/E-GEOD-45757-g5_g4,GO:0070125,mitochondrial translational elongation,0.007029132
+E-GEOD-50526,E-GEOD-50526,https://spoke.ucsf.edu/genelab/E-GEOD-50526-g8_g1,GO:0002181,cytoplasmic translation,0.0070332335
+E-GEOD-36581,E-GEOD-36581,https://spoke.ucsf.edu/genelab/E-GEOD-36581-g3_g2,GO:0032544,plastid translation,0.007071233
+E-GEOD-44356,E-GEOD-44356,https://spoke.ucsf.edu/genelab/E-GEOD-44356-g6_g5,GO:0006694,steroid biosynthetic process,0.0070877685
+E-GEOD-27149,E-GEOD-27149,https://spoke.ucsf.edu/genelab/E-GEOD-27149-g7_g1,GO:0032543,mitochondrial translation,0.007093246
+E-GEOD-5509,E-GEOD-5509,https://spoke.ucsf.edu/genelab/E-GEOD-5509-g7_g3,GO:0009058,biosynthetic process,0.007204573
+E-GEOD-17824,E-GEOD-17824,https://spoke.ucsf.edu/genelab/E-GEOD-17824-g3_g4,GO:0010120,camalexin biosynthetic process,0.0072114035
+E-GEOD-30249,E-GEOD-30249,https://spoke.ucsf.edu/genelab/E-GEOD-30249-g5_g1,GO:0044550,secondary metabolite biosynthetic process,0.007249354
+E-GEOD-34209,E-GEOD-34209,https://spoke.ucsf.edu/genelab/E-GEOD-34209-g3_g1,GO:0019761,glucosinolate biosynthetic process,0.007257938
+E-GEOD-5305,E-GEOD-5305,https://spoke.ucsf.edu/genelab/E-GEOD-5305-g2_g4,GO:0006412,translation,0.0072934865
+E-GEOD-35006,E-GEOD-35006,https://spoke.ucsf.edu/genelab/E-GEOD-35006-g6_g5,GO:0070125,mitochondrial translational elongation,0.0073047653
+E-GEOD-57466,E-GEOD-57466,https://spoke.ucsf.edu/genelab/E-GEOD-57466-g3_g1,GO:0016102,diterpenoid biosynthetic process,0.007342912
+E-GEOD-37286,E-GEOD-37286,https://spoke.ucsf.edu/genelab/E-GEOD-37286-g5_g6,GO:0006695,cholesterol biosynthetic process,0.0074473936
+E-GEOD-57252,E-GEOD-57252,https://spoke.ucsf.edu/genelab/E-GEOD-57252-g1_g5,GO:0031408,oxylipin biosynthetic process,0.0074766595
+E-GEOD-47205,E-GEOD-47205,https://spoke.ucsf.edu/genelab/E-GEOD-47205-g1_g2,GO:0006783,heme biosynthetic process,0.007498085
+E-GEOD-3231,E-GEOD-3231,https://spoke.ucsf.edu/genelab/E-GEOD-3231-g5_g6,GO:0032543,mitochondrial translation,0.00752336
+E-GEOD-60387,E-GEOD-60387,https://spoke.ucsf.edu/genelab/E-GEOD-60387-g4_g3,GO:0019253,reductive pentose-phosphate cycle,0.007583264
+E-GEOD-58261,E-GEOD-58261,https://spoke.ucsf.edu/genelab/E-GEOD-58261-g2_g3,GO:0006694,steroid biosynthetic process,0.007612851
+E-GEOD-41884,E-GEOD-41884,https://spoke.ucsf.edu/genelab/E-GEOD-41884-g4_g3,GO:0002181,cytoplasmic translation,0.007640182
+E-GEOD-55193,E-GEOD-55193,https://spoke.ucsf.edu/genelab/E-GEOD-55193-g1_g3,GO:0006695,cholesterol biosynthetic process,0.0077312225
+E-GEOD-31564,E-GEOD-31564,https://spoke.ucsf.edu/genelab/E-GEOD-31564-g8_g5,GO:0006633,fatty acid biosynthetic process,0.00777823
+E-GEOD-5281,E-GEOD-5281,https://spoke.ucsf.edu/genelab/E-GEOD-5281-g9_g3,GO:0070125,mitochondrial translational elongation,0.007910777
+E-GEOD-43463,E-GEOD-43463,https://spoke.ucsf.edu/genelab/E-GEOD-43463-g7_g3,GO:0009813,flavonoid biosynthetic process,0.007922919
+E-GEOD-44946,E-GEOD-44946,https://spoke.ucsf.edu/genelab/E-GEOD-44946-g3_g1,GO:0016126,sterol biosynthetic process,0.008138382
+E-GEOD-19242,E-GEOD-19242,https://spoke.ucsf.edu/genelab/E-GEOD-19242-g2_g1,GO:0019761,glucosinolate biosynthetic process,0.008164236
+E-GEOD-31677,E-GEOD-31677,https://spoke.ucsf.edu/genelab/E-GEOD-31677-g9_g10,GO:0002181,cytoplasmic translation,0.008209033
+E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g1_g10,GO:0006636,unsaturated fatty acid biosynthetic process,0.00824869
+E-GEOD-37266,E-GEOD-37266,https://spoke.ucsf.edu/genelab/E-GEOD-37266-g1_g2,GO:0006412,translation,0.008296206
+E-GEOD-31587,E-GEOD-31587,https://spoke.ucsf.edu/genelab/E-GEOD-31587-g3_g4,GO:0008652,cellular amino acid biosynthetic process,0.008335212
+E-GEOD-50526,E-GEOD-50526,https://spoke.ucsf.edu/genelab/E-GEOD-50526-g9_g4,GO:0010120,camalexin biosynthetic process,0.008364738
+E-GEOD-50526,E-GEOD-50526,https://spoke.ucsf.edu/genelab/E-GEOD-50526-g9_g2,GO:0008652,cellular amino acid biosynthetic process,0.00836803
+E-GEOD-38023,E-GEOD-38023,https://spoke.ucsf.edu/genelab/E-GEOD-38023-g9_g1,GO:0008652,cellular amino acid biosynthetic process,0.008388125
+E-GEOD-33643,E-GEOD-33643,https://spoke.ucsf.edu/genelab/E-GEOD-33643-g7_g8,GO:0008654,phospholipid biosynthetic process,0.0084331045
+E-GEOD-3231,E-GEOD-3231,https://spoke.ucsf.edu/genelab/E-GEOD-3231-g5_g4,GO:0006695,cholesterol biosynthetic process,0.008465436
+E-GEOD-33643,E-GEOD-33643,https://spoke.ucsf.edu/genelab/E-GEOD-33643-g7_g4,GO:0006695,cholesterol biosynthetic process,0.008472162
+E-GEOD-53580,E-GEOD-53580,https://spoke.ucsf.edu/genelab/E-GEOD-53580-g4_g3,GO:0006094,gluconeogenesis,0.008560649
+E-GEOD-53580,E-GEOD-53580,https://spoke.ucsf.edu/genelab/E-GEOD-53580-g4_g3,GO:0019253,reductive pentose-phosphate cycle,0.008560649
+E-GEOD-51720,E-GEOD-51720,https://spoke.ucsf.edu/genelab/E-GEOD-51720-g14_g10,GO:0019253,reductive pentose-phosphate cycle,0.008637298
+E-GEOD-53952,E-GEOD-53952,https://spoke.ucsf.edu/genelab/E-GEOD-53952-g7_g6,GO:0019253,reductive pentose-phosphate cycle,0.008640299
+E-GEOD-44793,E-GEOD-44793,https://spoke.ucsf.edu/genelab/E-GEOD-44793-g4_g2,GO:0002181,cytoplasmic translation,0.008647919
+E-GEOD-29814,E-GEOD-29814,https://spoke.ucsf.edu/genelab/E-GEOD-29814-g1_g3,GO:0015995,chlorophyll biosynthetic process,0.00867291
+E-GEOD-23820,E-GEOD-23820,https://spoke.ucsf.edu/genelab/E-GEOD-23820-g2_g1,GO:0009809,lignin biosynthetic process,0.00871911
+E-GEOD-23820,E-GEOD-23820,https://spoke.ucsf.edu/genelab/E-GEOD-23820-g2_g1,GO:0045492,xylan biosynthetic process,0.00871911
+E-GEOD-19249,E-GEOD-19249,https://spoke.ucsf.edu/genelab/E-GEOD-19249-g4_g3,GO:0002181,cytoplasmic translation,0.008804627
+E-GEOD-30030,E-GEOD-30030,https://spoke.ucsf.edu/genelab/E-GEOD-30030-g7_g6,GO:0016117,carotenoid biosynthetic process,0.008812898
+E-GEOD-38138,E-GEOD-38138,https://spoke.ucsf.edu/genelab/E-GEOD-38138-g3_g4,GO:0006694,steroid biosynthetic process,0.00884069
+E-GEOD-38138,E-GEOD-38138,https://spoke.ucsf.edu/genelab/E-GEOD-38138-g3_g4,GO:0008654,phospholipid biosynthetic process,0.00884069
+E-GEOD-26246,E-GEOD-26246,https://spoke.ucsf.edu/genelab/E-GEOD-26246-g12_g3,GO:0006164,purine nucleotide biosynthetic process,0.008892334
+E-GEOD-42780,E-GEOD-42780,https://spoke.ucsf.edu/genelab/E-GEOD-42780-g2_g1,GO:0006412,translation,0.008911466
+E-GEOD-50526,E-GEOD-50526,https://spoke.ucsf.edu/genelab/E-GEOD-50526-g9_g6,GO:0019438,aromatic compound biosynthetic process,0.009005961
+E-GEOD-40549,E-GEOD-40549,https://spoke.ucsf.edu/genelab/E-GEOD-40549-g10_g5,GO:0006633,fatty acid biosynthetic process,0.009097673
+E-GEOD-56677,E-GEOD-56677,https://spoke.ucsf.edu/genelab/E-GEOD-56677-g9_g4,GO:0008654,phospholipid biosynthetic process,0.009115964
+E-GEOD-34925,E-GEOD-34925,https://spoke.ucsf.edu/genelab/E-GEOD-34925-g1_g2,GO:0006695,cholesterol biosynthetic process,0.00912174
+E-GEOD-46867,E-GEOD-46867,https://spoke.ucsf.edu/genelab/E-GEOD-46867-g5_g3,GO:0006164,purine nucleotide biosynthetic process,0.009213575
+E-GEOD-41405,E-GEOD-41405,https://spoke.ucsf.edu/genelab/E-GEOD-41405-g1_g6,GO:0006351,"transcription, DNA-templated",0.0092744585
+E-GEOD-41405,E-GEOD-41405,https://spoke.ucsf.edu/genelab/E-GEOD-41405-g1_g6,GO:0032543,mitochondrial translation,0.0092744585
+E-GEOD-16879,E-GEOD-16879,https://spoke.ucsf.edu/genelab/E-GEOD-16879-g13_g12,GO:0042776,mitochondrial ATP synthesis coupled proton transport,0.009337022
+E-GEOD-46867,E-GEOD-46867,https://spoke.ucsf.edu/genelab/E-GEOD-46867-g5_g3,GO:0006189,de novo,0.009337086
+E-GEOD-38281,E-GEOD-38281,https://spoke.ucsf.edu/genelab/E-GEOD-38281-g1_g3,GO:0009073,aromatic amino acid family biosynthetic process,0.009401155
+E-GEOD-21945,E-GEOD-21945,https://spoke.ucsf.edu/genelab/E-GEOD-21945-g1_g2,GO:0009718,anthocyanin-containing compound biosynthetic process,0.009492138
+E-GEOD-46801,E-GEOD-46801,https://spoke.ucsf.edu/genelab/E-GEOD-46801-g3_g1,GO:0006506,GPI anchor biosynthetic process,0.009494793
+E-GEOD-48812,E-GEOD-48812,https://spoke.ucsf.edu/genelab/E-GEOD-48812-g2_g4,GO:0006694,steroid biosynthetic process,0.009514099
+E-GEOD-20505,E-GEOD-20505,https://spoke.ucsf.edu/genelab/E-GEOD-20505-g7_g5,GO:0016126,sterol biosynthetic process,0.009514364
+E-GEOD-60585,E-GEOD-60585,https://spoke.ucsf.edu/genelab/E-GEOD-60585-g4_g5,GO:0070125,mitochondrial translational elongation,0.009536511
+E-GEOD-50693,E-GEOD-50693,https://spoke.ucsf.edu/genelab/E-GEOD-50693-g1_g4,GO:0006695,cholesterol biosynthetic process,0.009536702
+E-GEOD-60835,E-GEOD-60835,https://spoke.ucsf.edu/genelab/E-GEOD-60835-g3_g1,GO:0002181,cytoplasmic translation,0.009618856
+E-GEOD-20505,E-GEOD-20505,https://spoke.ucsf.edu/genelab/E-GEOD-20505-g7_g2,GO:0006694,steroid biosynthetic process,0.009811449
+E-GEOD-2362,E-GEOD-2362,https://spoke.ucsf.edu/genelab/E-GEOD-2362-g1_g3,GO:0006694,steroid biosynthetic process,0.009847425
+E-GEOD-16964,E-GEOD-16964,https://spoke.ucsf.edu/genelab/E-GEOD-16964-g6_g2,GO:0009813,flavonoid biosynthetic process,0.009983047
