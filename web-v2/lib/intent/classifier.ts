@@ -24,6 +24,14 @@ export function classifyIntentDeterministic(
     task = "entity_lookup";
     confidence = 0.9;
     notes += " | Classified as entity_lookup via /entity command";
+  } else if (
+    (lowered.includes("gene expression") || lowered.includes("expression dataset") ||
+      lowered.includes("differential expression") || lowered.includes("expression experiment")) &&
+    (lowered.includes("dataset") || lowered.includes("list") || lowered.includes("what") || lowered.includes("which"))
+  ) {
+    task = "gene_expression_dataset_search";
+    confidence = 0.75;
+    notes += " | Classified as gene_expression_dataset_search (expression coverage)";
   } else if (lowered.includes("dataset") || lowered.includes("study")) {
     task = "dataset_search";
     confidence = 0.75;

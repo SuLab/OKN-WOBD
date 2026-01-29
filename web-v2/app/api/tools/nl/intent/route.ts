@@ -60,6 +60,20 @@ export async function POST(request: Request) {
     const classified = classifyIntentDeterministic(text, pack, intent);
     intent = classified.intent;
 
+    // 2.5) For GXA tasks, use gene-expression-atlas-okn graph only (direct endpoint)
+    const gxaTasks = [
+      "gene_expression_dataset_search",
+      "gene_expression_genes_in_experiment",
+      "gene_expression_experiments_for_gene",
+      "gene_expression_gene_cross_dataset_summary",
+      "gene_expression_genes_agreement",
+      "gene_expression_genes_discordance",
+    ];
+    if (gxaTasks.includes(intent.task)) {
+      intent.graphs = ["gene-expression-atlas-okn"];
+      intent.notes = `${intent.notes || ""} | GXA query, using graph: gene-expression-atlas-okn`.trim();
+    }
+
     // 3) Slot-filler populates slots (keywords, q, limit, etc.) heuristically
     intent = fillSlots(intent, text);
 
