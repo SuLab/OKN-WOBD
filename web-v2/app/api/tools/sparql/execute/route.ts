@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { executeSPARQL, injectFromClauses } from "@/lib/sparql/executor";
+import { executeSPARQL, injectFromClauses, removeFromClauses } from "@/lib/sparql/executor";
 import { validateSPARQL } from "@/lib/sparql/validator";
 import { loadContextPack } from "@/lib/context-packs/loader";
 import { runStore } from "@/lib/runs/store";
@@ -18,7 +18,7 @@ function uuidv4(): string {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { query, pack_id, mode, graphs, options, run_preflight, attempt_repair } = body;
+    const { query, pack_id, mode, graphs, options, run_preflight, attempt_repair, debug } = body;
 
     if (!query || typeof query !== "string") {
       return NextResponse.json(
@@ -57,14 +57,32 @@ export async function POST(request: Request) {
       finalQuery = injectFromClauses(finalQuery, graphs);
     }
 
-    // Determine endpoint
-    const endpoint = pack?.endpoint_mode.federated_endpoint ||
+    // Determine endpoint - check if query targets GXA graph and use direct endpoint
+    let endpoint = pack?.endpoint_mode.federated_endpoint ||
       process.env.NEXT_PUBLIC_FRINK_FEDERATION_URL ||
       "https://frink.apps.renci.org/federation/sparql";
 
-    // Optional preflight probes
+    // If query targets gene-expression-atlas-okn graph, use direct endpoint
+    const gxaGraphPattern = /gene-expression-atlas-okn/i;
+    const hasGXAGraph = gxaGraphPattern.test(finalQuery) ||
+      (graphs && Array.isArray(graphs) && graphs.some((g: string) => gxaGraphPattern.test(g)));
+
+    if (hasGXAGraph && pack?.endpoint_mode.direct_endpoints?.["gene-expression-atlas-okn"]) {
+      endpoint = pack.endpoint_mode.direct_endpoints["gene-expression-atlas-okn"];
+      // Remove all FROM clauses when querying direct endpoint (default graph is the GXA graph)
+      finalQuery = removeFromClauses(finalQuery);
+    }
+
+    // GXA direct endpoint can take 1–2 minutes; use a longer timeout when routing to it
+    const baseTimeout = options?.timeout_s ?? pack?.guardrails?.timeout_seconds ?? 25;
+    const timeout = hasGXAGraph && endpoint?.includes("gene-expression-atlas-okn")
+      ? Math.max(baseTimeout, 120)
+      : baseTimeout;
+
+    // Optional preflight probes (skip for GXA direct endpoint, which can be slow and
+    // has been flaky with small sample queries)
     let preflightResult = null;
-    if (run_preflight !== false && pack?.schema_hints) {
+    if (run_preflight !== false && pack?.schema_hints && !hasGXAGraph) {
       try {
         preflightResult = await runPreflight(
           finalQuery,
@@ -79,7 +97,6 @@ export async function POST(request: Request) {
     }
 
     // Execute
-    const timeout = options?.timeout_s || pack?.guardrails.timeout_seconds || 25;
     let execResult = await executeSPARQL(finalQuery, endpoint, { timeout_s: timeout });
 
     // Attempt repair if execution failed and repair is enabled
@@ -138,14 +155,16 @@ export async function POST(request: Request) {
 
     runStore.save(runRecord);
 
-    return NextResponse.json({
+    const response: Record<string, unknown> = {
       head: execResult.result.head,
       bindings: execResult.result.results.bindings,
+      result: { head: execResult.result.head, results: execResult.result.results },
       stats: {
         row_count: execResult.row_count,
         latency_ms: execResult.latency_ms,
       },
       run_id: runId,
+      endpoint_used: endpoint,
       repair_attempt: repairResult ? {
         attempted: true,
         success: repairResult.success,
@@ -153,7 +172,11 @@ export async function POST(request: Request) {
       } : undefined,
       preflight: preflightResult || undefined,
       error: execResult.error || undefined,
-    });
+    };
+    if (debug) {
+      response.executed_query = repairedQuery || finalQuery;
+    }
+    return NextResponse.json(response);
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || "Execution failed" },

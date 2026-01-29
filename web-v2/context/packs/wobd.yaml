@@ -6,7 +6,8 @@ version: "0.1.0"
 endpoint_mode:
   default: federated
   federated_endpoint: "https://frink.apps.renci.org/federation/sparql"
-  direct_endpoints: {}
+  direct_endpoints:
+    gene-expression-atlas-okn: "https://frink.apps.renci.org/gene-expression-atlas-okn/sparql"
 
 graphs:
   default_shortnames: ["nde", "ubergraph"]
@@ -36,6 +37,24 @@ templates:
   - id: entity_lookup
     description: "Resolve CURIE/URI/label to entity"
     required_slots: ["q"]
+  - id: gene_expression_dataset_search
+    description: "List gene expression experiments (datasets) that have differential expression results"
+    required_slots: []
+  - id: gene_expression_genes_in_experiment
+    description: "List differentially expressed genes for a given gene expression experiment (per contrast)"
+    required_slots: ["experiment_id"]
+  - id: gene_expression_experiments_for_gene
+    description: "Find gene expression experiments/contrasts where a gene is differentially expressed"
+    required_slots: ["gene_symbols"]
+  - id: gene_expression_gene_cross_dataset_summary
+    description: "Summarize a gene's DE evidence across experiments (per contrast)"
+    required_slots: ["gene_symbol"]
+  - id: gene_expression_genes_agreement
+    description: "Find genes DE in the same direction across multiple experiments"
+    required_slots: []
+  - id: gene_expression_genes_discordance
+    description: "Find genes DE in opposite directions across contrasts"
+    required_slots: []
 
 schema_hints:
   example_queries:
@@ -66,4 +85,11 @@ graphs_metadata:
     good_for: ["entity_lookup", "ontology_reasoning"]
     # provides_ontologies is defined in context/graphs/ubergraph.yaml with full list
 
+  - id: gene-expression-atlas-okn
+    description: "Gene Expression Atlas (GXA) differential expression and contrasts"
+    good_for: ["dataset_search", "gene_expression_coverage", "gene_de_for_dataset", "datasets_for_gene_de"]
+    uses_ontologies: []
+    queryable_by:
+      - entity_type: "Gene"
+        property: "biolink:object (GeneExpressionMixin)"
 

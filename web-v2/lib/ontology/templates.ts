@@ -537,26 +537,47 @@ LIMIT 50`;
 }
 
 /**
- * Build SPARQL query to find gene expression experiments with upregulated/downregulated genes
- * Uses biolink vocabulary and GeneExpressionMixin associations
- * 
- * @param geneSymbols - Array of gene symbols to search for (e.g., ["Dusp2"])
- * @param upregulated - If true, filter for upregulated genes (log2fc > 0). If false, filter for downregulated (log2fc < 0). If undefined, no filter.
+ * Build SPARQL query to list gene expression experiments (datasets) that have DE results.
+ * Returns experiment accession, number of contrasts, and sample contrast labels for coverage discovery.
+ * Used for Phase 1 "what expression data exists" and for bridging NDE with GXA.
  */
-export function buildGeneExpressionQuery(
-  geneSymbols: string[],
+export function buildGXAExperimentCoverageQuery(limit: number = 100): string {
+  return `PREFIX biolink: <https://w3id.org/biolink/vocab/>
+
+SELECT ?experimentId (COUNT(DISTINCT ?contrast) AS ?contrastCount) (SAMPLE(?contrastLabel) AS ?sampleContrastLabel)
+FROM <https://purl.org/okn/frink/kg/gene-expression-atlas-okn>
+WHERE {
+    ?association a biolink:GeneExpressionMixin ;
+        biolink:subject ?contrast .
+    ?contrast a biolink:Assay .
+    BIND(REPLACE(STR(?contrast), "^.*/(E-[A-Z0-9-]+)-.*$", "$1") AS ?experimentId)
+    OPTIONAL { ?contrast biolink:name ?contrastLabel . }
+    FILTER(REGEX(STR(?contrast), "E-[A-Z0-9-]+-g[0-9]+_g[0-9]+"))
+}
+GROUP BY ?experimentId
+ORDER BY DESC(?contrastCount)
+LIMIT ${Math.min(limit, 500)}`;
+}
+
+/**
+ * Build SPARQL query to list DE genes for a given GXA experiment (per-contrast, contrast-aware).
+ * Returns one row per (gene, contrast) with DE metrics and contrast labels.
+ *
+ * @param experimentId - GXA experiment accession (e.g. "E-GEOD-23301")
+ * @param limit - Max number of rows to return (default 100)
+ * @param upregulated - If true, only genes with log2fc > 0; if false, only log2fc < 0; if undefined, no direction filter.
+ */
+export function buildGXAGenesForExperimentQuery(
+  experimentId: string,
+  limit: number = 100,
   upregulated?: boolean
 ): string {
-  if (geneSymbols.length === 0) {
-    throw new Error("At least one gene symbol required for gene expression query");
+  if (!experimentId) {
+    throw new Error("experimentId is required for GXA genes-for-experiment query");
   }
 
-  // Build gene symbol filter
-  const geneFilters = geneSymbols.map(symbol =>
-    `LCASE(?geneSymbol) = "${symbol.toLowerCase()}"`
-  ).join(" ||\n    ");
+  const safeId = experimentId.replace(/"/g, '\\"');
 
-  // Build log2fc filter based on upregulated/downregulated
   let log2fcFilter = "";
   if (upregulated === true) {
     log2fcFilter = "\n    FILTER(?log2fc > 0)";
@@ -564,39 +585,219 @@ export function buildGeneExpressionQuery(
     log2fcFilter = "\n    FILTER(?log2fc < 0)";
   }
 
-  return `PREFIX biolink: <https://w3id.org/biolink/vocab/>
+  return `PREFIX biolink:      <https://w3id.org/biolink/vocab/>
 PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
 
-SELECT DISTINCT 
-    ?experiment 
-    (REPLACE(STR(?experiment), "^.*/(E-[A-Z0-9-]+)-.*$", "$1") AS ?experimentId)
-    ?experimentLabel
-    ?gene 
-    ?geneSymbol 
-    ?log2fc 
-    ?adjPValue
-FROM <https://purl.org/okn/frink/kg/spoke-genelab>
-FROM <https://purl.org/okn/frink/kg/spoke-okn>
+SELECT DISTINCT
+  ?experimentId
+  ?contrast
+  ?contrastId
+  ?contrastLabel
+  ?gene
+  ?geneSymbol
+  ?log2fc
+  ?adjPValue
 FROM <https://purl.org/okn/frink/kg/gene-expression-atlas-okn>
 WHERE {
-    # Find gene expression associations
-    ?association a biolink:GeneExpressionMixin ;
-        biolink:object ?gene ;
-        biolink:subject ?experiment ;
-        spokegenelab:log2fc ?log2fc ;
-        spokegenelab:adj_p_value ?adjPValue .
-    
-    # Get gene symbol and filter for target genes
-    ?gene biolink:symbol ?geneSymbol .
-    FILTER(${geneFilters})${log2fcFilter}
-    
-    # Get experiment label if available
-    OPTIONAL {
-        ?experiment biolink:name ?experimentLabel .
-    }
+  # Differential expression associations (same pattern as coverage query)
+  ?assoc a biolink:GeneExpressionMixin ;
+         biolink:object ?gene ;
+         biolink:subject ?contrast ;
+         spokegenelab:log2fc ?log2fc .
+  OPTIONAL { ?assoc spokegenelab:adj_p_value ?adjPValue . }
+  ?contrast a biolink:Assay .
+
+  # Restrict to the requested experiment (CONTAINS is robust across URI schemes)
+  FILTER(CONTAINS(STR(?contrast), "${safeId}"))
+
+  BIND(REPLACE(STR(?contrast), "^.*/(E-[A-Z0-9-]+)-.*$", "$1") AS ?experimentId)
+  OPTIONAL { ?contrast spokegenelab:contrast_id ?contrastIdProp . }
+  BIND(COALESCE(?contrastIdProp, REPLACE(STR(?contrast), "^.*-(g[0-9]+_g[0-9]+)$", "$1")) AS ?contrastId)
+  OPTIONAL { ?contrast biolink:name ?contrastLabel . }
+
+  # Gene symbol (optional; some graphs only attach symbols in other graphs)
+  OPTIONAL { ?gene biolink:symbol ?geneSymbol . }${log2fcFilter}
 }
-ORDER BY DESC(?log2fc)
-LIMIT 50`;
+ORDER BY ?contrastId ?geneSymbol
+LIMIT ${Math.min(limit, 500)}`;
+}
+
+/**
+ * Build SPARQL query to find GXA experiments/contrasts where given genes are DE.
+ * Returns one row per (experiment, contrast, gene) with DE metrics and labels.
+ *
+ * @param geneSymbols - Array of gene symbols to search for (e.g., ["Dusp2"])
+ * @param limit - Max number of rows to return (default 100)
+ * @param upregulated - If true, only genes with log2fc > 0; if false, only log2fc < 0; if undefined, no direction filter.
+ */
+export function buildGXAExperimentsForGenesQuery(
+  geneSymbols: string[],
+  limit: number = 100,
+  upregulated?: boolean
+): string {
+  if (!geneSymbols || geneSymbols.length === 0) {
+    throw new Error("At least one gene symbol is required for GXA experiments-for-gene query");
+  }
+
+  const geneFilters = geneSymbols.map(symbol =>
+    `LCASE(?geneSymbol) = "${symbol.toLowerCase()}"`
+  ).join(" ||\n    ");
+
+  let log2fcFilter = "";
+  if (upregulated === true) {
+    log2fcFilter = "\n    FILTER(?log2fc > 0)";
+  } else if (upregulated === false) {
+    log2fcFilter = "\n    FILTER(?log2fc < 0)";
+  }
+
+  return `PREFIX biolink:      <https://w3id.org/biolink/vocab/>
+PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
+
+SELECT DISTINCT
+  ?experimentId
+  ?contrast
+  ?contrastId
+  ?contrastLabel
+  ?gene
+  ?geneSymbol
+  ?log2fc
+  ?adjPValue
+FROM <https://purl.org/okn/frink/kg/gene-expression-atlas-okn>
+WHERE {
+  # Differential expression associations
+  ?assoc a biolink:GeneExpressionMixin ;
+         biolink:object ?gene ;
+         biolink:subject ?contrast ;
+         spokegenelab:log2fc ?log2fc .
+  OPTIONAL { ?assoc spokegenelab:adj_p_value ?adjPValue . }
+
+  # Gene symbol filter
+  ?gene biolink:symbol ?geneSymbol .
+  FILTER(
+    ${geneFilters}
+  )${log2fcFilter}
+
+  # Contrast / assay with study_id + label
+  ?contrast a biolink:Assay ;
+            spokegenelab:study_id ?experimentId ;
+            spokegenelab:contrast_id ?contrastId .
+  OPTIONAL { ?contrast biolink:name ?contrastLabel . }
+}
+ORDER BY ?geneSymbol ?experimentId ?contrastId
+LIMIT ${Math.min(limit, 500)}`;
+}
+
+/**
+ * Build SPARQL query to summarize a gene's DE evidence across experiments (Phase 3 cross-dataset).
+ * Returns one row per (gene, experiment, contrast) plus aggregates: total contrasts, upregulated count, downregulated count.
+ *
+ * @param geneSymbol - Gene symbol (e.g. "DUSP2")
+ * @param limit - Max rows (default 100)
+ */
+export function buildGXAGeneCrossDatasetSummaryQuery(
+  geneSymbol: string,
+  limit: number = 100
+): string {
+  if (!geneSymbol?.trim()) {
+    throw new Error("gene_symbol is required for GXA gene cross-dataset summary");
+  }
+  const safeSymbol = geneSymbol.trim().toLowerCase().replace(/"/g, '\\"');
+
+  return `PREFIX biolink:      <https://w3id.org/biolink/vocab/>
+PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
+
+SELECT DISTINCT
+  ?geneSymbol
+  ?experimentId
+  ?contrastId
+  ?contrastLabel
+  ?direction
+  ?log2fc
+  ?adjPValue
+FROM <https://purl.org/okn/frink/kg/gene-expression-atlas-okn>
+WHERE {
+  ?assoc a biolink:GeneExpressionMixin ;
+         biolink:object ?gene ;
+         biolink:subject ?contrast ;
+         spokegenelab:log2fc ?log2fc .
+  OPTIONAL { ?assoc spokegenelab:adj_p_value ?adjPValue . }
+  ?contrast a biolink:Assay .
+  ?gene biolink:symbol ?geneSymbol .
+  FILTER(LCASE(?geneSymbol) = "${safeSymbol}")
+
+  BIND(REPLACE(STR(?contrast), "^.*/(E-[A-Z0-9-]+)-.*$", "$1") AS ?experimentId)
+  OPTIONAL { ?contrast spokegenelab:contrast_id ?contrastIdProp . }
+  BIND(COALESCE(?contrastIdProp, REPLACE(STR(?contrast), "^.*-(g[0-9]+_g[0-9]+)$", "$1")) AS ?contrastId)
+  OPTIONAL { ?contrast biolink:name ?contrastLabel . }
+  BIND(IF(?log2fc > 0, "up", "down") AS ?direction)
+}
+ORDER BY ?experimentId ?contrastId
+LIMIT ${Math.min(limit, 500)}`;
+}
+
+/**
+ * Build SPARQL query to find genes DE in the same direction across multiple experiments (Phase 3 agreement).
+ * Returns genes that are consistently upregulated OR consistently downregulated in >= minExperiments experiments.
+ *
+ * @param minExperiments - Minimum number of distinct experiments (default 2)
+ * @param direction - "up", "down", or undefined for either
+ * @param limit - Max rows (default 50)
+ */
+export function buildGXAGenesAgreementQuery(
+  minExperiments: number = 2,
+  direction?: "up" | "down",
+  limit: number = 50
+): string {
+  const dirFilter =
+    direction === "up"
+      ? "FILTER(?log2fc > 0)"
+      : direction === "down"
+        ? "FILTER(?log2fc < 0)"
+        : "FILTER(?log2fc != 0)";
+
+  return `PREFIX biolink:      <https://w3id.org/biolink/vocab/>
+PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
+
+SELECT ?geneSymbol ?direction (COUNT(DISTINCT ?experimentId) AS ?experimentCount) (SAMPLE(?experimentId) AS ?sampleExperimentId)
+FROM <https://purl.org/okn/frink/kg/gene-expression-atlas-okn>
+WHERE {
+  ?assoc a biolink:GeneExpressionMixin ;
+         biolink:object ?gene ;
+         biolink:subject ?contrast ;
+         spokegenelab:log2fc ?log2fc .
+  ?contrast a biolink:Assay .
+  OPTIONAL { ?gene biolink:symbol ?geneSymbol . }
+  ${dirFilter}
+  BIND(REPLACE(STR(?contrast), "^.*/(E-[A-Z0-9-]+)-.*$", "$1") AS ?experimentId)
+  BIND(IF(?log2fc > 0, "up", "down") AS ?direction)
+}
+GROUP BY ?gene ?geneSymbol ?direction
+HAVING (COUNT(DISTINCT ?experimentId) >= ${Math.max(1, minExperiments)})
+ORDER BY DESC(?experimentCount) ?geneSymbol
+LIMIT ${Math.min(limit, 200)}`;
+}
+
+/**
+ * Build SPARQL query to find genes DE in opposite directions across contrasts (Phase 3 discordance).
+ * Returns genes that are upregulated in some contrasts and downregulated in others.
+ *
+ * @param limit - Max rows (default 50)
+ */
+export function buildGXAGenesDiscordanceQuery(limit: number = 50): string {
+  return `PREFIX biolink:      <https://w3id.org/biolink/vocab/>
+PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
+
+SELECT ?gene ?geneSymbol
+FROM <https://purl.org/okn/frink/kg/gene-expression-atlas-okn>
+WHERE {
+  ?a1 a biolink:GeneExpressionMixin ; biolink:object ?gene ; spokegenelab:log2fc ?l1 .
+  FILTER(?l1 > 0)
+  ?a2 a biolink:GeneExpressionMixin ; biolink:object ?gene ; spokegenelab:log2fc ?l2 .
+  FILTER(?l2 < 0)
+  FILTER(?a1 != ?a2)
+  OPTIONAL { ?gene biolink:symbol ?geneSymbol . }
+}
+LIMIT ${Math.min(limit, 200)}`;
 }
 
 /**
