@@ -32,7 +32,7 @@ def run_example(
     """Run a single DE analysis example."""
     from archs4_client import ARCHS4Client
     from chatgeo import SampleFinder
-    from chatgeo.de_analysis import DEConfig, DifferentialExpressionAnalyzer
+    from chatgeo.de_analysis import DEConfig, DEMethod, DifferentialExpressionAnalyzer, GeneFilterConfig
     from chatgeo.de_result import DEProvenance
     from chatgeo.enrichment_analyzer import EnrichmentAnalyzer, EnrichmentConfig
     from chatgeo.query_builder import PatternQueryStrategy, QueryBuilder
@@ -48,7 +48,9 @@ def run_example(
     # Create output directory
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Save command
+    # Build command flags
+    exclude_mt = name != "Mitochondrial Myopathy"
+    mt_flag = "" if exclude_mt else " \\\n    --include-mt-genes"
     command = f'''#!/bin/bash
 # ChatGEO Example: {name}
 # Generated: {datetime.now().isoformat()}
@@ -57,13 +59,13 @@ export ARCHS4_DATA_DIR="{data_dir}"
 
 python -m chatgeo.cli "{query}" \\
     --tissue {tissue} \\
-    --test mann-whitney \\
+    --method deseq2 \\
     --fdr 0.05 \\
     --log2fc 1.0 \\
     --max-test 200 \\
     --max-control 200 \\
     --output {output_dir}/results.json \\
-    --verbose
+    --verbose{mt_flag}
 '''
     (output_dir / "command.sh").write_text(command)
 
@@ -104,13 +106,21 @@ python -m chatgeo.cli "{query}" \\
     if "series_id" in pooled.control_samples.columns:
         control_studies = list(set(pooled.control_samples["series_id"].dropna().tolist()))
 
-    # Create provenance
+    # Configure gene filtering: protein-coding only, exclude MT genes
+    # For the mitochondrial myopathy example, MT genes are kept
+    exclude_mt = name != "Mitochondrial Myopathy"
+    gene_filter = GeneFilterConfig(
+        biotypes=frozenset({"protein_coding"}),
+        exclude_mt_genes=exclude_mt,
+        exclude_ribosomal=False,
+    )
+
+    # Create DE config using DESeq2 (handles normalization internally)
     config = DEConfig(
-        test_method="mann_whitney_u",
-        fdr_method="fdr_bh",
-        normalization="log_quantile",
+        method="deseq2",
         fdr_threshold=0.05,
         log2fc_threshold=1.0,
+        gene_filter=gene_filter,
     )
 
     provenance = DEProvenance.create(
@@ -123,17 +133,18 @@ python -m chatgeo.cli "{query}" \\
         test_studies=test_studies,
         control_studies=control_studies,
         organisms=["human"],
-        normalization_method=config.normalization,
-        test_method=config.test_method,
-        fdr_method=config.fdr_method,
-        pvalue_threshold=config.pvalue_threshold,
+        normalization_method="deseq2",
+        test_method="deseq2",
+        fdr_method="deseq2",
+        pvalue_threshold=config.fdr_threshold,
         fdr_threshold=config.fdr_threshold,
         log2fc_threshold=config.log2fc_threshold,
     )
 
-    # Run DE analysis
+    # Load biotype annotations and create analyzer
     print("Running differential expression analysis...")
-    analyzer = DifferentialExpressionAnalyzer(config=config)
+    gene_biotypes = client.get_gene_biotypes()
+    analyzer = DifferentialExpressionAnalyzer(config=config, gene_biotypes=gene_biotypes)
 
     result = analyzer.analyze_pooled(
         test_expr=test_expr,

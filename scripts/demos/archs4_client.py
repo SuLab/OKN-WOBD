@@ -513,6 +513,31 @@ class ARCHS4Client:
     # Data Processing Utilities
     # =========================================================================
 
+    def get_gene_biotypes(self) -> pd.Series:
+        """
+        Get gene biotype annotations from the H5 file.
+
+        Returns a Series mapping gene symbol to biotype (e.g.,
+        PROTEIN_CODING, LNCRNA, PROCESSED_PSEUDOGENE). These
+        correspond to Ensembl 107 gene biotype annotations.
+
+        Returns:
+            Series with gene symbols as index and biotypes as values
+        """
+        import h5py
+
+        with h5py.File(str(self.h5_path), "r") as f:
+            symbols = [
+                s.decode() if isinstance(s, bytes) else s
+                for s in f["meta"]["genes"]["symbol"][:]
+            ]
+            biotypes = [
+                b.decode() if isinstance(b, bytes) else b
+                for b in f["meta"]["genes"]["biotype"][:]
+            ]
+
+        return pd.Series(biotypes, index=symbols, name="biotype")
+
     @staticmethod
     def normalize_expression(
         expression: pd.DataFrame,

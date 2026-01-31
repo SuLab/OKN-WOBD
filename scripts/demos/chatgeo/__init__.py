@@ -83,9 +83,9 @@ from .de_result import (
 )
 from .de_analysis import (
     DEConfig,
+    DEMethod,
     DifferentialExpressionAnalyzer,
-    calculate_log2fc,
-    calculate_effect_size,
+    GeneFilterConfig,
 )
 from .gene_ranker import (
     GeneRanker,
@@ -150,9 +150,9 @@ __all__ = [
     "EnrichmentResult",
     # DE Analysis
     "DEConfig",
+    "DEMethod",
     "DifferentialExpressionAnalyzer",
-    "calculate_log2fc",
-    "calculate_effect_size",
+    "GeneFilterConfig",
     # Gene Ranking
     "GeneRanker",
     "RankingConfig",

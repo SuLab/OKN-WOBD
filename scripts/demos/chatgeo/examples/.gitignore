@@ -1,13 +1,14 @@
-# Ignore generated output files from example runs
+# Ignore large generated output files from example runs
 */results.json
 */genes.tsv
 */enrichment.tsv
 */summary.txt
-*/command.sh
 
-# Keep the README and script
+# Keep reproducibility and documentation files
 !README.md
 !run_all_examples.py
+!*/command.sh
+!*/interpretation.md
 
 # Python cache
 __pycache__/

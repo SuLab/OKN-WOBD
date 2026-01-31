@@ -70,12 +70,15 @@ def run_analysis(
     disease: str,
     tissue: Optional[str] = None,
     species: Literal["human", "mouse", "both"] = "human",
-    mode: Literal["pooled", "study_matched", "auto"] = "pooled",
-    test_method: Literal["mann_whitney_u", "welch_t"] = "mann_whitney_u",
+    method: str = "deseq2",
     fdr_threshold: float = 0.05,
     log2fc_threshold: float = 1.0,
     max_test_samples: int = 500,
     max_control_samples: int = 500,
+    gene_filter_biotypes: Optional[str] = "protein_coding",
+    include_mt_genes: bool = False,
+    exclude_ribosomal: bool = False,
+    min_library_size: int = 1_000_000,
     output_path: Optional[str] = None,
     output_format: Literal["summary", "json", "tsv"] = "summary",
     verbose: bool = False,
@@ -87,12 +90,15 @@ def run_analysis(
         disease: Disease or condition to search
         tissue: Optional tissue constraint
         species: Species to analyze
-        mode: Analysis mode (pooled or study-matched)
-        test_method: Statistical test method
+        method: DE method (deseq2, mann-whitney, welch-t)
         fdr_threshold: FDR significance threshold
         log2fc_threshold: Log2 fold change threshold
         max_test_samples: Maximum test samples
         max_control_samples: Maximum control samples
+        gene_filter_biotypes: Comma-separated biotypes to keep
+        include_mt_genes: Keep MT- genes
+        exclude_ribosomal: Remove RPS/RPL genes
+        min_library_size: Min total counts per sample
         output_path: Output file path
         output_format: Output format
         verbose: Print verbose output
@@ -100,7 +106,7 @@ def run_analysis(
     # Import here to defer ARCHS4 initialization
     from archs4_client import ARCHS4Client
 
-    from .de_analysis import DEConfig, DifferentialExpressionAnalyzer
+    from .de_analysis import DEConfig, DifferentialExpressionAnalyzer, GeneFilterConfig
     from .de_result import DEProvenance
     from .query_builder import PatternQueryStrategy, QueryBuilder
     from .report_generator import ReportGenerator
@@ -119,19 +125,41 @@ def run_analysis(
         print(f"Disease: {disease}")
         print(f"Tissue: {tissue or 'any'}")
         print(f"Species: {species}")
+        print(f"Method: {method}")
+        if gene_filter_biotypes:
+            print(f"Gene filter: {gene_filter_biotypes}")
         print()
 
     # Initialize components
+    client = ARCHS4Client(organism="human", data_dir=data_dir)
     query_builder = QueryBuilder(strategy=PatternQueryStrategy())
     finder = SampleFinder(data_dir=data_dir, query_builder=query_builder)
 
+    # Configure gene filtering
+    if gene_filter_biotypes:
+        biotype_set = frozenset(b.strip() for b in gene_filter_biotypes.split(","))
+    else:
+        biotype_set = None  # no biotype filtering
+
+    gene_filter = GeneFilterConfig(
+        biotypes=biotype_set,
+        exclude_mt_genes=not include_mt_genes,
+        exclude_ribosomal=exclude_ribosomal,
+    )
+
     # Configure DE analysis
     config = DEConfig(
-        test_method=test_method,
+        method=method,
         fdr_threshold=fdr_threshold,
         log2fc_threshold=log2fc_threshold,
+        min_library_size=min_library_size,
+        gene_filter=gene_filter,
     )
-    analyzer = DifferentialExpressionAnalyzer(config=config)
+
+    # Load biotype annotations for gene filtering
+    gene_biotypes = client.get_gene_biotypes() if gene_filter.biotypes is not None else None
+
+    analyzer = DifferentialExpressionAnalyzer(config=config, gene_biotypes=gene_biotypes)
     reporter = ReportGenerator()
 
     # Find samples
@@ -157,11 +185,9 @@ def run_analysis(
         print(f"Found {pooled.n_test} test samples, {pooled.n_control} control samples")
         print()
 
-    # Get expression data
+    # Get expression data (raw counts — DESeq2 normalizes internally)
     if verbose:
         print("Retrieving expression data...")
-
-    client = ARCHS4Client(organism="human", data_dir=data_dir)
 
     test_expr = client.get_expression_by_samples(pooled.test_ids)
     control_expr = client.get_expression_by_samples(pooled.control_ids)
@@ -189,10 +215,10 @@ def run_analysis(
         test_studies=test_studies,
         control_studies=control_studies,
         organisms=[species] if species != "both" else ["human", "mouse"],
-        normalization_method=config.normalization,
-        test_method=config.test_method,
-        fdr_method=config.fdr_method,
-        pvalue_threshold=config.pvalue_threshold,
+        normalization_method=config.method,
+        test_method=config.method,
+        fdr_method="deseq2" if config.method == "deseq2" else "fdr_bh",
+        pvalue_threshold=config.fdr_threshold,
         fdr_threshold=config.fdr_threshold,
         log2fc_threshold=config.log2fc_threshold,
     )
@@ -212,25 +238,69 @@ def run_analysis(
         print(f"Found {result.genes_significant} significant genes")
         print()
 
+    # Run enrichment analysis
+    enrichment_result = None
+    try:
+        from .enrichment_analyzer import EnrichmentAnalyzer, EnrichmentConfig
+
+        enrichment_config = EnrichmentConfig(
+            organism="hsapiens",
+            sources=["GO:BP", "GO:CC", "GO:MF", "KEGG", "REAC"],
+            significance_threshold=0.05,
+        )
+        enrichment_analyzer = EnrichmentAnalyzer(config=enrichment_config)
+
+        if verbose:
+            print("Running enrichment analysis...")
+
+        enrichment_result = enrichment_analyzer.analyze(result)
+
+        if verbose:
+            print(f"  Total enriched terms: {enrichment_result.total_terms}")
+            print(f"  Upregulated terms: {enrichment_result.upregulated.n_terms}")
+            print(f"  Downregulated terms: {enrichment_result.downregulated.n_terms}")
+            print()
+    except ImportError as e:
+        if verbose:
+            print(f"  Enrichment skipped (missing dependency): {e}")
+    except Exception as e:
+        if verbose:
+            print(f"  Enrichment failed: {e}")
+
     # Output results
     if output_format == "summary" or (output_format != "json" and not output_path):
         reporter.print_summary(result)
 
     if output_path:
         output_path = Path(output_path)
+        output_dir = output_path.parent
 
+        # Write primary output file
         if output_format == "json" or output_path.suffix == ".json":
-            reporter.to_json(result, output_path)
-            print(f"Results written to: {output_path}")
-
+            if enrichment_result is not None:
+                reporter.to_json_with_enrichment(result, enrichment_result, output_path)
+            else:
+                reporter.to_json(result, output_path)
         elif output_format == "tsv" or output_path.suffix == ".tsv":
             reporter.to_tsv(result, output_path)
-            print(f"Results written to: {output_path}")
-
         else:
-            # Default to JSON
-            reporter.to_json(result, output_path)
-            print(f"Results written to: {output_path}")
+            if enrichment_result is not None:
+                reporter.to_json_with_enrichment(result, enrichment_result, output_path)
+            else:
+                reporter.to_json(result, output_path)
+
+        # Write companion files in the same directory
+        reporter.to_tsv(result, output_dir / "genes.tsv")
+
+        if enrichment_result is not None:
+            reporter.enrichment_to_tsv(enrichment_result, output_dir / "enrichment.tsv")
+
+        summary = reporter.to_console_summary(result, top_n=20)
+        if enrichment_result is not None:
+            summary += "\n" + reporter.format_enrichment_summary(enrichment_result, top_n=10)
+        (output_dir / "summary.txt").write_text(summary)
+
+        print(f"Results written to: {output_dir}")
 
 
 def main():
@@ -270,16 +340,37 @@ Examples:
         help="Species to analyze (default: human)",
     )
     parser.add_argument(
-        "--mode",
-        choices=["pooled", "study_matched", "auto"],
-        default="pooled",
-        help="Analysis mode (default: pooled)",
+        "--method",
+        choices=["deseq2", "mann-whitney", "welch-t"],
+        default="deseq2",
+        help="DE method (default: deseq2). DESeq2 handles normalization "
+             "internally. Legacy methods (mann-whitney, welch-t) use "
+             "log2(CPM+1) normalization.",
+    )
+
+    # Gene filtering
+    parser.add_argument(
+        "--gene-filter",
+        default="protein_coding",
+        help="Comma-separated biotypes to keep (default: protein_coding). "
+             "Use 'all' to disable biotype filtering.",
     )
     parser.add_argument(
-        "--test",
-        choices=["mann-whitney", "welch-t"],
-        default="mann-whitney",
-        help="Statistical test (default: mann-whitney)",
+        "--include-mt-genes",
+        action="store_true",
+        help="Keep mitochondrial (MT-) genes (useful for mitochondrial diseases)",
+    )
+    parser.add_argument(
+        "--exclude-ribosomal",
+        action="store_true",
+        help="Remove ribosomal protein genes (RPS*/RPL*)",
+    )
+    parser.add_argument(
+        "--min-library-size",
+        type=int,
+        default=1_000_000,
+        help="Minimum total counts per sample (default: 1000000). "
+             "Filters out non-mRNA-seq and failed runs from ARCHS4.",
     )
 
     # Threshold options
@@ -338,20 +429,31 @@ Examples:
     if args.tissue:
         tissue = args.tissue
 
-    # Map test method
-    test_method = "mann_whitney_u" if args.test == "mann-whitney" else "welch_t"
+    # Map method name
+    method_map = {
+        "deseq2": "deseq2",
+        "mann-whitney": "mann_whitney_u",
+        "welch-t": "welch_t",
+    }
+    method = method_map[args.method]
+
+    # Map gene filter
+    gene_filter_biotypes = None if args.gene_filter == "all" else args.gene_filter
 
     # Run analysis
     run_analysis(
         disease=disease,
         tissue=tissue,
         species=args.species,
-        mode=args.mode,
-        test_method=test_method,
+        method=method,
         fdr_threshold=args.fdr,
         log2fc_threshold=args.log2fc,
         max_test_samples=args.max_test,
         max_control_samples=args.max_control,
+        gene_filter_biotypes=gene_filter_biotypes,
+        include_mt_genes=args.include_mt_genes,
+        exclude_ribosomal=args.exclude_ribosomal,
+        min_library_size=args.min_library_size,
         output_path=args.output,
         output_format=args.format,
         verbose=args.verbose,

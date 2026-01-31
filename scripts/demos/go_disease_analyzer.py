@@ -481,6 +481,50 @@ def validate_with_archs4(
 
     This function searches through ALL available studies until it finds
     max_studies with usable expression data, or exhausts the available studies.
+
+    Comparison with chatgeo DE analysis
+    ------------------------------------
+    This function is a lightweight directional validation check, not a
+    rigorous differential expression analysis. For a full genome-wide DE
+    pipeline, see ``chatgeo/de_analysis.py``. Key differences:
+
+    **Purpose**
+      This function validates a small set of pre-selected genes (10-30 from
+      a GO term query) by checking whether fold changes point in the expected
+      direction. ChatGEO performs a genome-wide DE analysis across all ~18k
+      expressed genes with statistical significance testing.
+
+    **Normalization**
+      This function applies no normalization; raw counts are used directly,
+      so library size differences between studies and between disease/control
+      confound the fold changes. ChatGEO normalizes test and control together
+      using log2 + quantile normalization to put both groups on comparable
+      scales.
+
+    **Fold change**
+      This function computes a linear ratio on raw counts::
+
+          fold_change = (mean_disease + 1) / (mean_control + 1)
+
+      where ``mean_disease`` is the average of per-study means and
+      ``mean_control`` is the average of per-sample raw counts. This mixes
+      aggregation levels (study-level vs sample-level). ChatGEO uses the
+      difference of group means in log2 space after combined normalization,
+      with both groups computed at the sample level.
+
+    **Statistical testing**
+      This function reports no p-values. Results are ranked by fold change
+      alone. ChatGEO runs a Mann-Whitney U or Welch t-test per gene followed
+      by Benjamini-Hochberg FDR correction.
+
+    **Known limitations**
+      1. Mixing granularities: disease uses mean-of-study-means while control
+         uses per-sample means, biasing toward smaller studies.
+      2. No normalization: raw count ratios are confounded by sequencing depth.
+      3. No significance filter: no way to distinguish real signal from noise.
+
+    These tradeoffs are acceptable for a quick validation layer but should be
+    kept in mind when interpreting the fold change values.
     """
     if not HAS_ARCHS4:
         return {"available": False, "reason": "ARCHS4 not installed"}
