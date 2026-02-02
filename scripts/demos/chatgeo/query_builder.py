@@ -1,13 +1,247 @@
 """
 Query building with expansion strategies for ARCHS4 sample search.
 
-Provides text-based search with architecture prepared for ontology-based
-query expansion (MONDO for diseases, UBERON for tissues).
+Supports three strategies:
+1. TextQueryStrategy: No expansion (baseline)
+2. PatternQueryStrategy: Predefined synonym expansion (fallback)
+3. LLM-powered query understanding via build_query_spec() (recommended)
+
+The LLM strategy parses a natural language disease/tissue query into a
+structured QuerySpec with disease search terms, tissue include/exclude
+filters, and control sample criteria.
 """
 
+import json
+import os
+import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import List, Optional
+
+
+@dataclass
+class QuerySpec:
+    """
+    Structured query specification for ARCHS4 sample search.
+
+    Produced by the LLM query builder or the pattern-based fallback.
+    Drives both the initial ARCHS4 regex search and post-search tissue
+    filtering of candidate samples.
+    """
+
+    # Search terms
+    disease_terms: List[str]
+    tissue_include: List[str]
+    tissue_exclude: List[str]
+    control_terms: List[str]
+
+    # Compiled regex patterns (built from the term lists)
+    disease_regex: str
+    tissue_include_regex: str
+    tissue_exclude_regex: str
+    control_regex: str
+
+    # Audit trail
+    reasoning: str
+    strategy: str  # "llm" or "pattern_fallback"
+
+    def to_dict(self) -> dict:
+        return {
+            "strategy": self.strategy,
+            "disease_terms": self.disease_terms,
+            "tissue_include": self.tissue_include,
+            "tissue_exclude": self.tissue_exclude,
+            "control_terms": self.control_terms,
+            "disease_regex": self.disease_regex,
+            "tissue_include_regex": self.tissue_include_regex,
+            "tissue_exclude_regex": self.tissue_exclude_regex,
+            "control_regex": self.control_regex,
+            "reasoning": self.reasoning,
+        }
+
+
+# =========================================================================
+# LLM-powered query builder
+# =========================================================================
+
+_LLM_SYSTEM_PROMPT = """\
+You are a biomedical query parser for the ARCHS4 gene expression database. \
+ARCHS4 contains RNA-seq samples from GEO, each annotated with metadata \
+fields: title, source_name_ch1, and characteristics_ch1.
+
+Given a disease condition and optional tissue, produce a JSON object that \
+will drive sample search and filtering. The goal is to find disease samples \
+from the CORRECT tissue and exclude samples from other organs that happen \
+to share disease keywords.
+
+Return ONLY valid JSON with these fields:
+{
+  "disease_terms": ["term1", "term2", ...],
+  "tissue_include": ["term1", "term2", ...],
+  "tissue_exclude": ["term1", "term2", ...],
+  "control_terms": ["term1", "term2", ...],
+  "reasoning": "brief explanation"
+}
+
+Rules:
+- disease_terms: Synonyms and abbreviations for the disease. Include the \
+full disease name, common abbreviations, and related terms that would \
+appear in GEO sample titles. These are used as an OR regex to search \
+ARCHS4 metadata.
+- tissue_include: Tissue/organ terms that MUST appear in the sample's \
+source_name or title to confirm it is from the correct tissue. These are \
+checked AFTER the disease search to filter out off-tissue matches. If no \
+tissue constraint, use an empty list.
+- tissue_exclude: Tissue/organ terms that should DISQUALIFY a sample. \
+These are competing tissues that might share the disease keyword. For \
+example, if searching for "pulmonary fibrosis", exclude "liver", "hepatic", \
+"kidney", "renal", "cardiac" etc. If the disease is systemic (e.g. lupus \
+in blood), the exclude list should be empty or minimal.
+- control_terms: Terms describing appropriate healthy control samples for \
+this tissue.
+- reasoning: One sentence explaining your choices."""
+
+
+def build_query_spec(
+    disease: str,
+    tissue: Optional[str] = None,
+    model: str = "claude-3-5-haiku-20241022",
+) -> QuerySpec:
+    """
+    Use an LLM to parse a disease/tissue query into structured search criteria.
+
+    Makes one API call to produce disease search terms, tissue include/exclude
+    filters, and control sample terms.
+
+    Args:
+        disease: Disease or condition name
+        tissue: Optional tissue constraint
+        model: Anthropic model to use (default: Haiku for speed/cost)
+
+    Returns:
+        QuerySpec with structured search and filtering criteria
+
+    Raises:
+        ImportError: If anthropic package not installed
+        ValueError: If ANTHROPIC_API_KEY not set or LLM returns bad JSON
+    """
+    import anthropic
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise ValueError("ANTHROPIC_API_KEY environment variable not set")
+
+    tissue_str = f"\nTissue: {tissue}" if tissue else ""
+    user_prompt = f"Disease: {disease}{tissue_str}"
+
+    client = anthropic.Anthropic(api_key=api_key)
+    message = client.messages.create(
+        model=model,
+        max_tokens=512,
+        system=_LLM_SYSTEM_PROMPT,
+        messages=[{"role": "user", "content": user_prompt}],
+    )
+
+    # Parse the JSON response
+    raw = message.content[0].text.strip()
+    # Strip markdown code fences if present
+    if raw.startswith("```"):
+        raw = re.sub(r"^```(?:json)?\s*", "", raw)
+        raw = re.sub(r"\s*```$", "", raw)
+
+    spec = json.loads(raw)
+
+    disease_terms = spec["disease_terms"]
+    tissue_include = spec.get("tissue_include", [])
+    tissue_exclude = spec.get("tissue_exclude", [])
+    control_terms = spec.get("control_terms", ["healthy", "control", "normal"])
+    reasoning = spec.get("reasoning", "")
+
+    # Build regex patterns from the term lists
+    disease_regex = "|".join(re.escape(t) for t in disease_terms)
+    tissue_include_regex = "|".join(re.escape(t) for t in tissue_include) if tissue_include else ""
+    tissue_exclude_regex = "|".join(re.escape(t) for t in tissue_exclude) if tissue_exclude else ""
+
+    # Control regex: tissue terms AND control keywords
+    if tissue_include:
+        tissue_pat = "|".join(re.escape(t) for t in tissue_include)
+        ctrl_pat = "|".join(re.escape(t) for t in control_terms)
+        control_regex = f"({tissue_pat}).*({ctrl_pat})"
+    else:
+        control_regex = "|".join(re.escape(t) for t in control_terms)
+
+    return QuerySpec(
+        disease_terms=disease_terms,
+        tissue_include=tissue_include,
+        tissue_exclude=tissue_exclude,
+        control_terms=control_terms,
+        disease_regex=disease_regex,
+        tissue_include_regex=tissue_include_regex,
+        tissue_exclude_regex=tissue_exclude_regex,
+        control_regex=control_regex,
+        reasoning=reasoning,
+        strategy="llm",
+    )
+
+
+def build_query_spec_fallback(
+    disease: str,
+    tissue: Optional[str] = None,
+) -> QuerySpec:
+    """
+    Build a QuerySpec using the pattern-based strategy (no LLM).
+
+    Used as a fallback when no API key is available. Applies tissue
+    conjunction to the disease search when a tissue is specified.
+
+    Args:
+        disease: Disease or condition name
+        tissue: Optional tissue constraint
+
+    Returns:
+        QuerySpec with pattern-based search criteria
+    """
+    strategy = PatternQueryStrategy()
+
+    # Expand disease terms
+    disease_exp = strategy.expand(disease)
+    disease_terms = disease_exp.expanded_terms
+
+    # Expand tissue terms
+    tissue_include = []
+    tissue_exclude = []
+    if tissue:
+        tissue_exp = strategy.expand(tissue)
+        tissue_include = tissue_exp.expanded_terms
+
+    disease_regex = "|".join(re.escape(t) for t in disease_terms)
+    tissue_include_regex = "|".join(re.escape(t) for t in tissue_include) if tissue_include else ""
+
+    control_terms = ["healthy", "control", "normal"]
+    if tissue_include:
+        tissue_pat = "|".join(re.escape(t) for t in tissue_include)
+        ctrl_pat = "|".join(re.escape(t) for t in control_terms)
+        control_regex = f"({tissue_pat}).*({ctrl_pat})"
+    else:
+        control_regex = "|".join(re.escape(t) for t in control_terms)
+
+    return QuerySpec(
+        disease_terms=disease_terms,
+        tissue_include=tissue_include,
+        tissue_exclude=tissue_exclude,
+        control_terms=control_terms,
+        disease_regex=disease_regex,
+        tissue_include_regex=tissue_include_regex,
+        tissue_exclude_regex="",
+        control_regex=control_regex,
+        reasoning="Pattern-based fallback (no LLM available)",
+        strategy="pattern_fallback",
+    )
+
+
+# =========================================================================
+# Legacy strategy classes (kept for backward compatibility)
+# =========================================================================
 
 
 @dataclass

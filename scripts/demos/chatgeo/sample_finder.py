@@ -22,7 +22,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from archs4_client import ARCHS4Client
 
-from .query_builder import QueryBuilder, QueryExpansion, TextQueryStrategy
+from .query_builder import QueryBuilder, QueryExpansion, QuerySpec, TextQueryStrategy
 
 
 def _get_default_data_dir() -> Optional[str]:
@@ -112,6 +112,9 @@ class PooledPair:
     total_test_found: int
     total_control_found: int
     overlap_removed: int = 0
+    # QuerySpec-based filtering provenance (populated when query_spec is used)
+    query_spec: Optional[dict] = None
+    filtering_stats: Optional[dict] = None
 
     @property
     def n_test(self) -> int:
@@ -244,6 +247,71 @@ class SampleFinder:
             self._client = ARCHS4Client(data_dir=self.data_dir)
         return self._client
 
+    def _combine_text_fields(self, df: pd.DataFrame) -> pd.Series:
+        """Combine source_name_ch1 and title into a single text for filtering."""
+        parts = []
+        for col in ["source_name_ch1", "title"]:
+            if col in df.columns:
+                parts.append(df[col].fillna("").astype(str))
+        if not parts:
+            return pd.Series("", index=df.index)
+        result = parts[0]
+        for p in parts[1:]:
+            result = result + " " + p
+        return result
+
+    def _apply_tissue_filters(
+        self,
+        df: pd.DataFrame,
+        include_regex: str,
+        exclude_regex: str,
+    ) -> tuple:
+        """
+        Apply tissue include/exclude regex filters to a sample DataFrame.
+
+        Args:
+            df: DataFrame with ARCHS4 metadata columns
+            include_regex: Regex pattern; keep only matching rows (empty = skip)
+            exclude_regex: Regex pattern; remove matching rows (empty = skip)
+
+        Returns:
+            Tuple of (filtered_df, stats_dict)
+        """
+        if df.empty:
+            return df, {
+                "before": 0,
+                "after_include": 0,
+                "after_exclude": 0,
+                "removed_by_include": 0,
+                "removed_by_exclude": 0,
+            }
+
+        before = len(df)
+        text = self._combine_text_fields(df)
+
+        # Include filter: keep only on-tissue samples
+        if include_regex:
+            mask = text.str.contains(include_regex, case=False, regex=True, na=False)
+            df = df[mask]
+        after_include = len(df)
+
+        # Exclude filter: remove competing-tissue samples
+        if exclude_regex and not df.empty:
+            text = self._combine_text_fields(df)
+            mask = text.str.contains(exclude_regex, case=False, regex=True, na=False)
+            df = df[~mask]
+        after_exclude = len(df)
+
+        stats = {
+            "before": before,
+            "after_include": after_include,
+            "after_exclude": after_exclude,
+            "removed_by_include": before - after_include,
+            "removed_by_exclude": after_include - after_exclude,
+        }
+
+        return df, stats
+
     def search_samples(self, search_term: str) -> SampleSet:
         """
         Search for samples matching a term.
@@ -373,18 +441,15 @@ class SampleFinder:
         control_keywords: Optional[list] = None,
         max_test_samples: int = 500,
         max_control_samples: int = 500,
+        query_spec: Optional[QuerySpec] = None,
     ) -> PooledPair:
         """
         Find pooled test and control samples for a single DE analysis.
 
-        All matching samples are combined into one test group and one control
-        group, with optional size limits. This mode ignores study boundaries
-        and leverages ARCHS4's diversity for broad biological signal.
-
-        Use this when:
-        - You want a single differential expression analysis
-        - You're okay with cross-study batch effects (or will normalize)
-        - You want maximum sample size for statistical power
+        When a QuerySpec is provided (from build_query_spec or fallback),
+        tissue include/exclude filtering is applied after the initial ARCHS4
+        search to remove off-tissue samples. Without a QuerySpec, falls back
+        to the legacy keyword-based search.
 
         Args:
             disease_term: Disease/condition to search for test samples
@@ -393,25 +458,31 @@ class SampleFinder:
                              (default: healthy, control, normal)
             max_test_samples: Maximum test samples to return (0 = no limit)
             max_control_samples: Maximum control samples to return (0 = no limit)
+            query_spec: Optional structured query spec for tissue-aware filtering
 
         Returns:
             PooledPair with test and control DataFrames ready for DE analysis
         """
-        # Get raw test/control pair
+        if query_spec is not None:
+            return self._find_pooled_with_spec(
+                query_spec=query_spec,
+                max_test_samples=max_test_samples,
+                max_control_samples=max_control_samples,
+            )
+
+        # Legacy path: keyword-based search without tissue filtering
         pair = self.find_test_control_pair(
             disease_term=disease_term,
             tissue=tissue,
             control_keywords=control_keywords,
         )
 
-        # Extract DataFrames
         test_df = pair.test_samples.samples
         control_df = pair.control_samples.samples
 
         total_test = len(test_df)
         total_control = len(control_df)
 
-        # Apply size limits with random sampling
         if max_test_samples > 0 and len(test_df) > max_test_samples:
             test_df = test_df.sample(n=max_test_samples, random_state=42)
 
@@ -426,6 +497,80 @@ class SampleFinder:
             total_test_found=total_test,
             total_control_found=total_control,
             overlap_removed=pair.overlap_removed,
+        )
+
+    def _find_pooled_with_spec(
+        self,
+        query_spec: QuerySpec,
+        max_test_samples: int = 500,
+        max_control_samples: int = 500,
+    ) -> PooledPair:
+        """
+        Find pooled samples using a QuerySpec with tissue filtering.
+
+        Pipeline:
+        1. Broad ARCHS4 search using disease_regex
+        2. Apply tissue_include_regex (keep on-tissue)
+        3. Apply tissue_exclude_regex (remove competing tissues)
+        4. Separate control search using control_regex
+        5. Remove overlap between test and control
+        6. Apply size limits
+        """
+        # 1. Broad ARCHS4 search for disease samples
+        test_metadata = self.client.search_metadata(query_spec.disease_regex)
+        test_df = test_metadata if test_metadata is not None else pd.DataFrame()
+        total_test_found = len(test_df)
+
+        # 2-3. Apply tissue include/exclude filters to test samples
+        test_df, test_filter_stats = self._apply_tissue_filters(
+            test_df,
+            include_regex=query_spec.tissue_include_regex,
+            exclude_regex=query_spec.tissue_exclude_regex,
+        )
+
+        # 4. Search for control samples
+        control_metadata = self.client.search_metadata(query_spec.control_regex)
+        control_df = control_metadata if control_metadata is not None else pd.DataFrame()
+        total_control_found = len(control_df)
+
+        # Apply tissue exclude filter to controls too
+        control_df, control_filter_stats = self._apply_tissue_filters(
+            control_df,
+            include_regex="",  # include is built into control_regex
+            exclude_regex=query_spec.tissue_exclude_regex,
+        )
+
+        # 5. Remove overlap: exclude samples appearing in both sets
+        overlap_removed = 0
+        if not test_df.empty and not control_df.empty:
+            test_ids = set(test_df["geo_accession"])
+            original_count = len(control_df)
+            control_df = control_df[~control_df["geo_accession"].isin(test_ids)]
+            overlap_removed = original_count - len(control_df)
+
+        # 6. Apply size limits with random sampling
+        if max_test_samples > 0 and len(test_df) > max_test_samples:
+            test_df = test_df.sample(n=max_test_samples, random_state=42)
+
+        if max_control_samples > 0 and len(control_df) > max_control_samples:
+            control_df = control_df.sample(n=max_control_samples, random_state=42)
+
+        filtering_stats = {
+            "test": test_filter_stats,
+            "control": control_filter_stats,
+            "overlap_removed": overlap_removed,
+        }
+
+        return PooledPair(
+            test_samples=test_df,
+            control_samples=control_df,
+            test_query=query_spec.disease_regex,
+            control_query=query_spec.control_regex,
+            total_test_found=total_test_found,
+            total_control_found=total_control_found,
+            overlap_removed=overlap_removed,
+            query_spec=query_spec.to_dict(),
+            filtering_stats=filtering_stats,
         )
 
     # =========================================================================

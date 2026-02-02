@@ -92,8 +92,8 @@ class DEConfig:
     method: DEMethod = "deseq2"
 
     # Significance thresholds
-    fdr_threshold: float = 0.05
-    log2fc_threshold: float = 1.0
+    fdr_threshold: float = 0.01
+    log2fc_threshold: float = 2.0
 
     # Minimum raw count sum across all samples for a gene to be tested.
     # DESeq2 pre-filters genes with very low counts automatically, but

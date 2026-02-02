@@ -71,8 +71,8 @@ def run_analysis(
     tissue: Optional[str] = None,
     species: Literal["human", "mouse", "both"] = "human",
     method: str = "deseq2",
-    fdr_threshold: float = 0.05,
-    log2fc_threshold: float = 1.0,
+    fdr_threshold: float = 0.01,
+    log2fc_threshold: float = 2.0,
     max_test_samples: int = 500,
     max_control_samples: int = 500,
     gene_filter_biotypes: Optional[str] = "protein_coding",
@@ -81,6 +81,7 @@ def run_analysis(
     min_library_size: int = 1_000_000,
     output_path: Optional[str] = None,
     output_format: Literal["summary", "json", "tsv"] = "summary",
+    interpret: bool = True,
     verbose: bool = False,
 ) -> None:
     """
@@ -108,7 +109,12 @@ def run_analysis(
 
     from .de_analysis import DEConfig, DifferentialExpressionAnalyzer, GeneFilterConfig
     from .de_result import DEProvenance
-    from .query_builder import PatternQueryStrategy, QueryBuilder
+    from .query_builder import (
+        PatternQueryStrategy,
+        QueryBuilder,
+        build_query_spec,
+        build_query_spec_fallback,
+    )
     from .report_generator import ReportGenerator
     from .sample_finder import SampleFinder
 
@@ -162,6 +168,23 @@ def run_analysis(
     analyzer = DifferentialExpressionAnalyzer(config=config, gene_biotypes=gene_biotypes)
     reporter = ReportGenerator()
 
+    # Build structured query spec for tissue-aware filtering
+    query_spec = None
+    if tissue:
+        try:
+            query_spec = build_query_spec(disease, tissue)
+            if verbose:
+                print(f"Query strategy: LLM")
+                print(f"  Disease terms: {query_spec.disease_terms}")
+                print(f"  Tissue include: {query_spec.tissue_include}")
+                print(f"  Tissue exclude: {query_spec.tissue_exclude}")
+                print(f"  Reasoning: {query_spec.reasoning}")
+                print()
+        except Exception as e:
+            if verbose:
+                print(f"LLM query builder failed ({e}), using pattern fallback")
+            query_spec = build_query_spec_fallback(disease, tissue)
+
     # Find samples
     if verbose:
         print("Searching for samples...")
@@ -171,7 +194,14 @@ def run_analysis(
         tissue=tissue,
         max_test_samples=max_test_samples,
         max_control_samples=max_control_samples,
+        query_spec=query_spec,
     )
+
+    if verbose and pooled.filtering_stats:
+        ts = pooled.filtering_stats.get("test", {})
+        print(f"  Tissue filtering: {ts.get('before', '?')} candidates → "
+              f"{ts.get('after_include', '?')} after include → "
+              f"{ts.get('after_exclude', '?')} after exclude")
 
     if pooled.n_test == 0:
         print(f"Error: No test samples found for '{disease}'")
@@ -221,6 +251,8 @@ def run_analysis(
         pvalue_threshold=config.fdr_threshold,
         fdr_threshold=config.fdr_threshold,
         log2fc_threshold=config.log2fc_threshold,
+        query_spec=pooled.query_spec,
+        sample_filtering=pooled.filtering_stats,
     )
 
     # Run DE analysis
@@ -300,6 +332,23 @@ def run_analysis(
             summary += "\n" + reporter.format_enrichment_summary(enrichment_result, top_n=10)
         (output_dir / "summary.txt").write_text(summary)
 
+        # AI interpretation
+        if interpret:
+            try:
+                from .interpretation import interpret_results, save_interpretation
+
+                if verbose:
+                    print("Generating AI interpretation...")
+
+                interpretation = interpret_results(result, enrichment_result)
+                save_interpretation(interpretation, output_dir, result)
+
+                if verbose:
+                    print(f"  Saved interpretation to: {output_dir / 'interpretation.md'}")
+            except (ImportError, ValueError) as e:
+                if verbose:
+                    print(f"  Interpretation skipped: {e}")
+
         print(f"Results written to: {output_dir}")
 
 
@@ -377,14 +426,14 @@ Examples:
     parser.add_argument(
         "--fdr",
         type=float,
-        default=0.05,
-        help="FDR threshold (default: 0.05)",
+        default=0.01,
+        help="FDR threshold (default: 0.01)",
     )
     parser.add_argument(
         "--log2fc",
         type=float,
-        default=1.0,
-        help="Log2 fold change threshold (default: 1.0)",
+        default=2.0,
+        help="Log2 fold change threshold (default: 2.0)",
     )
 
     # Sample options
@@ -399,6 +448,20 @@ Examples:
         type=int,
         default=500,
         help="Maximum control samples (default: 500)",
+    )
+
+    # Interpretation
+    parser.add_argument(
+        "--interpret",
+        action="store_true",
+        default=True,
+        help="Generate AI interpretation using Anthropic API (default: on)",
+    )
+    parser.add_argument(
+        "--no-interpret",
+        action="store_false",
+        dest="interpret",
+        help="Skip AI interpretation step",
     )
 
     # Output options
@@ -456,6 +519,7 @@ Examples:
         min_library_size=args.min_library_size,
         output_path=args.output,
         output_format=args.format,
+        interpret=args.interpret,
         verbose=args.verbose,
     )
 

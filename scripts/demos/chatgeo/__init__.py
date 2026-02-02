@@ -60,10 +60,13 @@ from .sample_finder import (
 from .query_builder import (
     QueryBuilder,
     QueryExpansion,
+    QuerySpec,
     QueryStrategy,
     TextQueryStrategy,
     PatternQueryStrategy,
     OntologyQueryStrategy,
+    build_query_spec,
+    build_query_spec_fallback,
 )
 from .study_grouper import StudyGrouper, StudyGroup
 from .metrics import SearchMetrics, SearchStats, PairQualityMetrics
@@ -111,6 +114,7 @@ from .species_merger import (
     OrthologMapping,
     load_ortholog_table,
 )
+from .interpretation import interpret_results, save_interpretation, build_prompt
 from .cli import parse_query, run_analysis
 
 __all__ = [
@@ -126,10 +130,13 @@ __all__ = [
     # Query building
     "QueryBuilder",
     "QueryExpansion",
+    "QuerySpec",
     "QueryStrategy",
     "TextQueryStrategy",
     "PatternQueryStrategy",
     "OntologyQueryStrategy",
+    "build_query_spec",
+    "build_query_spec_fallback",
     # Study grouping
     "StudyGrouper",
     "StudyGroup",
@@ -173,6 +180,10 @@ __all__ = [
     "SpeciesMerger",
     "OrthologMapping",
     "load_ortholog_table",
+    # Interpretation
+    "interpret_results",
+    "save_interpretation",
+    "build_prompt",
     # CLI
     "parse_query",
     "run_analysis",

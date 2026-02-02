@@ -86,6 +86,10 @@ class DEProvenance:
     fdr_method: str
     thresholds: Dict[str, float]
 
+    # Optional: query spec and filtering provenance from tissue-aware search
+    query_spec: Optional[dict] = None
+    sample_filtering: Optional[dict] = None
+
     @classmethod
     def create(
         cls,
@@ -104,6 +108,8 @@ class DEProvenance:
         pvalue_threshold: float,
         fdr_threshold: float,
         log2fc_threshold: float,
+        query_spec: Optional[dict] = None,
+        sample_filtering: Optional[dict] = None,
     ) -> "DEProvenance":
         """Create a provenance record with current timestamp."""
         return cls(
@@ -127,11 +133,13 @@ class DEProvenance:
                 "fdr": fdr_threshold,
                 "log2fc": log2fc_threshold,
             },
+            query_spec=query_spec,
+            sample_filtering=sample_filtering,
         )
 
     def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
-        return {
+        result = {
             "timestamp": self.timestamp,
             "query": {
                 "disease": self.query_disease,
@@ -159,6 +167,11 @@ class DEProvenance:
             },
             "thresholds": self.thresholds,
         }
+        if self.query_spec is not None:
+            result["query_spec"] = self.query_spec
+        if self.sample_filtering is not None:
+            result["sample_filtering"] = self.sample_filtering
+        return result
 
 
 @dataclass

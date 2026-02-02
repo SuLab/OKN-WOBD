@@ -2,11 +2,12 @@
 """
 Run all ChatGEO differential expression examples.
 
-This script runs three example DE analyses and saves results to the examples folder.
+This script runs DE analyses and saves results to the examples folder.
 
 Requirements:
     - ARCHS4_DATA_DIR environment variable set
     - Human ARCHS4 HDF5 file available
+    - ANTHROPIC_API_KEY environment variable set (for interpretation)
 
 Usage:
     export ARCHS4_DATA_DIR=/path/to/archs4/data
@@ -22,20 +23,41 @@ from pathlib import Path
 script_dir = Path(__file__).parent
 sys.path.insert(0, str(script_dir.parent.parent))
 
+# Load .env file if present
+env_path = script_dir.parent.parent / ".env"
+if env_path.exists():
+    for line in env_path.read_text().splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            key, _, value = line.partition("=")
+            os.environ.setdefault(key.strip(), value.strip())
+
+# Default thresholds (more stringent than previous 0.05/1.0)
+FDR_THRESHOLD = 0.01
+LOG2FC_THRESHOLD = 2.0
+
+
 def run_example(
     name: str,
     query: str,
     disease: str,
     tissue: str,
     output_dir: Path,
+    include_mt_genes: bool = False,
 ):
     """Run a single DE analysis example."""
     from archs4_client import ARCHS4Client
     from chatgeo import SampleFinder
-    from chatgeo.de_analysis import DEConfig, DEMethod, DifferentialExpressionAnalyzer, GeneFilterConfig
+    from chatgeo.de_analysis import DEConfig, DifferentialExpressionAnalyzer, GeneFilterConfig
     from chatgeo.de_result import DEProvenance
     from chatgeo.enrichment_analyzer import EnrichmentAnalyzer, EnrichmentConfig
-    from chatgeo.query_builder import PatternQueryStrategy, QueryBuilder
+    from chatgeo.interpretation import interpret_results, save_interpretation
+    from chatgeo.query_builder import (
+        PatternQueryStrategy,
+        QueryBuilder,
+        build_query_spec,
+        build_query_spec_fallback,
+    )
     from chatgeo.report_generator import ReportGenerator
 
     data_dir = os.environ.get("ARCHS4_DATA_DIR")
@@ -43,14 +65,14 @@ def run_example(
     print(f"\n{'='*70}")
     print(f"EXAMPLE: {name}")
     print(f"Query: {query}")
+    print(f"Thresholds: FDR < {FDR_THRESHOLD}, |log2FC| >= {LOG2FC_THRESHOLD}")
     print(f"{'='*70}\n")
 
     # Create output directory
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Build command flags
-    exclude_mt = name != "Mitochondrial Myopathy"
-    mt_flag = "" if exclude_mt else " \\\n    --include-mt-genes"
+    mt_flag = "" if not include_mt_genes else " \\\n    --include-mt-genes"
     command = f'''#!/bin/bash
 # ChatGEO Example: {name}
 # Generated: {datetime.now().isoformat()}
@@ -60,14 +82,28 @@ export ARCHS4_DATA_DIR="{data_dir}"
 python -m chatgeo.cli "{query}" \\
     --tissue {tissue} \\
     --method deseq2 \\
-    --fdr 0.05 \\
-    --log2fc 1.0 \\
+    --fdr {FDR_THRESHOLD} \\
+    --log2fc {LOG2FC_THRESHOLD} \\
     --max-test 200 \\
     --max-control 200 \\
     --output {output_dir}/results.json \\
     --verbose{mt_flag}
 '''
     (output_dir / "command.sh").write_text(command)
+
+    # Build structured query spec for tissue-aware filtering
+    query_spec = None
+    if tissue:
+        try:
+            query_spec = build_query_spec(disease, tissue)
+            print(f"  Query strategy: LLM")
+            print(f"  Disease terms: {query_spec.disease_terms}")
+            print(f"  Tissue include: {query_spec.tissue_include}")
+            print(f"  Tissue exclude: {query_spec.tissue_exclude}")
+            print(f"  Reasoning: {query_spec.reasoning}")
+        except Exception as e:
+            print(f"  LLM query builder failed ({e}), using pattern fallback")
+            query_spec = build_query_spec_fallback(disease, tissue)
 
     # Find samples
     print("Finding samples...")
@@ -79,10 +115,16 @@ python -m chatgeo.cli "{query}" \\
         tissue=tissue,
         max_test_samples=200,
         max_control_samples=200,
+        query_spec=query_spec,
     )
 
     print(f"  Test samples: {pooled.n_test}")
     print(f"  Control samples: {pooled.n_control}")
+    if pooled.filtering_stats:
+        ts = pooled.filtering_stats.get("test", {})
+        print(f"  Tissue filtering: {ts.get('before', '?')} → "
+              f"{ts.get('after_include', '?')} (include) → "
+              f"{ts.get('after_exclude', '?')} (exclude)")
 
     if pooled.n_test == 0 or pooled.n_control == 0:
         print(f"  ERROR: Not enough samples found")
@@ -106,20 +148,18 @@ python -m chatgeo.cli "{query}" \\
     if "series_id" in pooled.control_samples.columns:
         control_studies = list(set(pooled.control_samples["series_id"].dropna().tolist()))
 
-    # Configure gene filtering: protein-coding only, exclude MT genes
-    # For the mitochondrial myopathy example, MT genes are kept
-    exclude_mt = name != "Mitochondrial Myopathy"
+    # Configure gene filtering
     gene_filter = GeneFilterConfig(
         biotypes=frozenset({"protein_coding"}),
-        exclude_mt_genes=exclude_mt,
+        exclude_mt_genes=not include_mt_genes,
         exclude_ribosomal=False,
     )
 
-    # Create DE config using DESeq2 (handles normalization internally)
+    # Create DE config with stringent thresholds
     config = DEConfig(
         method="deseq2",
-        fdr_threshold=0.05,
-        log2fc_threshold=1.0,
+        fdr_threshold=FDR_THRESHOLD,
+        log2fc_threshold=LOG2FC_THRESHOLD,
         gene_filter=gene_filter,
     )
 
@@ -139,6 +179,8 @@ python -m chatgeo.cli "{query}" \\
         pvalue_threshold=config.fdr_threshold,
         fdr_threshold=config.fdr_threshold,
         log2fc_threshold=config.log2fc_threshold,
+        query_spec=pooled.query_spec,
+        sample_filtering=pooled.filtering_stats,
     )
 
     # Load biotype annotations and create analyzer
@@ -166,22 +208,22 @@ python -m chatgeo.cli "{query}" \\
     )
     enrichment_analyzer = EnrichmentAnalyzer(config=enrichment_config)
 
+    enrichment_result = None
     try:
         enrichment_result = enrichment_analyzer.analyze(result)
         print(f"  Total enriched terms: {enrichment_result.total_terms}")
         print(f"  Upregulated terms: {enrichment_result.upregulated.n_terms}")
         print(f"  Downregulated terms: {enrichment_result.downregulated.n_terms}")
-        has_enrichment = True
     except ImportError as e:
         print(f"  WARNING: Enrichment analysis skipped - {e}")
-        enrichment_result = None
-        has_enrichment = False
+    except Exception as e:
+        print(f"  WARNING: Enrichment failed - {e}")
 
     # Save results
     print("Saving results...")
     reporter = ReportGenerator()
 
-    if has_enrichment and enrichment_result is not None:
+    if enrichment_result is not None:
         reporter.to_json_with_enrichment(
             result, enrichment_result, output_dir / "results.json"
         )
@@ -198,6 +240,17 @@ python -m chatgeo.cli "{query}" \\
         summary += "\n" + enrichment_summary
     (output_dir / "summary.txt").write_text(summary)
 
+    # AI interpretation
+    print("Generating AI interpretation...")
+    try:
+        interpretation = interpret_results(result, enrichment_result)
+        save_interpretation(interpretation, output_dir, result)
+        print(f"  Saved interpretation to: {output_dir / 'interpretation.md'}")
+    except (ImportError, ValueError) as e:
+        print(f"  WARNING: Interpretation skipped - {e}")
+    except Exception as e:
+        print(f"  WARNING: Interpretation failed - {e}")
+
     print(f"  Saved to: {output_dir}")
     return True
 
@@ -206,6 +259,7 @@ def main():
     """Run all examples."""
     print("=" * 70)
     print("CHATGEO DIFFERENTIAL EXPRESSION EXAMPLES")
+    print(f"Thresholds: FDR < {FDR_THRESHOLD}, |log2FC| >= {LOG2FC_THRESHOLD}")
     print("=" * 70)
 
     # Check environment
@@ -220,6 +274,12 @@ def main():
     if not h5_path.exists():
         print(f"\nERROR: ARCHS4 data file not found: {h5_path}")
         sys.exit(1)
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        print("\nWARNING: ANTHROPIC_API_KEY not set - interpretation will be skipped")
+    else:
+        print(f"Anthropic API key: ...{api_key[-8:]}")
 
     print(f"\nUsing ARCHS4 data from: {data_dir}")
 
@@ -254,6 +314,7 @@ def main():
             "disease": "mitochondrial myopathy",
             "tissue": "muscle",
             "output_dir": examples_dir / "04_mitochondrial",
+            "include_mt_genes": True,
         },
         {
             "name": "Alzheimer's Disease",
@@ -261,6 +322,20 @@ def main():
             "disease": "alzheimer disease",
             "tissue": "brain",
             "output_dir": examples_dir / "05_alzheimers",
+        },
+        {
+            "name": "Systemic Lupus Erythematosus in Blood",
+            "query": "systemic lupus erythematosus in blood",
+            "disease": "systemic lupus erythematosus",
+            "tissue": "blood",
+            "output_dir": examples_dir / "08_sle",
+        },
+        {
+            "name": "Colorectal Cancer vs Normal Colon",
+            "query": "colorectal cancer in colon tissue",
+            "disease": "colorectal cancer",
+            "tissue": "colon",
+            "output_dir": examples_dir / "09_colorectal_cancer",
         },
     ]
 
@@ -272,6 +347,8 @@ def main():
             results.append((ex["name"], success))
         except Exception as e:
             print(f"  ERROR: {e}")
+            import traceback
+            traceback.print_exc()
             results.append((ex["name"], False))
 
     # Summary
