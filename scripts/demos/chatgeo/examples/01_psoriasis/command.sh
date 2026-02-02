@@ -11,5 +11,5 @@ python -m chatgeo.cli "psoriasis in skin tissue" \
     --log2fc 2.0 \
     --max-test 200 \
     --max-control 200 \
-    --output chatgeo/examples/01_psoriasis/results.json \
+    --output chatgeo/examples/01_psoriasis \
     --verbose

@@ -17,10 +17,7 @@ from typing import List, Optional
 
 import pandas as pd
 
-# Add parent directory for archs4_client import
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from archs4_client import ARCHS4Client
+from clients.archs4 import ARCHS4Client
 
 from .query_builder import QueryBuilder, QueryExpansion, QuerySpec, TextQueryStrategy
 
@@ -533,12 +530,23 @@ class SampleFinder:
         control_df = control_metadata if control_metadata is not None else pd.DataFrame()
         total_control_found = len(control_df)
 
-        # Apply tissue exclude filter to controls too
+        # Apply tissue include and exclude filters to controls
         control_df, control_filter_stats = self._apply_tissue_filters(
             control_df,
-            include_regex="",  # include is built into control_regex
+            include_regex=query_spec.tissue_include_regex,
             exclude_regex=query_spec.tissue_exclude_regex,
         )
+
+        # Fallback: if tissue include removed all controls (niche tissue),
+        # retry with exclude-only filtering
+        if control_df.empty and total_control_found > 0 and query_spec.tissue_include_regex:
+            control_df = control_metadata if control_metadata is not None else pd.DataFrame()
+            control_df, control_filter_stats = self._apply_tissue_filters(
+                control_df,
+                include_regex="",
+                exclude_regex=query_spec.tissue_exclude_regex,
+            )
+            control_filter_stats["fallback"] = "exclude_only"
 
         # 5. Remove overlap: exclude samples appearing in both sets
         overlap_removed = 0

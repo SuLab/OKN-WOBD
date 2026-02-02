@@ -19,6 +19,13 @@ from typing import Literal, Optional, Tuple
 # Add parent directory for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+# Load .env from demos directory
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).parent.parent / ".env")
+except ImportError:
+    pass
+
 
 def parse_query(query: str) -> Tuple[str, Optional[str]]:
     """
@@ -100,12 +107,12 @@ def run_analysis(
         include_mt_genes: Keep MT- genes
         exclude_ribosomal: Remove RPS/RPL genes
         min_library_size: Min total counts per sample
-        output_path: Output file path
+        output_path: Output directory or file path
         output_format: Output format
         verbose: Print verbose output
     """
     # Import here to defer ARCHS4 initialization
-    from archs4_client import ARCHS4Client
+    from clients.archs4 import ARCHS4Client
 
     from .de_analysis import DEConfig, DifferentialExpressionAnalyzer, GeneFilterConfig
     from .de_result import DEProvenance
@@ -199,9 +206,16 @@ def run_analysis(
 
     if verbose and pooled.filtering_stats:
         ts = pooled.filtering_stats.get("test", {})
-        print(f"  Tissue filtering: {ts.get('before', '?')} candidates → "
+        print(f"  Test tissue filtering: {ts.get('before', '?')} candidates → "
               f"{ts.get('after_include', '?')} after include → "
               f"{ts.get('after_exclude', '?')} after exclude")
+        cs = pooled.filtering_stats.get("control", {})
+        fallback = " (exclude-only fallback)" if cs.get("fallback") else ""
+        print(f"  Control tissue filtering: {cs.get('before', '?')} candidates → "
+              f"{cs.get('after_include', '?')} after include → "
+              f"{cs.get('after_exclude', '?')} after exclude{fallback}")
+        if pooled.filtering_stats.get("overlap_removed", 0) > 0:
+            print(f"  Overlap removed: {pooled.filtering_stats['overlap_removed']}")
 
     if pooled.n_test == 0:
         print(f"Error: No test samples found for '{disease}'")
@@ -305,21 +319,24 @@ def run_analysis(
 
     if output_path:
         output_path = Path(output_path)
-        output_dir = output_path.parent
+
+        # If output_path is a directory (or has no file extension), treat as directory
+        if output_path.is_dir() or not output_path.suffix:
+            output_dir = output_path
+            output_dir.mkdir(parents=True, exist_ok=True)
+            result_file = output_dir / "results.json"
+        else:
+            output_dir = output_path.parent
+            result_file = output_path
 
         # Write primary output file
-        if output_format == "json" or output_path.suffix == ".json":
-            if enrichment_result is not None:
-                reporter.to_json_with_enrichment(result, enrichment_result, output_path)
-            else:
-                reporter.to_json(result, output_path)
-        elif output_format == "tsv" or output_path.suffix == ".tsv":
-            reporter.to_tsv(result, output_path)
+        if output_format == "tsv" or result_file.suffix == ".tsv":
+            reporter.to_tsv(result, result_file)
         else:
             if enrichment_result is not None:
-                reporter.to_json_with_enrichment(result, enrichment_result, output_path)
+                reporter.to_json_with_enrichment(result, enrichment_result, result_file)
             else:
-                reporter.to_json(result, output_path)
+                reporter.to_json(result, result_file)
 
         # Write companion files in the same directory
         reporter.to_tsv(result, output_dir / "genes.tsv")
@@ -467,7 +484,7 @@ Examples:
     # Output options
     parser.add_argument(
         "--output", "-o",
-        help="Output file path (JSON or TSV)",
+        help="Output directory or file path. If a directory, writes results.json + companion files there.",
     )
     parser.add_argument(
         "--format", "-f",

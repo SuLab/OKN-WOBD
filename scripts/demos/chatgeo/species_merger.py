@@ -326,7 +326,7 @@ class SpeciesMerger:
                 query_builder=query_builder,
             )
             # Override to use human file
-            from archs4_client import ARCHS4Client
+            from clients.archs4 import ARCHS4Client
             human_finder._client = ARCHS4Client(
                 organism="human",
                 data_dir=data_dir,
@@ -345,7 +345,7 @@ class SpeciesMerger:
                 data_dir=data_dir,
                 query_builder=query_builder,
             )
-            from archs4_client import ARCHS4Client
+            from clients.archs4 import ARCHS4Client
             mouse_finder._client = ARCHS4Client(
                 organism="mouse",
                 data_dir=data_dir,

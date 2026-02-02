@@ -11,5 +11,5 @@ python -m chatgeo.cli "systemic lupus erythematosus in blood" \
     --log2fc 2.0 \
     --max-test 200 \
     --max-control 200 \
-    --output chatgeo/examples/08_sle/results.json \
+    --output chatgeo/examples/08_sle \
     --verbose

@@ -1,8 +1,0 @@
-study_id,study_title,assay,go_id,go_term_name,adj_pvalue
-E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g3_g12,GO:0008299,isoprenoid biosynthetic process,9.1884685E-6
-E-GEOD-45684,E-GEOD-45684,https://spoke.ucsf.edu/genelab/E-GEOD-45684-g4_g13,GO:0008299,isoprenoid biosynthetic process,2.0689104E-4
-E-GEOD-18985,E-GEOD-18985,https://spoke.ucsf.edu/genelab/E-GEOD-18985-g1_g2,GO:0009686,gibberellin biosynthetic process,0.0057530277
-E-GEOD-5617,E-GEOD-5617,https://spoke.ucsf.edu/genelab/E-GEOD-5617-g3_g1,GO:0009686,gibberellin biosynthetic process,0.0059619355
-E-GEOD-2565,E-GEOD-2565,https://spoke.ucsf.edu/genelab/E-GEOD-2565-g2_g11,GO:0008299,isoprenoid biosynthetic process,0.0063290945
-E-GEOD-57466,E-GEOD-57466,https://spoke.ucsf.edu/genelab/E-GEOD-57466-g3_g1,GO:0016102,diterpenoid biosynthetic process,0.007342912
-E-GEOD-30030,E-GEOD-30030,https://spoke.ucsf.edu/genelab/E-GEOD-30030-g7_g6,GO:0016117,carotenoid biosynthetic process,0.008812898

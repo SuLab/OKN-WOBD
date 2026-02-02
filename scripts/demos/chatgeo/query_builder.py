@@ -102,6 +102,19 @@ this tissue.
 - reasoning: One sentence explaining your choices."""
 
 
+def _term_to_regex(term: str) -> str:
+    """Convert a search term to regex, adding word boundaries for short terms.
+
+    Short terms (<=3 characters) like 'RA', 'IPF', 'SLE' get \\b boundaries
+    to prevent matching as substrings inside unrelated words (e.g., 'RA'
+    inside 'brain', 'library', 'characterization').
+    """
+    escaped = re.escape(term)
+    if len(term) <= 3:
+        return r"\b" + escaped + r"\b"
+    return escaped
+
+
 def build_query_spec(
     disease: str,
     tissue: Optional[str] = None,
@@ -157,18 +170,22 @@ def build_query_spec(
     control_terms = spec.get("control_terms", ["healthy", "control", "normal"])
     reasoning = spec.get("reasoning", "")
 
+    # Ensure broad baseline control terms are always included
+    _BASELINE_CONTROL = {"healthy", "control", "normal"}
+    control_terms_lower = {t.lower() for t in control_terms}
+    for term in _BASELINE_CONTROL:
+        if term not in control_terms_lower:
+            control_terms.append(term)
+
     # Build regex patterns from the term lists
-    disease_regex = "|".join(re.escape(t) for t in disease_terms)
+    # Short terms (<=3 chars) get word boundaries to prevent substring matches
+    # e.g., "RA" should not match inside "brain" or "library"
+    disease_regex = "|".join(_term_to_regex(t) for t in disease_terms)
     tissue_include_regex = "|".join(re.escape(t) for t in tissue_include) if tissue_include else ""
     tissue_exclude_regex = "|".join(re.escape(t) for t in tissue_exclude) if tissue_exclude else ""
 
-    # Control regex: tissue terms AND control keywords
-    if tissue_include:
-        tissue_pat = "|".join(re.escape(t) for t in tissue_include)
-        ctrl_pat = "|".join(re.escape(t) for t in control_terms)
-        control_regex = f"({tissue_pat}).*({ctrl_pat})"
-    else:
-        control_regex = "|".join(re.escape(t) for t in control_terms)
+    # Control regex: broad search, tissue filtering applied separately
+    control_regex = "|".join(re.escape(t) for t in control_terms)
 
     return QuerySpec(
         disease_terms=disease_terms,
@@ -214,16 +231,11 @@ def build_query_spec_fallback(
         tissue_exp = strategy.expand(tissue)
         tissue_include = tissue_exp.expanded_terms
 
-    disease_regex = "|".join(re.escape(t) for t in disease_terms)
+    disease_regex = "|".join(_term_to_regex(t) for t in disease_terms)
     tissue_include_regex = "|".join(re.escape(t) for t in tissue_include) if tissue_include else ""
 
     control_terms = ["healthy", "control", "normal"]
-    if tissue_include:
-        tissue_pat = "|".join(re.escape(t) for t in tissue_include)
-        ctrl_pat = "|".join(re.escape(t) for t in control_terms)
-        control_regex = f"({tissue_pat}).*({ctrl_pat})"
-    else:
-        control_regex = "|".join(re.escape(t) for t in control_terms)
+    control_regex = "|".join(re.escape(t) for t in control_terms)
 
     return QuerySpec(
         disease_terms=disease_terms,
@@ -344,8 +356,14 @@ class PatternQueryStrategy(QueryStrategy):
                 break
 
         # Also check for partial matches in compound terms
+        # Use word boundary check to avoid substring collisions
+        # (e.g., "ra" matching inside "brain")
         for key, synonyms in self.PATTERNS.items():
-            if key in term_lower:
+            if len(key) <= 2:
+                # Short keys must match as whole words
+                if re.search(r'\b' + re.escape(key) + r'\b', term_lower):
+                    expanded.update(synonyms)
+            elif key in term_lower:
                 expanded.update(synonyms)
 
         # Always include the original term

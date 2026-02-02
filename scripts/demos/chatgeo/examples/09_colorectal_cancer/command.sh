@@ -11,5 +11,5 @@ python -m chatgeo.cli "colorectal cancer in colon tissue" \
     --log2fc 2.0 \
     --max-test 200 \
     --max-control 200 \
-    --output chatgeo/examples/09_colorectal_cancer/results.json \
+    --output chatgeo/examples/09_colorectal_cancer \
     --verbose

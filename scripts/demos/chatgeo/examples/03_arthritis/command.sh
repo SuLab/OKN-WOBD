@@ -11,5 +11,5 @@ python -m chatgeo.cli "rheumatoid arthritis" \
     --log2fc 2.0 \
     --max-test 200 \
     --max-control 200 \
-    --output chatgeo/examples/03_arthritis/results.json \
+    --output chatgeo/examples/03_arthritis \
     --verbose

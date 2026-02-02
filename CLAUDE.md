@@ -8,7 +8,11 @@ OKN-WOBD extracts biomedical dataset metadata from the NIAID Data Ecosystem Disc
 
 1. **Core CLI** (`src/okn_wobd/`) - Fetch data from NIAID API and convert to RDF
 2. **ChatGEO** (`scripts/demos/chatgeo/`) - Natural language differential expression analysis using ARCHS4
-3. **Demo Scripts** (`scripts/demos/`) - Cross-layer query demos integrating multiple biomedical data sources
+3. **Reusable Packages** (`scripts/demos/`) - Modular packages for biomedical data integration:
+   - `clients/` - Data source clients (SPARQL, NIAID, ARCHS4, CellxGene)
+   - `frink/` - FRINK knowledge graph integration (registry, context, NL-to-SPARQL)
+   - `analysis/` - Reusable analysis tools (gene paths, neighborhoods, drug-disease, visualization)
+4. **Examples** (`scripts/demos/examples/`) - Worked examples using the packages
 
 ## Common Commands
 
@@ -28,8 +32,11 @@ okn-wobd convert --resource ImmPort
 # Run ChatGEO differential expression analysis (from scripts/demos/)
 cd scripts/demos && python -m chatgeo.cli "psoriasis in skin tissue" --verbose
 
-# Run demo scripts (from scripts/demos/)
-cd scripts/demos && python demo_acta2_fibrosis.py
+# Run example scripts (from scripts/demos/)
+cd scripts/demos && python -m examples.acta2_fibrosis
+cd scripts/demos && python -m examples.cross_layer_query
+cd scripts/demos && python -m analysis.gene_paths SFRP2
+cd scripts/demos && python -m analysis.gene_neighborhood CD19
 
 # Test competency SPARQL queries against local RDF
 python scripts/test_competency_queries.py           # Test all queries
@@ -63,27 +70,54 @@ Key modules:
 
 Additional dependencies beyond core: `numpy`, `pandas`, `scipy`, `pydeseq2`, `gprofiler-official`
 
-### Demo Clients (`scripts/demos/`)
+### Clients Package (`scripts/demos/clients/`)
 
-Reusable API clients for cross-layer biomedical queries:
+Unified data source clients for cross-layer biomedical queries:
 
-| Client | Data Layer | Input | Output |
-|--------|-----------|-------|--------|
-| `sparql_client.py` | Wikidata/FRINK/Ubergraph | Gene symbol, SPARQL | Gene IDs, GO terms, disease associations |
-| `cellxgene_client.py` | CellxGene Census | Gene + tissue + disease | Fold changes, cell type stats |
-| `niaid_client.py` | NIAID Discovery | Keywords | Study metadata, GSE accessions |
-| `archs4_client.py` | ARCHS4 (local HDF5) | GSE ID + genes | Bulk expression values |
-| `fuseki_client.py` | Local Fuseki/GXA | SPARQL | Gene expression atlas results |
-| `frink_context_builder.py` | FRINK | Endpoint URL | Schema context files for LLM query generation |
+| Module | Data Layer | Key Classes | Description |
+|--------|-----------|-------------|-------------|
+| `sparql.py` | Wikidata/FRINK/Ubergraph/Fuseki | `SPARQLClient`, `QueryResult`, `GXAQueries` | Unified SPARQL client with named endpoints and `add_endpoint()` for custom servers |
+| `cellxgene.py` | CellxGene Census | `CellxGeneClient`, `ExpressionStats` | Single-cell RNA-seq expression queries |
+| `niaid.py` | NIAID Discovery | `NIAIDClient`, `SearchResult` | Dataset search with ontology annotations |
+| `archs4.py` | ARCHS4 (local HDF5) | `ARCHS4Client`, `ARCHS4DataFile` | Bulk RNA-seq expression from GEO |
+| `http_utils.py` | Shared | `create_session()` | HTTP session with retry logic |
 
-**Dependency flow**: SPARQL, CellxGene, and NIAID queries are independent. ARCHS4 depends on GSE accessions from NIAID results. ChatGEO depends on ARCHS4 client.
+Import from the package: `from clients import SPARQLClient, NIAIDClient, ARCHS4Client, CellxGeneClient`
 
-### Analysis Scripts (`scripts/demos/`)
+**Dependency flow**: SPARQL, CellxGene, and NIAID queries are independent. ARCHS4 depends on GSE accessions from NIAID results. ChatGEO depends on `clients.archs4`.
 
-- `gene_disease_paths.py` - Finds gene-disease connections across SPOKE, Wikidata, and Ubergraph
-- `go_disease_analyzer.py` - Multi-layer analysis: KG → single-cell (CellxGene) → bulk validation (ARCHS4)
-- `query_drug_down_disease_up.py` - Finds opposing drug/disease expression patterns in local GXA Fuseki
-- `frink_nl2sparql.py` - Natural language to SPARQL translation using LLMs + FRINK context
+### FRINK Package (`scripts/demos/frink/`)
+
+FRINK knowledge graph integration tools:
+
+- `registry.py` - Scrapes FRINK registry metadata (`FrinkRegistryClient`, `KnowledgeGraph`)
+- `context.py` - Context file builder and API (`FrinkContext`, `build_context()`)
+- `nl2sparql.py` - LLM-based NL→SPARQL translation (`FrinkNL2SPARQL`, `SPARQLGenerator`)
+
+Import: `from frink import FrinkContext, FrinkNL2SPARQL, FrinkRegistryClient`
+
+### Analysis Package (`scripts/demos/analysis/`)
+
+Reusable analysis tools:
+
+- `gene_paths.py` - Gene-disease connections across SPOKE, Wikidata, Ubergraph (`GeneDiseasePathFinder`)
+- `gene_neighborhood.py` - Gene neighborhood queries across FRINK graphs (`GeneNeighborhoodQuery`)
+- `drug_disease.py` - Opposing drug/disease expression patterns via local GXA Fuseki (`find_drug_disease_genes`)
+- `visualization.py` - Plotly network and expression visualizations (`PlotlyVisualizer`)
+
+Import: `from analysis import GeneDiseasePathFinder, GeneNeighborhoodQuery, PlotlyVisualizer`
+
+### Examples (`scripts/demos/examples/`)
+
+Worked examples demonstrating multi-source integration:
+
+- `cross_layer_query.py` - SPARQL → NIAID → ARCHS4 workflow
+- `acta2_fibrosis.py` - Multi-source fibrosis markers analysis
+- `ecm_fibrosis.py` - Multi-layer ECM gene analysis with LLM summary
+- `niaid_vaccine.py` - NIAID API search patterns
+- `go_disease_analysis.py` - GO → disease multi-layer workflow
+- `biosynthesis/` - Terpenoid pathway queries
+- `sparql_queries/` - Reference SPARQL queries
 
 ### Data Flow
 
@@ -112,7 +146,7 @@ Copy `scripts/demos/.env.example` to `.env` and configure:
 - `ARCHS4_DATA_DIR` - Directory containing ARCHS4 HDF5 files (~15GB each, required for ARCHS4/ChatGEO)
 - `ANTHROPIC_API_KEY` - Required for LLM summaries in go_disease_analyzer and ChatGEO interpretation
 
-Demo scripts must be run from `scripts/demos/` so Python resolves local imports (chatgeo, archs4_client, etc.).
+Demo scripts must be run from `scripts/demos/` so Python resolves package imports (clients, frink, analysis, chatgeo, etc.).
 
 ### Demo Dependencies
 Demo scripts require packages beyond the core `okn-wobd` install:

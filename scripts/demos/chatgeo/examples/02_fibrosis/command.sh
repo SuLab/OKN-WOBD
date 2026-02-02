@@ -11,5 +11,5 @@ python -m chatgeo.cli "lung fibrosis" \
     --log2fc 2.0 \
     --max-test 200 \
     --max-control 200 \
-    --output chatgeo/examples/02_fibrosis/results.json \
+    --output chatgeo/examples/02_fibrosis \
     --verbose

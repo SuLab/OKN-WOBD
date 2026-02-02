@@ -11,5 +11,5 @@ python -m chatgeo.cli "osteoarthritis in knee" \
     --log2fc 1.0 \
     --max-test 200 \
     --max-control 200 \
-    --output chatgeo/examples/06_osteoarthritis/results.json \
+    --output chatgeo/examples/06_osteoarthritis \
     --verbose

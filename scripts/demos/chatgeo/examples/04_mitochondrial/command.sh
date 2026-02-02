@@ -11,6 +11,6 @@ python -m chatgeo.cli "mitochondrial myopathy" \
     --log2fc 2.0 \
     --max-test 200 \
     --max-control 200 \
-    --output chatgeo/examples/04_mitochondrial/results.json \
+    --output chatgeo/examples/04_mitochondrial \
     --verbose \
     --include-mt-genes

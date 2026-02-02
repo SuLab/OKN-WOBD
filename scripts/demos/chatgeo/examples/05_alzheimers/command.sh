@@ -11,5 +11,5 @@ python -m chatgeo.cli "alzheimer disease" \
     --log2fc 2.0 \
     --max-test 200 \
     --max-control 200 \
-    --output chatgeo/examples/05_alzheimers/results.json \
+    --output chatgeo/examples/05_alzheimers \
     --verbose

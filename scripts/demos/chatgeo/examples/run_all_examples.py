@@ -46,7 +46,7 @@ def run_example(
     include_mt_genes: bool = False,
 ):
     """Run a single DE analysis example."""
-    from archs4_client import ARCHS4Client
+    from clients.archs4 import ARCHS4Client
     from chatgeo import SampleFinder
     from chatgeo.de_analysis import DEConfig, DifferentialExpressionAnalyzer, GeneFilterConfig
     from chatgeo.de_result import DEProvenance
