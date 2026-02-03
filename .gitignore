@@ -1,5 +1,6 @@
-# Custom 
+# Custom
 data/raw/*_state.json
+scripts/demos/questions/output/*.html
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

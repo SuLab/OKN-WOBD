@@ -1,112 +1,0 @@
-======================================================================
-GO Term Disease Analyzer - Multi-Layer Analysis
-======================================================================
-
-  GO Term: GO:0030198
-  Disease: pulmonary fibrosis
-  Tissue: lung
-  Control: normal lung
-  Max Genes: 10
-
-----------------------------------------------------------------------
-[Layer 1] FRINK/Ubergraph: GO Term Gene Discovery
-----------------------------------------------------------------------
-  Querying Ubergraph for GO term subclasses of GO:0030198...
-  Found 21 GO terms (including subclasses)
-  Querying Wikidata for genes (batch 1)...
-  Found 337 genes
-
-  Sample genes found:
-    ECM2: extracellular matrix organization
-    TNC: extracellular matrix organization
-    MMP7: extracellular matrix organization, extracellular matrix disassembly
-    MMP8: extracellular matrix organization, extracellular matrix disassembly
-    MMP23B: extracellular matrix organization
-
-----------------------------------------------------------------------
-[Layer 2] CellxGene Census: Single-Cell Expression
-----------------------------------------------------------------------
-  Analyzing 10 genes in lung...
-  Comparing: normal vs pulmonary fibrosis
-
-  Results: 4 upregulated, 2 downregulated
-
-  Top Upregulated:
-    MMP7: 122.6x in pulmonary alveolar type 2 cell
-    TNC: 19.8x in pulmonary alveolar type 2 cell
-    COL4A1: 6.2x in pulmonary alveolar type 2 cell
-    COL13A1: 2.4x in pulmonary alveolar type 2 cell
-
-----------------------------------------------------------------------
-[Layer 3] ARCHS4: Bulk RNA-seq Validation
-----------------------------------------------------------------------
-  Searching ARCHS4 for 'pulmonary fibrosis' studies...
-  0%|          | 0/9 [00:00<?, ?it/s] 11%|█         | 1/9 [00:00<00:03,  2.32it/s] 22%|██▏       | 2/9 [00:00<00:03,  2.28it/s] 33%|███▎      | 3/9 [00:01<00:02,  2.12it/s] 44%|████▍     | 4/9 [00:01<00:02,  2.09it/s] 56%|█████▌    | 5/9 [00:02<00:02,  1.41it/s] 67%|██████▋   | 6/9 [00:07<00:06,  2.03s/it] 78%|███████▊  | 7/9 [00:08<00:03,  1.51s/it] 89%|████████▉ | 8/9 [00:08<00:01,  1.17s/it]100%|██████████| 9/9 [00:08<00:00,  1.06it/s]100%|██████████| 9/9 [00:08<00:00,  1.01it/s]
-  Found 28 unique studies with 241 samples in metadata
-  Searching for control samples ('normal lung')...
-  0%|          | 0/9 [00:00<?, ?it/s] 11%|█         | 1/9 [00:00<00:03,  2.34it/s] 22%|██▏       | 2/9 [00:00<00:03,  2.27it/s] 33%|███▎      | 3/9 [00:01<00:02,  2.04it/s] 44%|████▍     | 4/9 [00:01<00:02,  1.99it/s] 56%|█████▌    | 5/9 [00:03<00:02,  1.39it/s] 67%|██████▋   | 6/9 [00:08<00:06,  2.20s/it] 78%|███████▊  | 7/9 [00:08<00:03,  1.65s/it] 89%|████████▉ | 8/9 [00:09<00:01,  1.27s/it]100%|██████████| 9/9 [00:09<00:00,  1.00s/it]100%|██████████| 9/9 [00:09<00:00,  1.06s/it]
-  Found 700 control samples in metadata
-  0%|          | 0/100 [00:00<?, ?it/s]  1%|          | 1/100 [00:02<03:28,  2.11s/it]  6%|▌         | 6/100 [00:02<00:26,  3.56it/s] 12%|█▏        | 12/100 [00:02<00:10,  8.14it/s] 28%|██▊       | 28/100 [00:02<00:03, 23.83it/s] 42%|████▏     | 42/100 [00:02<00:01, 38.72it/s] 61%|██████    | 61/100 [00:02<00:00, 62.03it/s] 84%|████████▍ | 84/100 [00:02<00:00, 92.38it/s]100%|██████████| 100/100 [00:02<00:00, 35.36it/s]
-  Control samples with expression data: 100
-  Searching for studies with expression data (target: 10)...
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:01<00:05,  1.89s/it]100%|██████████| 4/4 [00:01<00:00,  2.08it/s]
-    ✓ GSE73189: 4 samples, 4 genes
-  0%|          | 0/16 [00:00<?, ?it/s]  6%|▋         | 1/16 [00:01<00:28,  1.93s/it] 25%|██▌       | 4/16 [00:02<00:04,  2.55it/s] 81%|████████▏ | 13/16 [00:02<00:00, 10.34it/s]100%|██████████| 16/16 [00:02<00:00,  7.40it/s]
-    ✓ GSE79544: 16 samples, 4 genes
-  0%|          | 0/27 [00:00<?, ?it/s]  4%|▎         | 1/27 [00:02<00:59,  2.27s/it] 22%|██▏       | 6/27 [00:02<00:06,  3.35it/s] 48%|████▊     | 13/27 [00:02<00:01,  8.50it/s] 93%|█████████▎| 25/27 [00:02<00:00, 19.51it/s]100%|██████████| 27/27 [00:02<00:00, 10.34it/s]
-    ✓ GSE83501: 27 samples, 4 genes
-  0%|          | 0/27 [00:00<?, ?it/s]  4%|▎         | 1/27 [00:02<00:53,  2.05s/it] 19%|█▊        | 5/27 [00:02<00:07,  3.07it/s] 74%|███████▍  | 20/27 [00:02<00:00, 15.17it/s]100%|██████████| 27/27 [00:02<00:00, 11.70it/s]
-    ✓ GSE83505: 27 samples, 4 genes
-  0%|          | 0/20 [00:00<?, ?it/s]  5%|▌         | 1/20 [00:01<00:35,  1.85s/it] 65%|██████▌   | 13/20 [00:01<00:00,  9.08it/s]100%|██████████| 20/20 [00:02<00:00, 14.65it/s]100%|██████████| 20/20 [00:02<00:00,  9.71it/s]
-    ✓ GSE92592: 20 samples, 4 genes
-  0%|          | 0/8 [00:00<?, ?it/s] 12%|█▎        | 1/8 [00:01<00:11,  1.65s/it]100%|██████████| 8/8 [00:01<00:00,  4.64it/s]
-    ✓ GSE97038: 8 samples, 4 genes
-  0%|          | 0/18 [00:00<?, ?it/s]  6%|▌         | 1/18 [00:01<00:29,  1.75s/it] 61%|██████    | 11/18 [00:01<00:00,  7.66it/s]100%|██████████| 18/18 [00:01<00:00,  9.27it/s]
-    ✓ GSE99621: 18 samples, 4 genes
-  0%|          | 0/6 [00:00<?, ?it/s] 17%|█▋        | 1/6 [00:01<00:08,  1.76s/it]100%|██████████| 6/6 [00:01<00:00,  3.32it/s]
-    ✓ GSE119007: 6 samples, 4 genes
-  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:02<00:05,  2.62s/it]100%|██████████| 3/3 [00:02<00:00,  1.13it/s]
-    ✓ GSE124786: 3 samples, 4 genes
-  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:01<00:03,  1.97s/it]100%|██████████| 3/3 [00:01<00:00,  1.50it/s]
-    ✓ GSE124788: 3 samples, 4 genes
-
-  Study search summary:
-    Examined: 10 of 28 studies
-    Successful: 10
-    No samples in metadata: 0
-    No expression data in HDF5: 0
-    Expression data empty: 0
-    No target genes found: 0
-    Exceptions: 0
-    Total disease samples with data: 132
-  Calculating differential expression vs controls...
-
-  Disease studies: 10
-  Control samples: 0
-
-  Differential Expression:
-    TNC: 64.3x up
-    COL4A1: 21.8x up
-    MMP7: 15.4x up
-    COL13A1: 8.3x up
-
-----------------------------------------------------------------------
-[Layer 4] LLM Summary
-----------------------------------------------------------------------
-
-  ## Multi-Layer Analysis of Extracellular Matrix Dysregulation in Pulmonary Fibrosis
-  
-  This comprehensive analysis identified four key extracellular matrix organization genes that are consistently upregulated in pulmonary fibrosis: **MMP7, TNC, COL4A1, and COL13A1**. At the tissue level, all four genes showed significant upregulation with fold changes ranging from 2.35 to 122.62-fold in diseased versus normal lung tissue. Notably, MMP7 (matrix metallopeptidase 7) emerged as the most dramatically upregulated gene with a 122.62-fold increase, followed by TNC (tenascin C) at 19.79-fold. These findings represent tissue-wide patterns where upregulation in any cell type within the lung contributes to the overall signal, providing a broad view of extracellular matrix remodeling in fibrotic disease.
-  
-  **Pulmonary alveolar type 2 (AT2) cells emerged as the primary cellular driver** of extracellular matrix dysregulation in pulmonary fibrosis. All four upregulated genes showed their highest expression changes specifically in AT2 cells, with this cell type showing upregulation of 4 genes and downregulation of 2 others (MMP23B and HSD17B12). This cell-type-specific pattern is particularly significant because AT2 cells are known to be key players in lung injury and repair responses. The analysis did not reveal opposing patterns across different cell types for the same genes, suggesting a coordinated upregulation of these matrix-remodeling genes primarily through AT2 cell activation.
-  
-  The single-cell findings were strongly validated in independent bulk RNA-seq studies from 10 GEO datasets (GSE73189, GSE79544, GSE83501, GSE83505, GSE92592, and others). **All four genes identified in the single-cell analysis showed robust upregulation in bulk tissue**, with TNC showing the highest bulk validation (64.29-fold change), followed by COL4A1 (21.75-fold), MMP7 (15.42-fold), and COL13A1 (8.3-fold). This cross-platform validation across 100 control samples and multiple disease studies provides strong evidence for the reliability of these findings.
-  
-  Biologically, these results reveal a coordinated upregulation of matrix metalloproteinases (MMP7), structural matrix proteins (TNC), and collagens (COL4A1, COL13A1) that drive pathological extracellular matrix remodeling in pulmonary fibrosis. The predominant role of AT2 cells aligns with their known function in lung homeostasis and their transformation into myofibroblast-like cells during fibrotic progression. This multi-layer approach, integrating Gene Ontology knowledge graphs, CellxGene Census single-cell data, and ARCHS4 bulk validation, demonstrates how computational biology can provide mechanistic insights into disease pathogenesis across multiple scales of biological organization.
-
-======================================================================
-Analysis Complete
-======================================================================
-
-Results saved to: /Users/bgood/Documents/GitHub/OKN-WOBD/scripts/demos/results/go_disease_analysis_results.json
-  (Visualization not available - visualize_results.py not found)

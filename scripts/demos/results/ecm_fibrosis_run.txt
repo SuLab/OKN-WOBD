@@ -1,145 +1,0 @@
-======================================================================
-ECM Genes in Pulmonary Fibrosis - Multi-Layer Analysis
-======================================================================
-
-Scientific Question:
-  Which genes involved in extracellular matrix organization are
-  dysregulated in pulmonary fibrosis, and which cell types drive
-  those changes?
-
-Tissue Focus: lung (UBERON:0002048)
-Caching: Disabled
-
-----------------------------------------------------------------------
-[Layer 1] FRINK/Ubergraph: ECM Gene Discovery via Ontology
-----------------------------------------------------------------------
-  Querying ubergraph for ECM-related GO terms...
-  Found 20 unique genes annotated to ECM organization terms
-
-  Sample ECM genes found:
-    ECM2: extracellular matrix organization
-    TNC: extracellular matrix organization
-    MMP7: extracellular matrix organization
-    MMP8: extracellular matrix organization
-    MMP23B: extracellular matrix organization
-
-----------------------------------------------------------------------
-[Layer 2] CellxGene Census: Single-Cell Expression in IPF vs Normal
-----------------------------------------------------------------------
-  Analyzing 10 genes in lung...
-  Comparing: normal vs pulmonary fibrosis
-
-  Tissue filter: lung (UBERON:0002048)
-  Analyzing 10 genes (skipping 0 cached)...
-    Analyzed 5/10 genes...
-    Analyzed 10/10 genes...
-  Successfully analyzed 10 new genes (0 errors)
-  Total genes with data: 10
-
-  Results Summary:
-    Genes analyzed: 10
-    Upregulated (>1.5x): 4
-    Downregulated (<0.67x): 6
-
-  Top Upregulated Genes:
-    MMP7: 122.6x in pulmonary alveolar type 2 cell
-    TNC: 19.8x in pulmonary alveolar type 2 cell
-    COL4A1: 6.2x in pulmonary alveolar type 2 cell
-    COL13A1: 2.4x in pulmonary alveolar type 2 cell
-
-  Cell Types Driving ECM Changes:
-    pulmonary alveolar type 2 cell: 4 genes upregulated
-
-----------------------------------------------------------------------
-[Layer 3] ARCHS4: Bulk RNA-seq Validation
-----------------------------------------------------------------------
-  Searching ARCHS4 for 'pulmonary fibrosis' studies...
-  0%|          | 0/9 [00:00<?, ?it/s] 11%|█         | 1/9 [00:00<00:05,  1.56it/s] 22%|██▏       | 2/9 [00:01<00:03,  1.93it/s] 33%|███▎      | 3/9 [00:01<00:03,  1.91it/s] 44%|████▍     | 4/9 [00:02<00:03,  1.45it/s] 56%|█████▌    | 5/9 [00:04<00:04,  1.17s/it] 67%|██████▋   | 6/9 [00:11<00:09,  3.06s/it] 78%|███████▊  | 7/9 [00:12<00:04,  2.34s/it] 89%|████████▉ | 8/9 [00:12<00:01,  1.73s/it]100%|██████████| 9/9 [00:13<00:00,  1.32s/it]100%|██████████| 9/9 [00:13<00:00,  1.44s/it]
-  Found 10 relevant studies with 241 disease samples
-  Searching for control samples ('normal lung')...
-  0%|          | 0/9 [00:00<?, ?it/s] 11%|█         | 1/9 [00:00<00:03,  2.36it/s] 22%|██▏       | 2/9 [00:00<00:03,  2.30it/s] 33%|███▎      | 3/9 [00:01<00:02,  2.09it/s] 44%|████▍     | 4/9 [00:01<00:02,  2.05it/s] 56%|█████▌    | 5/9 [00:02<00:02,  1.44it/s] 67%|██████▋   | 6/9 [00:07<00:06,  2.15s/it] 78%|███████▊  | 7/9 [00:08<00:03,  1.60s/it] 89%|████████▉ | 8/9 [00:08<00:01,  1.23s/it]100%|██████████| 9/9 [00:09<00:00,  1.03it/s]100%|██████████| 9/9 [00:09<00:00,  1.03s/it]
-  Found 700 control samples
-  0%|          | 0/100 [00:00<?, ?it/s]  1%|          | 1/100 [00:01<03:05,  1.88s/it]  8%|▊         | 8/100 [00:02<00:17,  5.32it/s] 23%|██▎       | 23/100 [00:02<00:04, 18.31it/s] 50%|█████     | 50/100 [00:02<00:01, 45.81it/s] 80%|████████  | 80/100 [00:02<00:00, 79.93it/s]100%|██████████| 100/100 [00:02<00:00, 41.75it/s]
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:01<00:05,  1.77s/it]100%|██████████| 4/4 [00:01<00:00,  2.16it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]  6%|▋         | 1/16 [00:02<00:30,  2.02s/it] 62%|██████▎   | 10/16 [00:02<00:00,  6.41it/s]100%|██████████| 16/16 [00:02<00:00,  7.36it/s]
-  0%|          | 0/27 [00:00<?, ?it/s]  4%|▎         | 1/27 [00:01<00:49,  1.90s/it] 41%|████      | 11/27 [00:02<00:02,  7.41it/s]100%|██████████| 27/27 [00:02<00:00, 12.95it/s]
-  0%|          | 0/27 [00:00<?, ?it/s]  4%|▎         | 1/27 [00:02<01:00,  2.33s/it] 22%|██▏       | 6/27 [00:02<00:06,  3.26it/s] 67%|██████▋   | 18/27 [00:02<00:00, 12.04it/s]100%|██████████| 27/27 [00:02<00:00, 10.35it/s]
-  0%|          | 0/20 [00:00<?, ?it/s]  5%|▌         | 1/20 [00:01<00:35,  1.85s/it] 55%|█████▌    | 11/20 [00:01<00:01,  7.48it/s]100%|██████████| 20/20 [00:02<00:00,  9.62it/s]
-  0%|          | 0/8 [00:00<?, ?it/s] 12%|█▎        | 1/8 [00:02<00:14,  2.09s/it]100%|██████████| 8/8 [00:02<00:00,  3.68it/s]
-  0%|          | 0/18 [00:00<?, ?it/s]  6%|▌         | 1/18 [00:01<00:33,  1.96s/it] 44%|████▍     | 8/18 [00:02<00:01,  5.20it/s]100%|██████████| 18/18 [00:02<00:00,  8.48it/s]
-  0%|          | 0/6 [00:00<?, ?it/s] 17%|█▋        | 1/6 [00:01<00:09,  1.98s/it]100%|██████████| 6/6 [00:01<00:00,  3.00it/s]
-  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:01<00:03,  1.62s/it]100%|██████████| 3/3 [00:01<00:00,  1.79it/s]
-  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:01<00:03,  1.81s/it]100%|██████████| 3/3 [00:01<00:00,  1.64it/s]
-  Calculating differential expression vs controls...
-
-  Validation Results:
-    Disease studies: 10
-    Disease samples: 241
-    Control samples: 700
-    Gene detection rate: 100%
-
-  Disease Studies (with metadata):
-    GSE73189: IPF-1...
-      4 samples, 4/4 genes detected
-    GSE79544: CS3 BAL_IPF...
-      16 samples, 4/4 genes detected
-    GSE83501: hu_IPF_HTII280...
-      27 samples, 4/4 genes detected
-    GSE83505: hu_IPF_HTII280...
-      27 samples, 4/4 genes detected
-    GSE92592: s_282634...
-      20 samples, 4/4 genes detected
-
-  Differential Expression (Disease vs Normal Lung):
-    TNC: 64.3x ↑ (disease=15865, control=246)
-    COL4A1: 21.8x ↑ (disease=12221, control=561)
-    MMP7: 15.4x ↑ (disease=1404, control=90)
-    COL13A1: 8.3x ↑ (disease=560, control=67)
-
-----------------------------------------------------------------------
-[Layer 4] LLM-Generated Summary
-----------------------------------------------------------------------
-
-  Generating comprehensive summary with provenance...
-
-  # Multi-Layer Gene Expression Analysis: ECM Dysregulation in Pulmonary Fibrosis
-  
-  ## Key Findings
-  
-  This comprehensive multi-layer analysis identified significant dysregulation of extracellular matrix organization genes in pulmonary fibrosis through integrated knowledge mining, single-cell RNA sequencing, and bulk RNA-seq validation. From an initial set of 10 ECM-related genes (GO:0030198), four genes showed consistent upregulation across both single-cell and bulk RNA-seq datasets: **MMP7**, **TNC**, **COL4A1**, and **COL13A1**. Single-cell analysis revealed dramatic fold changes, with MMP7 showing the most extreme upregulation (122.62-fold), followed by tenascin-C (TNC, 19.79-fold), type IV collagen alpha 1 (COL4A1, 6.21-fold), and type XIII collagen alpha 1 (COL13A1, 2.35-fold). Remarkably, all four upregulated genes showed their strongest expression changes specifically in **pulmonary alveolar type 2 (AT2) cells**, indicating this cell type as the primary driver of ECM dysregulation in pulmonary fibrosis.
-  
-  The bulk RNA-seq validation across 10 studies (241 disease samples vs 700 normal controls) strongly corroborated the single-cell findings, though with some expected differences in magnitude due to cellular heterogeneity in bulk samples. TNC showed the highest fold change in bulk analysis (64.29-fold, log2FC = 6.01), followed by COL4A1 (21.75-fold), MMP7 (15.42-fold), and COL13A1 (8.3-fold). The consistent upregulation pattern across both analytical approaches provides robust evidence for the involvement of these genes in pulmonary fibrosis pathogenesis. The perfect concordance between single-cell and bulk RNA-seq results strengthens confidence in these findings and suggests that AT2 cell dysregulation significantly contributes to the overall tissue-level gene expression changes observed in pulmonary fibrosis.
-  
-  ## Biological Significance
-  
-  The identification of AT2 cells as the primary cellular driver of ECM dysregulation has profound biological implications for understanding pulmonary fibrosis pathogenesis. AT2 cells are crucial lung epithelial cells responsible for surfactant production and serving as progenitor cells for alveolar type 1 cells during lung repair. The dramatic upregulation of MMP7 (matrix metalloproteinase 7) in these cells is particularly significant, as MMP7 degrades various ECM components and has been established as a biomarker for idiopathic pulmonary fibrosis progression. Similarly, the massive increase in TNC (tenascin-C) expression reflects enhanced ECM remodeling, as tenascin-C is a matricellular protein that modulates cell-matrix interactions and promotes fibroblast activation. The upregulation of COL4A1 and COL13A1 indicates aberrant collagen deposition, with type IV collagen being a key basement membrane component and type XIII collagen involved in cell adhesion and migration. This coordinated upregulation of matrix-degrading enzymes alongside structural matrix proteins suggests a dysregulated ECM homeostasis where both excessive matrix production and abnormal remodeling occur simultaneously in AT2 cells, contributing to the progressive scarring characteristic of pulmonary fibrosis.
-  
-  ## Data Sources
-  
-  **GEO Series Used for Bulk RNA-seq Validation:**
-  - **GSE73189**: IPF-1 study (4 samples)
-  - **GSE79544**: CS3 BAL_IPF - bronchoalveolar lavage samples from IPF patients (16 samples)  
-  - **GSE83501**: hu_IPF_HTII280 - human IPF samples analyzed with HTII-280 cells (27 samples)
-  - **GSE83505**: hu_IPF_HTII280 - human IPF samples analyzed with HTII-280 cells (27 samples)
-  - **GSE92592**: s_282634 study (20 samples)
-  
-  **Additional Data Sources:**
-  - CellxGene Census single-cell RNA-seq data (lung tissue: UBERON:0002048)
-  - Gene Ontology annotations via FRINK/Ubergraph federated SPARQL queries
-  - Wikidata gene-GO term associations
-  - Normal lung control samples (700 samples) from ARCHS4 database
-
-======================================================================
-Summary
-======================================================================
-
-  Starting Point: GO:0030198 (extracellular matrix organization)
-  ECM Genes Found: 10
-  Dysregulated in IPF: 4 upregulated, 6 downregulated
-  Top Finding: MMP7 (122.6x in pulmonary alveolar type 2 cell)
-
-  This analysis demonstrates how ontology-driven gene discovery
-  combined with expression data reveals biological insights that
-  simple keyword search cannot achieve.
-
-Results saved to: /Users/bgood/Documents/GitHub/OKN-WOBD/scripts/demos/results/ecm_fibrosis_results.json

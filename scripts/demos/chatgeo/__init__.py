@@ -115,7 +115,16 @@ from .species_merger import (
     load_ortholog_table,
 )
 from .interpretation import interpret_results, save_interpretation, build_prompt
-from .cli import parse_query, run_analysis
+
+
+def __getattr__(name):
+    # Lazy-load cli symbols to avoid the RuntimeWarning when running
+    # `python -m chatgeo.cli` (the module would already be in sys.modules
+    # from the package-level import before runpy tries to execute it).
+    if name in ("parse_query", "run_analysis"):
+        from .cli import parse_query, run_analysis
+        return parse_query if name == "parse_query" else run_analysis
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 __all__ = [
     # Core search

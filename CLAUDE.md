@@ -11,8 +11,8 @@ OKN-WOBD extracts biomedical dataset metadata from the NIAID Data Ecosystem Disc
 3. **Reusable Packages** (`scripts/demos/`) - Modular packages for biomedical data integration:
    - `clients/` - Data source clients (SPARQL, NIAID, ARCHS4, CellxGene)
    - `frink/` - FRINK knowledge graph integration (registry, context, NL-to-SPARQL)
-   - `analysis/` - Reusable analysis tools (gene paths, neighborhoods, drug-disease, visualization)
-4. **Examples** (`scripts/demos/examples/`) - Worked examples using the packages
+   - `analysis_tools/` - Reusable analysis tools (gene paths, neighborhoods, drug-disease, visualization)
+4. **Questions** (`scripts/demos/questions/`) - Biological question investigations producing HTML reports
 
 ## Common Commands
 
@@ -32,11 +32,16 @@ okn-wobd convert --resource ImmPort
 # Run ChatGEO differential expression analysis (from scripts/demos/)
 cd scripts/demos && python -m chatgeo.cli "psoriasis in skin tissue" --verbose
 
-# Run example scripts (from scripts/demos/)
-cd scripts/demos && python -m examples.acta2_fibrosis
-cd scripts/demos && python -m examples.cross_layer_query
-cd scripts/demos && python -m analysis.gene_paths SFRP2
-cd scripts/demos && python -m analysis.gene_neighborhood CD19
+# Run biological question investigations (from scripts/demos/)
+cd scripts/demos && python -m questions.run_all --list          # List all questions
+cd scripts/demos && python -m questions.gene_disease_map        # Q1: Gene-disease map
+cd scripts/demos && python -m questions.gene_neighborhood_map   # Q2: Gene neighborhood
+cd scripts/demos && python -m questions.run_all                 # Run all questions
+
+# Run analysis tools directly (from scripts/demos/)
+cd scripts/demos && python -m analysis_tools.gene_paths SFRP2
+cd scripts/demos && python -m analysis_tools.gene_neighborhood CD19 --html cd19.html
+cd scripts/demos && python -m analysis_tools.go_disease_analysis --go-term GO:0030198 --disease "pulmonary fibrosis" --tissue lung
 
 # Test competency SPARQL queries against local RDF
 python scripts/test_competency_queries.py           # Test all queries
@@ -96,37 +101,43 @@ FRINK knowledge graph integration tools:
 
 Import: `from frink import FrinkContext, FrinkNL2SPARQL, FrinkRegistryClient`
 
-### Analysis Package (`scripts/demos/analysis/`)
+### Analysis Package (`scripts/demos/analysis_tools/`)
 
 Reusable analysis tools:
 
 - `gene_paths.py` - Gene-disease connections across SPOKE, Wikidata, Ubergraph (`GeneDiseasePathFinder`)
 - `gene_neighborhood.py` - Gene neighborhood queries across FRINK graphs (`GeneNeighborhoodQuery`)
 - `drug_disease.py` - Opposing drug/disease expression patterns via local GXA Fuseki (`find_drug_disease_genes`)
-- `visualization.py` - Plotly network and expression visualizations (`PlotlyVisualizer`)
+- `go_disease_analysis.py` - Multi-layer GO term disease analysis (KG + single-cell + bulk)
+- `visualization.py` - vis.js network and Plotly visualizations (`PlotlyVisualizer`)
 
-Import: `from analysis import GeneDiseasePathFinder, GeneNeighborhoodQuery, PlotlyVisualizer`
+Import: `from analysis_tools import GeneDiseasePathFinder, GeneNeighborhoodQuery, PlotlyVisualizer`
 
-### Examples (`scripts/demos/examples/`)
+### Questions (`scripts/demos/questions/`)
 
-Worked examples demonstrating multi-source integration:
+Biological question investigations. Each module answers a specific question using the reusable packages and produces an interactive HTML report:
 
-- `cross_layer_query.py` - SPARQL → NIAID → ARCHS4 workflow
-- `acta2_fibrosis.py` - Multi-source fibrosis markers analysis
-- `ecm_fibrosis.py` - Multi-layer ECM gene analysis with LLM summary
-- `niaid_vaccine.py` - NIAID API search patterns
-- `go_disease_analysis.py` - GO → disease multi-layer workflow
-- `biosynthesis/` - Terpenoid pathway queries
-- `sparql_queries/` - Reference SPARQL queries
+- `gene_disease_map.py` - Q1: Gene-disease connections (SPOKE, Wikidata, Ubergraph)
+- `gene_neighborhood_map.py` - Q2: Gene neighborhood across FRINK graphs
+- `go_process_in_disease.py` - Q3: GO process genes in disease (multi-layer)
+- `differential_expression.py` - Q4: DE analysis via ChatGEO (ARCHS4, g:Profiler)
+- `drug_disease_targets.py` - Q5: Opposing drug/disease expression (GXA/Fuseki)
+- `cross_layer_datasets.py` - Q6: Cross-layer KG → NIAID → ARCHS4 workflow
+- `single_gene_deep_dive.py` - Q7: Single gene across all data sources
+- `run_all.py` - Runner for all questions
+- `_report.py` - Shared HTML report framework
+- `reference_queries/` - Reference SPARQL queries
 
 ### Data Flow
 
 ```
 NIAID API → data/raw/*.jsonl → data/rdf/*.nt → FRINK/Protege
                                                      ↓
-                            Demo scripts query: FRINK + CellxGene + ARCHS4
+                    Questions (Q1-Q7) query: FRINK + CellxGene + ARCHS4 + NIAID
                                                      ↓
-                            ChatGEO: NL query → ARCHS4 → DE analysis → enrichment
+                    ChatGEO: NL query → ARCHS4 → DE analysis → enrichment
+                                                     ↓
+                    Output: questions/output/*.html (interactive reports)
 ```
 
 ## Key Patterns
@@ -144,9 +155,9 @@ External URIs are preferred over internal URIs:
 ### Demo Scripts Environment
 Copy `scripts/demos/.env.example` to `.env` and configure:
 - `ARCHS4_DATA_DIR` - Directory containing ARCHS4 HDF5 files (~15GB each, required for ARCHS4/ChatGEO)
-- `ANTHROPIC_API_KEY` - Required for LLM summaries in go_disease_analyzer and ChatGEO interpretation
+- `ANTHROPIC_API_KEY` - Required for LLM summaries in go_disease_analysis and ChatGEO interpretation
 
-Demo scripts must be run from `scripts/demos/` so Python resolves package imports (clients, frink, analysis, chatgeo, etc.).
+Demo scripts must be run from `scripts/demos/` so Python resolves package imports (clients, frink, analysis, chatgeo, questions, etc.).
 
 ### Demo Dependencies
 Demo scripts require packages beyond the core `okn-wobd` install:
