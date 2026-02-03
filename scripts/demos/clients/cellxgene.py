@@ -12,6 +12,10 @@ This client provides:
 3. Fold change calculations with statistical tests
 4. Dataset-level metadata retrieval
 
+Uses the SOMA API directly for reads (obs, var, X) instead of the
+cellxgene_census.get_anndata() convenience function, which hangs
+indefinitely in tiledbsoma's C-level code when assembling AnnData objects.
+
 Usage:
     from clients import CellxGeneClient
 
@@ -30,9 +34,8 @@ Requirements:
     pip install cellxgene-census
 """
 
-from typing import List, Dict, Any, Optional, Union
+from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass, field
-from contextlib import contextmanager
 import warnings
 
 # Attempt to import dependencies
@@ -42,6 +45,13 @@ try:
 except ImportError:
     HAS_CENSUS = False
     cellxgene_census = None
+
+try:
+    import pyarrow
+    HAS_PYARROW = True
+except ImportError:
+    HAS_PYARROW = False
+    pyarrow = None
 
 try:
     import pandas as pd
@@ -102,6 +112,9 @@ class CellxGeneClient:
     CellxGene Census provides access to millions of cells from hundreds
     of datasets with standardized cell type and disease annotations.
 
+    Uses the SOMA API directly for all data reads to avoid hangs in
+    cellxgene_census.get_anndata().
+
     Example:
         with CellxGeneClient() as client:
             stats = client.get_cell_type_expression("ACTA2", tissue="lung")
@@ -144,60 +157,27 @@ class CellxGeneClient:
             self._census = cellxgene_census.open_soma(census_version="2025-11-08")
         return self._census
 
+    @property
+    def _exp(self):
+        """Get the experiment object for the configured organism."""
+        return self.census["census_data"][self.organism]
+
     def close(self):
         """Close the Census connection."""
         if self._census is not None:
             self._census.close()
             self._census = None
 
-    def get_gene_id(self, gene_symbol: str) -> Optional[str]:
-        """
-        Resolve a gene symbol to its Ensembl ID.
-
-        Args:
-            gene_symbol: Gene symbol (e.g., "ACTA2")
-
-        Returns:
-            Ensembl gene ID (e.g., "ENSG00000107796") or None if not found
-        """
-        gene_df = cellxgene_census.get_var(
-            self.census,
-            self.organism,
-            value_filter=f"feature_name == '{gene_symbol}'",
-            column_names=["feature_id", "feature_name"]
-        )
-
-        if gene_df.empty:
-            return None
-        return gene_df.iloc[0]["feature_id"]
-
-    def get_expression_data(
+    def _build_obs_filter(
         self,
-        gene_symbol: str,
         tissue: Optional[str] = None,
         tissue_ontology_term_id: Optional[str] = None,
         cell_types: Optional[List[str]] = None,
         diseases: Optional[List[str]] = None,
-        max_cells: int = 100000,
-    ) -> Optional[Any]:  # Returns AnnData
-        """
-        Get expression data for a gene with optional filters.
-
-        Args:
-            gene_symbol: Gene symbol (e.g., "ACTA2")
-            tissue: Tissue to filter by general name (e.g., "lung")
-            tissue_ontology_term_id: UBERON ID to filter by (e.g., "UBERON:0000114")
-            cell_types: List of cell types to include
-            diseases: List of diseases to include
-            max_cells: Maximum number of cells to retrieve
-
-        Returns:
-            AnnData object with expression and metadata, or None if no data
-        """
-        # Build observation filter
+    ) -> str:
+        """Build an observation value_filter string from common parameters."""
         filters = ["is_primary_data == True"]
 
-        # Prefer specific ontology term over general tissue name
         if tissue_ontology_term_id:
             filters.append(f"tissue_ontology_term_id == '{tissue_ontology_term_id}'")
         elif tissue:
@@ -211,26 +191,174 @@ class CellxGeneClient:
             disease_filter = " or ".join([f"disease == '{d}'" for d in diseases])
             filters.append(f"({disease_filter})")
 
-        obs_filter = " and ".join(filters)
+        return " and ".join(filters)
 
+    def get_gene_id(self, gene_symbol: str) -> Optional[str]:
+        """
+        Resolve a gene symbol to its Ensembl ID.
+
+        Args:
+            gene_symbol: Gene symbol (e.g., "ACTA2")
+
+        Returns:
+            Ensembl gene ID (e.g., "ENSG00000107796") or None if not found
+        """
+        gene_df = self._exp.ms["RNA"].var.read(
+            value_filter=f"feature_name == '{gene_symbol}'",
+            column_names=["soma_joinid", "feature_id", "feature_name"],
+        ).concat().to_pandas()
+
+        if gene_df.empty:
+            return None
+        return gene_df.iloc[0]["feature_id"]
+
+    def _get_gene_joinid(self, gene_symbol: str) -> Optional[int]:
+        """Get the soma_joinid for a gene symbol."""
+        var_df = self._exp.ms["RNA"].var.read(
+            value_filter=f"feature_name == '{gene_symbol}'",
+            column_names=["soma_joinid"],
+        ).concat().to_pandas()
+
+        if var_df.empty:
+            return None
+        return int(var_df.iloc[0]["soma_joinid"])
+
+    def get_expression_data(
+        self,
+        gene_symbol: str,
+        tissue: Optional[str] = None,
+        tissue_ontology_term_id: Optional[str] = None,
+        cell_types: Optional[List[str]] = None,
+        diseases: Optional[List[str]] = None,
+        max_cells: int = 10000,
+    ) -> Optional[Tuple[np.ndarray, pd.DataFrame]]:
+        """
+        Get expression data for a gene with optional filters.
+
+        Uses SOMA API directly: reads obs metadata, var metadata, and
+        the X sparse matrix separately, avoiding get_anndata() hangs.
+
+        Args:
+            gene_symbol: Gene symbol (e.g., "ACTA2")
+            tissue: Tissue to filter by general name (e.g., "lung")
+            tissue_ontology_term_id: UBERON ID to filter by (e.g., "UBERON:0000114")
+            cell_types: List of cell types to include
+            diseases: List of diseases to include
+            max_cells: Maximum number of cells to retrieve (default 10000)
+
+        Returns:
+            Tuple of (expression_array, obs_dataframe) or None if no data.
+            expression_array is a 1-D numpy array of raw counts aligned to obs_dataframe rows.
+        """
         try:
-            adata = cellxgene_census.get_anndata(
-                self.census,
-                organism="Homo sapiens" if self.organism == "homo_sapiens" else "Mus musculus",
-                var_value_filter=f"feature_name == '{gene_symbol}'",
-                obs_value_filter=obs_filter,
-                obs_column_names=["cell_type", "disease", "tissue", "dataset_id", "assay"],
-            )
-
-            if adata.n_obs == 0:
+            # Step 1: Resolve gene to soma_joinid (fast, ~2s)
+            var_joinid = self._get_gene_joinid(gene_symbol)
+            if var_joinid is None:
+                warnings.warn(f"Gene '{gene_symbol}' not found in Census")
                 return None
 
-            # Limit cells if needed (random sample)
-            if adata.n_obs > max_cells:
-                indices = np.random.choice(adata.n_obs, max_cells, replace=False)
-                adata = adata[indices].copy()
+            # Step 2: Get matching cell metadata with soma_joinid.
+            # The obs iterator returns rows in soma_joinid order. We take
+            # at most max_cells rows, stopping early to avoid materializing
+            # millions of rows for broad queries. Keeping soma_joinids
+            # contiguous is critical for fast X matrix reads (tiledb seeks
+            # are expensive for scattered IDs).
+            #
+            # When multiple diseases are specified, we query each disease
+            # separately and take cells_per_disease from each so that rare
+            # conditions (e.g., fibrosis) aren't drowned out by common ones
+            # (e.g., normal).
+            obs_columns = ["soma_joinid", "cell_type", "disease", "tissue", "dataset_id", "assay"]
 
-            return adata
+            if diseases and len(diseases) > 1:
+                cells_per_disease = max_cells // len(diseases)
+                all_obs = []
+                for disease in diseases:
+                    disease_filter = self._build_obs_filter(
+                        tissue=tissue,
+                        tissue_ontology_term_id=tissue_ontology_term_id,
+                        cell_types=cell_types,
+                        diseases=[disease],
+                    )
+                    obs_iter = self._exp.obs.read(
+                        value_filter=disease_filter,
+                        column_names=obs_columns,
+                    )
+                    tables = []
+                    n = 0
+                    for arrow_table in obs_iter:
+                        tables.append(arrow_table)
+                        n += len(arrow_table)
+                        if n >= cells_per_disease:
+                            break
+                    if tables:
+                        df = pyarrow.concat_tables(tables).to_pandas()
+                        all_obs.append(df.iloc[:cells_per_disease])
+
+                if not all_obs:
+                    return None
+                obs_df = pd.concat(all_obs, ignore_index=True)
+            else:
+                obs_filter = self._build_obs_filter(
+                    tissue=tissue,
+                    tissue_ontology_term_id=tissue_ontology_term_id,
+                    cell_types=cell_types,
+                    diseases=diseases,
+                )
+                obs_iter = self._exp.obs.read(
+                    value_filter=obs_filter,
+                    column_names=obs_columns,
+                )
+                obs_tables = []
+                total_rows = 0
+                for arrow_table in obs_iter:
+                    obs_tables.append(arrow_table)
+                    total_rows += len(arrow_table)
+                    if total_rows >= max_cells:
+                        break
+
+                if not obs_tables:
+                    return None
+                obs_df = pyarrow.concat_tables(obs_tables).to_pandas()
+                if len(obs_df) > max_cells:
+                    obs_df = obs_df.iloc[:max_cells]
+
+            if obs_df.empty:
+                return None
+
+            # Step 3: Read expression values from X matrix.
+            # Sort joinids for optimal tiledb read performance.
+            obs_df = obs_df.sort_values("soma_joinid").reset_index(drop=True)
+            obs_joinids = obs_df["soma_joinid"].tolist()
+            tables = list(
+                self._exp.ms["RNA"].X["raw"].read(
+                    coords=(obs_joinids, [var_joinid])
+                ).tables()
+            )
+
+            # Step 5: Build expression array aligned to obs_df rows
+            # X read returns sparse (soma_dim_0, soma_dim_1, soma_data) columns
+            # for non-zero entries only. We need a dense array matching obs_df order.
+            obs_id_to_idx = pd.Series(
+                range(len(obs_joinids)), index=obs_joinids
+            )
+            expr = np.zeros(len(obs_df), dtype=np.float64)
+
+            if tables:
+                combined = pyarrow.concat_tables(tables)
+                dim0 = combined.column("soma_dim_0").to_numpy()
+                data = combined.column("soma_data").to_numpy()
+                # Map soma_joinids back to obs_df row positions
+                indices = obs_id_to_idx.reindex(dim0).values
+                valid = ~np.isnan(indices)
+                expr[indices[valid].astype(int)] = data[valid]
+
+            # Keep only the metadata columns callers expect
+            keep_cols = [c for c in ["cell_type", "disease", "tissue", "dataset_id", "assay"]
+                         if c in obs_df.columns]
+            obs_df = obs_df[keep_cols]
+
+            return (expr, obs_df)
 
         except Exception as e:
             warnings.warn(f"Error fetching expression data: {e}")
@@ -255,21 +383,20 @@ class CellxGeneClient:
         Returns:
             List of ExpressionStats objects, one per cell type
         """
-        adata = self.get_expression_data(
+        result = self.get_expression_data(
             gene_symbol,
             tissue=tissue,
             diseases=diseases,
         )
 
-        if adata is None:
+        if result is None:
             return []
 
-        # Extract expression values
-        expr = adata.X.toarray().flatten() if hasattr(adata.X, 'toarray') else np.array(adata.X).flatten()
+        expr, obs_df = result
 
         results = []
-        for cell_type in adata.obs["cell_type"].unique():
-            mask = adata.obs["cell_type"] == cell_type
+        for cell_type in obs_df["cell_type"].unique():
+            mask = (obs_df["cell_type"] == cell_type).values
             ct_expr = expr[mask]
 
             if len(ct_expr) < min_cells:
@@ -310,21 +437,20 @@ class CellxGeneClient:
         Returns:
             ConditionComparison object with fold change and statistics
         """
-        adata = self.get_expression_data(
+        result = self.get_expression_data(
             gene_symbol,
             tissue=tissue,
             diseases=[condition_a, condition_b],
         )
 
-        if adata is None:
+        if result is None:
             return None
 
-        # Extract expression values
-        expr = adata.X.toarray().flatten() if hasattr(adata.X, 'toarray') else np.array(adata.X).flatten()
+        expr, obs_df = result
 
         # Split by condition
-        mask_a = adata.obs["disease"] == condition_a
-        mask_b = adata.obs["disease"] == condition_b
+        mask_a = (obs_df["disease"] == condition_a).values
+        mask_b = (obs_df["disease"] == condition_b).values
 
         expr_a = expr[mask_a]
         expr_b = expr[mask_b]
@@ -353,7 +479,7 @@ class CellxGeneClient:
                 pass
 
         # Get supporting datasets
-        datasets = list(adata.obs["dataset_id"].unique())
+        datasets = list(obs_df["dataset_id"].unique())
 
         return ConditionComparison(
             gene=gene_symbol,
@@ -394,24 +520,24 @@ class CellxGeneClient:
         Returns:
             Dict mapping cell type to comparison stats
         """
-        adata = self.get_expression_data(
+        result = self.get_expression_data(
             gene_symbol,
             tissue=tissue,
             tissue_ontology_term_id=tissue_ontology_term_id,
             diseases=[condition_a, condition_b],
         )
 
-        if adata is None:
+        if result is None:
             return {}
 
-        expr = adata.X.toarray().flatten() if hasattr(adata.X, 'toarray') else np.array(adata.X).flatten()
+        expr, obs_df = result
 
         results = {}
-        for cell_type in adata.obs["cell_type"].unique():
-            ct_mask = adata.obs["cell_type"] == cell_type
+        for cell_type in obs_df["cell_type"].unique():
+            ct_mask = (obs_df["cell_type"] == cell_type).values
 
-            mask_a = ct_mask & (adata.obs["disease"] == condition_a)
-            mask_b = ct_mask & (adata.obs["disease"] == condition_b)
+            mask_a = ct_mask & (obs_df["disease"] == condition_a).values
+            mask_b = ct_mask & (obs_df["disease"] == condition_b).values
 
             expr_a = expr[mask_a]
             expr_b = expr[mask_b]
@@ -446,19 +572,13 @@ class CellxGeneClient:
         Returns:
             List of disease names
         """
-        filters = ["is_primary_data == True"]
-        if tissue:
-            filters.append(f"tissue_general == '{tissue}'")
-
-        obs_filter = " and ".join(filters)
+        obs_filter = self._build_obs_filter(tissue=tissue)
 
         try:
-            obs_df = cellxgene_census.get_obs(
-                self.census,
-                self.organism,
+            obs_df = self._exp.obs.read(
                 value_filter=obs_filter,
-                column_names=["disease"]
-            )
+                column_names=["disease"],
+            ).concat().to_pandas()
             return sorted(obs_df["disease"].unique().tolist())
         except Exception:
             return []
@@ -478,21 +598,13 @@ class CellxGeneClient:
         Returns:
             List of cell type names
         """
-        filters = ["is_primary_data == True"]
-        if tissue:
-            filters.append(f"tissue_general == '{tissue}'")
-        if disease:
-            filters.append(f"disease == '{disease}'")
-
-        obs_filter = " and ".join(filters)
+        obs_filter = self._build_obs_filter(tissue=tissue, diseases=[disease] if disease else None)
 
         try:
-            obs_df = cellxgene_census.get_obs(
-                self.census,
-                self.organism,
+            obs_df = self._exp.obs.read(
                 value_filter=obs_filter,
-                column_names=["cell_type"]
-            )
+                column_names=["cell_type"],
+            ).concat().to_pandas()
             return sorted(obs_df["cell_type"].unique().tolist())
         except Exception:
             return []
@@ -512,21 +624,13 @@ class CellxGeneClient:
         Returns:
             List of dataset info dicts
         """
-        filters = ["is_primary_data == True"]
-        if tissue:
-            filters.append(f"tissue_general == '{tissue}'")
-        if disease:
-            filters.append(f"disease == '{disease}'")
-
-        obs_filter = " and ".join(filters)
+        obs_filter = self._build_obs_filter(tissue=tissue, diseases=[disease] if disease else None)
 
         try:
-            obs_df = cellxgene_census.get_obs(
-                self.census,
-                self.organism,
+            obs_df = self._exp.obs.read(
                 value_filter=obs_filter,
-                column_names=["dataset_id", "assay", "tissue", "disease"]
-            )
+                column_names=["dataset_id", "assay", "tissue", "disease"],
+            ).concat().to_pandas()
 
             # Aggregate by dataset
             datasets = []
