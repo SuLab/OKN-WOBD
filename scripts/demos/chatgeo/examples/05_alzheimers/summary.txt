@@ -1,0 +1,128 @@
+======================================================================
+DIFFERENTIAL EXPRESSION ANALYSIS RESULTS
+======================================================================
+
+QUERY
+  Disease: alzheimer disease
+  Tissue: brain
+  Timestamp: 2026-02-02T15:07:10.430571
+
+SAMPLES
+  Test: 200 samples from 107 studies
+  Control: 99 samples from 11 studies
+  Organisms: human
+
+METHODS
+  Normalization: deseq2
+  Statistical test: deseq2
+  FDR correction: deseq2
+
+THRESHOLDS
+  FDR: 0.01
+  Log2 FC: 2.0
+
+----------------------------------------------------------------------
+SUMMARY
+----------------------------------------------------------------------
+  Genes tested: 19,331
+  Genes significant: 557
+  Upregulated: 338
+  Downregulated: 219
+
+----------------------------------------------------------------------
+TOP 20 UPREGULATED GENES
+----------------------------------------------------------------------
+  Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
+  ----------------------------------------------------------
+  FGA                5.44     8.44e-06      1901.48         5.74
+  MAGEA12            5.31     8.06e-09        55.27         2.35
+  AFP                5.23     1.85e-13     10878.92        37.16
+  FGG                4.97     9.58e-06      1512.10        14.44
+  AHSG               4.94     6.02e-16      1632.57         6.63
+  CCL4               4.94     1.09e-15      1412.20         5.63
+  CCL4L2             4.63     5.27e-12       762.88         1.16
+  RGS1               4.38     6.50e-20       976.73        49.51
+  USP17L23           4.14     3.97e-03         7.02         0.10
+  CXCL9              4.08     2.72e-08      1322.59        10.24
+  USP17L20           4.08     8.17e-06        12.22         1.50
+  CCL3               3.94     6.01e-08       666.96         2.63
+  RNASEK-C17ORF49       3.86     2.92e-21      1478.95        35.75
+  HLA-DQB1           3.86     7.53e-11       227.84        42.28
+  C1QB               3.83     2.46e-11      2433.15       160.21
+  C1QC               3.78     3.58e-10      2101.27       129.79
+  APOC2              3.70     2.71e-17       747.54        59.63
+  PLVAP              3.60     1.42e-14       163.25        12.56
+  FCGR1A             3.58     4.07e-15       663.19        42.91
+  C1QA               3.58     1.37e-10      1503.05       112.74
+
+----------------------------------------------------------------------
+TOP 20 DOWNREGULATED GENES
+----------------------------------------------------------------------
+  Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
+  ----------------------------------------------------------
+  VGLL1             -7.44     3.29e-21         1.28       186.72
+  MMP9              -7.07     7.79e-53       214.49      2719.60
+  IVL               -7.01     1.03e-12         1.31        34.69
+  ACTC1             -6.32     9.54e-37       264.06      6482.12
+  CLDN6             -6.18     2.20e-41        60.80      2931.03
+  CLCA1             -5.98     5.03e-22         3.88       336.99
+  XAGE2             -5.73     3.56e-10         1.40        39.63
+  NPPB              -5.52     1.35e-25        26.31       522.13
+  ZBED2             -5.44     4.28e-14         2.52       134.03
+  MRGPRX1           -5.01     6.99e-08         0.97        21.31
+  KRT8              -4.80     9.66e-29      1427.89     26243.59
+  VTCN1             -4.72     2.82e-28        12.69       277.01
+  GATA3             -4.49     1.04e-15        46.01       819.78
+  CRYBG2            -4.49     2.95e-14        16.31       400.38
+  KRT18             -4.48     5.26e-15      1058.10     16986.63
+  LAMC2             -4.46     6.69e-32       208.33      3865.09
+  GCG               -4.36     8.33e-13         3.52        53.93
+  HOXB1             -4.29     2.46e-05         1.46        25.82
+  H3C3              -4.26     9.21e-11        18.20       374.41
+  ACTA1             -4.13     1.38e-20        97.23      2184.47
+
+======================================================================
+
+----------------------------------------------------------------------
+ENRICHMENT ANALYSIS
+----------------------------------------------------------------------
+  Backend: gprofiler
+  Organism: hsapiens
+  Sources: GO:BP, GO:CC, GO:MF, KEGG, REAC
+  Threshold: 0.05
+
+  Total significant terms: 799
+  Upregulated: 562 terms
+  Downregulated: 237 terms
+
+----------------------------------------------------------------------
+TOP 10 ENRICHED TERMS (UPREGULATED GENES)
+----------------------------------------------------------------------
+  Source   Term ID             P-adj  Genes  Term Name
+  ------------------------------------------------------------------
+  GO:BP    GO:0002376       4.24e-47    148  immune system process
+  GO:BP    GO:0006955       6.77e-41    120  immune response
+  GO:BP    GO:0006952       4.86e-36    108  defense response
+  GO:BP    GO:0002682       7.71e-32     95  regulation of immune system process
+  GO:BP    GO:0001775       2.86e-28     77  cell activation
+  GO:BP    GO:0009607       1.12e-27     91  response to biotic stimulus
+  GO:BP    GO:0006954       2.02e-27     67  inflammatory response
+  GO:BP    GO:0044419       2.14e-27     94  biological process involved in inte...
+  GO:BP    GO:0009605       4.50e-27    110  response to external stimulus
+  GO:BP    GO:0051707       4.66e-27     89  response to other organism
+
+----------------------------------------------------------------------
+TOP 10 ENRICHED TERMS (DOWNREGULATED GENES)
+----------------------------------------------------------------------
+  Source   Term ID             P-adj  Genes  Term Name
+  ------------------------------------------------------------------
+  GO:CC    GO:0005615       6.60e-24     95  extracellular space
+  GO:CC    GO:0005576       2.87e-23    107  extracellular region
+  GO:MF    GO:0030527       1.55e-20     22  structural constituent of chromatin
+  GO:CC    GO:0000786       1.48e-18     22  nucleosome
+  REAC     REAC:R-HSA-73728   2.46e-18     18  RNA Polymerase I Promoter Opening
+  REAC     REAC:R-HSA-5334118   4.69e-18     18  DNA methylation
+  REAC     REAC:R-HSA-5625886   8.75e-18     18  Activated PKN1 stimulates transcrip...
+  REAC     REAC:R-HSA-427359   1.19e-17     18  SIRT1 negatively regulates rRNA exp...
+  GO:BP    GO:0009888       1.29e-17     67  tissue development
+  REAC     REAC:R-HSA-3214815   1.37e-17     20  HDACs deacetylate histones

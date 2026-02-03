@@ -1,0 +1,128 @@
+======================================================================
+DIFFERENTIAL EXPRESSION ANALYSIS RESULTS
+======================================================================
+
+QUERY
+  Disease: lung fibrosis
+  Tissue: lung
+  Timestamp: 2026-02-02T15:16:07.476083
+
+SAMPLES
+  Test: 200 samples from 80 studies
+  Control: 79 samples from 7 studies
+  Organisms: human
+
+METHODS
+  Normalization: deseq2
+  Statistical test: deseq2
+  FDR correction: deseq2
+
+THRESHOLDS
+  FDR: 0.01
+  Log2 FC: 2.0
+
+----------------------------------------------------------------------
+SUMMARY
+----------------------------------------------------------------------
+  Genes tested: 19,344
+  Genes significant: 1,925
+  Upregulated: 523
+  Downregulated: 1,402
+
+----------------------------------------------------------------------
+TOP 20 UPREGULATED GENES
+----------------------------------------------------------------------
+  Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
+  ----------------------------------------------------------
+  SPRR1B            12.32     4.58e-22       875.98         2.50
+  PRAME             11.15     1.84e-09       235.83         0.53
+  LY6D              11.14     2.34e-27       728.96         3.26
+  SPRR3             11.03     3.95e-15      1376.32         3.71
+  SPRR2A            11.00     5.94e-12       149.83         1.05
+  SPRR1A            10.34     1.14e-15       276.23         0.77
+  MAGEA6             9.69     3.07e-07       160.27         0.06
+  CALML3             9.59     1.53e-11       213.36         0.18
+  LGALS7             7.75     2.28e-18       663.36         1.21
+  ADH7               7.66     1.18e-21       658.84         6.52
+  IL36G              6.78     2.40e-15        78.95         2.47
+  DEFB4B             6.59     1.83e-07        56.64         0.14
+  CD24               6.20     2.41e-44     11295.63       166.67
+  SERPINB5           5.99     2.08e-20      1563.85        35.64
+  S100A2             5.93     1.54e-33     15698.94       123.67
+  MAGEA4             5.89     9.68e-03       623.15         0.48
+  SLURP2             5.85     2.36e-11       143.21         0.77
+  MUC4               5.84     5.64e-13       453.76         8.35
+  CXCL6              5.78     2.60e-27       762.20        15.58
+  SLC5A8             5.77     1.09e-05        47.12         0.00
+
+----------------------------------------------------------------------
+TOP 20 DOWNREGULATED GENES
+----------------------------------------------------------------------
+  Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
+  ----------------------------------------------------------
+  HNRNPCL2         -17.82     5.27e-31         0.21      1166.32
+  ZNF735           -12.89     2.22e-28         0.26        37.05
+  USP17L4          -10.73     1.07e-17         1.20        50.98
+  SPDYE14          -10.53     6.27e-14         0.67        48.67
+  NACA2            -10.37     9.45e-57         5.49       539.39
+  TCEAL6           -10.00     1.10e-50         1.41       165.42
+  AMY2A             -9.01     1.74e-30         1.28       303.36
+  PPIAL4H           -8.63     4.01e-37         2.89       115.38
+  CST9              -8.25     1.03e-14         0.32        12.59
+  H3-5              -7.62     5.07e-71        10.62       333.80
+  OR51V1            -7.56     2.83e-08         0.19         6.88
+  GOLGA6D           -7.55     1.00e-20         1.78        81.44
+  POTEJ             -7.43     1.17e-23         2.66       129.91
+  KLRC2             -7.35     1.66e-38        16.97       470.15
+  EIF2S3B           -7.30     2.95e-75        23.46      1277.21
+  TAS2R43           -7.20     3.70e-12         0.89        16.21
+  HBA1              -7.19     1.76e-27      3686.27     28819.74
+  CTAGE8            -7.17     3.08e-13         2.48        98.21
+  SPANXN1           -7.11     2.38e-06         0.13         6.61
+  RPS4Y2            -7.09     4.37e-20         2.20        23.47
+
+======================================================================
+
+----------------------------------------------------------------------
+ENRICHMENT ANALYSIS
+----------------------------------------------------------------------
+  Backend: gprofiler
+  Organism: hsapiens
+  Sources: GO:BP, GO:CC, GO:MF, KEGG, REAC
+  Threshold: 0.05
+
+  Total significant terms: 336
+  Upregulated: 142 terms
+  Downregulated: 194 terms
+
+----------------------------------------------------------------------
+TOP 10 ENRICHED TERMS (UPREGULATED GENES)
+----------------------------------------------------------------------
+  Source   Term ID             P-adj  Genes  Term Name
+  ------------------------------------------------------------------
+  GO:CC    GO:0005576       2.29e-21    185  extracellular region
+  GO:CC    GO:0005615       3.21e-18    151  extracellular space
+  REAC     REAC:R-HSA-6809371   4.88e-17     29  Formation of the cornified envelope
+  GO:BP    GO:0008544       7.92e-17     45  epidermis development
+  GO:BP    GO:0060429       4.29e-16     80  epithelium development
+  GO:BP    GO:0009888       5.73e-16    107  tissue development
+  GO:BP    GO:0030855       4.29e-15     59  epithelial cell differentiation
+  GO:BP    GO:0032502       5.91e-15    226  developmental process
+  GO:BP    GO:0019730       1.10e-14     28  antimicrobial humoral response
+  GO:BP    GO:0043588       2.99e-14     38  skin development
+
+----------------------------------------------------------------------
+TOP 10 ENRICHED TERMS (DOWNREGULATED GENES)
+----------------------------------------------------------------------
+  Source   Term ID             P-adj  Genes  Term Name
+  ------------------------------------------------------------------
+  GO:CC    GO:0071944       4.09e-35    551  cell periphery
+  GO:CC    GO:0005886       4.39e-26    493  plasma membrane
+  GO:BP    GO:0032501       1.92e-16    540  multicellular organismal process
+  GO:CC    GO:0005576       2.41e-14    349  extracellular region
+  GO:MF    GO:0060089       4.11e-14    214  molecular transducer activity
+  GO:MF    GO:0038023       4.11e-14    214  signaling receptor activity
+  GO:BP    GO:0007155       4.14e-13    160  cell adhesion
+  GO:MF    GO:0004888       3.51e-12    149  transmembrane signaling receptor ac...
+  GO:CC    GO:0009986       8.01e-12    108  cell surface
+  GO:CC    GO:0016020       3.10e-11    669  membrane

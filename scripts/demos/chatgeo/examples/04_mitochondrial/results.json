@@ -1,0 +1,3559 @@
+{
+  "provenance": {
+    "timestamp": "2026-02-02T15:15:12.506956",
+    "query": {
+      "disease": "mitochondrial myopathy",
+      "tissue": "muscle"
+    },
+    "search_patterns": {
+      "test": "mitochondrial\\ myopathy|mitochondrial\\ muscle\\ disease|mitochondrial\\ muscle\\ disorder|mtDNA\\ myopathy|mitochondrial\\ DNA\\ disease|MELAS|mitochondrial\\ encephalomyopathy",
+      "control": "(muscle|skeletal\\ muscle|muscle\\ tissue|muscular\\ tissue).*(healthy\\ muscle|normal\\ muscle|control\\ muscle|non\\-diseased\\ muscle)"
+    },
+    "samples": {
+      "n_test": 13,
+      "n_control": 33,
+      "test_ids": [
+        "GSM3722449",
+        "GSM3722450",
+        "GSM3722451",
+        "GSM3722452",
+        "GSM3722461",
+        "GSM3722462",
+        "GSM3722463",
+        "GSM3722464",
+        "GSM3722465",
+        "GSM3722466",
+        "GSM3722467",
+        "GSM3722468",
+        "GSM3722469"
+      ],
+      "control_ids": [
+        "GSM6829193",
+        "GSM6829194",
+        "GSM6829195",
+        "GSM6829196",
+        "GSM6829197",
+        "GSM6829198",
+        "GSM6829199",
+        "GSM6829200",
+        "GSM6829201",
+        "GSM6829202",
+        "GSM6829203",
+        "GSM6829204",
+        "GSM6829205",
+        "GSM6829206",
+        "GSM6829207",
+        "GSM6829208",
+        "GSM6829209",
+        "GSM6829210",
+        "GSM6829211",
+        "GSM6829212",
+        "GSM6829213",
+        "GSM6829214",
+        "GSM6829215",
+        "GSM6829216",
+        "GSM6829217",
+        "GSM6829218",
+        "GSM6829219",
+        "GSM6829220",
+        "GSM6829221",
+        "GSM6829222",
+        "GSM6829223",
+        "GSM6829224",
+        "GSM6829225"
+      ]
+    },
+    "studies": {
+      "test": [
+        "GSE129811"
+      ],
+      "control": [
+        "GSE220915"
+      ]
+    },
+    "organisms": [
+      "human"
+    ],
+    "methods": {
+      "normalization": "deseq2",
+      "test": "deseq2",
+      "fdr": "deseq2"
+    },
+    "thresholds": {
+      "pvalue": 0.01,
+      "fdr": 0.01,
+      "log2fc": 2.0
+    },
+    "query_spec": {
+      "strategy": "llm",
+      "disease_terms": [
+        "mitochondrial myopathy",
+        "mitochondrial muscle disease",
+        "mitochondrial muscle disorder",
+        "mtDNA myopathy",
+        "mitochondrial DNA disease",
+        "MELAS",
+        "mitochondrial encephalomyopathy"
+      ],
+      "tissue_include": [
+        "muscle",
+        "skeletal muscle",
+        "muscle tissue",
+        "muscular tissue"
+      ],
+      "tissue_exclude": [
+        "cardiac",
+        "heart",
+        "brain",
+        "neuronal",
+        "liver",
+        "kidney"
+      ],
+      "control_terms": [
+        "healthy muscle",
+        "normal muscle",
+        "control muscle",
+        "non-diseased muscle"
+      ],
+      "disease_regex": "mitochondrial\\ myopathy|mitochondrial\\ muscle\\ disease|mitochondrial\\ muscle\\ disorder|mtDNA\\ myopathy|mitochondrial\\ DNA\\ disease|MELAS|mitochondrial\\ encephalomyopathy",
+      "tissue_include_regex": "muscle|skeletal\\ muscle|muscle\\ tissue|muscular\\ tissue",
+      "tissue_exclude_regex": "cardiac|heart|brain|neuronal|liver|kidney",
+      "control_regex": "(muscle|skeletal\\ muscle|muscle\\ tissue|muscular\\ tissue).*(healthy\\ muscle|normal\\ muscle|control\\ muscle|non\\-diseased\\ muscle)",
+      "reasoning": "Mitochondrial myopathy specifically affects muscle tissue, so we want to ensure samples are from muscle and exclude other organ tissues that might incidentally match disease keywords."
+    },
+    "sample_filtering": {
+      "test": {
+        "before": 52,
+        "after_include": 13,
+        "after_exclude": 13,
+        "removed_by_include": 39,
+        "removed_by_exclude": 0
+      },
+      "control": {
+        "before": 33,
+        "after_include": 33,
+        "after_exclude": 33,
+        "removed_by_include": 0,
+        "removed_by_exclude": 0
+      },
+      "overlap_removed": 0
+    }
+  },
+  "summary": {
+    "genes_tested": 17609,
+    "genes_significant": 302,
+    "n_upregulated": 117,
+    "n_downregulated": 185
+  },
+  "upregulated": [
+    {
+      "gene_symbol": "KLHDC7B",
+      "log2_fold_change": 6.248965348720634,
+      "mean_test": 122.53846153846153,
+      "mean_control": 2.242424242424242,
+      "pvalue": 2.086993921650027e-36,
+      "pvalue_adjusted": 4.837823444131748e-34,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "FGF21",
+      "log2_fold_change": 5.802365509971693,
+      "mean_test": 82.84615384615384,
+      "mean_control": 2.1818181818181817,
+      "pvalue": 2.0944611753118787e-17,
+      "pvalue_adjusted": 5.652706859430241e-16,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "BIVM-ERCC5",
+      "log2_fold_change": 5.138660710436769,
+      "mean_test": 41.38461538461539,
+      "mean_control": 1.9090909090909092,
+      "pvalue": 0.00029593320145877985,
+      "pvalue_adjusted": 0.0009169773589457789,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "ASDURF",
+      "log2_fold_change": 4.8592787413237994,
+      "mean_test": 45.69230769230769,
+      "mean_control": 2.878787878787879,
+      "pvalue": 0.00012613851912836435,
+      "pvalue_adjusted": 0.00042125834235053907,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "C8ORF44-SGK3",
+      "log2_fold_change": 4.442343582415041,
+      "mean_test": 8.461538461538462,
+      "mean_control": 0.5757575757575758,
+      "pvalue": 5.0077182864975525e-08,
+      "pvalue_adjusted": 3.1246537184406927e-07,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "TREH",
+      "log2_fold_change": 4.3538755623287075,
+      "mean_test": 9.846153846153847,
+      "mean_control": 0.696969696969697,
+      "pvalue": 5.3985812777061045e-15,
+      "pvalue_adjusted": 1.0334252531826098e-13,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "GDF15",
+      "log2_fold_change": 4.268513977985022,
+      "mean_test": 112.15384615384616,
+      "mean_control": 9.93939393939394,
+      "pvalue": 1.3147401699544371e-13,
+      "pvalue_adjusted": 2.0243888221991795e-12,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "PLCZ1",
+      "log2_fold_change": 4.245343162992915,
+      "mean_test": 2.230769230769231,
+      "mean_control": 0.030303030303030304,
+      "pvalue": 0.0020608921125410107,
+      "pvalue_adjusted": 0.005274412632852236,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "HEPN1",
+      "log2_fold_change": 4.233339508698066,
+      "mean_test": 2.3076923076923075,
+      "mean_control": 0.0,
+      "pvalue": 0.0011385416759338962,
+      "pvalue_adjusted": 0.0030974923215680693,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "PPM1E",
+      "log2_fold_change": 4.112398486501851,
+      "mean_test": 102.3076923076923,
+      "mean_control": 10.06060606060606,
+      "pvalue": 3.1836409042484657e-09,
+      "pvalue_adjusted": 2.4126095558303868e-08,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "FAM181A",
+      "log2_fold_change": 4.103273210733065,
+      "mean_test": 4.769230769230769,
+      "mean_control": 0.36363636363636365,
+      "pvalue": 6.793741544970095e-08,
+      "pvalue_adjusted": 4.1473194236646453e-07,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "RPL36A-HNRNPH2",
+      "log2_fold_change": 4.102807920623528,
+      "mean_test": 880.6153846153846,
+      "mean_control": 69.60606060606061,
+      "pvalue": 1.5585000297080487e-26,
+      "pvalue_adjusted": 1.473348463839084e-24,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "SLC24A2",
+      "log2_fold_change": 4.073061380065308,
+      "mean_test": 97.0,
+      "mean_control": 7.7272727272727275,
+      "pvalue": 3.4268949216125534e-20,
+      "pvalue_adjusted": 1.410946857993373e-18,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "ORM1",
+      "log2_fold_change": 3.989731531157904,
+      "mean_test": 10.76923076923077,
+      "mean_control": 1.0,
+      "pvalue": 0.00047450632598511924,
+      "pvalue_adjusted": 0.0014045121651775736,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "APOC4",
+      "log2_fold_change": 3.9393302785474327,
+      "mean_test": 3.3076923076923075,
+      "mean_control": 0.30303030303030304,
+      "pvalue": 0.0009706559610285965,
+      "pvalue_adjusted": 0.002694461970558712,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "TMEM63C",
+      "log2_fold_change": 3.9263708387292544,
+      "mean_test": 128.84615384615384,
+      "mean_control": 11.727272727272727,
+      "pvalue": 8.353546231504468e-19,
+      "pvalue_adjusted": 2.7991823629607646e-17,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "RAB33A",
+      "log2_fold_change": 3.8907762677493114,
+      "mean_test": 10.615384615384615,
+      "mean_control": 0.9696969696969697,
+      "pvalue": 3.458356079908918e-12,
+      "pvalue_adjusted": 4.356951759858985e-11,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "IFNG",
+      "log2_fold_change": 3.8584841629967093,
+      "mean_test": 3.5384615384615383,
+      "mean_control": 0.24242424242424243,
+      "pvalue": 0.0011370083133679333,
+      "pvalue_adjusted": 0.003094813363167471,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "ERICH4",
+      "log2_fold_change": 3.8096969296691596,
+      "mean_test": 8.615384615384615,
+      "mean_control": 0.9090909090909091,
+      "pvalue": 4.991109030051171e-17,
+      "pvalue_adjusted": 1.2719811296163543e-15,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "DIRAS1",
+      "log2_fold_change": 3.7669034758433804,
+      "mean_test": 576.8461538461538,
+      "mean_control": 57.696969696969695,
+      "pvalue": 8.037521521045742e-15,
+      "pvalue_adjusted": 1.502883305846807e-13,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "NKX6-2",
+      "log2_fold_change": 3.670917741278899,
+      "mean_test": 14.461538461538462,
+      "mean_control": 1.7878787878787878,
+      "pvalue": 1.5166106859183136e-18,
+      "pvalue_adjusted": 4.916491576074656e-17,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "GP1BA",
+      "log2_fold_change": 3.6476064714841567,
+      "mean_test": 40.76923076923077,
+      "mean_control": 4.818181818181818,
+      "pvalue": 2.029913199139314e-35,
+      "pvalue_adjusted": 4.461063786472139e-33,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "ZNF730",
+      "log2_fold_change": 3.570926731977473,
+      "mean_test": 2.1538461538461537,
+      "mean_control": 0.15151515151515152,
+      "pvalue": 0.0014255598549510339,
+      "pvalue_adjusted": 0.0037983504748041875,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "SMIM38",
+      "log2_fold_change": 3.5085006046380474,
+      "mean_test": 17.46153846153846,
+      "mean_control": 2.4242424242424243,
+      "pvalue": 2.1407539990717968e-09,
+      "pvalue_adjusted": 1.678676514008014e-08,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "LAMP3",
+      "log2_fold_change": 3.4657910290764176,
+      "mean_test": 50.53846153846154,
+      "mean_control": 6.575757575757576,
+      "pvalue": 1.1069278082563993e-14,
+      "pvalue_adjusted": 2.0309104049431666e-13,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "PRUNE2",
+      "log2_fold_change": 3.4360763081018373,
+      "mean_test": 1281.1538461538462,
+      "mean_control": 174.84848484848484,
+      "pvalue": 4.193986767043393e-15,
+      "pvalue_adjusted": 8.138835329347281e-14,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "SCN1A",
+      "log2_fold_change": 3.4050951228250583,
+      "mean_test": 20.923076923076923,
+      "mean_control": 3.090909090909091,
+      "pvalue": 5.0465261331688424e-08,
+      "pvalue_adjusted": 3.144231046593636e-07,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "PCDHGC4",
+      "log2_fold_change": 3.37354251423345,
+      "mean_test": 9.846153846153847,
+      "mean_control": 1.3333333333333333,
+      "pvalue": 2.7538776230627125e-09,
+      "pvalue_adjusted": 2.1115141430660273e-08,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "PCDHGC5",
+      "log2_fold_change": 3.318892166962671,
+      "mean_test": 23.153846153846153,
+      "mean_control": 3.787878787878788,
+      "pvalue": 9.000445262900919e-11,
+      "pvalue_adjusted": 8.798702180173851e-10,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "MSMP",
+      "log2_fold_change": 3.3086541912370375,
+      "mean_test": 15.846153846153847,
+      "mean_control": 9.515151515151516,
+      "pvalue": 3.483399117396778e-05,
+      "pvalue_adjusted": 0.00013026757981124482,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "NPIPB12",
+      "log2_fold_change": 3.2582542444639917,
+      "mean_test": 997.0769230769231,
+      "mean_control": 147.0909090909091,
+      "pvalue": 3.911696023365956e-11,
+      "pvalue_adjusted": 4.083511419333665e-10,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "COL19A1",
+      "log2_fold_change": 3.2351725992174316,
+      "mean_test": 45.23076923076923,
+      "mean_control": 7.303030303030303,
+      "pvalue": 1.2983581421547063e-12,
+      "pvalue_adjusted": 1.7409521776182203e-11,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "PROX2",
+      "log2_fold_change": 3.1944552971925555,
+      "mean_test": 6.384615384615385,
+      "mean_control": 0.9393939393939394,
+      "pvalue": 3.5429994067780417e-09,
+      "pvalue_adjusted": 2.6575636507756215e-08,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "HSPB2-C11ORF52",
+      "log2_fold_change": 3.1397407816358713,
+      "mean_test": 93.53846153846153,
+      "mean_control": 16.78787878787879,
+      "pvalue": 1.571827014909374e-05,
+      "pvalue_adjusted": 6.292514016157187e-05,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "GPR156",
+      "log2_fold_change": 3.1332959564552367,
+      "mean_test": 11.923076923076923,
+      "mean_control": 2.1515151515151514,
+      "pvalue": 3.173211779300176e-14,
+      "pvalue_adjusted": 5.385866572649707e-13,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "DMBT1",
+      "log2_fold_change": 3.131420065488975,
+      "mean_test": 10.692307692307692,
+      "mean_control": 1.8181818181818181,
+      "pvalue": 1.7613727261774982e-06,
+      "pvalue_adjusted": 8.337328467797378e-06,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "SRCAP",
+      "log2_fold_change": 3.1018207213652147,
+      "mean_test": 1412.6923076923076,
+      "mean_control": 259.8181818181818,
+      "pvalue": 9.033176895537012e-47,
+      "pvalue_adjusted": 4.776856857071166e-44,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "CAMK1G",
+      "log2_fold_change": 3.086851320089373,
+      "mean_test": 39.07692307692308,
+      "mean_control": 6.818181818181818,
+      "pvalue": 6.8483335843922e-07,
+      "pvalue_adjusted": 3.5053690536928253e-06,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "TSSK4",
+      "log2_fold_change": 3.062764470078614,
+      "mean_test": 8.153846153846153,
+      "mean_control": 1.4242424242424243,
+      "pvalue": 2.855063391856293e-14,
+      "pvalue_adjusted": 4.875215208576406e-13,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "COMMD3-BMI1",
+      "log2_fold_change": 3.0105255378908318,
+      "mean_test": 98.3076923076923,
+      "mean_control": 21.0,
+      "pvalue": 0.0003114410242250865,
+      "pvalue_adjusted": 0.0009615407794083038,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "GPR17",
+      "log2_fold_change": 3.0049374899853114,
+      "mean_test": 70.0,
+      "mean_control": 13.272727272727273,
+      "pvalue": 3.91242167382179e-24,
+      "pvalue_adjusted": 2.78176468758035e-22,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "TRIB3",
+      "log2_fold_change": 3.004069540694506,
+      "mean_test": 220.69230769230768,
+      "mean_control": 42.45454545454545,
+      "pvalue": 5.258516468955911e-13,
+      "pvalue_adjusted": 7.44018525816655e-12,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "TMED7-TICAM2",
+      "log2_fold_change": 2.9964539479385452,
+      "mean_test": 40.53846153846154,
+      "mean_control": 6.636363636363637,
+      "pvalue": 0.00038233658793385757,
+      "pvalue_adjusted": 0.0011559585029509985,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "FAM180A",
+      "log2_fold_change": 2.9746010728621046,
+      "mean_test": 50.15384615384615,
+      "mean_control": 9.606060606060606,
+      "pvalue": 4.162438445017418e-12,
+      "pvalue_adjusted": 5.152654233107883e-11,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "CXCL9",
+      "log2_fold_change": 2.97331610631428,
+      "mean_test": 254.53846153846155,
+      "mean_control": 44.90909090909091,
+      "pvalue": 7.216416184752446e-09,
+      "pvalue_adjusted": 5.159112576188462e-08,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "VTCN1",
+      "log2_fold_change": 2.9535023507726272,
+      "mean_test": 15.307692307692308,
+      "mean_control": 2.696969696969697,
+      "pvalue": 3.094023531024995e-08,
+      "pvalue_adjusted": 2.0059347844514966e-07,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "PLAAT2",
+      "log2_fold_change": 2.8698290034360503,
+      "mean_test": 2.6923076923076925,
+      "mean_control": 0.48484848484848486,
+      "pvalue": 0.0038215829239532464,
+      "pvalue_adjusted": 0.009179393362546038,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "PLA2G2C",
+      "log2_fold_change": 2.863439557492962,
+      "mean_test": 22.846153846153847,
+      "mean_control": 4.606060606060606,
+      "pvalue": 7.059570984071634e-12,
+      "pvalue_adjusted": 8.336501060185638e-11,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "LTK",
+      "log2_fold_change": 2.859396497896074,
+      "mean_test": 28.23076923076923,
+      "mean_control": 5.666666666666667,
+      "pvalue": 1.3274220139948885e-07,
+      "pvalue_adjusted": 7.69268332904846e-07,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "ODAD1",
+      "log2_fold_change": 2.787085041957353,
+      "mean_test": 39.46153846153846,
+      "mean_control": 8.090909090909092,
+      "pvalue": 1.4692875634046197e-13,
+      "pvalue_adjusted": 2.249923734186152e-12,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "CCDC63",
+      "log2_fold_change": 2.7139995125288543,
+      "mean_test": 43.53846153846154,
+      "mean_control": 9.121212121212121,
+      "pvalue": 4.490218538116381e-18,
+      "pvalue_adjusted": 1.3740231121519963e-16,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "IMPG1",
+      "log2_fold_change": 2.702198539666555,
+      "mean_test": 2.230769230769231,
+      "mean_control": 0.5151515151515151,
+      "pvalue": 0.00027044456641225727,
+      "pvalue_adjusted": 0.0008449560781199512,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "C4A",
+      "log2_fold_change": 2.689654296871403,
+      "mean_test": 47.76923076923077,
+      "mean_control": 10.727272727272727,
+      "pvalue": 0.0012167274219453492,
+      "pvalue_adjusted": 0.0032906283257406427,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "NPIPB7",
+      "log2_fold_change": 2.6836059908245216,
+      "mean_test": 194.30769230769232,
+      "mean_control": 44.96969696969697,
+      "pvalue": 3.441038011914002e-56,
+      "pvalue_adjusted": 3.234958068756041e-53,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "IGLL5",
+      "log2_fold_change": 2.6383405416271595,
+      "mean_test": 47.38461538461539,
+      "mean_control": 21.606060606060606,
+      "pvalue": 0.0010578754781752696,
+      "pvalue_adjusted": 0.0029093724754886904,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "ASNS",
+      "log2_fold_change": 2.6368523349481667,
+      "mean_test": 367.38461538461536,
+      "mean_control": 86.21212121212122,
+      "pvalue": 6.829303597916316e-16,
+      "pvalue_adjusted": 1.4778193795900244e-14,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "MOCOS",
+      "log2_fold_change": 2.634983419265121,
+      "mean_test": 90.84615384615384,
+      "mean_control": 20.12121212121212,
+      "pvalue": 9.189563366347894e-18,
+      "pvalue_adjusted": 2.6673377578960387e-16,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "MICAL3",
+      "log2_fold_change": 2.6008958190818716,
+      "mean_test": 1336.6153846153845,
+      "mean_control": 332.8484848484849,
+      "pvalue": 3.8696942531651144e-89,
+      "pvalue_adjusted": 2.1827655384020022e-85,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "PCDHAC2",
+      "log2_fold_change": 2.5911802294264934,
+      "mean_test": 38.92307692307692,
+      "mean_control": 9.545454545454545,
+      "pvalue": 1.0144312835071845e-12,
+      "pvalue_adjusted": 1.3799201108929724e-11,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "FAM86B2",
+      "log2_fold_change": 2.574187251158624,
+      "mean_test": 15.846153846153847,
+      "mean_control": 3.6666666666666665,
+      "pvalue": 0.0003884956088728411,
+      "pvalue_adjusted": 0.0011737408843681871,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "LHX4",
+      "log2_fold_change": 2.5656359465801213,
+      "mean_test": 20.23076923076923,
+      "mean_control": 5.787878787878788,
+      "pvalue": 1.4501491582178737e-06,
+      "pvalue_adjusted": 6.961538739110031e-06,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "TRIM67",
+      "log2_fold_change": 2.5507265553253475,
+      "mean_test": 3.3846153846153846,
+      "mean_control": 0.9393939393939394,
+      "pvalue": 0.004187803706220412,
+      "pvalue_adjusted": 0.00997972318218023,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "CXCL10",
+      "log2_fold_change": 2.5505924373801947,
+      "mean_test": 58.38461538461539,
+      "mean_control": 13.545454545454545,
+      "pvalue": 4.321698281395116e-06,
+      "pvalue_adjusted": 1.9154473105753836e-05,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "FAM90A11P",
+      "log2_fold_change": 2.5437748207178763,
+      "mean_test": 3.6153846153846154,
+      "mean_control": 0.9090909090909091,
+      "pvalue": 0.0004056170601696471,
+      "pvalue_adjusted": 0.0012198066273664061,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "ZNF710",
+      "log2_fold_change": 2.534225429558514,
+      "mean_test": 482.0,
+      "mean_control": 113.96969696969697,
+      "pvalue": 4.355797521693679e-25,
+      "pvalue_adjusted": 3.5099431267666876e-23,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "MYH3",
+      "log2_fold_change": 2.526777580329348,
+      "mean_test": 2302.6923076923076,
+      "mean_control": 600.8787878787879,
+      "pvalue": 1.747450766947931e-10,
+      "pvalue_adjusted": 1.6391553147612466e-09,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "EDA2R",
+      "log2_fold_change": 2.4930364288507625,
+      "mean_test": 129.76923076923077,
+      "mean_control": 35.15151515151515,
+      "pvalue": 1.0844485975372627e-17,
+      "pvalue_adjusted": 3.094610314928425e-16,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "SPDYE2",
+      "log2_fold_change": 2.4928906994323987,
+      "mean_test": 71.6923076923077,
+      "mean_control": 16.90909090909091,
+      "pvalue": 4.0317031299891085e-05,
+      "pvalue_adjusted": 0.00014867356259161413,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "KCNAB2",
+      "log2_fold_change": 2.476793699209414,
+      "mean_test": 273.0769230769231,
+      "mean_control": 66.45454545454545,
+      "pvalue": 2.3404297029869167e-19,
+      "pvalue_adjusted": 8.480674825255803e-18,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "CXCL11",
+      "log2_fold_change": 2.465444164010882,
+      "mean_test": 20.76923076923077,
+      "mean_control": 5.0606060606060606,
+      "pvalue": 2.757669886568706e-05,
+      "pvalue_adjusted": 0.00010519677597050415,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "NHLH2",
+      "log2_fold_change": 2.424097034062986,
+      "mean_test": 15.76923076923077,
+      "mean_control": 4.242424242424242,
+      "pvalue": 0.0004003946095191036,
+      "pvalue_adjusted": 0.0012056009932886601,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "NNAT",
+      "log2_fold_change": 2.4222634231140465,
+      "mean_test": 58.53846153846154,
+      "mean_control": 16.424242424242426,
+      "pvalue": 1.363004767282949e-17,
+      "pvalue_adjusted": 3.8060671075844986e-16,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "CSTA",
+      "log2_fold_change": 2.4121441369067127,
+      "mean_test": 16.46153846153846,
+      "mean_control": 4.151515151515151,
+      "pvalue": 1.4004257142277974e-05,
+      "pvalue_adjusted": 5.6450700181426365e-05,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "ART1",
+      "log2_fold_change": 2.3941192814349064,
+      "mean_test": 276.84615384615387,
+      "mean_control": 75.84848484848484,
+      "pvalue": 1.301066594161523e-17,
+      "pvalue_adjusted": 3.6633359245260053e-16,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "TNNT2",
+      "log2_fold_change": 2.388756609180694,
+      "mean_test": 354.2307692307692,
+      "mean_control": 91.06060606060606,
+      "pvalue": 1.9727274318398838e-09,
+      "pvalue_adjusted": 1.5570192911191473e-08,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "SPATA32",
+      "log2_fold_change": 2.3868384658963957,
+      "mean_test": 4.3076923076923075,
+      "mean_control": 1.2424242424242424,
+      "pvalue": 0.00047555851792788575,
+      "pvalue_adjusted": 0.0014073804197928792,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "IQCA1L",
+      "log2_fold_change": 2.3827892801426183,
+      "mean_test": 5.6923076923076925,
+      "mean_control": 1.8181818181818181,
+      "pvalue": 3.863988292277195e-06,
+      "pvalue_adjusted": 1.7279706628412974e-05,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "NUTM2E",
+      "log2_fold_change": 2.37592373944584,
+      "mean_test": 40.0,
+      "mean_control": 11.636363636363637,
+      "pvalue": 5.016147327394213e-09,
+      "pvalue_adjusted": 3.6745993538599516e-08,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "P2RX1",
+      "log2_fold_change": 2.3372561759588772,
+      "mean_test": 91.07692307692308,
+      "mean_control": 24.757575757575758,
+      "pvalue": 8.48751936127566e-05,
+      "pvalue_adjusted": 0.0002943673385401762,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "LRTOMT",
+      "log2_fold_change": 2.3335850245075798,
+      "mean_test": 21.846153846153847,
+      "mean_control": 6.212121212121212,
+      "pvalue": 3.8070915347293177e-10,
+      "pvalue_adjusted": 3.36767396501252e-09,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "LAD1",
+      "log2_fold_change": 2.3235536207848453,
+      "mean_test": 163.69230769230768,
+      "mean_control": 43.72727272727273,
+      "pvalue": 2.350431718151505e-11,
+      "pvalue_adjusted": 2.552888673591769e-10,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "CD79A",
+      "log2_fold_change": 2.2961784047566396,
+      "mean_test": 17.153846153846153,
+      "mean_control": 4.909090909090909,
+      "pvalue": 8.545745912007713e-05,
+      "pvalue_adjusted": 0.00029609154857287984,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "PLK4",
+      "log2_fold_change": 2.29341355629825,
+      "mean_test": 30.53846153846154,
+      "mean_control": 9.666666666666666,
+      "pvalue": 8.611964346003431e-06,
+      "pvalue_adjusted": 3.617965756282772e-05,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "TENM2",
+      "log2_fold_change": 2.2911072340618244,
+      "mean_test": 53.76923076923077,
+      "mean_control": 16.181818181818183,
+      "pvalue": 1.0957990904666631e-05,
+      "pvalue_adjusted": 4.502941284331441e-05,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "FAM90A24P",
+      "log2_fold_change": 2.278224003216744,
+      "mean_test": 2.8461538461538463,
+      "mean_control": 0.8787878787878788,
+      "pvalue": 0.0020486378311815505,
+      "pvalue_adjusted": 0.005244636819856914,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "GARRE1",
+      "log2_fold_change": 2.2780075302733382,
+      "mean_test": 560.2307692307693,
+      "mean_control": 178.36363636363637,
+      "pvalue": 1.4016297662817222e-38,
+      "pvalue_adjusted": 3.88825883688841e-36,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "ST8SIA2",
+      "log2_fold_change": 2.273329243440731,
+      "mean_test": 66.61538461538461,
+      "mean_control": 21.242424242424242,
+      "pvalue": 1.1281012156556737e-07,
+      "pvalue_adjusted": 6.619184733469248e-07,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "SLC7A1",
+      "log2_fold_change": 2.2650571023237913,
+      "mean_test": 299.6923076923077,
+      "mean_control": 99.15151515151516,
+      "pvalue": 1.9989544985851128e-08,
+      "pvalue_adjusted": 1.3333191968883437e-07,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "SLC7A11",
+      "log2_fold_change": 2.2645541676097936,
+      "mean_test": 41.38461538461539,
+      "mean_control": 12.575757575757576,
+      "pvalue": 2.99428908874542e-09,
+      "pvalue_adjusted": 2.2824036017905404e-08,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "ACER2",
+      "log2_fold_change": 2.2511013924333096,
+      "mean_test": 19.0,
+      "mean_control": 6.181818181818182,
+      "pvalue": 1.3529464289424047e-09,
+      "pvalue_adjusted": 1.0980604062620324e-08,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "CCDC168",
+      "log2_fold_change": 2.2493763833455427,
+      "mean_test": 7.230769230769231,
+      "mean_control": 2.121212121212121,
+      "pvalue": 3.66095999742809e-06,
+      "pvalue_adjusted": 1.6415147079088005e-05,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "MINAR1",
+      "log2_fold_change": 2.19815119381849,
+      "mean_test": 24.307692307692307,
+      "mean_control": 7.818181818181818,
+      "pvalue": 4.195512308123955e-06,
+      "pvalue_adjusted": 1.865872779975652e-05,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "RAP1GAP",
+      "log2_fold_change": 2.196571301655283,
+      "mean_test": 24.307692307692307,
+      "mean_control": 8.484848484848484,
+      "pvalue": 0.0013209397399676784,
+      "pvalue_adjusted": 0.003546960057082363,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "SCG2",
+      "log2_fold_change": 2.1949317536928357,
+      "mean_test": 8.153846153846153,
+      "mean_control": 2.4242424242424243,
+      "pvalue": 0.0004220749443071663,
+      "pvalue_adjusted": 0.001262792115906271,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "CKLF-CMTM1",
+      "log2_fold_change": 2.179517725919205,
+      "mean_test": 2.769230769230769,
+      "mean_control": 0.8787878787878788,
+      "pvalue": 0.003531050263286461,
+      "pvalue_adjusted": 0.008549496717031549,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "CIDEB",
+      "log2_fold_change": 2.176144630882207,
+      "mean_test": 24.076923076923077,
+      "mean_control": 7.484848484848484,
+      "pvalue": 1.5634487653147515e-07,
+      "pvalue_adjusted": 8.941088207724308e-07,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "APBA1",
+      "log2_fold_change": 2.1327158533041053,
+      "mean_test": 64.0,
+      "mean_control": 21.454545454545453,
+      "pvalue": 0.0012974985223447389,
+      "pvalue_adjusted": 0.003488998886877113,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "TIGIT",
+      "log2_fold_change": 2.130406881822711,
+      "mean_test": 10.0,
+      "mean_control": 2.9696969696969697,
+      "pvalue": 0.0002731056296484629,
+      "pvalue_adjusted": 0.000852202372286795,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "CYP2D6",
+      "log2_fold_change": 2.127019234351462,
+      "mean_test": 4.769230769230769,
+      "mean_control": 1.696969696969697,
+      "pvalue": 0.004111680738651847,
+      "pvalue_adjusted": 0.00982321918106262,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "DLEC1",
+      "log2_fold_change": 2.122218083414277,
+      "mean_test": 23.153846153846153,
+      "mean_control": 8.121212121212121,
+      "pvalue": 9.774924640760421e-14,
+      "pvalue_adjusted": 1.5330053268855221e-12,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "RAB40A",
+      "log2_fold_change": 2.1184813284966975,
+      "mean_test": 6.230769230769231,
+      "mean_control": 2.090909090909091,
+      "pvalue": 5.475731597091225e-06,
+      "pvalue_adjusted": 2.3850792814923473e-05,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "TAS2R5",
+      "log2_fold_change": 2.118341543385805,
+      "mean_test": 6.615384615384615,
+      "mean_control": 2.484848484848485,
+      "pvalue": 4.937597767973514e-05,
+      "pvalue_adjusted": 0.00017959449713147278,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "EVC",
+      "log2_fold_change": 2.117213417957892,
+      "mean_test": 86.3076923076923,
+      "mean_control": 29.96969696969697,
+      "pvalue": 1.0288947595237906e-18,
+      "pvalue_adjusted": 3.420620259462001e-17,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "PHF21B",
+      "log2_fold_change": 2.1073167418553664,
+      "mean_test": 15.615384615384615,
+      "mean_control": 5.424242424242424,
+      "pvalue": 2.4593530621270836e-05,
+      "pvalue_adjusted": 9.497300893955844e-05,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "IRF4",
+      "log2_fold_change": 2.100887476485696,
+      "mean_test": 34.30769230769231,
+      "mean_control": 12.0,
+      "pvalue": 9.013285923246676e-11,
+      "pvalue_adjusted": 8.806167690137427e-10,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "LIPJ",
+      "log2_fold_change": 2.0900017134091824,
+      "mean_test": 2.4615384615384617,
+      "mean_control": 0.7878787878787878,
+      "pvalue": 0.0026545488278687046,
+      "pvalue_adjusted": 0.006615651732723744,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "SHANK1",
+      "log2_fold_change": 2.079258684335773,
+      "mean_test": 22.23076923076923,
+      "mean_control": 7.575757575757576,
+      "pvalue": 9.367104704801876e-07,
+      "pvalue_adjusted": 4.66755435261064e-06,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "MYH8",
+      "log2_fold_change": 2.065035375830602,
+      "mean_test": 2092.769230769231,
+      "mean_control": 628.060606060606,
+      "pvalue": 0.0004197359406283204,
+      "pvalue_adjusted": 0.0012574871861995652,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "PLCH2",
+      "log2_fold_change": 2.0583448259601975,
+      "mean_test": 5.3076923076923075,
+      "mean_control": 1.8181818181818181,
+      "pvalue": 0.0002837014820978352,
+      "pvalue_adjusted": 0.0008821750238992222,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "ZNF750",
+      "log2_fold_change": 2.0579722991553417,
+      "mean_test": 20.846153846153847,
+      "mean_control": 6.696969696969697,
+      "pvalue": 2.39348327462183e-06,
+      "pvalue_adjusted": 1.1021094958680438e-05,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "STX16-NPEPL1",
+      "log2_fold_change": 2.0551445259056464,
+      "mean_test": 94.23076923076923,
+      "mean_control": 31.939393939393938,
+      "pvalue": 2.3927637867985347e-14,
+      "pvalue_adjusted": 4.1401174642336203e-13,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "CLGN",
+      "log2_fold_change": 2.055107563643519,
+      "mean_test": 67.46153846153847,
+      "mean_control": 22.454545454545453,
+      "pvalue": 5.951586691070261e-10,
+      "pvalue_adjusted": 5.099379746141314e-09,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "MUSK",
+      "log2_fold_change": 2.044605634522937,
+      "mean_test": 85.46153846153847,
+      "mean_control": 31.03030303030303,
+      "pvalue": 1.7788171877554212e-09,
+      "pvalue_adjusted": 1.413863055481317e-08,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "STAG3",
+      "log2_fold_change": 2.0401709550448204,
+      "mean_test": 439.15384615384613,
+      "mean_control": 152.4848484848485,
+      "pvalue": 5.272621217062398e-21,
+      "pvalue_adjusted": 2.4647319401969584e-19,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "GCOM1",
+      "log2_fold_change": 2.0331300085227375,
+      "mean_test": 238.30769230769232,
+      "mean_control": 93.9090909090909,
+      "pvalue": 2.3212692488517153e-11,
+      "pvalue_adjusted": 2.526078342705384e-10,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "RNPC3",
+      "log2_fold_change": 2.0310809516432715,
+      "mean_test": 638.9230769230769,
+      "mean_control": 232.96969696969697,
+      "pvalue": 2.36731085739213e-56,
+      "pvalue_adjusted": 2.356449078164096e-53,
+      "test_method": "deseq2",
+      "direction": "up"
+    },
+    {
+      "gene_symbol": "GOLGA8R",
+      "log2_fold_change": 2.029103635243725,
+      "mean_test": 120.92307692307692,
+      "mean_control": 46.18181818181818,
+      "pvalue": 1.7841058548202336e-09,
+      "pvalue_adjusted": 1.4174009049421593e-08,
+      "test_method": "deseq2",
+      "direction": "up"
+    }
+  ],
+  "downregulated": [
+    {
+      "gene_symbol": "HLA-DRA",
+      "log2_fold_change": -7.149235695298656,
+      "mean_test": 0.23076923076923078,
+      "mean_control": 119.42424242424242,
+      "pvalue": 3.069649223641134e-05,
+      "pvalue_adjusted": 0.0001160773277373302,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "PSG2",
+      "log2_fold_change": -6.8897426120559295,
+      "mean_test": 0.23076923076923078,
+      "mean_control": 54.18181818181818,
+      "pvalue": 3.778941400443571e-15,
+      "pvalue_adjusted": 7.38420858871895e-14,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "TBC1D3D",
+      "log2_fold_change": -6.349002510483137,
+      "mean_test": 0.6923076923076923,
+      "mean_control": 68.93939393939394,
+      "pvalue": 0.0030012248133370525,
+      "pvalue_adjusted": 0.0073957661702766285,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "TUBB",
+      "log2_fold_change": -6.10876248815986,
+      "mean_test": 7.6923076923076925,
+      "mean_control": 824.7878787878788,
+      "pvalue": 1.1487891503381556e-08,
+      "pvalue_adjusted": 7.915232085513953e-08,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "FGF23",
+      "log2_fold_change": -6.003906207719905,
+      "mean_test": 16.46153846153846,
+      "mean_control": 1545.0,
+      "pvalue": 1.726989150015317e-59,
+      "pvalue_adjusted": 2.4353425330465996e-56,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "POU3F3",
+      "log2_fold_change": -5.391382459006362,
+      "mean_test": 0.15384615384615385,
+      "mean_control": 16.87878787878788,
+      "pvalue": 0.00033852130537460163,
+      "pvalue_adjusted": 0.0010364497068118344,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "ABHD16B",
+      "log2_fold_change": -5.357027769424272,
+      "mean_test": 0.0,
+      "mean_control": 10.787878787878787,
+      "pvalue": 4.096612992043502e-05,
+      "pvalue_adjusted": 0.00015083308322750248,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "DCD",
+      "log2_fold_change": -5.30025050825224,
+      "mean_test": 0.0,
+      "mean_control": 8.272727272727273,
+      "pvalue": 6.237471611139059e-05,
+      "pvalue_adjusted": 0.00022207131202123956,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "H2AC19",
+      "log2_fold_change": -5.104281317027418,
+      "mean_test": 0.46153846153846156,
+      "mean_control": 206.42424242424244,
+      "pvalue": 1.6224976713901362e-06,
+      "pvalue_adjusted": 7.716668239253481e-06,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "TMEM238",
+      "log2_fold_change": -4.969592442654782,
+      "mean_test": 0.15384615384615385,
+      "mean_control": 11.181818181818182,
+      "pvalue": 6.356621939556986e-09,
+      "pvalue_adjusted": 4.585113233639527e-08,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "KCNC2",
+      "log2_fold_change": -4.897313469933131,
+      "mean_test": 0.0,
+      "mean_control": 9.242424242424242,
+      "pvalue": 0.00030232422161576364,
+      "pvalue_adjusted": 0.0009359550819945028,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "HBD",
+      "log2_fold_change": -4.809744237501116,
+      "mean_test": 0.07692307692307693,
+      "mean_control": 8.181818181818182,
+      "pvalue": 5.535134430198047e-05,
+      "pvalue_adjusted": 0.00019950062796125954,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "CXCR5",
+      "log2_fold_change": -4.515112148154026,
+      "mean_test": 2.076923076923077,
+      "mean_control": 61.75757575757576,
+      "pvalue": 0.00013353492614352167,
+      "pvalue_adjusted": 0.000443683098409714,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "PGLYRP3",
+      "log2_fold_change": -4.417999826819587,
+      "mean_test": 0.23076923076923078,
+      "mean_control": 9.424242424242424,
+      "pvalue": 5.379017712367146e-07,
+      "pvalue_adjusted": 2.814154836918894e-06,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SPP2",
+      "log2_fold_change": -4.272358372852762,
+      "mean_test": 0.46153846153846156,
+      "mean_control": 12.242424242424242,
+      "pvalue": 4.7692554812182596e-08,
+      "pvalue_adjusted": 2.98908671308057e-07,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "KRT19",
+      "log2_fold_change": -4.237398678786935,
+      "mean_test": 1.5384615384615385,
+      "mean_control": 50.63636363636363,
+      "pvalue": 6.611887991198746e-07,
+      "pvalue_adjusted": 3.3915237522602354e-06,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "LRRC24",
+      "log2_fold_change": -4.199572268946683,
+      "mean_test": 1.2307692307692308,
+      "mean_control": 27.21212121212121,
+      "pvalue": 6.267326293105477e-10,
+      "pvalue_adjusted": 5.367191069429701e-09,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "CHURC1-FNTB",
+      "log2_fold_change": -4.1623920263717675,
+      "mean_test": 0.6153846153846154,
+      "mean_control": 17.0,
+      "pvalue": 0.002228992273625164,
+      "pvalue_adjusted": 0.005658416929835738,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "BOLA2",
+      "log2_fold_change": -4.099199960764874,
+      "mean_test": 1.5384615384615385,
+      "mean_control": 34.90909090909091,
+      "pvalue": 0.00013741524613788834,
+      "pvalue_adjusted": 0.0004550569070734533,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "NEUROD2",
+      "log2_fold_change": -3.983682523946826,
+      "mean_test": 0.6153846153846154,
+      "mean_control": 14.606060606060606,
+      "pvalue": 3.313673021616229e-12,
+      "pvalue_adjusted": 4.194014575302156e-11,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "CDH12",
+      "log2_fold_change": -3.8955006775601237,
+      "mean_test": 0.07692307692307693,
+      "mean_control": 4.151515151515151,
+      "pvalue": 0.0006947957461212853,
+      "pvalue_adjusted": 0.001988723548014951,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "TCF19",
+      "log2_fold_change": -3.8428658485613036,
+      "mean_test": 1.3076923076923077,
+      "mean_control": 26.939393939393938,
+      "pvalue": 0.0019229764144019666,
+      "pvalue_adjusted": 0.004954416395327357,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "ZBTB20",
+      "log2_fold_change": -3.8124354607455095,
+      "mean_test": 46.84615384615385,
+      "mean_control": 790.0909090909091,
+      "pvalue": 3.4635556587053277e-12,
+      "pvalue_adjusted": 4.357642294171863e-11,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "FSD1",
+      "log2_fold_change": -3.730906881869671,
+      "mean_test": 0.15384615384615385,
+      "mean_control": 12.393939393939394,
+      "pvalue": 0.0012397851916312523,
+      "pvalue_adjusted": 0.0033476376276981097,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "HBG2",
+      "log2_fold_change": -3.6570816260647003,
+      "mean_test": 1.8461538461538463,
+      "mean_control": 29.272727272727273,
+      "pvalue": 0.0020122184230368847,
+      "pvalue_adjusted": 0.005158424504564485,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "FMN2",
+      "log2_fold_change": -3.6533080261510946,
+      "mean_test": 0.8461538461538461,
+      "mean_control": 18.333333333333332,
+      "pvalue": 1.8394338265894665e-05,
+      "pvalue_adjusted": 7.279443221128848e-05,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "DDX39B",
+      "log2_fold_change": -3.650160323260071,
+      "mean_test": 23.53846153846154,
+      "mean_control": 433.27272727272725,
+      "pvalue": 6.401099616717781e-12,
+      "pvalue_adjusted": 7.633503010154918e-11,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "HLA-C",
+      "log2_fold_change": -3.597226958095471,
+      "mean_test": 39.0,
+      "mean_control": 633.5454545454545,
+      "pvalue": 5.091754998868492e-06,
+      "pvalue_adjusted": 2.2310377548123412e-05,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "FOSB",
+      "log2_fold_change": -3.5935230059271768,
+      "mean_test": 11.846153846153847,
+      "mean_control": 210.5151515151515,
+      "pvalue": 1.0846727768623126e-07,
+      "pvalue_adjusted": 6.386511040384153e-07,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "HLA-DRB5",
+      "log2_fold_change": -3.5669179368529687,
+      "mean_test": 14.307692307692308,
+      "mean_control": 271.09090909090907,
+      "pvalue": 5.277591682812767e-07,
+      "pvalue_adjusted": 2.7666482793233474e-06,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "URGCP-MRPS24",
+      "log2_fold_change": -3.4794649110411284,
+      "mean_test": 72.15384615384616,
+      "mean_control": 1376.7272727272727,
+      "pvalue": 2.0189402160774423e-23,
+      "pvalue_adjusted": 1.2892266542061313e-21,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "ATP6V1G2-DDX39B",
+      "log2_fold_change": -3.474622446318269,
+      "mean_test": 0.15384615384615385,
+      "mean_control": 3.9393939393939394,
+      "pvalue": 0.000563760335211702,
+      "pvalue_adjusted": 0.0016445358373474263,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "CRB2",
+      "log2_fold_change": -3.4665333730463876,
+      "mean_test": 0.15384615384615385,
+      "mean_control": 4.0,
+      "pvalue": 0.0004231458770982318,
+      "pvalue_adjusted": 0.0012657724115708465,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "CLDN19",
+      "log2_fold_change": -3.4351219822743557,
+      "mean_test": 0.38461538461538464,
+      "mean_control": 6.636363636363637,
+      "pvalue": 0.00048513147192011526,
+      "pvalue_adjusted": 0.001434707229610659,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SEPTIN3",
+      "log2_fold_change": -3.410673413695239,
+      "mean_test": 0.6153846153846154,
+      "mean_control": 10.727272727272727,
+      "pvalue": 0.00032567046608224644,
+      "pvalue_adjusted": 0.0010007255542116894,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SH3GL2",
+      "log2_fold_change": -3.402531684843804,
+      "mean_test": 0.23076923076923078,
+      "mean_control": 4.9393939393939394,
+      "pvalue": 0.0033918380065070175,
+      "pvalue_adjusted": 0.00824309676089498,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "KASH5",
+      "log2_fold_change": -3.3324999792516476,
+      "mean_test": 0.15384615384615385,
+      "mean_control": 4.151515151515151,
+      "pvalue": 0.0003300160893653319,
+      "pvalue_adjusted": 0.0010127914878926634,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "LPAR4",
+      "log2_fold_change": -3.323260989595838,
+      "mean_test": 5.6923076923076925,
+      "mean_control": 85.60606060606061,
+      "pvalue": 5.150977556572443e-19,
+      "pvalue_adjusted": 1.7788743308636508e-17,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "PRH1",
+      "log2_fold_change": -3.321878728093459,
+      "mean_test": 2.0,
+      "mean_control": 29.272727272727273,
+      "pvalue": 8.783318467163149e-05,
+      "pvalue_adjusted": 0.0003037631618666152,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "MT1F",
+      "log2_fold_change": -3.270112911282703,
+      "mean_test": 4.461538461538462,
+      "mean_control": 56.121212121212125,
+      "pvalue": 4.959252321911448e-14,
+      "pvalue_adjusted": 8.100431253994742e-13,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SHOC1",
+      "log2_fold_change": -3.233022561210126,
+      "mean_test": 0.38461538461538464,
+      "mean_control": 5.454545454545454,
+      "pvalue": 4.621348745722417e-05,
+      "pvalue_adjusted": 0.00016883087969584356,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "DPEP3",
+      "log2_fold_change": -3.1830863536336857,
+      "mean_test": 0.6153846153846154,
+      "mean_control": 7.96969696969697,
+      "pvalue": 1.4500715399500373e-05,
+      "pvalue_adjusted": 5.829914611317304e-05,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SP9",
+      "log2_fold_change": -3.160283948123765,
+      "mean_test": 0.23076923076923078,
+      "mean_control": 4.393939393939394,
+      "pvalue": 0.002930968163541463,
+      "pvalue_adjusted": 0.007235279834201114,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "TNFRSF6B",
+      "log2_fold_change": -3.154754108467534,
+      "mean_test": 4.230769230769231,
+      "mean_control": 57.42424242424242,
+      "pvalue": 4.1061529127645543e-19,
+      "pvalue_adjusted": 1.429718510078226e-17,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "PRAMEF9",
+      "log2_fold_change": -3.09295394390857,
+      "mean_test": 0.15384615384615385,
+      "mean_control": 3.1818181818181817,
+      "pvalue": 0.0008651605989060413,
+      "pvalue_adjusted": 0.0024283044708389503,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "GABRG3",
+      "log2_fold_change": -3.0745174230714354,
+      "mean_test": 0.15384615384615385,
+      "mean_control": 3.0,
+      "pvalue": 0.00045182248812045394,
+      "pvalue_adjusted": 0.001343185131972463,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "B3GNT6",
+      "log2_fold_change": -3.068363477025745,
+      "mean_test": 0.23076923076923078,
+      "mean_control": 3.393939393939394,
+      "pvalue": 0.00047086714214183197,
+      "pvalue_adjusted": 0.0013944721349884634,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SLC30A10",
+      "log2_fold_change": -3.0640801588353916,
+      "mean_test": 0.6153846153846154,
+      "mean_control": 8.121212121212121,
+      "pvalue": 8.194336362850626e-06,
+      "pvalue_adjusted": 3.456245262516408e-05,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "CA9",
+      "log2_fold_change": -3.0634699747448413,
+      "mean_test": 0.15384615384615385,
+      "mean_control": 3.0606060606060606,
+      "pvalue": 0.0016094445407519298,
+      "pvalue_adjusted": 0.004229697238484882,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "FOS",
+      "log2_fold_change": -3.062990700960049,
+      "mean_test": 158.69230769230768,
+      "mean_control": 1852.3030303030303,
+      "pvalue": 9.316258991920937e-07,
+      "pvalue_adjusted": 4.6449538792364786e-06,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "HBA2",
+      "log2_fold_change": -3.0614650741546745,
+      "mean_test": 1431.3076923076924,
+      "mean_control": 16594.0,
+      "pvalue": 8.840687458597996e-07,
+      "pvalue_adjusted": 4.436598848588236e-06,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "JPH3",
+      "log2_fold_change": -3.022738599680622,
+      "mean_test": 0.6153846153846154,
+      "mean_control": 7.909090909090909,
+      "pvalue": 0.002675987752733528,
+      "pvalue_adjusted": 0.006665155247535585,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "METTL21C",
+      "log2_fold_change": -3.0172773200386724,
+      "mean_test": 13.461538461538462,
+      "mean_control": 182.87878787878788,
+      "pvalue": 2.943133402954223e-07,
+      "pvalue_adjusted": 1.6034675931999795e-06,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "PCK1",
+      "log2_fold_change": -2.993174295039154,
+      "mean_test": 3.769230769230769,
+      "mean_control": 41.27272727272727,
+      "pvalue": 6.106590373771516e-05,
+      "pvalue_adjusted": 0.00021786996058393757,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "HBB",
+      "log2_fold_change": -2.964279399057788,
+      "mean_test": 1535.2307692307693,
+      "mean_control": 17011.333333333332,
+      "pvalue": 1.9159090138575354e-06,
+      "pvalue_adjusted": 9.000836294418993e-06,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "ANKUB1",
+      "log2_fold_change": -2.955362660641042,
+      "mean_test": 0.7692307692307693,
+      "mean_control": 8.696969696969697,
+      "pvalue": 2.4311965027728108e-06,
+      "pvalue_adjusted": 1.1176502912230782e-05,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "HBA1",
+      "log2_fold_change": -2.9500875613529534,
+      "mean_test": 954.2307692307693,
+      "mean_control": 11058.030303030304,
+      "pvalue": 9.856300389830335e-07,
+      "pvalue_adjusted": 4.888285908461574e-06,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SPOCK3",
+      "log2_fold_change": -2.930027807893806,
+      "mean_test": 1.8461538461538463,
+      "mean_control": 22.12121212121212,
+      "pvalue": 5.8124787287267376e-05,
+      "pvalue_adjusted": 0.00020865245024928692,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "C11ORF96",
+      "log2_fold_change": -2.9141843843759148,
+      "mean_test": 22.692307692307693,
+      "mean_control": 247.96969696969697,
+      "pvalue": 3.276859824180495e-22,
+      "pvalue_adjusted": 1.8422266426837986e-20,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "TAFA5",
+      "log2_fold_change": -2.8895108653745716,
+      "mean_test": 4.3076923076923075,
+      "mean_control": 49.63636363636363,
+      "pvalue": 8.490934221536727e-11,
+      "pvalue_adjusted": 8.353697028886308e-10,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "OR2AP1",
+      "log2_fold_change": -2.8861523528371595,
+      "mean_test": 0.3076923076923077,
+      "mean_control": 3.515151515151515,
+      "pvalue": 0.0009283715537514902,
+      "pvalue_adjusted": 0.002587269998778445,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "HEPACAM",
+      "log2_fold_change": -2.873822019735153,
+      "mean_test": 3.230769230769231,
+      "mean_control": 34.21212121212121,
+      "pvalue": 2.131019233507003e-15,
+      "pvalue_adjusted": 4.308131357853809e-14,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "DPPA4",
+      "log2_fold_change": -2.8721379102558613,
+      "mean_test": 4.076923076923077,
+      "mean_control": 45.24242424242424,
+      "pvalue": 1.3447585455750036e-17,
+      "pvalue_adjusted": 3.7675503490430815e-16,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "ALAS2",
+      "log2_fold_change": -2.847915940812201,
+      "mean_test": 3.076923076923077,
+      "mean_control": 32.878787878787875,
+      "pvalue": 0.0004256094924319635,
+      "pvalue_adjusted": 0.001272467107938814,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "VSTM2A",
+      "log2_fold_change": -2.837857582540401,
+      "mean_test": 0.46153846153846156,
+      "mean_control": 5.333333333333333,
+      "pvalue": 0.0028762148095582327,
+      "pvalue_adjusted": 0.007116728616368536,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "HES4",
+      "log2_fold_change": -2.831340915928782,
+      "mean_test": 20.0,
+      "mean_control": 193.87878787878788,
+      "pvalue": 2.382408641442353e-23,
+      "pvalue_adjusted": 1.50429548621222e-21,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "H2AC20",
+      "log2_fold_change": -2.803021812082666,
+      "mean_test": 0.6923076923076923,
+      "mean_control": 52.39393939393939,
+      "pvalue": 0.000981689478390033,
+      "pvalue_adjusted": 0.002722410579042304,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "GGT6",
+      "log2_fold_change": -2.788765346983242,
+      "mean_test": 2.8461538461538463,
+      "mean_control": 28.242424242424242,
+      "pvalue": 1.064224064115622e-14,
+      "pvalue_adjusted": 1.9574782188004952e-13,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "KCNH6",
+      "log2_fold_change": -2.787897587765339,
+      "mean_test": 4.153846153846154,
+      "mean_control": 38.72727272727273,
+      "pvalue": 5.1758959759537355e-12,
+      "pvalue_adjusted": 6.310267413911319e-11,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "MUC5B",
+      "log2_fold_change": -2.78292396856271,
+      "mean_test": 0.5384615384615384,
+      "mean_control": 5.333333333333333,
+      "pvalue": 7.163287833694527e-05,
+      "pvalue_adjusted": 0.0002519059782248104,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "VSIG10L2",
+      "log2_fold_change": -2.7534639881696044,
+      "mean_test": 1.8461538461538463,
+      "mean_control": 17.87878787878788,
+      "pvalue": 0.00032031534442222007,
+      "pvalue_adjusted": 0.0009869585321035702,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SULT2B1",
+      "log2_fold_change": -2.7482117954112995,
+      "mean_test": 0.5384615384615384,
+      "mean_control": 5.2727272727272725,
+      "pvalue": 7.865183221148994e-05,
+      "pvalue_adjusted": 0.0002745351288537196,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "RPS18",
+      "log2_fold_change": -2.7255702944950446,
+      "mean_test": 398.0,
+      "mean_control": 3650.6363636363635,
+      "pvalue": 1.3772404560073459e-27,
+      "pvalue_adjusted": 1.4657649683368745e-25,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "G0S2",
+      "log2_fold_change": -2.678833878206148,
+      "mean_test": 1173.7692307692307,
+      "mean_control": 10052.181818181818,
+      "pvalue": 7.645210083697639e-15,
+      "pvalue_adjusted": 1.4342820957464684e-13,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "MPZ",
+      "log2_fold_change": -2.6738673045515515,
+      "mean_test": 30.46153846153846,
+      "mean_control": 300.3636363636364,
+      "pvalue": 0.00012193911704114556,
+      "pvalue_adjusted": 0.00040868562855422163,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "VIL1",
+      "log2_fold_change": -2.667417860882682,
+      "mean_test": 8.846153846153847,
+      "mean_control": 81.0,
+      "pvalue": 9.218175072582835e-07,
+      "pvalue_adjusted": 4.605549411817146e-06,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "GGT7",
+      "log2_fold_change": -2.6458092907133297,
+      "mean_test": 200.92307692307693,
+      "mean_control": 1779.5757575757575,
+      "pvalue": 9.85358092595347e-15,
+      "pvalue_adjusted": 1.8223201795517442e-13,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "CIDEA",
+      "log2_fold_change": -2.635856106448037,
+      "mean_test": 3.923076923076923,
+      "mean_control": 33.666666666666664,
+      "pvalue": 0.0004518823399314047,
+      "pvalue_adjusted": 0.001343185131972463,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "CFAP299",
+      "log2_fold_change": -2.6344465097446017,
+      "mean_test": 0.3076923076923077,
+      "mean_control": 2.9393939393939394,
+      "pvalue": 0.0017706947716271684,
+      "pvalue_adjusted": 0.004606964471936492,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "CDKN1C",
+      "log2_fold_change": -2.607322306164242,
+      "mean_test": 43.76923076923077,
+      "mean_control": 370.3939393939394,
+      "pvalue": 4.0826438670985774e-10,
+      "pvalue_adjusted": 3.5901967375399026e-09,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "CFB",
+      "log2_fold_change": -2.600685593412739,
+      "mean_test": 0.6153846153846154,
+      "mean_control": 5.454545454545454,
+      "pvalue": 0.0031810156794837034,
+      "pvalue_adjusted": 0.007793088384121265,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "OR4P4",
+      "log2_fold_change": -2.5950940798274553,
+      "mean_test": 0.23076923076923078,
+      "mean_control": 2.5757575757575757,
+      "pvalue": 0.002719160467319078,
+      "pvalue_adjusted": 0.006764721174356577,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "NEUROD1",
+      "log2_fold_change": -2.5911118535303097,
+      "mean_test": 2.3076923076923075,
+      "mean_control": 22.03030303030303,
+      "pvalue": 6.891430573159219e-12,
+      "pvalue_adjusted": 8.160726953044108e-11,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "LYG2",
+      "log2_fold_change": -2.5597755423835507,
+      "mean_test": 0.3076923076923077,
+      "mean_control": 2.6363636363636362,
+      "pvalue": 0.004186941490707495,
+      "pvalue_adjusted": 0.009979073789542568,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "PROZ",
+      "log2_fold_change": -2.558160505140061,
+      "mean_test": 0.38461538461538464,
+      "mean_control": 3.515151515151515,
+      "pvalue": 0.0031813411273791336,
+      "pvalue_adjusted": 0.007793088384121265,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "LRRC10B",
+      "log2_fold_change": -2.5515131593046934,
+      "mean_test": 1.0,
+      "mean_control": 8.909090909090908,
+      "pvalue": 9.747055743280498e-05,
+      "pvalue_adjusted": 0.00033395358835349787,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "ARL2-SNX15",
+      "log2_fold_change": -2.5472176328011398,
+      "mean_test": 10.923076923076923,
+      "mean_control": 88.27272727272727,
+      "pvalue": 4.760074280365866e-11,
+      "pvalue_adjusted": 4.884777257268113e-10,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "EFNA2",
+      "log2_fold_change": -2.532814634964806,
+      "mean_test": 1.6923076923076923,
+      "mean_control": 13.93939393939394,
+      "pvalue": 1.932156273143003e-09,
+      "pvalue_adjusted": 1.5278480586040137e-08,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "FMC1",
+      "log2_fold_change": -2.5318479655858384,
+      "mean_test": 104.15384615384616,
+      "mean_control": 897.4545454545455,
+      "pvalue": 8.332933696954713e-90,
+      "pvalue_adjusted": 7.050495200993382e-86,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "FOXD1",
+      "log2_fold_change": -2.5286634753000006,
+      "mean_test": 2.6153846153846154,
+      "mean_control": 24.484848484848484,
+      "pvalue": 0.0010669258437647094,
+      "pvalue_adjusted": 0.0029299771386216184,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "NPAS1",
+      "log2_fold_change": -2.526133208223624,
+      "mean_test": 0.7692307692307693,
+      "mean_control": 6.7272727272727275,
+      "pvalue": 0.0005601217186361964,
+      "pvalue_adjusted": 0.0016350491155359176,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "LRRC8E",
+      "log2_fold_change": -2.5256820141151217,
+      "mean_test": 0.6153846153846154,
+      "mean_control": 5.363636363636363,
+      "pvalue": 0.0014410903429300556,
+      "pvalue_adjusted": 0.0038367103182917555,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "CELF5",
+      "log2_fold_change": -2.517752234444296,
+      "mean_test": 0.7692307692307693,
+      "mean_control": 7.121212121212121,
+      "pvalue": 6.456546973057596e-05,
+      "pvalue_adjusted": 0.00022909978586303342,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "ROMO1",
+      "log2_fold_change": -2.491120583499651,
+      "mean_test": 173.30769230769232,
+      "mean_control": 1497.7878787878788,
+      "pvalue": 1.2078442344579407e-78,
+      "pvalue_adjusted": 4.087828027099455e-75,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "CCDC160",
+      "log2_fold_change": -2.485229799459484,
+      "mean_test": 4.153846153846154,
+      "mean_control": 36.09090909090909,
+      "pvalue": 2.241872849450028e-09,
+      "pvalue_adjusted": 1.7522850973853754e-08,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "HSPB9",
+      "log2_fold_change": -2.480844939636981,
+      "mean_test": 0.5384615384615384,
+      "mean_control": 4.575757575757576,
+      "pvalue": 0.0003556975244589554,
+      "pvalue_adjusted": 0.001082769114749855,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SCAMP3",
+      "log2_fold_change": -2.468569650693774,
+      "mean_test": 123.6923076923077,
+      "mean_control": 1021.5757575757576,
+      "pvalue": 2.0201345059910945e-66,
+      "pvalue_adjusted": 5.69745268506355e-63,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "PCDH8",
+      "log2_fold_change": -2.4598035295256806,
+      "mean_test": 3.230769230769231,
+      "mean_control": 25.454545454545453,
+      "pvalue": 2.995230955693498e-07,
+      "pvalue_adjusted": 1.6271363798473635e-06,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "TMEM256-PLSCR3",
+      "log2_fold_change": -2.4590180737131218,
+      "mean_test": 3.6153846153846154,
+      "mean_control": 28.151515151515152,
+      "pvalue": 2.7898764903750787e-07,
+      "pvalue_adjusted": 1.5263591972236366e-06,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SIX3",
+      "log2_fold_change": -2.454402817622477,
+      "mean_test": 1.2307692307692308,
+      "mean_control": 9.545454545454545,
+      "pvalue": 1.4542054257442712e-05,
+      "pvalue_adjusted": 5.8451458941673524e-05,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "JSRP1",
+      "log2_fold_change": -2.453566933384004,
+      "mean_test": 937.5384615384615,
+      "mean_control": 7486.333333333333,
+      "pvalue": 3.619691143291822e-54,
+      "pvalue_adjusted": 3.0626206763392105e-51,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "IGSF21",
+      "log2_fold_change": -2.444406841066571,
+      "mean_test": 3.4615384615384617,
+      "mean_control": 28.242424242424242,
+      "pvalue": 8.734868465036609e-10,
+      "pvalue_adjusted": 7.331916873281224e-09,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "CDH22",
+      "log2_fold_change": -2.444254651499517,
+      "mean_test": 3.1538461538461537,
+      "mean_control": 26.060606060606062,
+      "pvalue": 8.204710356821128e-05,
+      "pvalue_adjusted": 0.00028526835557453697,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "C1ORF167",
+      "log2_fold_change": -2.435342475079145,
+      "mean_test": 17.0,
+      "mean_control": 131.15151515151516,
+      "pvalue": 3.650478477581092e-10,
+      "pvalue_adjusted": 3.2409966840308106e-09,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "ST6GALNAC5",
+      "log2_fold_change": -2.4333349626633254,
+      "mean_test": 0.38461538461538464,
+      "mean_control": 3.3333333333333335,
+      "pvalue": 0.0023503667225786436,
+      "pvalue_adjusted": 0.005926524464234213,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "PCDH9",
+      "log2_fold_change": -2.4255836481225606,
+      "mean_test": 59.0,
+      "mean_control": 494.3333333333333,
+      "pvalue": 1.0258763081829397e-15,
+      "pvalue_adjusted": 2.1618778190624788e-14,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "NDUFC2-KCTD14",
+      "log2_fold_change": -2.4254251432133827,
+      "mean_test": 39.76923076923077,
+      "mean_control": 334.8181818181818,
+      "pvalue": 1.2546786208269347e-20,
+      "pvalue_adjusted": 5.527961098376038e-19,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "TOX3",
+      "log2_fold_change": -2.4150193711242047,
+      "mean_test": 0.6153846153846154,
+      "mean_control": 5.484848484848484,
+      "pvalue": 0.002710411548415732,
+      "pvalue_adjusted": 0.006744938856219267,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SULT2A1",
+      "log2_fold_change": -2.4114766982961835,
+      "mean_test": 0.6153846153846154,
+      "mean_control": 4.393939393939394,
+      "pvalue": 0.000573264619591559,
+      "pvalue_adjusted": 0.0016699576334529803,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "LRAT",
+      "log2_fold_change": -2.4039801179862508,
+      "mean_test": 3.230769230769231,
+      "mean_control": 26.03030303030303,
+      "pvalue": 6.580490827055176e-11,
+      "pvalue_adjusted": 6.59686408622202e-10,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SMIM41",
+      "log2_fold_change": -2.4024030399484735,
+      "mean_test": 14.461538461538462,
+      "mean_control": 123.18181818181819,
+      "pvalue": 4.870249139847622e-09,
+      "pvalue_adjusted": 3.57856517344774e-08,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "MSRA",
+      "log2_fold_change": -2.398035173356525,
+      "mean_test": 4.230769230769231,
+      "mean_control": 36.54545454545455,
+      "pvalue": 0.0018149173901135028,
+      "pvalue_adjusted": 0.0047075463021920136,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "RHOXF1",
+      "log2_fold_change": -2.392372878270905,
+      "mean_test": 0.38461538461538464,
+      "mean_control": 3.1515151515151514,
+      "pvalue": 0.0021372843260719886,
+      "pvalue_adjusted": 0.0054526044573782895,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "MT1G",
+      "log2_fold_change": -2.3888435450843875,
+      "mean_test": 3.6153846153846154,
+      "mean_control": 26.575757575757574,
+      "pvalue": 2.904553012739563e-07,
+      "pvalue_adjusted": 1.5844889130102802e-06,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "INKA1",
+      "log2_fold_change": -2.3647286853149767,
+      "mean_test": 17.846153846153847,
+      "mean_control": 127.93939393939394,
+      "pvalue": 2.330932765483044e-16,
+      "pvalue_adjusted": 5.395902087209859e-15,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SEC14L3",
+      "log2_fold_change": -2.357538190190626,
+      "mean_test": 0.8461538461538461,
+      "mean_control": 6.242424242424242,
+      "pvalue": 5.329218061167274e-05,
+      "pvalue_adjusted": 0.00019257106135185269,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "GALR3",
+      "log2_fold_change": -2.3442384729646215,
+      "mean_test": 0.7692307692307693,
+      "mean_control": 5.606060606060606,
+      "pvalue": 0.0007930766962334801,
+      "pvalue_adjusted": 0.0022457005628427253,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SERF1A",
+      "log2_fold_change": -2.3267517474385917,
+      "mean_test": 29.692307692307693,
+      "mean_control": 212.4848484848485,
+      "pvalue": 0.0006317663860639378,
+      "pvalue_adjusted": 0.0018234267073126312,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "DNAH6",
+      "log2_fold_change": -2.3056029621928693,
+      "mean_test": 0.38461538461538464,
+      "mean_control": 3.0,
+      "pvalue": 0.001979585902005328,
+      "pvalue_adjusted": 0.005084011630556102,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "B4GALNT4",
+      "log2_fold_change": -2.3055918824546353,
+      "mean_test": 0.8461538461538461,
+      "mean_control": 10.181818181818182,
+      "pvalue": 0.004178206287023344,
+      "pvalue_adjusted": 0.009961060409835026,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "VPS28",
+      "log2_fold_change": -2.3042457213024155,
+      "mean_test": 28.384615384615383,
+      "mean_control": 186.87878787878788,
+      "pvalue": 1.3409605439942307e-13,
+      "pvalue_adjusted": 2.059141045868455e-12,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "FAM240C",
+      "log2_fold_change": -2.2897202890465596,
+      "mean_test": 7.846153846153846,
+      "mean_control": 47.333333333333336,
+      "pvalue": 0.0013872976559741992,
+      "pvalue_adjusted": 0.003707493830447789,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "CFD",
+      "log2_fold_change": -2.268098406346808,
+      "mean_test": 408.38461538461536,
+      "mean_control": 2950.3939393939395,
+      "pvalue": 3.342649180634342e-17,
+      "pvalue_adjusted": 8.824385247222204e-16,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "C19ORF33",
+      "log2_fold_change": -2.256170552041557,
+      "mean_test": 3.6923076923076925,
+      "mean_control": 28.90909090909091,
+      "pvalue": 2.0820023726847463e-08,
+      "pvalue_adjusted": 1.383803776534614e-07,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "IRX3",
+      "log2_fold_change": -2.254485225856246,
+      "mean_test": 73.61538461538461,
+      "mean_control": 502.09090909090907,
+      "pvalue": 3.421816347093411e-05,
+      "pvalue_adjusted": 0.00012819122476314968,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "BMP3",
+      "log2_fold_change": -2.2503285352227427,
+      "mean_test": 1.3846153846153846,
+      "mean_control": 10.757575757575758,
+      "pvalue": 0.001280894939206004,
+      "pvalue_adjusted": 0.0034492845578045833,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "RPS21",
+      "log2_fold_change": -2.2443443325705386,
+      "mean_test": 625.2307692307693,
+      "mean_control": 4565.69696969697,
+      "pvalue": 4.935715027238775e-42,
+      "pvalue_adjusted": 1.8560482153541008e-39,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "ANTKMT",
+      "log2_fold_change": -2.240845840138136,
+      "mean_test": 51.69230769230769,
+      "mean_control": 346.6363636363636,
+      "pvalue": 1.0405151775222719e-22,
+      "pvalue_adjusted": 6.221766019092539e-21,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "ASMT",
+      "log2_fold_change": -2.2278643353360565,
+      "mean_test": 0.9230769230769231,
+      "mean_control": 6.484848484848484,
+      "pvalue": 4.090659696806521e-05,
+      "pvalue_adjusted": 0.00015064666678859617,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "WNT4",
+      "log2_fold_change": -2.220975205353401,
+      "mean_test": 18.307692307692307,
+      "mean_control": 127.63636363636364,
+      "pvalue": 7.769183266734506e-15,
+      "pvalue_adjusted": 1.4559260159433143e-13,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "RBP4",
+      "log2_fold_change": -2.2172865614743693,
+      "mean_test": 16.46153846153846,
+      "mean_control": 104.93939393939394,
+      "pvalue": 0.00015306776835508908,
+      "pvalue_adjusted": 0.0005030516170333691,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "PITX1",
+      "log2_fold_change": -2.215599650598956,
+      "mean_test": 125.15384615384616,
+      "mean_control": 889.1212121212121,
+      "pvalue": 2.9860898236415165e-07,
+      "pvalue_adjusted": 1.623212720708697e-06,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "MSX1",
+      "log2_fold_change": -2.213846142677429,
+      "mean_test": 21.0,
+      "mean_control": 148.3030303030303,
+      "pvalue": 1.7413577056442513e-20,
+      "pvalue_adjusted": 7.594653374977325e-19,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "FUT6",
+      "log2_fold_change": -2.2092867230448907,
+      "mean_test": 0.7692307692307693,
+      "mean_control": 4.757575757575758,
+      "pvalue": 0.0008902057770872374,
+      "pvalue_adjusted": 0.0024915749520129393,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "BRDT",
+      "log2_fold_change": -2.1938117885039246,
+      "mean_test": 1.0769230769230769,
+      "mean_control": 6.7272727272727275,
+      "pvalue": 0.0004717182332316071,
+      "pvalue_adjusted": 0.0013967481964558626,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SBK2",
+      "log2_fold_change": -2.186677884916944,
+      "mean_test": 14.384615384615385,
+      "mean_control": 95.45454545454545,
+      "pvalue": 0.0011337380413994794,
+      "pvalue_adjusted": 0.003086408484002894,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SCX",
+      "log2_fold_change": -2.1825205689792435,
+      "mean_test": 49.76923076923077,
+      "mean_control": 323.75757575757575,
+      "pvalue": 3.2971678358288543e-21,
+      "pvalue_adjusted": 1.6032952332728697e-19,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "TMEM160",
+      "log2_fold_change": -2.1819244695937337,
+      "mean_test": 39.61538461538461,
+      "mean_control": 247.33333333333334,
+      "pvalue": 4.3800798376666953e-16,
+      "pvalue_adjusted": 9.72699619593121e-15,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SLC12A5",
+      "log2_fold_change": -2.176496264402217,
+      "mean_test": 1.4615384615384615,
+      "mean_control": 10.212121212121213,
+      "pvalue": 0.00016657204667652593,
+      "pvalue_adjusted": 0.0005437369162538911,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "TRIM49D1",
+      "log2_fold_change": -2.1754712275350974,
+      "mean_test": 0.9230769230769231,
+      "mean_control": 5.878787878787879,
+      "pvalue": 0.00037544620260182446,
+      "pvalue_adjusted": 0.001137768739331675,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "GRIK2",
+      "log2_fold_change": -2.173828902684188,
+      "mean_test": 10.307692307692308,
+      "mean_control": 68.06060606060606,
+      "pvalue": 3.872916149955162e-12,
+      "pvalue_adjusted": 4.815392144712803e-11,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "IRX5",
+      "log2_fold_change": -2.164791014633979,
+      "mean_test": 15.615384615384615,
+      "mean_control": 110.72727272727273,
+      "pvalue": 1.7524321527076185e-07,
+      "pvalue_adjusted": 9.92458396523371e-07,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "POTEG",
+      "log2_fold_change": -2.1637261629221927,
+      "mean_test": 0.7692307692307693,
+      "mean_control": 5.484848484848484,
+      "pvalue": 0.0003195475072142577,
+      "pvalue_adjusted": 0.0009849066688758059,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "H2AC18",
+      "log2_fold_change": -2.1597175599318734,
+      "mean_test": 21.76923076923077,
+      "mean_control": 214.21212121212122,
+      "pvalue": 2.408936913529246e-10,
+      "pvalue_adjusted": 2.202270688856937e-09,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "CALML6",
+      "log2_fold_change": -2.158735943619965,
+      "mean_test": 339.15384615384613,
+      "mean_control": 2328.0,
+      "pvalue": 8.613800166151783e-07,
+      "pvalue_adjusted": 4.330443446572207e-06,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "IGFBP6",
+      "log2_fold_change": -2.1484912965169682,
+      "mean_test": 109.53846153846153,
+      "mean_control": 701.0,
+      "pvalue": 1.149315965663259e-10,
+      "pvalue_adjusted": 1.1075583582547647e-09,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "TMEM121",
+      "log2_fold_change": -2.135739165356092,
+      "mean_test": 1.8461538461538463,
+      "mean_control": 11.757575757575758,
+      "pvalue": 1.1209892048193985e-05,
+      "pvalue_adjusted": 4.595405650388225e-05,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SDF2L1",
+      "log2_fold_change": -2.1345715092169373,
+      "mean_test": 11.615384615384615,
+      "mean_control": 74.78787878787878,
+      "pvalue": 2.5534663460069427e-25,
+      "pvalue_adjusted": 2.1181253679965434e-23,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "GALNTL6",
+      "log2_fold_change": -2.1269288659300267,
+      "mean_test": 0.8461538461538461,
+      "mean_control": 5.757575757575758,
+      "pvalue": 0.0010888451364682293,
+      "pvalue_adjusted": 0.002982427549257911,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "DOHH",
+      "log2_fold_change": -2.1244533769231357,
+      "mean_test": 69.3076923076923,
+      "mean_control": 414.57575757575756,
+      "pvalue": 2.9179847476468786e-21,
+      "pvalue_adjusted": 1.431250373903782e-19,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "FAU",
+      "log2_fold_change": -2.1222290837616606,
+      "mean_test": 1105.076923076923,
+      "mean_control": 7174.151515151515,
+      "pvalue": 4.87218651251984e-60,
+      "pvalue_adjusted": 7.495194560441884e-57,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "ACTN3",
+      "log2_fold_change": -2.1218807648970928,
+      "mean_test": 5244.384615384615,
+      "mean_control": 34198.181818181816,
+      "pvalue": 1.28339727280059e-05,
+      "pvalue_adjusted": 5.196852991225553e-05,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SYT14",
+      "log2_fold_change": -2.120086568434466,
+      "mean_test": 1.3846153846153846,
+      "mean_control": 9.484848484848484,
+      "pvalue": 1.916450789062057e-05,
+      "pvalue_adjusted": 7.56124510433857e-05,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "JUNB",
+      "log2_fold_change": -2.116930005497373,
+      "mean_test": 121.0,
+      "mean_control": 719.9090909090909,
+      "pvalue": 9.090810452138006e-08,
+      "pvalue_adjusted": 5.433934809999271e-07,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "EPHA10",
+      "log2_fold_change": -2.115750668116758,
+      "mean_test": 1.3846153846153846,
+      "mean_control": 9.090909090909092,
+      "pvalue": 5.3580819102104854e-05,
+      "pvalue_adjusted": 0.0001934901026132775,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "NXNL2",
+      "log2_fold_change": -2.109878233646852,
+      "mean_test": 1.5384615384615385,
+      "mean_control": 9.606060606060606,
+      "pvalue": 7.720678358328242e-06,
+      "pvalue_adjusted": 3.274419027058409e-05,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "B9D2",
+      "log2_fold_change": -2.1093682289138074,
+      "mean_test": 2.769230769230769,
+      "mean_control": 17.515151515151516,
+      "pvalue": 3.835685499734847e-09,
+      "pvalue_adjusted": 2.8656719658504668e-08,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SCAND1",
+      "log2_fold_change": -2.106348311453035,
+      "mean_test": 120.6923076923077,
+      "mean_control": 731.969696969697,
+      "pvalue": 8.936100325822518e-26,
+      "pvalue_adjusted": 7.91710417348527e-24,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "MYG1",
+      "log2_fold_change": -2.10542704498179,
+      "mean_test": 72.0,
+      "mean_control": 454.6969696969697,
+      "pvalue": 2.6943640794190966e-22,
+      "pvalue_adjusted": 1.5300009715412736e-20,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "G6PC1",
+      "log2_fold_change": -2.0980531573013534,
+      "mean_test": 0.8461538461538461,
+      "mean_control": 5.2727272727272725,
+      "pvalue": 0.0013407377510121006,
+      "pvalue_adjusted": 0.0035955569291009136,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "MIXL1",
+      "log2_fold_change": -2.096435015843171,
+      "mean_test": 0.5384615384615384,
+      "mean_control": 3.515151515151515,
+      "pvalue": 0.0032208247055335497,
+      "pvalue_adjusted": 0.007878034246609857,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "TNNI2",
+      "log2_fold_change": -2.0945944103030216,
+      "mean_test": 9488.846153846154,
+      "mean_control": 64748.666666666664,
+      "pvalue": 2.2926202925762187e-19,
+      "pvalue_adjusted": 8.343165718489197e-18,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SLC4A1",
+      "log2_fold_change": -2.0945208643547115,
+      "mean_test": 3.923076923076923,
+      "mean_control": 24.0,
+      "pvalue": 1.4178194307347766e-05,
+      "pvalue_adjusted": 5.71110221539964e-05,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "NR2F1",
+      "log2_fold_change": -2.0944225158638954,
+      "mean_test": 7.230769230769231,
+      "mean_control": 46.60606060606061,
+      "pvalue": 3.07933450173844e-07,
+      "pvalue_adjusted": 1.6690742613202396e-06,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "TCF15",
+      "log2_fold_change": -2.094131499351377,
+      "mean_test": 33.46153846153846,
+      "mean_control": 200.6969696969697,
+      "pvalue": 1.2000686914940133e-25,
+      "pvalue_adjusted": 1.0467815668794688e-23,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "HSD17B6",
+      "log2_fold_change": -2.0906605337354036,
+      "mean_test": 1.0769230769230769,
+      "mean_control": 6.545454545454546,
+      "pvalue": 0.0005170224330452827,
+      "pvalue_adjusted": 0.0015189329187486585,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "VARS1",
+      "log2_fold_change": -2.0902688062585533,
+      "mean_test": 15.307692307692308,
+      "mean_control": 86.51515151515152,
+      "pvalue": 2.4992089607836165e-06,
+      "pvalue_adjusted": 1.1464248857245963e-05,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SLX1A",
+      "log2_fold_change": -2.087599206418108,
+      "mean_test": 23.307692307692307,
+      "mean_control": 151.27272727272728,
+      "pvalue": 3.9812908260043665e-11,
+      "pvalue_adjusted": 4.143382740322626e-10,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "HES6",
+      "log2_fold_change": -2.086892517437984,
+      "mean_test": 28.53846153846154,
+      "mean_control": 154.1818181818182,
+      "pvalue": 9.771974865563374e-11,
+      "pvalue_adjusted": 9.503526360635828e-10,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "PAOX",
+      "log2_fold_change": -2.0800257901947727,
+      "mean_test": 9.0,
+      "mean_control": 53.666666666666664,
+      "pvalue": 3.901485760650168e-11,
+      "pvalue_adjusted": 4.0753667926988977e-10,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "OR10A2",
+      "log2_fold_change": -2.0641859891854777,
+      "mean_test": 1.1538461538461537,
+      "mean_control": 6.787878787878788,
+      "pvalue": 0.00018145187819126703,
+      "pvalue_adjusted": 0.0005878860200560253,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "RAC3",
+      "log2_fold_change": -2.0599439986349144,
+      "mean_test": 1.8461538461538463,
+      "mean_control": 11.575757575757576,
+      "pvalue": 0.003498455774928947,
+      "pvalue_adjusted": 0.008474215376946414,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "FAM221B",
+      "log2_fold_change": -2.0581545338199656,
+      "mean_test": 1.7692307692307692,
+      "mean_control": 10.424242424242424,
+      "pvalue": 1.1893628385940922e-05,
+      "pvalue_adjusted": 4.853242815213221e-05,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "C1QTNF4",
+      "log2_fold_change": -2.0558939083134478,
+      "mean_test": 1.2307692307692308,
+      "mean_control": 7.242424242424242,
+      "pvalue": 1.8988963458115028e-05,
+      "pvalue_adjusted": 7.498978754684306e-05,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "MOGAT3",
+      "log2_fold_change": -2.0534210287643964,
+      "mean_test": 1.9230769230769231,
+      "mean_control": 11.121212121212121,
+      "pvalue": 1.554125046141935e-05,
+      "pvalue_adjusted": 6.226066295173728e-05,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "ANAPC11",
+      "log2_fold_change": -2.045709517497094,
+      "mean_test": 382.2307692307692,
+      "mean_control": 2374.4848484848485,
+      "pvalue": 1.728026299091239e-52,
+      "pvalue_adjusted": 1.3291664106009974e-49,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "MAFA",
+      "log2_fold_change": -2.038240260778167,
+      "mean_test": 222.76923076923077,
+      "mean_control": 1243.0,
+      "pvalue": 6.463196637232229e-13,
+      "pvalue_adjusted": 9.03139665526373e-12,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "AMER3",
+      "log2_fold_change": -2.037435801896749,
+      "mean_test": 0.8461538461538461,
+      "mean_control": 5.242424242424242,
+      "pvalue": 0.00026137154695303846,
+      "pvalue_adjusted": 0.0008193644530454459,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "TPGS1",
+      "log2_fold_change": -2.0355923720460587,
+      "mean_test": 18.307692307692307,
+      "mean_control": 97.24242424242425,
+      "pvalue": 2.2269370192801793e-10,
+      "pvalue_adjusted": 2.0413991462762295e-09,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "FAM124B",
+      "log2_fold_change": -2.0355834205291568,
+      "mean_test": 6.6923076923076925,
+      "mean_control": 40.90909090909091,
+      "pvalue": 2.788181664565116e-06,
+      "pvalue_adjusted": 1.2696881089281726e-05,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "DMKN",
+      "log2_fold_change": -2.0341555172273105,
+      "mean_test": 3.6153846153846154,
+      "mean_control": 24.666666666666668,
+      "pvalue": 5.259669480737409e-05,
+      "pvalue_adjusted": 0.00019026106659478077,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "IL23R",
+      "log2_fold_change": -2.0327617368643627,
+      "mean_test": 0.7692307692307693,
+      "mean_control": 4.151515151515151,
+      "pvalue": 0.0019448534894597046,
+      "pvalue_adjusted": 0.005003924395413885,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "NKD2",
+      "log2_fold_change": -2.0228639815944,
+      "mean_test": 0.6153846153846154,
+      "mean_control": 3.757575757575758,
+      "pvalue": 0.003777159752441658,
+      "pvalue_adjusted": 0.00908687764157204,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "SH2D1B",
+      "log2_fold_change": -2.0032966719836374,
+      "mean_test": 38.69230769230769,
+      "mean_control": 255.84848484848484,
+      "pvalue": 6.612737855734479e-06,
+      "pvalue_adjusted": 2.8379596752406507e-05,
+      "test_method": "deseq2",
+      "direction": "down"
+    },
+    {
+      "gene_symbol": "MTNR1A",
+      "log2_fold_change": -2.003230712874527,
+      "mean_test": 2.5384615384615383,
+      "mean_control": 14.242424242424242,
+      "pvalue": 2.625536103934024e-07,
+      "pvalue_adjusted": 1.4472091840642199e-06,
+      "test_method": "deseq2",
+      "direction": "down"
+    }
+  ],
+  "enrichment": {
+    "provenance": {
+      "backend": "gprofiler",
+      "organism": "hsapiens",
+      "sources": [
+        "GO:BP",
+        "GO:CC",
+        "GO:MF",
+        "KEGG",
+        "REAC"
+      ],
+      "significance_threshold": 0.05,
+      "correction_method": "g_SCS",
+      "timestamp": "2026-02-02T15:15:25.864220"
+    },
+    "summary": {
+      "total_significant_terms": 12,
+      "upregulated_terms": 2,
+      "downregulated_terms": 10
+    },
+    "upregulated": {
+      "direction": "up",
+      "input_genes": 117,
+      "n_genes_mapped": 99,
+      "n_significant_terms": 2,
+      "terms": [
+        {
+          "term_id": "GO:0048248",
+          "term_name": "CXCR3 chemokine receptor binding",
+          "source": "GO:MF",
+          "pvalue": 0.000793042996539067,
+          "pvalue_adjusted": 0.000793042996539067,
+          "term_size": 5,
+          "query_size": 99,
+          "intersection_size": 3,
+          "precision": 0.030303030303030304,
+          "recall": 0.6,
+          "genes": [
+            "CXCL9",
+            "CXCL10",
+            "CXCL11"
+          ]
+        },
+        {
+          "term_id": "GO:0071944",
+          "term_name": "cell periphery",
+          "source": "GO:CC",
+          "pvalue": 0.029040006242728882,
+          "pvalue_adjusted": 0.029040006242728882,
+          "term_size": 6347,
+          "query_size": 106,
+          "intersection_size": 49,
+          "precision": 0.46226415094339623,
+          "recall": 0.00772018276351032,
+          "genes": [
+            "TREH",
+            "GDF15",
+            "RPL36A-HNRNPH2",
+            "SLC24A2",
+            "ORM1",
+            "TMEM63C",
+            "RAB33A",
+            "DIRAS1",
+            "GP1BA",
+            "LAMP3",
+            "SCN1A",
+            "PCDHGC4",
+            "PCDHGC5",
+            "COL19A1",
+            "GPR156",
+            "DMBT1",
+            "CAMK1G",
+            "GPR17",
+            "TRIB3",
+            "CXCL9",
+            "VTCN1",
+            "LTK",
+            "IMPG1",
+            "C4A",
+            "MICAL3",
+            "PCDHAC2",
+            "CXCL10",
+            "EDA2R",
+            "KCNAB2",
+            "CSTA",
+            "ART1",
+            "P2RX1",
+            "LRTOMT",
+            "LAD1",
+            "CD79A",
+            "PLK4",
+            "TENM2",
+            "ST8SIA2",
+            "SLC7A1",
+            "SLC7A11",
+            "MINAR1",
+            "APBA1",
+            "TIGIT",
+            "RAB40A",
+            "TAS2R5",
+            "EVC",
+            "SHANK1",
+            "PLCH2",
+            "MUSK"
+          ]
+        }
+      ]
+    },
+    "downregulated": {
+      "direction": "down",
+      "input_genes": 185,
+      "n_genes_mapped": 160,
+      "n_significant_terms": 10,
+      "terms": [
+        {
+          "term_id": "GO:0030492",
+          "term_name": "hemoglobin binding",
+          "source": "GO:MF",
+          "pvalue": 0.00036426887252209684,
+          "pvalue_adjusted": 0.00036426887252209684,
+          "term_size": 9,
+          "query_size": 160,
+          "intersection_size": 4,
+          "precision": 0.025,
+          "recall": 0.4444444444444444,
+          "genes": [
+            "HBD",
+            "HBG2",
+            "HBB",
+            "SLC4A1"
+          ]
+        },
+        {
+          "term_id": "GO:0031721",
+          "term_name": "hemoglobin alpha binding",
+          "source": "GO:MF",
+          "pvalue": 0.0038000036623801635,
+          "pvalue_adjusted": 0.0038000036623801635,
+          "term_size": 5,
+          "query_size": 160,
+          "intersection_size": 3,
+          "precision": 0.01875,
+          "recall": 0.6,
+          "genes": [
+            "HBD",
+            "HBG2",
+            "HBB"
+          ]
+        },
+        {
+          "term_id": "GO:0032501",
+          "term_name": "multicellular organismal process",
+          "source": "GO:BP",
+          "pvalue": 0.009085897941841059,
+          "pvalue_adjusted": 0.009085897941841059,
+          "term_size": 7322,
+          "query_size": 150,
+          "intersection_size": 79,
+          "precision": 0.5266666666666666,
+          "recall": 0.010789401802786125,
+          "genes": [
+            "HLA-DRA",
+            "PSG2",
+            "FGF23",
+            "POU3F3",
+            "KCNC2",
+            "CXCR5",
+            "PGLYRP3",
+            "SPP2",
+            "KRT19",
+            "LRRC24",
+            "NEUROD2",
+            "ZBTB20",
+            "FOSB",
+            "HLA-DRB5",
+            "CRB2",
+            "CLDN19",
+            "SH3GL2",
+            "SP9",
+            "GABRG3",
+            "FOS",
+            "JPH3",
+            "PCK1",
+            "HBB",
+            "TAFA5",
+            "OR2AP1",
+            "DPPA4",
+            "ALAS2",
+            "HES4",
+            "KCNH6",
+            "SULT2B1",
+            "G0S2",
+            "MPZ",
+            "VIL1",
+            "CIDEA",
+            "OR4P4",
+            "NEUROD1",
+            "PROZ",
+            "EFNA2",
+            "FOXD1",
+            "NPAS1",
+            "PCDH8",
+            "SIX3",
+            "JSRP1",
+            "IGSF21",
+            "PCDH9",
+            "LRAT",
+            "MT1G",
+            "INKA1",
+            "GALR3",
+            "IRX3",
+            "BMP3",
+            "WNT4",
+            "RBP4",
+            "PITX1",
+            "MSX1",
+            "FUT6",
+            "SCX",
+            "SLC12A5",
+            "GRIK2",
+            "IRX5",
+            "ACTN3",
+            "JUNB",
+            "EPHA10",
+            "NXNL2",
+            "MYG1",
+            "G6PC1",
+            "MIXL1",
+            "TNNI2",
+            "SLC4A1",
+            "NR2F1",
+            "TCF15",
+            "HES6",
+            "OR10A2",
+            "RAC3",
+            "C1QTNF4",
+            "TPGS1",
+            "IL23R",
+            "SH2D1B",
+            "MTNR1A"
+          ]
+        },
+        {
+          "term_id": "GO:0031838",
+          "term_name": "haptoglobin-hemoglobin complex",
+          "source": "GO:CC",
+          "pvalue": 0.01908871187285013,
+          "pvalue_adjusted": 0.01908871187285013,
+          "term_size": 11,
+          "query_size": 162,
+          "intersection_size": 3,
+          "precision": 0.018518518518518517,
+          "recall": 0.2727272727272727,
+          "genes": [
+            "HBD",
+            "HBG2",
+            "HBB"
+          ]
+        },
+        {
+          "term_id": "GO:0001228",
+          "term_name": "DNA-binding transcription activator activity, RNA polymerase II-specific",
+          "source": "GO:MF",
+          "pvalue": 0.022330107357580144,
+          "pvalue_adjusted": 0.022330107357580144,
+          "term_size": 479,
+          "query_size": 160,
+          "intersection_size": 14,
+          "precision": 0.0875,
+          "recall": 0.029227557411273485,
+          "genes": [
+            "NEUROD2",
+            "FOSB",
+            "FOS",
+            "NEUROD1",
+            "FOXD1",
+            "SIX3",
+            "IRX3",
+            "PITX1",
+            "MSX1",
+            "SCX",
+            "JUNB",
+            "MIXL1",
+            "TCF15",
+            "MAFA"
+          ]
+        },
+        {
+          "term_id": "GO:0001216",
+          "term_name": "DNA-binding transcription activator activity",
+          "source": "GO:MF",
+          "pvalue": 0.026162878943875485,
+          "pvalue_adjusted": 0.026162878943875485,
+          "term_size": 486,
+          "query_size": 160,
+          "intersection_size": 14,
+          "precision": 0.0875,
+          "recall": 0.02880658436213992,
+          "genes": [
+            "NEUROD2",
+            "FOSB",
+            "FOS",
+            "NEUROD1",
+            "FOXD1",
+            "SIX3",
+            "IRX3",
+            "PITX1",
+            "MSX1",
+            "SCX",
+            "JUNB",
+            "MIXL1",
+            "TCF15",
+            "MAFA"
+          ]
+        },
+        {
+          "term_id": "GO:0005833",
+          "term_name": "hemoglobin complex",
+          "source": "GO:CC",
+          "pvalue": 0.0327327147122626,
+          "pvalue_adjusted": 0.0327327147122626,
+          "term_size": 13,
+          "query_size": 162,
+          "intersection_size": 3,
+          "precision": 0.018518518518518517,
+          "recall": 0.23076923076923078,
+          "genes": [
+            "HBD",
+            "HBG2",
+            "HBB"
+          ]
+        },
+        {
+          "term_id": "GO:0031720",
+          "term_name": "haptoglobin binding",
+          "source": "GO:MF",
+          "pvalue": 0.044290968305855744,
+          "pvalue_adjusted": 0.044290968305855744,
+          "term_size": 10,
+          "query_size": 160,
+          "intersection_size": 3,
+          "precision": 0.01875,
+          "recall": 0.3,
+          "genes": [
+            "HBD",
+            "HBG2",
+            "HBB"
+          ]
+        },
+        {
+          "term_id": "GO:0019755",
+          "term_name": "one-carbon compound transport",
+          "source": "GO:BP",
+          "pvalue": 0.048294991994279286,
+          "pvalue_adjusted": 0.048294991994279286,
+          "term_size": 25,
+          "query_size": 150,
+          "intersection_size": 4,
+          "precision": 0.02666666666666667,
+          "recall": 0.16,
+          "genes": [
+            "POU3F3",
+            "HBD",
+            "HBG2",
+            "HBB"
+          ]
+        },
+        {
+          "term_id": "GO:0043382",
+          "term_name": "positive regulation of memory T cell differentiation",
+          "source": "GO:BP",
+          "pvalue": 0.049945002929556497,
+          "pvalue_adjusted": 0.049945002929556497,
+          "term_size": 9,
+          "query_size": 150,
+          "intersection_size": 3,
+          "precision": 0.02,
+          "recall": 0.3333333333333333,
+          "genes": [
+            "HLA-DRA",
+            "PCK1",
+            "IL23R"
+          ]
+        }
+      ]
+    }
+  }
+}
