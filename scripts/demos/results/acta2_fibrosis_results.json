@@ -1,0 +1,48 @@
+{
+  "gene": "ACTA2",
+  "tissue": "lung",
+  "gene_info": {
+    "symbol": "ACTA2",
+    "entrez_id": "59",
+    "ensembl_id": "ENSG00000107796",
+    "uniprot_ids": [],
+    "name": "ACTA2",
+    "description": "protein-coding gene in the species Homo sapiens",
+    "go_terms": [],
+    "wikidata_id": "Q17709258"
+  },
+  "primary_expressing_cells": [
+    "pulmonary alveolar type 2 cell"
+  ],
+  "disease_context": {
+    "condition": "pulmonary_fibrosis",
+    "expression_change": "upregulated",
+    "fold_change": 17.13,
+    "log2_fold_change": 4.1,
+    "p_value": 6.541805329717449e-40,
+    "evidence_quality": "strong",
+    "supporting_datasets": [
+      "781cc817-3fd0-487c-a55a-b47b2786a05d",
+      "9f222629-9e39-47d0-b83f-e08d610c7479"
+    ]
+  },
+  "cell_type_specificity": {
+    "pulmonary alveolar type 2 cell": {
+      "mean_expression": 0.07,
+      "fold_vs_normal": 1.04,
+      "n_cells": 3270,
+      "pct_expressing": 0.0
+    }
+  },
+  "data_sources": {
+    "single_cell": {
+      "n_cells": 10000,
+      "n_datasets": 2
+    },
+    "bulk_rnaseq": {
+      "n_samples": 0,
+      "n_studies": 50
+    }
+  },
+  "last_updated": "2026-02"
+}

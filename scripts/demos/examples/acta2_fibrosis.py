@@ -29,6 +29,12 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, asdict
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).parent.parent / ".env")
+except ImportError:
+    pass
+
 # Import the clients
 from clients import SPARQLClient
 from clients import NIAIDClient
@@ -43,7 +49,6 @@ except ImportError:
 
 # Configuration
 ARCHS4_DATA_DIR = os.environ.get("ARCHS4_DATA_DIR", "/tmp/archs4")
-print("using archs4 data dir: ", ARCHS4_DATA_DIR)
 
 # =============================================================================
 # Output Data Structures
