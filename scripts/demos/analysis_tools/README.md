@@ -9,7 +9,7 @@ Reusable analysis tools for biomedical data exploration. Each module can be used
 | `gene_paths.py` | Find gene-disease connections and the mechanisms linking them | SPOKE-OKN, Wikidata, Ubergraph |
 | `gene_neighborhood.py` | Query the biological neighborhood of a gene across FRINK knowledge graphs | SPOKE-OKN, SPOKE-GeneLab, Wikidata, NDE, BioBricks |
 | `go_disease_analysis.py` | Multi-layer analysis: which genes in a GO process are dysregulated in a disease, and which cell types drive the changes? | Ubergraph, Wikidata, CellxGene Census, ARCHS4 |
-| `drug_disease.py` | Find genes with opposing expression between drug treatment and disease | GXA/Fuseki (local) |
+| `drug_disease.py` | Find genes with opposing expression between drug treatment and disease | GXA (FRINK) |
 | `visualization.py` | Interactive vis.js network graphs and Plotly charts | — |
 
 ## Quick Start
@@ -33,7 +33,7 @@ python -m analysis_tools.go_disease_analysis \
     --tissue lung \
     --output ecm_fibrosis.json
 
-# Drug-disease opposing expression (requires local GXA Fuseki)
+# Drug-disease opposing expression (queries GXA in FRINK)
 python -m analysis_tools.drug_disease
 ```
 
@@ -109,7 +109,7 @@ Finds genes where drug treatment and disease push expression in opposite directi
 1. **Drug DOWN / Disease UP** -- drug suppresses a pathologically elevated gene
 2. **Drug UP / Disease DOWN** -- drug activates a pathologically suppressed gene
 
-Requires a local GXA Fuseki server at `http://localhost:3030/GXA-v2/sparql`.
+Queries the GXA knowledge graph in FRINK at `https://frink.apps.renci.org/gene-expression-atlas-okn/sparql`.
 
 ### visualization.py
 

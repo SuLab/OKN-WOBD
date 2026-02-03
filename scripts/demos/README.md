@@ -36,7 +36,7 @@ Each question is a self-contained investigation that queries multiple data sourc
 | Q2 | What is the biological neighborhood of CD19 across FRINK knowledge graphs? | SPOKE-OKN, SPOKE-GeneLab, Wikidata, NDE, BioBricks | `python -m questions.gene_neighborhood_map` |
 | Q3 | Which ECM genes are dysregulated in pulmonary fibrosis, and which cell types drive the changes? | Ubergraph, Wikidata, CellxGene, ARCHS4 | `python -m questions.go_process_in_disease` |
 | Q4 | What genes are differentially expressed in psoriasis skin tissue vs normal? | ARCHS4, g:Profiler | `python -m questions.differential_expression` |
-| Q5 | What genes show opposing drug vs disease expression? | GXA/Fuseki, SPOKE | `python -m questions.drug_disease_targets` |
+| Q5 | What genes show opposing drug vs disease expression? | GXA (FRINK), SPOKE | `python -m questions.drug_disease_targets` |
 | Q6 | What B cell activation genes have expression data in NIAID vaccination studies? | Wikidata, NIAID, ARCHS4 | `python -m questions.cross_layer_datasets` |
 | Q7 | What is ACTA2's role in pulmonary fibrosis across cell types and data sources? | Wikidata, CellxGene, NIAID, ARCHS4 | `python -m questions.single_gene_deep_dive` |
 
@@ -94,7 +94,7 @@ from analysis_tools import GeneDiseasePathFinder, GeneNeighborhoodQuery, PlotlyV
 |--------|-------------|
 | `gene_paths.py` | Gene-disease connections via SPOKE, Wikidata, Ubergraph |
 | `gene_neighborhood.py` | Gene neighborhood across FRINK graphs |
-| `drug_disease.py` | Opposing drug/disease expression (requires local GXA Fuseki) |
+| `drug_disease.py` | Opposing drug/disease expression (GXA via FRINK) |
 | `go_disease_analysis.py` | Multi-layer GO term analysis (KG + single-cell + bulk) |
 | `visualization.py` | vis.js networks and Plotly charts |
 
@@ -159,5 +159,5 @@ pip install anthropic
 | CellxGene Census | via `cellxgene-census` | Q3, Q7 |
 | ARCHS4 | Local HDF5 files | Q3, Q4, Q6, Q7 |
 | NIAID | https://api.data.niaid.nih.gov/ | Q6, Q7 |
-| GXA/Fuseki | http://localhost:3030/GXA-v2/sparql | Q5 |
+| GXA (FRINK) | https://frink.apps.renci.org/gene-expression-atlas-okn/sparql | Q5 |
 | g:Profiler | https://biit.cs.ut.ee/gprofiler/ | Q4 |

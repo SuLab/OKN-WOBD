@@ -163,6 +163,33 @@ def run(
     report.add_provenance("disease", disease)
     report.add_provenance("tissue", tissue)
 
+    # SPARQL queries used
+    go_uri_id = go_term.replace(":", "_")
+    report.add_query(
+        "Ubergraph: Subclasses of GO term",
+        f'''PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT DISTINCT ?subclass ?label
+WHERE {{
+    ?subclass rdfs:subClassOf* obo:{go_uri_id} .
+    ?subclass rdfs:label ?label .
+}}''',
+        "https://ubergraph.apps.renci.org/sparql",
+    )
+    report.add_query(
+        "Wikidata: Genes for GO term",
+        f'''SELECT DISTINCT ?symbol ?entrez WHERE {{
+    ?go_term wdt:P686 "{go_term}" .
+    ?protein wdt:P682 ?go_term ;
+             wdt:P703 wd:Q15978631 ;
+             wdt:P702 ?gene .
+    ?gene wdt:P353 ?symbol ;
+          wdt:P351 ?entrez .
+}}''',
+        "https://query.wikidata.org/sparql",
+    )
+
     filepath = str(Path(output_dir) / "go_process_in_disease.html")
     saved = report.save(filepath)
     print(f"Report saved to: {saved}")

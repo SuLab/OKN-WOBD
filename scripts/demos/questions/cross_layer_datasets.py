@@ -20,6 +20,12 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).parent.parent / ".env")
+except ImportError:
+    pass
+
 QUESTION = "What {go_label} genes have expression data in NIAID {search_term} studies?"
 GO_TERM = "GO:0042113"
 GO_LABEL = "B cell activation"
@@ -186,6 +192,20 @@ def run(
     report.add_provenance("niaid_query", f'{search_term} AND includedInDataCatalog.name:"NCBI GEO"')
     if selected_gse:
         report.add_provenance("archs4_series", selected_gse)
+
+    # SPARQL query used
+    report.add_query(
+        "Wikidata: Genes for GO term",
+        f'''SELECT DISTINCT ?symbol ?entrez WHERE {{
+    ?go_term wdt:P686 "{go_term}" .
+    ?protein wdt:P682 ?go_term ;
+             wdt:P703 wd:Q15978631 ;
+             wdt:P702 ?gene .
+    ?gene wdt:P353 ?symbol ;
+          wdt:P351 ?entrez .
+}}''',
+        "https://query.wikidata.org/sparql",
+    )
 
     filepath = str(Path(output_dir) / "cross_layer_datasets.html")
     saved = report.save(filepath)

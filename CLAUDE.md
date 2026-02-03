@@ -81,7 +81,7 @@ Unified data source clients for cross-layer biomedical queries:
 
 | Module | Data Layer | Key Classes | Description |
 |--------|-----------|-------------|-------------|
-| `sparql.py` | Wikidata/FRINK/Ubergraph/Fuseki | `SPARQLClient`, `QueryResult`, `GXAQueries` | Unified SPARQL client with named endpoints and `add_endpoint()` for custom servers |
+| `sparql.py` | Wikidata/FRINK/Ubergraph | `SPARQLClient`, `QueryResult`, `GXAQueries` | Unified SPARQL client with named endpoints and `add_endpoint()` for custom servers |
 | `cellxgene.py` | CellxGene Census | `CellxGeneClient`, `ExpressionStats` | Single-cell RNA-seq expression queries |
 | `niaid.py` | NIAID Discovery | `NIAIDClient`, `SearchResult` | Dataset search with ontology annotations |
 | `archs4.py` | ARCHS4 (local HDF5) | `ARCHS4Client`, `ARCHS4DataFile` | Bulk RNA-seq expression from GEO |
@@ -107,7 +107,7 @@ Reusable analysis tools:
 
 - `gene_paths.py` - Gene-disease connections across SPOKE, Wikidata, Ubergraph (`GeneDiseasePathFinder`)
 - `gene_neighborhood.py` - Gene neighborhood queries across FRINK graphs (`GeneNeighborhoodQuery`)
-- `drug_disease.py` - Opposing drug/disease expression patterns via local GXA Fuseki (`find_drug_disease_genes`)
+- `drug_disease.py` - Opposing drug/disease expression patterns via GXA in FRINK (`find_drug_disease_genes`)
 - `go_disease_analysis.py` - Multi-layer GO term disease analysis (KG + single-cell + bulk)
 - `visualization.py` - vis.js network and Plotly visualizations (`PlotlyVisualizer`)
 
@@ -121,7 +121,7 @@ Biological question investigations. Each module answers a specific question usin
 - `gene_neighborhood_map.py` - Q2: Gene neighborhood across FRINK graphs
 - `go_process_in_disease.py` - Q3: GO process genes in disease (multi-layer)
 - `differential_expression.py` - Q4: DE analysis via ChatGEO (ARCHS4, g:Profiler)
-- `drug_disease_targets.py` - Q5: Opposing drug/disease expression (GXA/Fuseki)
+- `drug_disease_targets.py` - Q5: Opposing drug/disease expression (GXA/FRINK)
 - `cross_layer_datasets.py` - Q6: Cross-layer KG → NIAID → ARCHS4 workflow
 - `single_gene_deep_dive.py` - Q7: Single gene across all data sources
 - `run_all.py` - Runner for all questions
@@ -187,5 +187,5 @@ The `--all` flag fetches these resources: ImmPort, VDJServer, Vivli, RADx Data H
 - **Wikidata**: https://query.wikidata.org/sparql - Gene/disease lookups via demo clients
 - **CellxGene Census**: Single-cell RNA-seq expression data
 - **ARCHS4**: Bulk RNA-seq from GEO (requires local HDF5 files)
-- **GXA/Fuseki**: Gene Expression Atlas via local Fuseki server (`http://localhost:3030/GXA-v2/sparql`)
+- **GXA**: Gene Expression Atlas via FRINK (`https://frink.apps.renci.org/gene-expression-atlas-okn/sparql`)
 - **g:Profiler**: Gene set enrichment analysis (GO, KEGG, Reactome)

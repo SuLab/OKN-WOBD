@@ -123,6 +123,88 @@ def run(gene: str = GENE, output_dir: str = "questions/output"):
     })
     report.add_provenance("gene_symbol", gene)
 
+    # SPARQL queries used
+    report.add_query(
+        "SPOKE: Direct gene-disease associations",
+        f'''PREFIX biolink: <https://w3id.org/biolink/vocab/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX spoke: <https://purl.org/okn/frink/kg/spoke/schema/>
+
+SELECT ?gene ?predicate ?disease
+WHERE {{
+    ?gene a biolink:Gene ;
+          rdfs:label "{gene}" .
+    VALUES ?predicate {{
+        spoke:MARKER_POS_GmpD
+        spoke:MARKER_NEG_GmnD
+        spoke:EXPRESSEDIN_GeiD
+    }}
+    ?gene ?predicate ?disease .
+}}''',
+        "https://frink.apps.renci.org/spoke-okn/sparql",
+    )
+    report.add_query(
+        "Wikidata: Gene-disease associations",
+        f'''PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT DISTINCT ?disease ?diseaseLabel ?doid ?mondo
+WHERE {{
+    ?gene wdt:P353 "{gene}" ;
+          wdt:P703 wd:Q15978631 .
+    ?gene wdt:P2293 ?disease .
+    ?disease rdfs:label ?diseaseLabel .
+    FILTER(LANG(?diseaseLabel) = "en")
+    OPTIONAL {{ ?disease wdt:P699 ?doid . }}
+    OPTIONAL {{ ?disease wdt:P5270 ?mondo . }}
+}}''',
+        "https://query.wikidata.org/sparql",
+    )
+    report.add_query(
+        "Wikidata: Gene GO terms (via protein)",
+        f'''PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT DISTINCT ?goId ?goLabel
+WHERE {{
+    ?gene wdt:P353 "{gene}" ;
+          wdt:P703 wd:Q15978631 ;
+          wdt:P688 ?protein .
+    ?protein wdt:P680|wdt:P681|wdt:P682 ?goTerm .
+    ?goTerm wdt:P686 ?goId .
+    ?goTerm rdfs:label ?goLabel .
+    FILTER(LANG(?goLabel) = "en")
+}}''',
+        "https://query.wikidata.org/sparql",
+    )
+    report.add_query(
+        "Ubergraph: GO term to disease (per GO term)",
+        '''PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+SELECT DISTINCT ?disease ?diseaseLabel
+WHERE {
+    BIND(obo:<GO_ID> AS ?goTerm)
+    {
+        ?disease rdfs:subClassOf* obo:MONDO_0000001 .
+        ?disease rdfs:subClassOf ?restriction .
+        ?restriction owl:onProperty ?prop ;
+                     owl:someValuesFrom ?goTerm .
+    }
+    UNION
+    {
+        ?disease rdfs:subClassOf* obo:MONDO_0000001 .
+        ?disease obo:RO_0004027 ?goTerm .
+    }
+    ?disease rdfs:label ?diseaseLabel .
+}
+LIMIT 20''',
+        "https://ubergraph.apps.renci.org/sparql",
+    )
+
     filepath = str(Path(output_dir) / "gene_disease_map.html")
     saved = report.save(filepath)
     print(f"Report saved to: {saved}")

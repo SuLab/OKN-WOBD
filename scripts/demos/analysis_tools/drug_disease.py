@@ -47,7 +47,7 @@ def find_drug_disease_genes(
         List of dicts with gene, drug, and disease information
     """
     client = SPARQLClient(timeout=120)
-    client.add_endpoint("gxa", "http://localhost:3030/GXA-v2/sparql")
+    client.add_endpoint("gxa", "https://frink.apps.renci.org/gene-expression-atlas-okn/sparql")
 
     # Set up thresholds based on direction
     if drug_direction == "down":

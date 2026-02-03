@@ -19,8 +19,8 @@ Usage:
         } LIMIT 10
     ''', endpoint="wikidata")
 
-    # Add and query a local Fuseki endpoint
-    client.add_endpoint("gxa", "http://localhost:3030/GXA-v2/sparql")
+    # Add and query the GXA endpoint in FRINK
+    client.add_endpoint("gxa", "https://frink.apps.renci.org/gene-expression-atlas-okn/sparql")
     results = client.query("SELECT * WHERE { ?s ?p ?o } LIMIT 5", endpoint="gxa")
 
     # Check endpoint availability
@@ -126,7 +126,7 @@ class SPARQLClient:
         results = client.query("SELECT * WHERE { ?s ?p ?o } LIMIT 10", endpoint="wikidata")
 
         # Add custom endpoint
-        client.add_endpoint("gxa", "http://localhost:3030/GXA-v2/sparql")
+        client.add_endpoint("gxa", "https://frink.apps.renci.org/gene-expression-atlas-okn/sparql")
     """
 
     # Pre-configured FRINK endpoints (hosted by RENCI)
@@ -500,14 +500,15 @@ class SPARQLClient:
 
 class GXAQueries:
     """
-    Domain-specific helper queries for GXA/GeneLab data in local Fuseki.
+    Domain-specific helper queries for GXA/GeneLab data in FRINK.
 
     These functions accept a SPARQLClient instance configured with a GXA endpoint.
-    Register the endpoint first: client.add_endpoint("gxa", "http://localhost:3030/GXA-v2/sparql")
+    Register the endpoint first:
+        client.add_endpoint("gxa", "https://frink.apps.renci.org/gene-expression-atlas-okn/sparql")
 
     Usage:
         client = SPARQLClient()
-        client.add_endpoint("gxa", "http://localhost:3030/GXA-v2/sparql")
+        client.add_endpoint("gxa", "https://frink.apps.renci.org/gene-expression-atlas-okn/sparql")
         studies = GXAQueries.list_studies(client)
     """
 

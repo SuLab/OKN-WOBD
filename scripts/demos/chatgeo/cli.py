@@ -14,7 +14,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Literal, Optional, Tuple
+from typing import Any, Dict, Literal, Optional, Tuple
 
 # Add parent directory for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -90,7 +90,7 @@ def run_analysis(
     output_format: Literal["summary", "json", "tsv"] = "summary",
     interpret: bool = True,
     verbose: bool = False,
-) -> None:
+) -> Optional[Dict[str, Any]]:
     """
     Run differential expression analysis.
 
@@ -367,6 +367,53 @@ def run_analysis(
                     print(f"  Interpretation skipped: {e}")
 
         print(f"Results written to: {output_dir}")
+
+    # Return structured results for programmatic use
+    return {
+        "sample_discovery": {
+            "n_disease_samples": provenance.n_test_samples,
+            "n_control_samples": provenance.n_control_samples,
+            "test_studies": provenance.test_studies,
+            "control_studies": provenance.control_studies,
+            "mode": "pooled",
+        },
+        "de_results": {
+            "genes_tested": result.genes_tested,
+            "genes_significant": result.genes_significant,
+            "significant_genes": [
+                {
+                    "gene": g.gene_symbol,
+                    "log2_fold_change": g.log2_fold_change,
+                    "padj": g.pvalue_adjusted,
+                    "direction": g.direction,
+                    "mean_test": g.mean_test,
+                    "mean_control": g.mean_control,
+                }
+                for g in sorted(
+                    result.upregulated + result.downregulated,
+                    key=lambda g: abs(g.log2_fold_change),
+                    reverse=True,
+                )
+            ],
+        },
+        "enrichment": _format_enrichment(enrichment_result) if enrichment_result else {},
+        "provenance": provenance.to_dict(),
+    }
+
+
+def _format_enrichment(enrichment_result) -> Dict[str, Any]:
+    """Format enrichment result for programmatic return."""
+    out: Dict[str, list] = {}
+    for direction in [enrichment_result.upregulated, enrichment_result.downregulated]:
+        for t in direction.terms:
+            out.setdefault(t.source, []).append({
+                "name": t.term_name,
+                "p_value": t.pvalue_adjusted,
+                "intersection_size": t.intersection_size,
+                "source": t.source,
+                "term_id": t.term_id,
+            })
+    return out
 
 
 def main():

@@ -26,7 +26,7 @@ QUESTIONS = [
     ("gene_neighborhood_map", "Q2: Gene Neighborhood", ["SPARQLWrapper"]),
     ("go_process_in_disease", "Q3: GO Process in Disease", ["SPARQLWrapper"]),
     ("differential_expression", "Q4: Differential Expression", ["chatgeo"]),
-    ("drug_disease_targets", "Q5: Drug-Disease Targets", ["GXA/Fuseki"]),
+    ("drug_disease_targets", "Q5: Drug-Disease Targets", ["GXA/FRINK"]),
     ("cross_layer_datasets", "Q6: Cross-Layer Datasets", ["SPARQLWrapper"]),
     ("single_gene_deep_dive", "Q7: Single Gene Deep Dive", ["SPARQLWrapper"]),
 ]

@@ -3,14 +3,12 @@
 Q5: What genes show opposing drug vs disease expression, suggesting
     therapeutic potential?
 
-Data Sources: GXA/Fuseki (local), SPOKE
+Data Sources: GXA (FRINK), SPOKE
 Primary Tools: find_drug_disease_genes, PlotlyVisualizer
 
-Queries a local GXA Fuseki server for genes where drug treatment pushes
+Queries the GXA knowledge graph in FRINK for genes where drug treatment pushes
 expression in the opposite direction from disease, identifying potential
 therapeutic mechanisms.
-
-Requires: Local Fuseki server running at http://localhost:3030/GXA-v2/sparql
 
 Usage:
     python -m questions.drug_disease_targets
@@ -28,7 +26,7 @@ def run(output_dir: str = "questions/output"):
 
     report = QuestionReport(
         question=QUESTION,
-        sources=["GXA/Fuseki", "SPOKE"],
+        sources=["GXA (FRINK)", "SPOKE"],
         module_name="drug_disease_targets",
     )
 
@@ -55,12 +53,9 @@ def run(output_dir: str = "questions/output"):
         results1 = []
         report.add_step(
             "Pattern 1: Drug suppresses pathologically elevated genes",
-            f'<p class="no-data">Query failed: {e}. Is the GXA Fuseki server running at localhost:3030?</p>',
+            f'<p class="no-data">Query failed: {e}</p>',
         )
-        report.set_answer(
-            "Analysis requires a local GXA Fuseki server. "
-            "Start it with: fuseki-server --mem /GXA-v2"
-        )
+        report.set_answer(f"GXA query failed: {e}")
         filepath = str(Path(output_dir) / "drug_disease_targets.html")
         report.save(filepath)
         return report
@@ -131,7 +126,68 @@ def run(output_dir: str = "questions/output"):
         f"Pattern 2 (drug activates pathologically suppressed genes): {len(results2)} pairs."
     )
 
-    report.add_provenance("gxa_endpoint", "http://localhost:3030/GXA-v2/sparql")
+    gxa_endpoint = "https://frink.apps.renci.org/gene-expression-atlas-okn/sparql"
+    report.add_provenance("gxa_endpoint", gxa_endpoint)
+
+    # SPARQL queries used
+    report.add_query(
+        "GXA: Drug-regulated genes",
+        '''SELECT DISTINCT ?gene ?geneSymbol ?drugStudy ?drugTitle ?drugLog2fc
+                ?drugAssayName ?drugTestGroup ?drugRefGroup
+                ?drugName ?drugId
+WHERE {
+    ?drugExpr a biolink:GeneExpressionMixin ;
+              spokegenelab:log2fc ?drugLog2fc ;
+              spokegenelab:adj_p_value ?drugPval ;
+              biolink:subject ?drugAssayUri ;
+              biolink:object ?gene .
+    FILTER(?drugLog2fc < -2.0)
+    FILTER(?drugPval < 0.05)
+    ?gene biolink:symbol ?geneSymbol .
+    ?drugAssayUri biolink:name ?drugAssayName .
+    OPTIONAL { ?drugAssayUri spokegenelab:test_group_label ?drugTestGroup }
+    OPTIONAL { ?drugAssayUri spokegenelab:reference_group_label ?drugRefGroup }
+    VALUES ?factor { "compound" "treatment" "dose" }
+    ?drugStudyUri spokegenelab:experimental_factors ?factor ;
+                  biolink:has_output ?drugAssayUri ;
+                  biolink:name ?drugStudy ;
+                  spokegenelab:project_title ?drugTitle .
+    OPTIONAL {
+        ?drugStudyUri biolink:studies ?drug .
+        ?drug a biolink:ChemicalEntity ;
+              biolink:name ?drugName ;
+              biolink:id ?drugId .
+    }
+}
+LIMIT 2000''',
+        gxa_endpoint,
+    )
+    report.add_query(
+        "GXA: Disease-regulated genes (per batch)",
+        '''SELECT ?gene ?diseaseStudy ?diseaseTitle ?diseaseLog2fc ?diseasePval
+       ?diseaseName ?diseaseId ?diseaseAssayName ?diseaseTestGroup ?diseaseRefGroup
+WHERE {
+    VALUES ?gene { <gene_uris...> }
+    ?diseaseExpr a biolink:GeneExpressionMixin ;
+                 biolink:object ?gene ;
+                 biolink:subject ?diseaseAssayUri ;
+                 spokegenelab:log2fc ?diseaseLog2fc ;
+                 spokegenelab:adj_p_value ?diseasePval .
+    ?diseaseAssayUri biolink:name ?diseaseAssayName .
+    OPTIONAL { ?diseaseAssayUri spokegenelab:test_group_label ?diseaseTestGroup }
+    OPTIONAL { ?diseaseAssayUri spokegenelab:reference_group_label ?diseaseRefGroup }
+    ?diseaseStudyUri spokegenelab:experimental_factors "disease" ;
+                     biolink:has_output ?diseaseAssayUri ;
+                     biolink:name ?diseaseStudy ;
+                     spokegenelab:project_title ?diseaseTitle ;
+                     biolink:studies ?disease .
+    ?disease a biolink:Disease ;
+             biolink:name ?diseaseName ;
+             biolink:id ?diseaseId .
+}
+LIMIT 500''',
+        gxa_endpoint,
+    )
 
     filepath = str(Path(output_dir) / "drug_disease_targets.html")
     saved = report.save(filepath)

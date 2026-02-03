@@ -20,6 +20,12 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).parent.parent / ".env")
+except ImportError:
+    pass
+
 QUESTION = "What is {gene}'s role in {disease} across cell types and data sources?"
 GENE = "ACTA2"
 TISSUE = "lung"
@@ -234,6 +240,30 @@ def run(
     report.add_provenance("gene_symbol", gene)
     report.add_provenance("tissue", tissue)
     report.add_provenance("disease", disease)
+
+    # SPARQL query used
+    report.add_query(
+        "Wikidata: Gene information",
+        f'''SELECT DISTINCT ?gene ?symbol ?entrez ?ensembl ?uniprot ?name ?description ?go_id WHERE {{
+    ?gene wdt:P353 "{gene}" ;
+          wdt:P703 wd:Q15978631 .
+    OPTIONAL {{ ?gene wdt:P353 ?symbol . }}
+    OPTIONAL {{ ?gene wdt:P351 ?entrez . }}
+    OPTIONAL {{ ?gene wdt:P594 ?ensembl . }}
+    OPTIONAL {{ ?gene rdfs:label ?name . FILTER(LANG(?name) = "en") }}
+    OPTIONAL {{ ?gene schema:description ?description . FILTER(LANG(?description) = "en") }}
+    OPTIONAL {{
+        ?gene wdt:P702 ?protein .
+        ?protein wdt:P352 ?uniprot .
+    }}
+    OPTIONAL {{
+        ?gene wdt:P702 ?protein2 .
+        ?protein2 wdt:P682 ?go_term .
+        ?go_term wdt:P686 ?go_id .
+    }}
+}}''',
+        "https://query.wikidata.org/sparql",
+    )
 
     filepath = str(Path(output_dir) / "single_gene_deep_dive.html")
     saved = report.save(filepath)

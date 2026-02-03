@@ -475,6 +475,8 @@ class ARCHS4Client:
         """
         try:
             samples = a4.meta.series(str(self.h5_path), geo_accession)
+            if isinstance(samples, pd.DataFrame):
+                return not samples.empty
             return len(samples) > 0 if samples else False
         except Exception:
             return False
@@ -490,6 +492,12 @@ class ARCHS4Client:
             List of sample GEO accession IDs
         """
         samples = a4.meta.series(str(self.h5_path), geo_accession)
+        if isinstance(samples, pd.DataFrame):
+            if samples.empty:
+                return []
+            if "geo_accession" in samples.columns:
+                return samples["geo_accession"].tolist()
+            return samples.index.tolist()
         return samples if samples else []
 
     def count_samples(self, search_term: Optional[str] = None) -> int:

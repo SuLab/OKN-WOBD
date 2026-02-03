@@ -119,6 +119,92 @@ def run(gene: str = GENE, output_dir: str = "questions/output"):
     for g in neighborhood.graphs:
         report.add_provenance(f"endpoint_{g.graph_name}", g.endpoint)
 
+    # SPARQL queries used (representative templates)
+    gene_iri = neighborhood.gene_iri or "<gene_iri>"
+    report.add_query(
+        "SPOKE-OKN: Gene neighborhood",
+        f'''PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX biolink: <https://w3id.org/biolink/vocab/>
+
+SELECT DISTINCT ?entity ?entityLabel ?entityType ?entityTypeLabel ?predicate ?predicateLabel ?direction
+WHERE {{
+  {{
+    <{gene_iri}> ?predicate ?entity .
+    BIND("outgoing" AS ?direction)
+    OPTIONAL {{ ?entity rdfs:label ?entityLabel }}
+    OPTIONAL {{ ?entity a ?entityType . OPTIONAL {{ ?entityType rdfs:label ?entityTypeLabel }} }}
+    OPTIONAL {{ ?predicate rdfs:label ?predicateLabel }}
+    FILTER(?predicate != rdf:type && ?predicate != rdfs:label && ?predicate != rdfs:comment)
+  }}
+  UNION
+  {{
+    ?entity ?predicate <{gene_iri}> .
+    BIND("incoming" AS ?direction)
+    OPTIONAL {{ ?entity rdfs:label ?entityLabel }}
+    OPTIONAL {{ ?entity a ?entityType . OPTIONAL {{ ?entityType rdfs:label ?entityTypeLabel }} }}
+    OPTIONAL {{ ?predicate rdfs:label ?predicateLabel }}
+    FILTER(?predicate != rdf:type && ?predicate != rdfs:label)
+  }}
+}}
+LIMIT 20''',
+        "https://frink.apps.renci.org/spoke-okn/sparql",
+    )
+    report.add_query(
+        "Wikidata: Gene properties and GO terms",
+        f'''SELECT DISTINCT ?entity ?entityLabel ?entityType ?entityTypeLabel ?property ?propertyLabel ?direction
+WHERE {{
+  {{
+    ?gene wdt:P353 "{gene}" .
+    ?gene wdt:P703 wd:Q15978631 .
+  }}
+  {{
+    ?gene ?prop ?entity .
+    ?property wikibase:directClaim ?prop .
+    BIND("outgoing" AS ?direction)
+    FILTER(isIRI(?entity) && ?entity != wd:Q15978631)
+    OPTIONAL {{ ?entity wdt:P31 ?entityType }}
+  }}
+  UNION
+  {{
+    ?gene wdt:P688 ?protein .
+    ?protein ?prop ?entity .
+    ?property wikibase:directClaim ?prop .
+    BIND("outgoing" AS ?direction)
+    FILTER(isIRI(?entity))
+    OPTIONAL {{ ?entity wdt:P31 ?entityType }}
+  }}
+  SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }}
+}}
+LIMIT 30''',
+        "https://query.wikidata.org/sparql",
+    )
+    report.add_query(
+        "NDE: Datasets mentioning gene",
+        f'''PREFIX schema: <http://schema.org/>
+
+SELECT DISTINCT ?entity ?entityLabel ?entityType ?predicate ?direction
+WHERE {{
+  ?entity a schema:Dataset .
+  BIND(schema:Dataset AS ?entityType)
+  BIND("incoming" AS ?direction)
+  BIND(schema:mentions AS ?predicate)
+  {{
+    ?entity schema:name ?name .
+    FILTER(CONTAINS(LCASE(?name), LCASE("{gene}")))
+    BIND(?name AS ?entityLabel)
+  }}
+  UNION
+  {{
+    ?entity schema:description ?desc .
+    FILTER(CONTAINS(LCASE(?desc), LCASE("{gene}")))
+    ?entity schema:name ?entityLabel .
+  }}
+}}
+LIMIT 10''',
+        "https://frink.apps.renci.org/nde/sparql",
+    )
+
     filepath = str(Path(output_dir) / "gene_neighborhood_map.html")
     saved = report.save(filepath)
     print(f"Report saved to: {saved}")

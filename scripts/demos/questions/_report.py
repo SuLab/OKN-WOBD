@@ -42,6 +42,7 @@ class QuestionReport:
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "sources": sources,
         }
+        self.queries: List[Dict[str, str]] = []
         self.raw_data: Dict[str, Any] = {}
 
     def add_step(
@@ -72,6 +73,11 @@ class QuestionReport:
     def set_answer(self, answer: str) -> "QuestionReport":
         """Set the concluding answer summary."""
         self.answer = answer
+        return self
+
+    def add_query(self, label: str, sparql: str, endpoint: str) -> "QuestionReport":
+        """Add a SPARQL query to provenance."""
+        self.queries.append({"label": label, "sparql": sparql.strip(), "endpoint": endpoint})
         return self
 
     def add_provenance(self, key: str, value: Any) -> "QuestionReport":
@@ -236,6 +242,14 @@ class QuestionReport:
         .provenance dd {{ margin-left: 16px; word-break: break-all; }}
         code {{ background: #f0f0f0; padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }}
         .no-data {{ color: #999; font-style: italic; }}
+        .query-block {{ margin: 10px 0; }}
+        .query-block summary {{ cursor: pointer; font-weight: 600; font-size: 0.9em; color: #555; }}
+        .query-block pre {{
+            background: #1e1e2e; color: #cdd6f4; padding: 12px 16px;
+            border-radius: 6px; overflow-x: auto; font-size: 0.82em;
+            line-height: 1.5; margin-top: 6px;
+        }}
+        .query-endpoint {{ font-size: 0.8em; color: #888; margin-left: 8px; font-weight: normal; }}
     </style>
 </head>
 <body>
@@ -315,6 +329,20 @@ class QuestionReport:
                 val_str = str(value)
             items.append(f"<dt>{key}</dt><dd>{val_str}</dd>")
         dl = "\n            ".join(items)
+
+        query_blocks = ""
+        if self.queries:
+            parts = []
+            for q in self.queries:
+                escaped = q["sparql"].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                parts.append(
+                    f'<details class="query-block">'
+                    f'<summary>{q["label"]}<span class="query-endpoint">{q["endpoint"]}</span></summary>'
+                    f'<pre><code>{escaped}</code></pre>'
+                    f'</details>'
+                )
+            query_blocks = "\n            ".join(parts)
+
         return f'''
     <div class="provenance">
         <h3>Provenance &#9660;</h3>
@@ -322,6 +350,7 @@ class QuestionReport:
             <dl>
             {dl}
             </dl>
+            {query_blocks}
         </div>
     </div>'''
 
