@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What B cell activation genes have expression data in NIAID vaccination studies?</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f8f9fa;
+            color: #2c3e50;
+            line-height: 1.6;
+            padding: 0 20px 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            padding: 40px 0 20px;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 30px;
+        }
+        header h1 {
+            font-size: 1.6em;
+            color: #2c3e50;
+            font-style: italic;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+        .badge {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin: 2px;
+        }
+        .step {
+            background: white;
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .step-header {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        .step-number {
+            background: #3498db;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .step-title {
+            font-weight: 600;
+            font-size: 1.05em;
+        }
+        .step-toggle {
+            margin-left: auto;
+            color: #aaa;
+            font-size: 1.2em;
+            transition: transform 0.2s;
+        }
+        .step-toggle.collapsed { transform: rotate(-90deg); }
+        .step-body {
+            margin-top: 14px;
+            padding-left: 40px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .step-body.collapsed { max-height: 0; margin-top: 0; }
+        .step-body table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .step-body th, .step-body td {
+            padding: 6px 12px;
+            border: 1px solid #e9ecef;
+            text-align: left;
+            font-size: 0.9em;
+        }
+        .step-body th { background: #f8f9fa; font-weight: 600; }
+        .viz-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .viz-section h3 { margin-bottom: 14px; }
+        .answer-section {
+            background: #eaf7ed;
+            border-left: 4px solid #27ae60;
+            border-radius: 0 8px 8px 0;
+            padding: 20px 24px;
+            margin: 24px 0;
+        }
+        .answer-section h2 {
+            color: #27ae60;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+        .provenance {
+            background: white;
+            border-radius: 8px;
+            padding: 16px 24px;
+            margin-top: 24px;
+            font-size: 0.85em;
+            color: #666;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .provenance h3 {
+            font-size: 0.95em;
+            color: #888;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .provenance-body { display: none; }
+        .provenance-body.expanded { display: block; }
+        .provenance dt { font-weight: 600; margin-top: 6px; }
+        .provenance dd { margin-left: 16px; word-break: break-all; }
+        code { background: #f0f0f0; padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }
+        .no-data { color: #999; font-style: italic; }
+        .query-block { margin: 10px 0; }
+        .query-block summary { cursor: pointer; font-weight: 600; font-size: 0.9em; color: #555; }
+        .query-block pre {
+            background: #1e1e2e; color: #cdd6f4; padding: 12px 16px;
+            border-radius: 6px; overflow-x: auto; font-size: 0.82em;
+            line-height: 1.5; margin-top: 6px;
+        }
+        .query-endpoint { font-size: 0.8em; color: #888; margin-left: 8px; font-weight: normal; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>"What B cell activation genes have expression data in NIAID vaccination studies?"</h1>
+        <div><span class="badge">Wikidata</span> <span class="badge">NIAID</span> <span class="badge">ARCHS4</span></div>
+    </header>
+
+    
+    <div class="step">
+        <div class="step-header">
+            <div class="step-number">1</div>
+            <div class="step-title">Query genes annotated to GO:0042113 (B cell activation)</div>
+            <div class="step-toggle">&#9660;</div>
+        </div>
+        <div class="step-body">
+            <p><strong>Genes found:</strong> 32</p><p><strong>Sample:</strong> CD79A, CHRNB2, CHRNA4, IGBP1, LAT2, PRKCB, AKAP17A, HDAC9, HDAC5, HDAC4, SKAP2, ICOSLG</p><table><thead><tr><th>Gene</th></tr></thead><tbody><tr><td>CD79A</td></tr><tr><td>CHRNB2</td></tr><tr><td>CHRNA4</td></tr><tr><td>IGBP1</td></tr><tr><td>LAT2</td></tr><tr><td>PRKCB</td></tr><tr><td>AKAP17A</td></tr><tr><td>HDAC9</td></tr><tr><td>HDAC5</td></tr><tr><td>HDAC4</td></tr><tr><td>SKAP2</td></tr><tr><td>ICOSLG</td></tr><tr><td>MALT1</td></tr><tr><td>IKZF3</td></tr><tr><td>BANK1</td></tr><tr><td>LAX1</td></tr><tr><td>TXLNA</td></tr><tr><td>FCRL1</td></tr><tr><td>GAPT</td></tr><tr><td>CD40</td></tr></tbody></table>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-header">
+            <div class="step-number">2</div>
+            <div class="step-title">Search NIAID for vaccination studies with GEO data</div>
+            <div class="step-toggle">&#9660;</div>
+        </div>
+        <div class="step-body">
+            <p><strong>Total studies:</strong> 3728</p><p><strong>With GEO accessions:</strong> 50</p><table><thead><tr><th>GEO Series</th><th>Study</th></tr></thead><tbody><tr><td>GSE302672</td><td>Comparative analysis of Ad5, mRNA, and protein vaccines reve</td></tr><tr><td>GSE51839</td><td>Transcriptomic analysis reveals differential response in the</td></tr><tr><td>GSE264579</td><td>Adenoviral Vectored Neoantigen Vaccine Augments Hyperexpande</td></tr><tr><td>GSE221646</td><td>Rational identification of novel drug targets and vaccine ca</td></tr><tr><td>GSE26808</td><td>Gene expression profiles of vaccinated fish using a long-ter</td></tr><tr><td>GSE247401</td><td>Blood transcriptome profiling reveals distinct gene networks</td></tr><tr><td>GSE103862</td><td>A Safety and Efficacy Study of ChAd63/MVA METRAP + RTS,S</td></tr><tr><td>GSE298124</td><td>Immunogenicity and protective efficacy of Marburg virus glyc</td></tr><tr><td>GSE129133</td><td>Vaccination accelerates hepatic erythropoiesis induced by bl</td></tr><tr><td>GSE260817</td><td>Time-dependent enhancement of mRNA vaccines by 4-1BB costimu</td></tr></tbody></table>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-header">
+            <div class="step-number">3</div>
+            <div class="step-title">Retrieve expression from ARCHS4 (GSE247401)</div>
+            <div class="step-toggle">&#9660;</div>
+        </div>
+        <div class="step-body">
+            <p><strong>GEO Series:</strong> GSE247401</p><p><strong>Matrix size:</strong> 32 genes x 50 samples</p><p><strong>B cell activation genes matched:</strong> 32</p><table><thead><tr><th>Gene</th><th>Mean Expression</th><th>Samples</th></tr></thead><tbody><tr><td>CD79A</td><td>3007</td><td>50</td></tr><tr><td>CHRNB2</td><td>21</td><td>50</td></tr><tr><td>CHRNA4</td><td>0</td><td>50</td></tr><tr><td>IGBP1</td><td>1090</td><td>50</td></tr><tr><td>LAT2</td><td>7587</td><td>50</td></tr><tr><td>PRKCB</td><td>7991</td><td>50</td></tr><tr><td>AKAP17A</td><td>3178</td><td>50</td></tr><tr><td>HDAC9</td><td>253</td><td>50</td></tr><tr><td>HDAC5</td><td>4005</td><td>50</td></tr><tr><td>HDAC4</td><td>2397</td><td>50</td></tr></tbody></table>
+        </div>
+    </div>
+    
+    
+    <div class="answer-section">
+        <h2>Answer</h2>
+        <p>Found 32 genes annotated to B cell activation (GO:0042113).</p><p>Discovered 50 vaccination studies with GEO data in NIAID.</p><p>Retrieved expression for 32 of 32 genes from GSE247401 (50 samples).</p>
+    </div>
+    
+    <div class="provenance">
+        <h3>Provenance &#9660;</h3>
+        <div class="provenance-body">
+            <dl>
+            <dt>timestamp</dt><dd>2026-02-03T16:32:47.911797+00:00</dd>
+            <dt>sources</dt><dd>Wikidata, NIAID, ARCHS4</dd>
+            <dt>go_term</dt><dd>GO:0042113</dd>
+            <dt>niaid_query</dt><dd>vaccination AND includedInDataCatalog.name:"NCBI GEO"</dd>
+            <dt>archs4_series</dt><dd>GSE247401</dd>
+            </dl>
+            <details class="query-block"><summary>Wikidata: Genes for GO term<span class="query-endpoint">https://query.wikidata.org/sparql</span></summary><pre><code>SELECT DISTINCT ?symbol ?entrez WHERE {
+    ?go_term wdt:P686 "GO:0042113" .
+    ?protein wdt:P682 ?go_term ;
+             wdt:P703 wd:Q15978631 ;
+             wdt:P702 ?gene .
+    ?gene wdt:P353 ?symbol ;
+          wdt:P351 ?entrez .
+}</code></pre></details>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.step-header').forEach(function(header) {
+            header.addEventListener('click', function() {
+                var body = this.nextElementSibling;
+                var toggle = this.querySelector('.step-toggle');
+                body.classList.toggle('collapsed');
+                toggle.classList.toggle('collapsed');
+            });
+        });
+        document.querySelectorAll('.provenance h3').forEach(function(h) {
+            h.addEventListener('click', function() {
+                this.nextElementSibling.classList.toggle('expanded');
+            });
+        });
+    </script>
+</body>
+</html>

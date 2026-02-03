@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What is the biological neighborhood of CD19 across FRINK knowledge graphs?</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f8f9fa;
+            color: #2c3e50;
+            line-height: 1.6;
+            padding: 0 20px 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            padding: 40px 0 20px;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 30px;
+        }
+        header h1 {
+            font-size: 1.6em;
+            color: #2c3e50;
+            font-style: italic;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+        .badge {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin: 2px;
+        }
+        .step {
+            background: white;
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .step-header {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        .step-number {
+            background: #3498db;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .step-title {
+            font-weight: 600;
+            font-size: 1.05em;
+        }
+        .step-toggle {
+            margin-left: auto;
+            color: #aaa;
+            font-size: 1.2em;
+            transition: transform 0.2s;
+        }
+        .step-toggle.collapsed { transform: rotate(-90deg); }
+        .step-body {
+            margin-top: 14px;
+            padding-left: 40px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .step-body.collapsed { max-height: 0; margin-top: 0; }
+        .step-body table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .step-body th, .step-body td {
+            padding: 6px 12px;
+            border: 1px solid #e9ecef;
+            text-align: left;
+            font-size: 0.9em;
+        }
+        .step-body th { background: #f8f9fa; font-weight: 600; }
+        .viz-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .viz-section h3 { margin-bottom: 14px; }
+        .answer-section {
+            background: #eaf7ed;
+            border-left: 4px solid #27ae60;
+            border-radius: 0 8px 8px 0;
+            padding: 20px 24px;
+            margin: 24px 0;
+        }
+        .answer-section h2 {
+            color: #27ae60;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+        .provenance {
+            background: white;
+            border-radius: 8px;
+            padding: 16px 24px;
+            margin-top: 24px;
+            font-size: 0.85em;
+            color: #666;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .provenance h3 {
+            font-size: 0.95em;
+            color: #888;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .provenance-body { display: none; }
+        .provenance-body.expanded { display: block; }
+        .provenance dt { font-weight: 600; margin-top: 6px; }
+        .provenance dd { margin-left: 16px; word-break: break-all; }
+        code { background: #f0f0f0; padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }
+        .no-data { color: #999; font-style: italic; }
+        .query-block { margin: 10px 0; }
+        .query-block summary { cursor: pointer; font-weight: 600; font-size: 0.9em; color: #555; }
+        .query-block pre {
+            background: #1e1e2e; color: #cdd6f4; padding: 12px 16px;
+            border-radius: 6px; overflow-x: auto; font-size: 0.82em;
+            line-height: 1.5; margin-top: 6px;
+        }
+        .query-endpoint { font-size: 0.8em; color: #888; margin-left: 8px; font-weight: normal; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>"What is the biological neighborhood of CD19 across FRINK knowledge graphs?"</h1>
+        <div><span class="badge">SPOKE-OKN</span> <span class="badge">SPOKE-GeneLab</span> <span class="badge">Wikidata</span> <span class="badge">NDE</span> <span class="badge">BioBricks</span></div>
+    </header>
+
+    
+    <div class="step">
+        <div class="step-header">
+            <div class="step-number">1</div>
+            <div class="step-title">Resolve CD19 identifiers</div>
+            <div class="step-toggle">&#9660;</div>
+        </div>
+        <div class="step-body">
+            <p><strong>Gene Symbol:</strong> CD19</p><p><strong>NCBI Gene ID:</strong> 930</p><p><strong>Gene IRI:</strong> <code>http://www.ncbi.nlm.nih.gov/gene/930</code></p>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-header">
+            <div class="step-number">2</div>
+            <div class="step-title">Query all knowledge graphs in parallel</div>
+            <div class="step-toggle">&#9660;</div>
+        </div>
+        <div class="step-body">
+            <p><strong>Total entities found:</strong> 42</p><table><thead><tr><th>Graph</th><th>Entities</th><th>Query Time</th><th>Status</th></tr></thead><tbody><tr><td>biobricks-aopwiki</td><td>2</td><td>3039ms</td><td>2 entities</td></tr><tr><td>nde</td><td>10</td><td>2227ms</td><td>10 entities</td></tr><tr><td>spoke-genelab</td><td>10</td><td>407ms</td><td>10 entities</td></tr><tr><td>spoke-okn</td><td>10</td><td>344ms</td><td>10 entities</td></tr><tr><td>wikidata</td><td>10</td><td>352ms</td><td>10 entities</td></tr></tbody></table>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-header">
+            <div class="step-number">3</div>
+            <div class="step-title">Categorize related entities by type</div>
+            <div class="step-toggle">&#9660;</div>
+        </div>
+        <div class="step-body">
+            <table><thead><tr><th>Entity Type</th><th>Count</th></tr></thead><tbody><tr><td>Dataset</td><td>10</td></tr><tr><td>Disease</td><td>9</td></tr><tr><td>Unknown</td><td>5</td></tr><tr><td>OBI_0000070</td><td>5</td></tr><tr><td>Gene</td><td>3</td></tr><tr><td>data_1025</td><td>2</td></tr><tr><td>organ type</td><td>2</td></tr><tr><td>biological process</td><td>2</td></tr><tr><td>cellular component</td><td>2</td></tr><tr><td>gene</td><td>1</td></tr><tr><td>tissue type</td><td>1</td></tr></tbody></table>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-header">
+            <div class="step-number">4</div>
+            <div class="step-title">Entities from biobricks-aopwiki (2 total)</div>
+            <div class="step-toggle">&#9660;</div>
+        </div>
+        <div class="step-body">
+            <table><thead><tr><th>Direction</th><th>Entity</th><th>Type</th><th>Predicate</th></tr></thead><tbody><tr><td><-</td><td>CD83</td><td>data_1025</td><td>exactMatch</td></tr><tr><td><-</td><td>9308</td><td>data_1025</td><td>data_1027</td></tr></tbody></table>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-header">
+            <div class="step-number">5</div>
+            <div class="step-title">Entities from nde (10 total)</div>
+            <div class="step-toggle">&#9660;</div>
+        </div>
+        <div class="step-body">
+            <table><thead><tr><th>Direction</th><th>Entity</th><th>Type</th><th>Predicate</th></tr></thead><tbody><tr><td><-</td><td>Human TFH responses to malaria specific antigen us</td><td>Dataset</td><td>mentions</td></tr><tr><td><-</td><td>Study of efficacy and longevity of immune response</td><td>Dataset</td><td>mentions</td></tr><tr><td><-</td><td>Majority of human circulating IgG plasmablasts sto</td><td>Dataset</td><td>mentions</td></tr><tr><td><-</td><td>SARS-CoV-2-specific plasma cells are not durably e</td><td>Dataset</td><td>mentions</td></tr><tr><td><-</td><td>SMAD4 impedes conversion of NK cells into ILC1-lik</td><td>Dataset</td><td>mentions</td></tr><tr><td><-</td><td>SMAD4 impedes conversion of NK cells into ILC1-lik</td><td>Dataset</td><td>mentions</td></tr><tr><td><-</td><td>A comprehensive, cell specific microRNA catalogue </td><td>Dataset</td><td>mentions</td></tr><tr><td><-</td><td>Early arthritis B cell gene expression profiling</td><td>Dataset</td><td>mentions</td></tr></tbody></table>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-header">
+            <div class="step-number">6</div>
+            <div class="step-title">Entities from spoke-genelab (10 total)</div>
+            <div class="step-toggle">&#9660;</div>
+        </div>
+        <div class="step-body">
+            <table><thead><tr><th>Direction</th><th>Entity</th><th>Type</th><th>Predicate</th></tr></thead><tbody><tr><td>-></td><td>Gene</td><td></td><td>22-rdf-syntax-ns#type</td></tr><tr><td>-></td><td>CD19 molecule</td><td>Gene</td><td>IS_ORTHOLOG_MGiG</td></tr><tr><td>-></td><td>NCBITaxon_9606</td><td></td><td>taxonomy</td></tr><tr><td><-</td><td>CD19 antigen</td><td>Gene</td><td>IS_ORTHOLOG_MGiG</td></tr><tr><td><-</td><td>CD19 molecule</td><td>Gene</td><td>IS_ORTHOLOG_MGiG</td></tr><tr><td><-</td><td>OSD-125_transcription-profiling_dna-microarray_Aff</td><td>OBI_0000070</td><td>MEASURED_DIFFERENTIAL_EXPRESSION_ASmMG</td></tr><tr><td><-</td><td>OSD-125_transcription-profiling_dna-microarray_Aff</td><td>OBI_0000070</td><td>MEASURED_DIFFERENTIAL_EXPRESSION_ASmMG</td></tr><tr><td><-</td><td>OSD-125_transcription-profiling_dna-microarray_Aff</td><td>OBI_0000070</td><td>MEASURED_DIFFERENTIAL_EXPRESSION_ASmMG</td></tr></tbody></table>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-header">
+            <div class="step-number">7</div>
+            <div class="step-title">Entities from spoke-okn (10 total)</div>
+            <div class="step-toggle">&#9660;</div>
+        </div>
+        <div class="step-body">
+            <table><thead><tr><th>Direction</th><th>Entity</th><th>Type</th><th>Predicate</th></tr></thead><tbody><tr><td>-></td><td>ENSG00000177455</td><td></td><td>ensembl</td></tr><tr><td><-</td><td>non-Hodgkin lymphoma</td><td>Disease</td><td>ASSOCIATES_DaG</td></tr><tr><td><-</td><td>lymphoid leukemia</td><td>Disease</td><td>ASSOCIATES_DaG</td></tr><tr><td><-</td><td>otitis media</td><td>Disease</td><td>ASSOCIATES_DaG</td></tr><tr><td><-</td><td>leukemia</td><td>Disease</td><td>ASSOCIATES_DaG</td></tr><tr><td><-</td><td>Parkinson's disease</td><td>Disease</td><td>ASSOCIATES_DaG</td></tr><tr><td><-</td><td>liver disease</td><td>Disease</td><td>ASSOCIATES_DaG</td></tr><tr><td><-</td><td>rheumatoid arthritis</td><td>Disease</td><td>ASSOCIATES_DaG</td></tr></tbody></table>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-header">
+            <div class="step-number">8</div>
+            <div class="step-title">Entities from wikidata (10 total)</div>
+            <div class="step-toggle">&#9660;</div>
+        </div>
+        <div class="step-body">
+            <table><thead><tr><th>Direction</th><th>Entity</th><th>Type</th><th>Predicate</th></tr></thead><tbody><tr><td>-></td><td>PBB%20GE%20CD19%20206398%20s%20at%20fs.png</td><td></td><td>Gene Atlas image</td></tr><tr><td>-></td><td>appendix</td><td>organ type</td><td>expressed in</td></tr><tr><td>-></td><td>regulation of immune response</td><td>biological process</td><td>biological process</td></tr><tr><td>-></td><td>cellular defense response</td><td>biological process</td><td>biological process</td></tr><tr><td>-></td><td>mucosa of ileum</td><td></td><td>expressed in</td></tr><tr><td>-></td><td>CD19</td><td>gene</td><td>encoded by</td></tr><tr><td>-></td><td>spleen</td><td>organ type</td><td>expressed in</td></tr><tr><td>-></td><td>membrane</td><td>cellular component</td><td>cell component</td></tr></tbody></table>
+        </div>
+    </div>
+    
+    <div class="viz-section">
+        <h3>Neighborhood Network of CD19</h3>
+        <!DOCTYPE html>
+<html>
+<head>
+    <title>Biological Neighborhood of CD19</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .legend {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #555;
+        }
+        .instructions {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+        #network {
+            width: 1000px;
+            height: 700px;
+            border: 1px solid #ddd;
+            background: white;
+            margin: 0 auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .summary {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #666;
+        }
+        .controls {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .toggle-btn {
+            padding: 8px 16px;
+            font-size: 13px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: all 0.2s;
+        }
+        .toggle-btn.active {
+            background: #27ae60;
+            color: white;
+        }
+        .toggle-btn.inactive {
+            background: #e0e0e0;
+            color: #555;
+        }
+        .toggle-btn:hover {
+            opacity: 0.85;
+        }
+        #custom-tooltip {
+            position: fixed;
+            background: rgba(45, 52, 54, 0.95);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.5;
+            max-width: 400px;
+            pointer-events: none;
+            z-index: 10000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        #custom-tooltip b {
+            color: #f1c40f;
+        }
+        /* Hide native vis.js tooltip */
+        .vis-tooltip {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <h1>Biological Neighborhood of CD19</h1>
+    <div class="legend"><div style="margin-bottom:5px;"><b>Nodes:</b> <span style="display:inline-block;margin-right:15px;"><span style="display:inline-block;width:12px;height:12px;background:#3498db;border-radius:50%;margin-right:5px;"></span>Gene</span> <span style="display:inline-block;margin-right:15px;"><span style="display:inline-block;width:12px;height:12px;background:#e74c3c;border-radius:50%;margin-right:5px;"></span>Disease</span> <span style="display:inline-block;margin-right:15px;"><span style="display:inline-block;width:12px;height:12px;background:#2ecc71;border-radius:50%;margin-right:5px;"></span>GO Term</span> <span style="display:inline-block;margin-right:15px;"><span style="display:inline-block;width:12px;height:12px;background:#9b59b6;border-radius:50%;margin-right:5px;"></span>Drug</span></div><div><b>Sources:</b> <span style="display:inline-block;margin-right:15px;"><span style="display:inline-block;width:20px;height:3px;background:#d62728;margin-right:5px;vertical-align:middle;"></span>GXA</span> <span style="display:inline-block;margin-right:15px;"><span style="display:inline-block;width:20px;height:3px;background:#1f77b4;margin-right:5px;vertical-align:middle;"></span>SPOKE-OKN</span> <span style="display:inline-block;margin-right:15px;"><span style="display:inline-block;width:20px;height:3px;background:#2ca02c;margin-right:5px;vertical-align:middle;"></span>Ubergraph</span></div></div>
+    <div class="controls">
+        <button id="physicsToggle" class="toggle-btn inactive" onclick="togglePhysics()">
+            ⚡ Auto-Layout: OFF
+        </button>
+        <button class="toggle-btn inactive" onclick="resetLayout()">
+            🔄 Reset Layout
+        </button>
+    </div>
+    <div class="instructions">Drag nodes to rearrange • Scroll to zoom • Hover for details</div>
+    <div id="network"></div>
+    <div id="custom-tooltip"></div>
+    <div class="summary">
+        43 nodes • 42 connections
+    </div>
+
+    <script type="text/javascript">
+        var nodes = new vis.DataSet([{"id": "gene:CD19", "label": "CD19", "color": {"background": "#3498db", "border": "#3498db", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 40, "font": {"size": 14, "color": "#ffffff", "bold": true}, "title": "Gene: CD19<br>NCBI: 930", "shape": "dot", "fixed": {"x": false, "y": false}, "physics": false}, {"id": "https://identifiers.org/hgnc/CD83", "label": "CD83", "color": {"background": "#17becf", "border": "#17becf", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>CD83</b><br>Type: data_1025<br>Source: biobricks-aopwiki<br>IRI: https://identifiers.org/hgnc/CD83", "shape": "dot"}, {"id": "https://identifiers.org/ncbigene/9308", "label": "9308", "color": {"background": "#17becf", "border": "#17becf", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>9308</b><br>Type: data_1025<br>Source: biobricks-aopwiki<br>IRI: https://identifiers.org/ncbigene/9308", "shape": "dot"}, {"id": "https://okn.wobd.org/dataset/immport/sdy2534", "label": "Human TFH responses to malar...", "color": {"background": "#e377c2", "border": "#e377c2", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Human TFH responses to malaria specific antigen using a Kenyan cross sectional study</b><br>Type: Dataset<br>Source: nde<br>IRI: https://okn.wobd.org/dataset/immport/sdy2534", "shape": "dot"}, {"id": "https://okn.wobd.org/dataset/immport/sdy2653", "label": "Study of efficacy and longev...", "color": {"background": "#e377c2", "border": "#e377c2", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Study of efficacy and longevity of immune response to third and fourth doses of COVID-19 vaccines in</b><br>Type: Dataset<br>Source: nde<br>IRI: https://okn.wobd.org/dataset/immport/sdy2653", "shape": "dot"}, {"id": "https://okn.wobd.org/dataset/immport/sdy2925", "label": "Majority of human circulatin...", "color": {"background": "#e377c2", "border": "#e377c2", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Majority of human circulating IgG plasmablasts stop blasting in a cell-free pro-survival culture</b><br>Type: Dataset<br>Source: nde<br>IRI: https://okn.wobd.org/dataset/immport/sdy2925", "shape": "dot"}, {"id": "https://okn.wobd.org/dataset/immport/sdy3162", "label": "SARS-CoV-2-specific plasma c...", "color": {"background": "#e377c2", "border": "#e377c2", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>SARS-CoV-2-specific plasma cells are not durably established in the bone marrow long-lived compartme</b><br>Type: Dataset<br>Source: nde<br>IRI: https://okn.wobd.org/dataset/immport/sdy3162", "shape": "dot"}, {"id": "https://okn.wobd.org/dataset/ncbi_geo/gse100246", "label": "SMAD4 impedes conversion of ...", "color": {"background": "#e377c2", "border": "#e377c2", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>SMAD4 impedes conversion of NK cells into ILC1-like cells by curtailing non-canonical TGFb signaling</b><br>Type: Dataset<br>Source: nde<br>IRI: https://okn.wobd.org/dataset/ncbi_geo/gse100246", "shape": "dot"}, {"id": "https://okn.wobd.org/dataset/ncbi_geo/gse100247", "label": "SMAD4 impedes conversion of ...", "color": {"background": "#e377c2", "border": "#e377c2", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>SMAD4 impedes conversion of NK cells into ILC1-like cells by curtailing non-canonical TGFb signaling</b><br>Type: Dataset<br>Source: nde<br>IRI: https://okn.wobd.org/dataset/ncbi_geo/gse100247", "shape": "dot"}, {"id": "https://okn.wobd.org/dataset/ncbi_geo/gse100467", "label": "A comprehensive, cell specif...", "color": {"background": "#e377c2", "border": "#e377c2", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>A comprehensive, cell specific microRNA catalogue of human peripheral blood</b><br>Type: Dataset<br>Source: nde<br>IRI: https://okn.wobd.org/dataset/ncbi_geo/gse100467", "shape": "dot"}, {"id": "https://okn.wobd.org/dataset/ncbi_geo/gse100648", "label": "Early arthritis B cell gene ...", "color": {"background": "#e377c2", "border": "#e377c2", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Early arthritis B cell gene expression profiling</b><br>Type: Dataset<br>Source: nde<br>IRI: https://okn.wobd.org/dataset/ncbi_geo/gse100648", "shape": "dot"}, {"id": "https://okn.wobd.org/dataset/ncbi_geo/gse100801", "label": "Genome-Wide Expression Profi...", "color": {"background": "#e377c2", "border": "#e377c2", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Genome-Wide Expression Profiling of B-CLL cells vs Healthy B cells cultured in high density</b><br>Type: Dataset<br>Source: nde<br>IRI: https://okn.wobd.org/dataset/ncbi_geo/gse100801", "shape": "dot"}, {"id": "https://okn.wobd.org/dataset/ncbi_geo/gse101438", "label": "Expression profiling of huma...", "color": {"background": "#e377c2", "border": "#e377c2", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Expression profiling of human ILCreg cells</b><br>Type: Dataset<br>Source: nde<br>IRI: https://okn.wobd.org/dataset/ncbi_geo/gse101438", "shape": "dot"}, {"id": "https://w3id.org/biolink/vocab/Gene", "label": "Gene", "color": {"background": "#8c564b", "border": "#8c564b", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Gene</b><br>Type: <br>Source: spoke-genelab<br>IRI: https://w3id.org/biolink/vocab/Gene", "shape": "dot"}, {"id": "http://www.ncbi.nlm.nih.gov/gene/930", "label": "CD19 molecule", "color": {"background": "#8c564b", "border": "#8c564b", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>CD19 molecule</b><br>Type: Gene<br>Source: spoke-genelab<br>IRI: http://www.ncbi.nlm.nih.gov/gene/930", "shape": "dot"}, {"id": "http://purl.obolibrary.org/obo/NCBITaxon_9606", "label": "NCBITaxon_9606", "color": {"background": "#8c564b", "border": "#8c564b", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>NCBITaxon_9606</b><br>Type: <br>Source: spoke-genelab<br>IRI: http://purl.obolibrary.org/obo/NCBITaxon_9606", "shape": "dot"}, {"id": "http://www.ncbi.nlm.nih.gov/gene/12478", "label": "CD19 antigen", "color": {"background": "#8c564b", "border": "#8c564b", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>CD19 antigen</b><br>Type: Gene<br>Source: spoke-genelab<br>IRI: http://www.ncbi.nlm.nih.gov/gene/12478", "shape": "dot"}, {"id": "http://www.ncbi.nlm.nih.gov/gene/365367", "label": "CD19 molecule", "color": {"background": "#8c564b", "border": "#8c564b", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>CD19 molecule</b><br>Type: Gene<br>Source: spoke-genelab<br>IRI: http://www.ncbi.nlm.nih.gov/gene/365367", "shape": "dot"}, {"id": "https://purl.org/okn/frink/kg/spoke-genelab/node/OSD-125-073966e3f95292b8f5f0d2c4d72798bd", "label": "OSD-125_transcription-profil...", "color": {"background": "#8c564b", "border": "#8c564b", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>OSD-125_transcription-profiling_dna-microarray_Affymetrix</b><br>Type: OBI_0000070<br>Source: spoke-genelab<br>IRI: https://purl.org/okn/frink/kg/spoke-genelab/node/OSD-125-073966e3f95292b8f5f0d2c", "shape": "dot"}, {"id": "https://purl.org/okn/frink/kg/spoke-genelab/node/OSD-125-18e9dc349eb7b2beadac0e7e71a31f84", "label": "OSD-125_transcription-profil...", "color": {"background": "#8c564b", "border": "#8c564b", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>OSD-125_transcription-profiling_dna-microarray_Affymetrix</b><br>Type: OBI_0000070<br>Source: spoke-genelab<br>IRI: https://purl.org/okn/frink/kg/spoke-genelab/node/OSD-125-18e9dc349eb7b2beadac0e7", "shape": "dot"}, {"id": "https://purl.org/okn/frink/kg/spoke-genelab/node/OSD-125-213cac2c706b95b4a0a1198fbb152a46", "label": "OSD-125_transcription-profil...", "color": {"background": "#8c564b", "border": "#8c564b", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>OSD-125_transcription-profiling_dna-microarray_Affymetrix</b><br>Type: OBI_0000070<br>Source: spoke-genelab<br>IRI: https://purl.org/okn/frink/kg/spoke-genelab/node/OSD-125-213cac2c706b95b4a0a1198", "shape": "dot"}, {"id": "https://purl.org/okn/frink/kg/spoke-genelab/node/OSD-125-2b650a7b1ed7d670dcb9e23113f34345", "label": "OSD-125_transcription-profil...", "color": {"background": "#8c564b", "border": "#8c564b", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>OSD-125_transcription-profiling_dna-microarray_Affymetrix</b><br>Type: OBI_0000070<br>Source: spoke-genelab<br>IRI: https://purl.org/okn/frink/kg/spoke-genelab/node/OSD-125-2b650a7b1ed7d670dcb9e23", "shape": "dot"}, {"id": "https://purl.org/okn/frink/kg/spoke-genelab/node/OSD-125-55caeffc8380a1d632ba8dcef4c7290e", "label": "OSD-125_transcription-profil...", "color": {"background": "#8c564b", "border": "#8c564b", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>OSD-125_transcription-profiling_dna-microarray_Affymetrix</b><br>Type: OBI_0000070<br>Source: spoke-genelab<br>IRI: https://purl.org/okn/frink/kg/spoke-genelab/node/OSD-125-55caeffc8380a1d632ba8dc", "shape": "dot"}, {"id": "http://identifiers.org/ensembl/ENSG00000177455", "label": "ENSG00000177455", "color": {"background": "#1f77b4", "border": "#1f77b4", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>ENSG00000177455</b><br>Type: <br>Source: spoke-okn<br>IRI: http://identifiers.org/ensembl/ENSG00000177455", "shape": "dot"}, {"id": "http://purl.obolibrary.org/obo/DOID_0060060", "label": "non-Hodgkin lymphoma", "color": {"background": "#1f77b4", "border": "#1f77b4", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>non-Hodgkin lymphoma</b><br>Type: Disease<br>Source: spoke-okn<br>IRI: http://purl.obolibrary.org/obo/DOID_0060060", "shape": "triangle"}, {"id": "http://purl.obolibrary.org/obo/DOID_1037", "label": "lymphoid leukemia", "color": {"background": "#1f77b4", "border": "#1f77b4", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>lymphoid leukemia</b><br>Type: Disease<br>Source: spoke-okn<br>IRI: http://purl.obolibrary.org/obo/DOID_1037", "shape": "triangle"}, {"id": "http://purl.obolibrary.org/obo/DOID_10754", "label": "otitis media", "color": {"background": "#1f77b4", "border": "#1f77b4", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>otitis media</b><br>Type: Disease<br>Source: spoke-okn<br>IRI: http://purl.obolibrary.org/obo/DOID_10754", "shape": "triangle"}, {"id": "http://purl.obolibrary.org/obo/DOID_1240", "label": "leukemia", "color": {"background": "#1f77b4", "border": "#1f77b4", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>leukemia</b><br>Type: Disease<br>Source: spoke-okn<br>IRI: http://purl.obolibrary.org/obo/DOID_1240", "shape": "triangle"}, {"id": "http://purl.obolibrary.org/obo/DOID_14330", "label": "Parkinson's disease", "color": {"background": "#1f77b4", "border": "#1f77b4", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Parkinson's disease</b><br>Type: Disease<br>Source: spoke-okn<br>IRI: http://purl.obolibrary.org/obo/DOID_14330", "shape": "triangle"}, {"id": "http://purl.obolibrary.org/obo/DOID_409", "label": "liver disease", "color": {"background": "#1f77b4", "border": "#1f77b4", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>liver disease</b><br>Type: Disease<br>Source: spoke-okn<br>IRI: http://purl.obolibrary.org/obo/DOID_409", "shape": "triangle"}, {"id": "http://purl.obolibrary.org/obo/DOID_7148", "label": "rheumatoid arthritis", "color": {"background": "#1f77b4", "border": "#1f77b4", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>rheumatoid arthritis</b><br>Type: Disease<br>Source: spoke-okn<br>IRI: http://purl.obolibrary.org/obo/DOID_7148", "shape": "triangle"}, {"id": "http://purl.obolibrary.org/obo/DOID_8567", "label": "Hodgkin's lymphoma", "color": {"background": "#1f77b4", "border": "#1f77b4", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>Hodgkin's lymphoma</b><br>Type: Disease<br>Source: spoke-okn<br>IRI: http://purl.obolibrary.org/obo/DOID_8567", "shape": "triangle"}, {"id": "http://purl.obolibrary.org/obo/DOID_863", "label": "nervous system disease", "color": {"background": "#1f77b4", "border": "#1f77b4", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>nervous system disease</b><br>Type: Disease<br>Source: spoke-okn<br>IRI: http://purl.obolibrary.org/obo/DOID_863", "shape": "triangle"}, {"id": "http://commons.wikimedia.org/wiki/Special:FilePath/PBB%20GE%20CD19%20206398%20s%20at%20fs.png", "label": "PBB%20GE%20CD19%20206398%20s...", "color": {"background": "#ff7f0e", "border": "#ff7f0e", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>PBB%20GE%20CD19%20206398%20s%20at%20fs.png</b><br>Type: <br>Source: wikidata<br>IRI: http://commons.wikimedia.org/wiki/Special:FilePath/PBB%20GE%20CD19%20206398%20s%", "shape": "dot"}, {"id": "http://www.wikidata.org/entity/Q9656", "label": "appendix", "color": {"background": "#ff7f0e", "border": "#ff7f0e", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>appendix</b><br>Type: organ type<br>Source: wikidata<br>IRI: http://www.wikidata.org/entity/Q9656", "shape": "dot"}, {"id": "http://www.wikidata.org/entity/Q14865944", "label": "regulation of immune response", "color": {"background": "#ff7f0e", "border": "#ff7f0e", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>regulation of immune response</b><br>Type: biological process<br>Source: wikidata<br>IRI: http://www.wikidata.org/entity/Q14865944", "shape": "dot"}, {"id": "http://www.wikidata.org/entity/Q14864077", "label": "cellular defense response", "color": {"background": "#ff7f0e", "border": "#ff7f0e", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>cellular defense response</b><br>Type: biological process<br>Source: wikidata<br>IRI: http://www.wikidata.org/entity/Q14864077", "shape": "dot"}, {"id": "http://www.wikidata.org/entity/Q66511085", "label": "mucosa of ileum", "color": {"background": "#ff7f0e", "border": "#ff7f0e", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>mucosa of ileum</b><br>Type: <br>Source: wikidata<br>IRI: http://www.wikidata.org/entity/Q66511085", "shape": "dot"}, {"id": "http://www.wikidata.org/entity/Q14907948", "label": "CD19", "color": {"background": "#ff7f0e", "border": "#ff7f0e", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>CD19</b><br>Type: gene<br>Source: wikidata<br>IRI: http://www.wikidata.org/entity/Q14907948", "shape": "dot"}, {"id": "http://www.wikidata.org/entity/Q9371", "label": "spleen", "color": {"background": "#ff7f0e", "border": "#ff7f0e", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>spleen</b><br>Type: organ type<br>Source: wikidata<br>IRI: http://www.wikidata.org/entity/Q9371", "shape": "dot"}, {"id": "http://www.wikidata.org/entity/Q14349455", "label": "membrane", "color": {"background": "#ff7f0e", "border": "#ff7f0e", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>membrane</b><br>Type: cellular component<br>Source: wikidata<br>IRI: http://www.wikidata.org/entity/Q14349455", "shape": "dot"}, {"id": "http://www.wikidata.org/entity/Q14327652", "label": "integral component of membrane", "color": {"background": "#ff7f0e", "border": "#ff7f0e", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>integral component of membrane</b><br>Type: cellular component<br>Source: wikidata<br>IRI: http://www.wikidata.org/entity/Q14327652", "shape": "dot"}, {"id": "http://www.wikidata.org/entity/Q180569", "label": "tonsil", "color": {"background": "#ff7f0e", "border": "#ff7f0e", "highlight": {"background": "#f1c40f", "border": "#f39c12"}}, "size": 20, "font": {"size": 11, "color": "#ffffff"}, "title": "<b>tonsil</b><br>Type: tissue type<br>Source: wikidata<br>IRI: http://www.wikidata.org/entity/Q180569", "shape": "dot"}]);
+        var edges = new vis.DataSet([{"from": "https://identifiers.org/hgnc/CD83", "to": "gene:CD19", "color": {"color": "#17becf", "highlight": "#f1c40f"}, "title": "<b>exactMatch</b><br>Source: biobricks-aopwiki<br>Direction: related", "label": "exactMatch", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "https://identifiers.org/ncbigene/9308", "to": "gene:CD19", "color": {"color": "#17becf", "highlight": "#f1c40f"}, "title": "<b>data_1027</b><br>Source: biobricks-aopwiki<br>Direction: related", "label": "data_1027", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "https://okn.wobd.org/dataset/immport/sdy2534", "to": "gene:CD19", "color": {"color": "#e377c2", "highlight": "#f1c40f"}, "title": "<b>mentions</b><br>Source: nde<br>Direction: incoming", "label": "mentions", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "https://okn.wobd.org/dataset/immport/sdy2653", "to": "gene:CD19", "color": {"color": "#e377c2", "highlight": "#f1c40f"}, "title": "<b>mentions</b><br>Source: nde<br>Direction: incoming", "label": "mentions", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "https://okn.wobd.org/dataset/immport/sdy2925", "to": "gene:CD19", "color": {"color": "#e377c2", "highlight": "#f1c40f"}, "title": "<b>mentions</b><br>Source: nde<br>Direction: incoming", "label": "mentions", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "https://okn.wobd.org/dataset/immport/sdy3162", "to": "gene:CD19", "color": {"color": "#e377c2", "highlight": "#f1c40f"}, "title": "<b>mentions</b><br>Source: nde<br>Direction: incoming", "label": "mentions", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "https://okn.wobd.org/dataset/ncbi_geo/gse100246", "to": "gene:CD19", "color": {"color": "#e377c2", "highlight": "#f1c40f"}, "title": "<b>mentions</b><br>Source: nde<br>Direction: incoming", "label": "mentions", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "https://okn.wobd.org/dataset/ncbi_geo/gse100247", "to": "gene:CD19", "color": {"color": "#e377c2", "highlight": "#f1c40f"}, "title": "<b>mentions</b><br>Source: nde<br>Direction: incoming", "label": "mentions", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "https://okn.wobd.org/dataset/ncbi_geo/gse100467", "to": "gene:CD19", "color": {"color": "#e377c2", "highlight": "#f1c40f"}, "title": "<b>mentions</b><br>Source: nde<br>Direction: incoming", "label": "mentions", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "https://okn.wobd.org/dataset/ncbi_geo/gse100648", "to": "gene:CD19", "color": {"color": "#e377c2", "highlight": "#f1c40f"}, "title": "<b>mentions</b><br>Source: nde<br>Direction: incoming", "label": "mentions", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "https://okn.wobd.org/dataset/ncbi_geo/gse100801", "to": "gene:CD19", "color": {"color": "#e377c2", "highlight": "#f1c40f"}, "title": "<b>mentions</b><br>Source: nde<br>Direction: incoming", "label": "mentions", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "https://okn.wobd.org/dataset/ncbi_geo/gse101438", "to": "gene:CD19", "color": {"color": "#e377c2", "highlight": "#f1c40f"}, "title": "<b>mentions</b><br>Source: nde<br>Direction: incoming", "label": "mentions", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "gene:CD19", "to": "https://w3id.org/biolink/vocab/Gene", "color": {"color": "#8c564b", "highlight": "#f1c40f"}, "title": "<b>22-rdf-syntax-ns#type</b><br>Source: spoke-genelab<br>Direction: outgoing", "label": "22-rdf-syntax-ns#type", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "gene:CD19", "to": "http://www.ncbi.nlm.nih.gov/gene/930", "color": {"color": "#8c564b", "highlight": "#f1c40f"}, "title": "<b>IS_ORTHOLOG_MGiG</b><br>Source: spoke-genelab<br>Direction: outgoing", "label": "IS_ORTHOLOG_MGiG", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "gene:CD19", "to": "http://purl.obolibrary.org/obo/NCBITaxon_9606", "color": {"color": "#8c564b", "highlight": "#f1c40f"}, "title": "<b>taxonomy</b><br>Source: spoke-genelab<br>Direction: outgoing", "label": "taxonomy", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "http://www.ncbi.nlm.nih.gov/gene/12478", "to": "gene:CD19", "color": {"color": "#8c564b", "highlight": "#f1c40f"}, "title": "<b>IS_ORTHOLOG_MGiG</b><br>Source: spoke-genelab<br>Direction: incoming", "label": "IS_ORTHOLOG_MGiG", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "http://www.ncbi.nlm.nih.gov/gene/365367", "to": "gene:CD19", "color": {"color": "#8c564b", "highlight": "#f1c40f"}, "title": "<b>IS_ORTHOLOG_MGiG</b><br>Source: spoke-genelab<br>Direction: incoming", "label": "IS_ORTHOLOG_MGiG", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "https://purl.org/okn/frink/kg/spoke-genelab/node/OSD-125-073966e3f95292b8f5f0d2c4d72798bd", "to": "gene:CD19", "color": {"color": "#8c564b", "highlight": "#f1c40f"}, "title": "<b>MEASURED_DIFFERENTIAL_EXPRESSION_ASmMG</b><br>Source: spoke-genelab<br>Direction: incoming", "label": "MEASURED_DIFFERENTIAL_E..", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "https://purl.org/okn/frink/kg/spoke-genelab/node/OSD-125-18e9dc349eb7b2beadac0e7e71a31f84", "to": "gene:CD19", "color": {"color": "#8c564b", "highlight": "#f1c40f"}, "title": "<b>MEASURED_DIFFERENTIAL_EXPRESSION_ASmMG</b><br>Source: spoke-genelab<br>Direction: incoming", "label": "MEASURED_DIFFERENTIAL_E..", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "https://purl.org/okn/frink/kg/spoke-genelab/node/OSD-125-213cac2c706b95b4a0a1198fbb152a46", "to": "gene:CD19", "color": {"color": "#8c564b", "highlight": "#f1c40f"}, "title": "<b>MEASURED_DIFFERENTIAL_EXPRESSION_ASmMG</b><br>Source: spoke-genelab<br>Direction: incoming", "label": "MEASURED_DIFFERENTIAL_E..", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "https://purl.org/okn/frink/kg/spoke-genelab/node/OSD-125-2b650a7b1ed7d670dcb9e23113f34345", "to": "gene:CD19", "color": {"color": "#8c564b", "highlight": "#f1c40f"}, "title": "<b>MEASURED_DIFFERENTIAL_EXPRESSION_ASmMG</b><br>Source: spoke-genelab<br>Direction: incoming", "label": "MEASURED_DIFFERENTIAL_E..", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "https://purl.org/okn/frink/kg/spoke-genelab/node/OSD-125-55caeffc8380a1d632ba8dcef4c7290e", "to": "gene:CD19", "color": {"color": "#8c564b", "highlight": "#f1c40f"}, "title": "<b>MEASURED_DIFFERENTIAL_EXPRESSION_ASmMG</b><br>Source: spoke-genelab<br>Direction: incoming", "label": "MEASURED_DIFFERENTIAL_E..", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "gene:CD19", "to": "http://identifiers.org/ensembl/ENSG00000177455", "color": {"color": "#1f77b4", "highlight": "#f1c40f"}, "title": "<b>ensembl</b><br>Source: spoke-okn<br>Direction: outgoing", "label": "ensembl", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "http://purl.obolibrary.org/obo/DOID_0060060", "to": "gene:CD19", "color": {"color": "#1f77b4", "highlight": "#f1c40f"}, "title": "<b>ASSOCIATES_DaG</b><br>Source: spoke-okn<br>Direction: incoming", "label": "ASSOCIATES_DaG", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "http://purl.obolibrary.org/obo/DOID_1037", "to": "gene:CD19", "color": {"color": "#1f77b4", "highlight": "#f1c40f"}, "title": "<b>ASSOCIATES_DaG</b><br>Source: spoke-okn<br>Direction: incoming", "label": "ASSOCIATES_DaG", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "http://purl.obolibrary.org/obo/DOID_10754", "to": "gene:CD19", "color": {"color": "#1f77b4", "highlight": "#f1c40f"}, "title": "<b>ASSOCIATES_DaG</b><br>Source: spoke-okn<br>Direction: incoming", "label": "ASSOCIATES_DaG", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "http://purl.obolibrary.org/obo/DOID_1240", "to": "gene:CD19", "color": {"color": "#1f77b4", "highlight": "#f1c40f"}, "title": "<b>ASSOCIATES_DaG</b><br>Source: spoke-okn<br>Direction: incoming", "label": "ASSOCIATES_DaG", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "http://purl.obolibrary.org/obo/DOID_14330", "to": "gene:CD19", "color": {"color": "#1f77b4", "highlight": "#f1c40f"}, "title": "<b>ASSOCIATES_DaG</b><br>Source: spoke-okn<br>Direction: incoming", "label": "ASSOCIATES_DaG", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "http://purl.obolibrary.org/obo/DOID_409", "to": "gene:CD19", "color": {"color": "#1f77b4", "highlight": "#f1c40f"}, "title": "<b>ASSOCIATES_DaG</b><br>Source: spoke-okn<br>Direction: incoming", "label": "ASSOCIATES_DaG", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "http://purl.obolibrary.org/obo/DOID_7148", "to": "gene:CD19", "color": {"color": "#1f77b4", "highlight": "#f1c40f"}, "title": "<b>ASSOCIATES_DaG</b><br>Source: spoke-okn<br>Direction: incoming", "label": "ASSOCIATES_DaG", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "http://purl.obolibrary.org/obo/DOID_8567", "to": "gene:CD19", "color": {"color": "#1f77b4", "highlight": "#f1c40f"}, "title": "<b>ASSOCIATES_DaG</b><br>Source: spoke-okn<br>Direction: incoming", "label": "ASSOCIATES_DaG", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "http://purl.obolibrary.org/obo/DOID_863", "to": "gene:CD19", "color": {"color": "#1f77b4", "highlight": "#f1c40f"}, "title": "<b>ASSOCIATES_DaG</b><br>Source: spoke-okn<br>Direction: incoming", "label": "ASSOCIATES_DaG", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "gene:CD19", "to": "http://commons.wikimedia.org/wiki/Special:FilePath/PBB%20GE%20CD19%20206398%20s%20at%20fs.png", "color": {"color": "#ff7f0e", "highlight": "#f1c40f"}, "title": "<b>Gene Atlas image</b><br>Source: wikidata<br>Direction: outgoing", "label": "Gene Atlas image", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "gene:CD19", "to": "http://www.wikidata.org/entity/Q9656", "color": {"color": "#ff7f0e", "highlight": "#f1c40f"}, "title": "<b>expressed in</b><br>Source: wikidata<br>Direction: outgoing", "label": "expressed in", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "gene:CD19", "to": "http://www.wikidata.org/entity/Q14865944", "color": {"color": "#ff7f0e", "highlight": "#f1c40f"}, "title": "<b>biological process</b><br>Source: wikidata<br>Direction: outgoing", "label": "biological process", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "gene:CD19", "to": "http://www.wikidata.org/entity/Q14864077", "color": {"color": "#ff7f0e", "highlight": "#f1c40f"}, "title": "<b>biological process</b><br>Source: wikidata<br>Direction: outgoing", "label": "biological process", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "gene:CD19", "to": "http://www.wikidata.org/entity/Q66511085", "color": {"color": "#ff7f0e", "highlight": "#f1c40f"}, "title": "<b>expressed in</b><br>Source: wikidata<br>Direction: outgoing", "label": "expressed in", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "gene:CD19", "to": "http://www.wikidata.org/entity/Q14907948", "color": {"color": "#ff7f0e", "highlight": "#f1c40f"}, "title": "<b>encoded by</b><br>Source: wikidata<br>Direction: outgoing", "label": "encoded by", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "gene:CD19", "to": "http://www.wikidata.org/entity/Q9371", "color": {"color": "#ff7f0e", "highlight": "#f1c40f"}, "title": "<b>expressed in</b><br>Source: wikidata<br>Direction: outgoing", "label": "expressed in", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "gene:CD19", "to": "http://www.wikidata.org/entity/Q14349455", "color": {"color": "#ff7f0e", "highlight": "#f1c40f"}, "title": "<b>cell component</b><br>Source: wikidata<br>Direction: outgoing", "label": "cell component", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "gene:CD19", "to": "http://www.wikidata.org/entity/Q14327652", "color": {"color": "#ff7f0e", "highlight": "#f1c40f"}, "title": "<b>cell component</b><br>Source: wikidata<br>Direction: outgoing", "label": "cell component", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}, {"from": "gene:CD19", "to": "http://www.wikidata.org/entity/Q180569", "color": {"color": "#ff7f0e", "highlight": "#f1c40f"}, "title": "<b>expressed in</b><br>Source: wikidata<br>Direction: outgoing", "label": "expressed in", "font": {"size": 9, "color": "#555", "strokeWidth": 3, "strokeColor": "#ffffff", "align": "middle"}, "width": 2, "smooth": {"type": "continuous"}, "arrows": "to"}]);
+
+        var container = document.getElementById('network');
+        var data = { nodes: nodes, edges: edges };
+
+        var options = {
+            nodes: {
+                borderWidth: 2,
+                shadow: true,
+                font: {
+                    color: '#ffffff',
+                    face: 'arial',
+                }
+            },
+            edges: {
+                shadow: true,
+                smooth: {
+                    type: 'continuous'
+                }
+            },
+            physics: {
+                enabled: true,
+                barnesHut: {
+                    gravitationalConstant: -3000,
+                    centralGravity: 0.3,
+                    springLength: 150,
+                    springConstant: 0.04,
+                    damping: 0.09,
+                },
+                stabilization: {
+                    iterations: 150,
+                    fit: true
+                }
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 100,
+                dragNodes: true,
+                dragView: true,
+                zoomView: true,
+            }
+        };
+
+        var network = new vis.Network(container, data, options);
+
+        var physicsEnabled = false;
+
+        // Stop physics after initial stabilization
+        network.on("stabilizationIterationsDone", function () {
+            physicsEnabled = false;
+            network.setOptions({ physics: { enabled: false } });
+            updatePhysicsButton();
+        });
+
+        function togglePhysics() {
+            physicsEnabled = !physicsEnabled;
+            network.setOptions({ physics: { enabled: physicsEnabled } });
+            updatePhysicsButton();
+        }
+
+        function updatePhysicsButton() {
+            var btn = document.getElementById('physicsToggle');
+            if (physicsEnabled) {
+                btn.textContent = '⚡ Auto-Layout: ON';
+                btn.className = 'toggle-btn active';
+            } else {
+                btn.textContent = '⚡ Auto-Layout: OFF';
+                btn.className = 'toggle-btn inactive';
+            }
+        }
+
+        function resetLayout() {
+            // Re-enable physics and re-stabilize
+            physicsEnabled = true;
+            network.setOptions({ physics: { enabled: true } });
+            updatePhysicsButton();
+
+            // Reset node positions to trigger re-layout
+            var positions = network.getPositions();
+            var updates = [];
+            for (var nodeId in positions) {
+                updates.push({ id: nodeId, x: undefined, y: undefined });
+            }
+            nodes.update(updates);
+
+            // Restabilize the network
+            network.stabilize(150);
+        }
+
+        // Custom tooltip handling - replaces native vis.js tooltip
+        var tooltip = document.getElementById('custom-tooltip');
+
+        function showTooltip(content, params) {
+            if (!content) return;
+            tooltip.innerHTML = content;
+            tooltip.style.display = 'block';
+
+            // Get coordinates from vis.js params
+            var x, y;
+            if (params.event && params.event.srcEvent) {
+                x = params.event.srcEvent.clientX;
+                y = params.event.srcEvent.clientY;
+            } else if (params.pointer && params.pointer.DOM) {
+                // Fallback to DOM pointer coordinates + container offset
+                var rect = container.getBoundingClientRect();
+                x = rect.left + params.pointer.DOM.x;
+                y = rect.top + params.pointer.DOM.y;
+            } else {
+                return; // Can't position tooltip
+            }
+
+            tooltip.style.left = (x + 15) + 'px';
+            tooltip.style.top = (y + 15) + 'px';
+
+            // Adjust if going off screen
+            var rect = tooltip.getBoundingClientRect();
+            if (rect.right > window.innerWidth) {
+                tooltip.style.left = (x - rect.width - 15) + 'px';
+            }
+            if (rect.bottom > window.innerHeight) {
+                tooltip.style.top = (y - rect.height - 15) + 'px';
+            }
+        }
+
+        function hideTooltip() {
+            tooltip.style.display = 'none';
+        }
+
+        // Handle edge hover
+        network.on('hoverEdge', function(params) {
+            var edgeId = params.edge;
+            var edge = edges.get(edgeId);
+            var content = edge ? (edge.customTitle || edge.title) : null;
+            if (content) {
+                showTooltip(content, params);
+            }
+        });
+
+        network.on('blurEdge', function(params) {
+            hideTooltip();
+        });
+
+        // Handle node hover
+        network.on('hoverNode', function(params) {
+            var nodeId = params.node;
+            var node = nodes.get(nodeId);
+            var content = node ? (node.customTitle || node.title) : null;
+            if (content) {
+                showTooltip(content, params);
+            }
+        });
+
+        network.on('blurNode', function(params) {
+            hideTooltip();
+        });
+
+        // Hide tooltip when dragging or clicking
+        network.on('dragStart', function() {
+            hideTooltip();
+        });
+        network.on('click', function() {
+            hideTooltip();
+        });
+    </script>
+</body>
+</html>
+    </div>
+    
+    <div class="answer-section">
+        <h2>Answer</h2>
+        <p>CD19 has 42 related entities across 5 knowledge graphs (biobricks-aopwiki, nde, spoke-genelab, spoke-okn, wikidata).</p><p>Entity types include: Dataset, Disease, Gene, OBI_0000070, Unknown, biological process, cellular component, data_1025, gene, organ type, tissue type.</p>
+    </div>
+    
+    <div class="provenance">
+        <h3>Provenance &#9660;</h3>
+        <div class="provenance-body">
+            <dl>
+            <dt>timestamp</dt><dd>2026-02-03T07:38:36.695401+00:00</dd>
+            <dt>sources</dt><dd>SPOKE-OKN, SPOKE-GeneLab, Wikidata, NDE, BioBricks</dd>
+            <dt>endpoint_biobricks-aopwiki</dt><dd>https://frink.apps.renci.org/biobricks-aopwiki/sparql</dd>
+            <dt>endpoint_nde</dt><dd>https://frink.apps.renci.org/nde/sparql</dd>
+            <dt>endpoint_spoke-genelab</dt><dd>https://frink.apps.renci.org/spoke-genelab/sparql</dd>
+            <dt>endpoint_spoke-okn</dt><dd>https://frink.apps.renci.org/spoke-okn/sparql</dd>
+            <dt>endpoint_wikidata</dt><dd>https://query.wikidata.org/sparql</dd>
+            </dl>
+            <details class="query-block"><summary>SPOKE-OKN: Gene neighborhood<span class="query-endpoint">https://frink.apps.renci.org/spoke-okn/sparql</span></summary><pre><code>PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
+PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX biolink: &lt;https://w3id.org/biolink/vocab/&gt;
+
+SELECT DISTINCT ?entity ?entityLabel ?entityType ?entityTypeLabel ?predicate ?predicateLabel ?direction
+WHERE {
+  {
+    &lt;http://www.ncbi.nlm.nih.gov/gene/930&gt; ?predicate ?entity .
+    BIND("outgoing" AS ?direction)
+    OPTIONAL { ?entity rdfs:label ?entityLabel }
+    OPTIONAL { ?entity a ?entityType . OPTIONAL { ?entityType rdfs:label ?entityTypeLabel } }
+    OPTIONAL { ?predicate rdfs:label ?predicateLabel }
+    FILTER(?predicate != rdf:type &amp;&amp; ?predicate != rdfs:label &amp;&amp; ?predicate != rdfs:comment)
+  }
+  UNION
+  {
+    ?entity ?predicate &lt;http://www.ncbi.nlm.nih.gov/gene/930&gt; .
+    BIND("incoming" AS ?direction)
+    OPTIONAL { ?entity rdfs:label ?entityLabel }
+    OPTIONAL { ?entity a ?entityType . OPTIONAL { ?entityType rdfs:label ?entityTypeLabel } }
+    OPTIONAL { ?predicate rdfs:label ?predicateLabel }
+    FILTER(?predicate != rdf:type &amp;&amp; ?predicate != rdfs:label)
+  }
+}
+LIMIT 20</code></pre></details>
+            <details class="query-block"><summary>Wikidata: Gene properties and GO terms<span class="query-endpoint">https://query.wikidata.org/sparql</span></summary><pre><code>SELECT DISTINCT ?entity ?entityLabel ?entityType ?entityTypeLabel ?property ?propertyLabel ?direction
+WHERE {
+  {
+    ?gene wdt:P353 "CD19" .
+    ?gene wdt:P703 wd:Q15978631 .
+  }
+  {
+    ?gene ?prop ?entity .
+    ?property wikibase:directClaim ?prop .
+    BIND("outgoing" AS ?direction)
+    FILTER(isIRI(?entity) &amp;&amp; ?entity != wd:Q15978631)
+    OPTIONAL { ?entity wdt:P31 ?entityType }
+  }
+  UNION
+  {
+    ?gene wdt:P688 ?protein .
+    ?protein ?prop ?entity .
+    ?property wikibase:directClaim ?prop .
+    BIND("outgoing" AS ?direction)
+    FILTER(isIRI(?entity))
+    OPTIONAL { ?entity wdt:P31 ?entityType }
+  }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
+LIMIT 30</code></pre></details>
+            <details class="query-block"><summary>NDE: Datasets mentioning gene<span class="query-endpoint">https://frink.apps.renci.org/nde/sparql</span></summary><pre><code>PREFIX schema: &lt;http://schema.org/&gt;
+
+SELECT DISTINCT ?entity ?entityLabel ?entityType ?predicate ?direction
+WHERE {
+  ?entity a schema:Dataset .
+  BIND(schema:Dataset AS ?entityType)
+  BIND("incoming" AS ?direction)
+  BIND(schema:mentions AS ?predicate)
+  {
+    ?entity schema:name ?name .
+    FILTER(CONTAINS(LCASE(?name), LCASE("CD19")))
+    BIND(?name AS ?entityLabel)
+  }
+  UNION
+  {
+    ?entity schema:description ?desc .
+    FILTER(CONTAINS(LCASE(?desc), LCASE("CD19")))
+    ?entity schema:name ?entityLabel .
+  }
+}
+LIMIT 10</code></pre></details>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.step-header').forEach(function(header) {
+            header.addEventListener('click', function() {
+                var body = this.nextElementSibling;
+                var toggle = this.querySelector('.step-toggle');
+                body.classList.toggle('collapsed');
+                toggle.classList.toggle('collapsed');
+            });
+        });
+        document.querySelectorAll('.provenance h3').forEach(function(h) {
+            h.addEventListener('click', function() {
+                this.nextElementSibling.classList.toggle('expanded');
+            });
+        });
+    </script>
+</body>
+</html>

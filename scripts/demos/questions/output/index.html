@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OKN-WOBD Biological Questions</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            color: #2c3e50;
+        }
+        h1 { color: #2c3e50; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        th, td { padding: 10px 14px; border: 1px solid #e9ecef; text-align: left; }
+        th { background: #f8f9fa; }
+        a { color: #3498db; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .success { color: #27ae60; font-weight: 600; }
+        .error { color: #e74c3c; font-size: 0.85em; }
+        footer { margin-top: 30px; font-size: 0.85em; color: #999; }
+    </style>
+</head>
+<body>
+    <h1>OKN-WOBD: Biological Questions</h1>
+    <p>Each question is a self-contained investigation that queries multiple
+    biomedical data sources and produces an interactive HTML report.</p>
+
+    <table>
+        <thead>
+            <tr><th>Module</th><th>Question</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+            
+        <tr>
+            <td><a href="gene_disease_map.html">gene_disease_map</a></td>
+            <td>What diseases is {gene} connected to, and through what mechanisms?</td>
+            <td class="success">OK</td>
+        </tr>
+        <tr>
+            <td><a href="gene_neighborhood_map.html">gene_neighborhood_map</a></td>
+            <td>What is the biological neighborhood of {gene} across FRINK knowledge graphs?</td>
+            <td class="success">OK</td>
+        </tr>
+        <tr>
+            <td><a href="go_process_in_disease.html">go_process_in_disease</a></td>
+            <td>Which {go_label} genes are dysregulated in {disease}, and which cell types drive the changes?</td>
+            <td class="success">OK</td>
+        </tr>
+        <tr>
+            <td><a href="differential_expression.html">differential_expression</a></td>
+            <td>What genes are differentially expressed in {query} vs normal?</td>
+            <td class="success">OK</td>
+        </tr>
+        <tr>
+            <td><a href="drug_disease_targets.html">drug_disease_targets</a></td>
+            <td>What genes show opposing drug vs disease expression, suggesting therapeutic potential?</td>
+            <td class="success">OK</td>
+        </tr>
+        <tr>
+            <td><a href="cross_layer_datasets.html">cross_layer_datasets</a></td>
+            <td>What {go_label} genes have expression data in NIAID {search_term} studies?</td>
+            <td class="success">OK</td>
+        </tr>
+        <tr>
+            <td><a href="single_gene_deep_dive.html">single_gene_deep_dive</a></td>
+            <td>What is {gene}'s role in {disease} across cell types and data sources?</td>
+            <td class="success">OK</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <footer>Generated: 2026-02-03 07:23 UTC</footer>
+</body>
+</html>
