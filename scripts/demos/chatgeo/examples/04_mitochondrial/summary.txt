@@ -1,0 +1,120 @@
+======================================================================
+DIFFERENTIAL EXPRESSION ANALYSIS RESULTS
+======================================================================
+
+QUERY
+  Disease: mitochondrial myopathy
+  Tissue: muscle
+  Timestamp: 2026-02-02T15:15:12.506956
+
+SAMPLES
+  Test: 13 samples from 1 studies
+  Control: 33 samples from 1 studies
+  Organisms: human
+
+METHODS
+  Normalization: deseq2
+  Statistical test: deseq2
+  FDR correction: deseq2
+
+THRESHOLDS
+  FDR: 0.01
+  Log2 FC: 2.0
+
+----------------------------------------------------------------------
+SUMMARY
+----------------------------------------------------------------------
+  Genes tested: 17,609
+  Genes significant: 302
+  Upregulated: 117
+  Downregulated: 185
+
+----------------------------------------------------------------------
+TOP 20 UPREGULATED GENES
+----------------------------------------------------------------------
+  Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
+  ----------------------------------------------------------
+  KLHDC7B            6.25     4.84e-34       122.54         2.24
+  FGF21              5.80     5.65e-16        82.85         2.18
+  BIVM-ERCC5         5.14     9.17e-04        41.38         1.91
+  ASDURF             4.86     4.21e-04        45.69         2.88
+  C8ORF44-SGK3       4.44     3.12e-07         8.46         0.58
+  TREH               4.35     1.03e-13         9.85         0.70
+  GDF15              4.27     2.02e-12       112.15         9.94
+  PLCZ1              4.25     5.27e-03         2.23         0.03
+  HEPN1              4.23     3.10e-03         2.31         0.00
+  PPM1E              4.11     2.41e-08       102.31        10.06
+  FAM181A            4.10     4.15e-07         4.77         0.36
+  RPL36A-HNRNPH2       4.10     1.47e-24       880.62        69.61
+  SLC24A2            4.07     1.41e-18        97.00         7.73
+  ORM1               3.99     1.40e-03        10.77         1.00
+  APOC4              3.94     2.69e-03         3.31         0.30
+  TMEM63C            3.93     2.80e-17       128.85        11.73
+  RAB33A             3.89     4.36e-11        10.62         0.97
+  IFNG               3.86     3.09e-03         3.54         0.24
+  ERICH4             3.81     1.27e-15         8.62         0.91
+  DIRAS1             3.77     1.50e-13       576.85        57.70
+
+----------------------------------------------------------------------
+TOP 20 DOWNREGULATED GENES
+----------------------------------------------------------------------
+  Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
+  ----------------------------------------------------------
+  HLA-DRA           -7.15     1.16e-04         0.23       119.42
+  PSG2              -6.89     7.38e-14         0.23        54.18
+  TBC1D3D           -6.35     7.40e-03         0.69        68.94
+  TUBB              -6.11     7.92e-08         7.69       824.79
+  FGF23             -6.00     2.44e-56        16.46      1545.00
+  POU3F3            -5.39     1.04e-03         0.15        16.88
+  ABHD16B           -5.36     1.51e-04         0.00        10.79
+  DCD               -5.30     2.22e-04         0.00         8.27
+  H2AC19            -5.10     7.72e-06         0.46       206.42
+  TMEM238           -4.97     4.59e-08         0.15        11.18
+  KCNC2             -4.90     9.36e-04         0.00         9.24
+  HBD               -4.81     2.00e-04         0.08         8.18
+  CXCR5             -4.52     4.44e-04         2.08        61.76
+  PGLYRP3           -4.42     2.81e-06         0.23         9.42
+  SPP2              -4.27     2.99e-07         0.46        12.24
+  KRT19             -4.24     3.39e-06         1.54        50.64
+  LRRC24            -4.20     5.37e-09         1.23        27.21
+  CHURC1-FNTB       -4.16     5.66e-03         0.62        17.00
+  BOLA2             -4.10     4.55e-04         1.54        34.91
+  NEUROD2           -3.98     4.19e-11         0.62        14.61
+
+======================================================================
+
+----------------------------------------------------------------------
+ENRICHMENT ANALYSIS
+----------------------------------------------------------------------
+  Backend: gprofiler
+  Organism: hsapiens
+  Sources: GO:BP, GO:CC, GO:MF, KEGG, REAC
+  Threshold: 0.05
+
+  Total significant terms: 12
+  Upregulated: 2 terms
+  Downregulated: 10 terms
+
+----------------------------------------------------------------------
+TOP 2 ENRICHED TERMS (UPREGULATED GENES)
+----------------------------------------------------------------------
+  Source   Term ID             P-adj  Genes  Term Name
+  ------------------------------------------------------------------
+  GO:MF    GO:0048248       7.93e-04      3  CXCR3 chemokine receptor binding
+  GO:CC    GO:0071944       2.90e-02     49  cell periphery
+
+----------------------------------------------------------------------
+TOP 10 ENRICHED TERMS (DOWNREGULATED GENES)
+----------------------------------------------------------------------
+  Source   Term ID             P-adj  Genes  Term Name
+  ------------------------------------------------------------------
+  GO:MF    GO:0030492       3.64e-04      4  hemoglobin binding
+  GO:MF    GO:0031721       3.80e-03      3  hemoglobin alpha binding
+  GO:BP    GO:0032501       9.09e-03     79  multicellular organismal process
+  GO:CC    GO:0031838       1.91e-02      3  haptoglobin-hemoglobin complex
+  GO:MF    GO:0001228       2.23e-02     14  DNA-binding transcription activator...
+  GO:MF    GO:0001216       2.62e-02     14  DNA-binding transcription activator...
+  GO:CC    GO:0005833       3.27e-02      3  hemoglobin complex
+  GO:MF    GO:0031720       4.43e-02      3  haptoglobin binding
+  GO:BP    GO:0019755       4.83e-02      4  one-carbon compound transport
+  GO:BP    GO:0043382       4.99e-02      3  positive regulation of memory T cel...

@@ -1,4 +1,4 @@
-# Custom 
+# Custom
 data/raw/*_state.json
 data/raw/*.jsonl
 data/gene_expression/*

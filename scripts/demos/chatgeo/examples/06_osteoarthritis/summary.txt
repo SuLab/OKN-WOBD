@@ -1,0 +1,128 @@
+======================================================================
+DIFFERENTIAL EXPRESSION ANALYSIS RESULTS
+======================================================================
+
+QUERY
+  Disease: osteoarthritis
+  Tissue: knee
+  Timestamp: 2026-02-02T15:48:20.521681
+
+SAMPLES
+  Test: 200 samples from 17 studies
+  Control: 57 samples from 11 studies
+  Organisms: human
+
+METHODS
+  Normalization: deseq2
+  Statistical test: deseq2
+  FDR correction: deseq2
+
+THRESHOLDS
+  FDR: 0.01
+  Log2 FC: 2.0
+
+----------------------------------------------------------------------
+SUMMARY
+----------------------------------------------------------------------
+  Genes tested: 19,170
+  Genes significant: 835
+  Upregulated: 720
+  Downregulated: 115
+
+----------------------------------------------------------------------
+TOP 20 UPREGULATED GENES
+----------------------------------------------------------------------
+  Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
+  ----------------------------------------------------------
+  HLA-DRB3           9.71     9.41e-15       203.68        31.00
+  TRARG1             9.34     8.21e-21        79.68         1.12
+  CIDEC              8.60     6.79e-35       203.36         5.05
+  MYH1               7.45     1.29e-16       267.74         2.02
+  PLIN1              7.19     1.69e-57      1785.97        52.11
+  PLIN4              6.84     1.99e-50      1711.75        73.07
+  ADH1B              6.80     3.62e-74      3539.17       165.19
+  KRT6A              6.66     5.32e-11        39.45         0.75
+  THRSP              6.51     3.62e-31        82.60         5.12
+  KLK5               6.49     2.86e-10        11.75         0.33
+  GPD1               6.38     1.72e-41       703.35        59.33
+  ADIPOQ             6.17     2.60e-31       999.51       109.51
+  C14ORF180          6.10     6.48e-11        90.42         4.21
+  CTSG               6.09     1.68e-11        52.05         5.40
+  HEPN1              5.88     3.35e-05         3.22         0.05
+  TPSAB1             5.87     1.91e-10       237.85        64.86
+  TMEM132C           5.82     1.00e-12        92.46         8.86
+  C6                 5.82     7.23e-15       184.81        14.53
+  HLA-DOA            5.61     3.18e-19        38.87         3.21
+  TPSD1              5.52     2.81e-09        16.61         1.95
+
+----------------------------------------------------------------------
+TOP 20 DOWNREGULATED GENES
+----------------------------------------------------------------------
+  Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
+  ----------------------------------------------------------
+  CXCL5             -5.87     2.94e-34        27.63       652.00
+  CSF3              -5.26     1.30e-16         1.85       420.54
+  H4C11             -5.14     7.34e-03         4.36       142.32
+  IL1B              -4.93     7.40e-32       174.06      1980.44
+  SELE              -4.62     2.00e-08        56.37      5656.09
+  CXCL8             -4.57     1.89e-19      1679.61     25542.35
+  CCKAR             -4.47     4.18e-20        21.02       854.77
+  H2AC16            -4.26     1.22e-11        13.10       284.93
+  EREG              -4.26     1.05e-35       176.49      8277.77
+  CXCL3             -4.24     8.73e-20       450.91      5526.56
+  H3C8              -4.18     1.04e-10        10.41       225.18
+  H3C3              -4.15     1.24e-08        16.41       292.91
+  H3C2              -4.13     3.52e-08        30.02       547.00
+  H2BC17            -4.12     8.71e-11        13.59       212.12
+  H2AC14            -4.06     2.01e-10        15.11       243.58
+  ESM1              -3.95     2.53e-18       161.91      1678.25
+  H2BC14            -3.94     2.19e-08         7.31       126.75
+  H3C15             -3.88     3.61e-07        18.90       517.37
+  CXCL2             -3.84     4.64e-17       467.27      7051.11
+  IL6               -3.82     1.33e-18       400.85      8274.28
+
+======================================================================
+
+----------------------------------------------------------------------
+ENRICHMENT ANALYSIS
+----------------------------------------------------------------------
+  Backend: gprofiler
+  Organism: hsapiens
+  Sources: GO:BP, GO:CC, GO:MF, KEGG, REAC
+  Threshold: 0.05
+
+  Total significant terms: 656
+  Upregulated: 357 terms
+  Downregulated: 299 terms
+
+----------------------------------------------------------------------
+TOP 10 ENRICHED TERMS (UPREGULATED GENES)
+----------------------------------------------------------------------
+  Source   Term ID             P-adj  Genes  Term Name
+  ------------------------------------------------------------------
+  GO:CC    GO:0071944       4.53e-46    373  cell periphery
+  GO:BP    GO:0032501       2.12e-36    384  multicellular organismal process
+  GO:CC    GO:0005886       5.13e-33    328  plasma membrane
+  GO:CC    GO:0005576       3.79e-27    254  extracellular region
+  GO:BP    GO:0050896       4.05e-21    400  response to stimulus
+  GO:CC    GO:0009986       6.31e-20     89  cell surface
+  GO:MF    GO:0060089       1.94e-19    151  molecular transducer activity
+  GO:MF    GO:0038023       1.94e-19    151  signaling receptor activity
+  GO:CC    GO:0016020       1.03e-17    421  membrane
+  GO:BP    GO:0007154       4.99e-17    309  cell communication
+
+----------------------------------------------------------------------
+TOP 10 ENRICHED TERMS (DOWNREGULATED GENES)
+----------------------------------------------------------------------
+  Source   Term ID             P-adj  Genes  Term Name
+  ------------------------------------------------------------------
+  GO:MF    GO:0030527       1.27e-34     26  structural constituent of chromatin
+  GO:CC    GO:0000786       2.65e-32     26  nucleosome
+  REAC     REAC:R-HSA-3214815   1.61e-27     24  HDACs deacetylate histones
+  GO:CC    GO:0032993       1.53e-25     26  protein-DNA complex
+  REAC     REAC:R-HSA-9821002   1.92e-25     21  Chromatin modifications during the ...
+  KEGG     KEGG:05322       2.14e-25     25  Systemic lupus erythematosus
+  REAC     REAC:R-HSA-9610379   2.14e-25     24  HCMV Late Events
+  REAC     REAC:R-HSA-73728   7.37e-25     20  RNA Polymerase I Promoter Opening
+  REAC     REAC:R-HSA-5334118   1.55e-24     20  DNA methylation
+  GO:CC    GO:0005615       2.79e-24     64  extracellular space
