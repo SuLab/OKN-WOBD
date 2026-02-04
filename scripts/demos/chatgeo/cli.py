@@ -90,6 +90,9 @@ def run_analysis(
     output_format: Literal["summary", "json", "tsv"] = "summary",
     interpret: bool = True,
     verbose: bool = False,
+    rdf: bool = False,
+    rdf_format: str = "turtle",
+    rdf_base_uri: str = "https://okn.wobd.org/",
 ) -> Optional[Dict[str, Any]]:
     """
     Run differential expression analysis.
@@ -366,6 +369,34 @@ def run_analysis(
                 if verbose:
                     print(f"  Interpretation skipped: {e}")
 
+        # RDF export (opt-in)
+        if rdf:
+            try:
+                from chatgeo.rdf_export import from_chatgeo
+                from okn_wobd.de_rdf import RdfConfig
+
+                rdf_config = RdfConfig(
+                    base_uri=rdf_base_uri,
+                    output_format=rdf_format,
+                )
+
+                if verbose:
+                    print("Generating RDF export...")
+
+                writer = from_chatgeo(result, enrichment_result, config=rdf_config)
+                ext = "ttl" if rdf_format == "turtle" else "nt"
+                rdf_path = output_dir / f"results.{ext}"
+                writer.write(rdf_path, fmt=rdf_format)
+
+                if verbose:
+                    print(f"  RDF: {writer.get_triple_count()} triples → {rdf_path}")
+            except ImportError as e:
+                if verbose:
+                    print(f"  RDF export skipped (missing dependency): {e}")
+            except Exception as e:
+                if verbose:
+                    print(f"  RDF export failed: {e}")
+
         print(f"Results written to: {output_dir}")
 
     # Return structured results for programmatic use
@@ -545,6 +576,24 @@ Examples:
         help="Print verbose output",
     )
 
+    # RDF export options
+    parser.add_argument(
+        "--rdf",
+        action="store_true",
+        help="Export results as Biolink RDF (requires --output directory)",
+    )
+    parser.add_argument(
+        "--rdf-format",
+        choices=["turtle", "nt"],
+        default="turtle",
+        help="RDF serialization format (default: turtle)",
+    )
+    parser.add_argument(
+        "--rdf-base-uri",
+        default="https://okn.wobd.org/",
+        help="Base URI for RDF export (default: https://okn.wobd.org/)",
+    )
+
     args = parser.parse_args()
 
     # Parse query
@@ -585,6 +634,9 @@ Examples:
         output_format=args.format,
         interpret=args.interpret,
         verbose=args.verbose,
+        rdf=args.rdf,
+        rdf_format=args.rdf_format,
+        rdf_base_uri=args.rdf_base_uri,
     )
 
 
