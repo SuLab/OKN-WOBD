@@ -1,0 +1,57 @@
+# Template for graph metadata YAML files
+# Copy this file to {graph-shortname}.yaml and fill in the values
+#
+# This metadata is merged into the auto-generated {graph}_global.json by build_graph_context.py
+# Fields marked "optional" can be omitted if not applicable
+
+# Required: Graph shortname (must match the filename: {id}.yaml)
+id: graph-shortname
+
+# Required: SPARQL endpoint URL
+# For FRINK graphs: https://frink.apps.renci.org/{shortname}/sparql
+# For external graphs: the actual SPARQL endpoint URL
+endpoint: "https://frink.apps.renci.org/graph-shortname/sparql"
+
+# Optional: Human-readable description
+# If omitted, build_graph_context.py will derive a description from the graph introspection
+# If provided, this overrides the auto-generated description
+description: "Brief description of what this graph contains and what it's good for"
+
+# Required: Use cases this graph supports
+# Common values: "dataset_search", "entity_lookup", "entity_relationships", "ontology_reasoning"
+# Multiple values allowed
+good_for:
+  - "dataset_search"
+  # - "entity_lookup"
+
+# Optional: Ontologies provided by this graph (e.g. MONDO, GO, HP, NCBITaxon)
+# Only include if the graph is a source/authority for these ontologies
+provides_ontologies:
+  - "MONDO"
+  # - "GO"
+
+# Optional: Notable relationship patterns in this graph
+# Describe key relationship types that users should know about
+# Format: "Subject to object via predicate (description)"
+notable_relationships:
+  - "Datasets to diseases via schema:healthCondition (MONDO IRIs)"
+  - "Datasets to species via schema:species (UniProt taxonomy IRIs)"
+  # Add more relationship patterns...
+
+# Optional: Example predicates with brief descriptions
+# List important predicates users should know about
+# Format: "prefix:property (human-readable description)"
+# You can extract candidates from the *_global.json file's top properties
+example_predicates:
+  - "schema:healthCondition (links to disease entities)"
+  - "schema:species (links to species/organism entities)"
+  # Add more predicates from the graph...
+
+# Optional: Entity types that can be used to query this graph
+# Maps entity types to the properties used to query them
+queryable_by:
+  - entity_type: "Disease"
+    property: "schema:healthCondition"
+  - entity_type: "Species"
+    property: "schema:species"
+  # Add more queryable entity types...

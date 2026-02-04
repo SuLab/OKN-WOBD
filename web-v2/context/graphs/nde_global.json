@@ -1,0 +1,268 @@
+{
+  "endpoint": "https://frink.apps.renci.org/nde/sparql",
+  "description": "NIAID biomedical datasets with disease, species, and publication metadata",
+  "uses_ontologies": [
+    "DOID",
+    "MONDO",
+    "UniProt"
+  ],
+  "good_for": [
+    "dataset_search"
+  ],
+  "notable_relationships": [
+    "Datasets to diseases via schema:healthCondition (MONDO IRIs)",
+    "Datasets to species via schema:species (UniProt taxonomy IRIs)",
+    "Datasets to infectious agents via schema:infectiousAgent"
+  ],
+  "example_predicates": [
+    "schema:healthCondition (links to disease entities)",
+    "schema:species (links to species/organism entities)",
+    "schema:infectiousAgent (links to pathogen entities - common in RADx Data Hub datasets)",
+    "schema:name (dataset name)",
+    "schema:description (dataset description)",
+    "schema:identifier (dataset identifiers - GSE IDs in NCBI GEO, common across repositories)",
+    "schema:url (dataset URLs - NCBI GEO URLs, common across repositories)",
+    "schema:distribution (data access URLs - common in ImmPort datasets)",
+    "schema:contentUrl (direct content download URLs - common in ImmPort datasets)",
+    "schema:encodingFormat (file format information - common in ImmPort datasets)",
+    "schema:abstract (dataset abstracts - common in ImmPort datasets)",
+    "schema:sameAs (DOI links - common in ImmPort, Project Tycho, and Vivli datasets)",
+    "schema:author (author links - very common in NCBI GEO and Project Tycho datasets)",
+    "schema:funding (grant/funding links - common in NCBI GEO, VDJServer, and RADx Data Hub datasets)",
+    "schema:funder (funding organization links - common in VDJServer and RADx Data Hub datasets)",
+    "schema:datePublished (publication dates - common in NCBI GEO, Project Tycho, and Vivli datasets)",
+    "schema:dateCreated (creation dates - common in Project Tycho and Vivli datasets)",
+    "schema:dateModified (modification dates - common in Vivli datasets)",
+    "schema:startDate, schema:endDate (date ranges - common in VDJServer and RADx Data Hub datasets)",
+    "schema:affiliation (author affiliations - common in VDJServer datasets)",
+    "schema:alternateName (alternative names - common in VDJServer datasets)"
+  ],
+  "queryable_by": [
+    {
+      "entity_type": "Disease",
+      "property": "schema:healthCondition"
+    },
+    {
+      "entity_type": "Species",
+      "property": "schema:species"
+    },
+    {
+      "entity_type": "Pathogen",
+      "property": "schema:infectiousAgent"
+    }
+  ],
+  "prefixes": {
+    "schema": "http://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "owl": "http://www.w3.org/2002/07/owl#"
+  },
+  "classes": [
+    {
+      "iri": "http://schema.org/Dataset",
+      "count": 9863
+    },
+    {
+      "iri": "http://schema.org/DefinedTerm",
+      "count": 1275
+    },
+    {
+      "iri": "http://schema.org/Person",
+      "count": 824
+    },
+    {
+      "iri": "http://schema.org/MonetaryGrant",
+      "count": 569
+    },
+    {
+      "iri": "http://schema.org/Organization",
+      "count": 413
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#Class",
+      "count": 9
+    },
+    {
+      "iri": "http://schema.org/DataCatalog",
+      "count": 7
+    }
+  ],
+  "dataset_properties": {
+    "http://schema.org/author": {
+      "iri": "http://schema.org/author",
+      "count": 14665
+    },
+    "http://schema.org/sameAs": {
+      "iri": "http://schema.org/sameAs",
+      "count": 11124
+    },
+    "http://schema.org/identifier": {
+      "iri": "http://schema.org/identifier",
+      "count": 7073,
+      "curie": "schema:identifier",
+      "examples": [
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1",
+          "object": "10.21430/M38Y09R3R9"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy10",
+          "object": "10.21430/M3K0GCB4KL"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy100",
+          "object": "10.21430/M3XUDZGCYI"
+        }
+      ]
+    },
+    "http://schema.org/includedInDataCatalog": {
+      "iri": "http://schema.org/includedInDataCatalog",
+      "count": 6452,
+      "curie": "schema:includedInDataCatalog",
+      "examples": [
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1",
+          "object": "https://okn.wobd.org/catalog/immport"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy10",
+          "object": "https://okn.wobd.org/catalog/immport"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy100",
+          "object": "https://okn.wobd.org/catalog/immport"
+        }
+      ]
+    },
+    "http://schema.org/healthCondition": {
+      "iri": "http://schema.org/healthCondition",
+      "count": 6389,
+      "curie": "schema:healthCondition",
+      "examples": [
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1",
+          "object": "http://purl.obolibrary.org/obo/MONDO_0005324"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1",
+          "object": "http://purl.obolibrary.org/obo/MONDO_0011786"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy10",
+          "object": "http://purl.obolibrary.org/obo/DOID_9123"
+        }
+      ]
+    },
+    "http://schema.org/name": {
+      "iri": "http://schema.org/name",
+      "count": 5674,
+      "curie": "schema:name",
+      "examples": [
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1",
+          "object": "Efficacy and Safety Evaluation of Allergen Immunotherapy Co-Administered with Omalizumab (an anti-IgE Monoclonal Antibody) (ITN019AD)"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy10",
+          "object": "Role of Antimicrobial Peptides in Host Defense Against Vaccinia Virus (AMP 01)"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy100",
+          "object": "PPARG and microRNA-146 in mucosal immune responses to C. difficile"
+        }
+      ]
+    },
+    "http://schema.org/url": {
+      "iri": "http://schema.org/url",
+      "count": 5674
+    },
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": {
+      "iri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "count": 5674
+    },
+    "http://schema.org/date": {
+      "iri": "http://schema.org/date",
+      "count": 5621
+    },
+    "http://www.w3.org/2002/07/owl#sameAs": {
+      "iri": "http://www.w3.org/2002/07/owl#sameAs",
+      "count": 5551
+    },
+    "http://schema.org/dateModified": {
+      "iri": "http://schema.org/dateModified",
+      "count": 5022
+    },
+    "http://schema.org/description": {
+      "iri": "http://schema.org/description",
+      "count": 4896,
+      "curie": "schema:description",
+      "examples": [
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1",
+          "object": "Allergic rhinitis affects 20 to 40 million Americans annually. Allergy symptoms, which can range from mild to seriously debilitating, may affect quality of life. Left untreated, allergic rhinitis can exacerbate or trigger more serious conditions, such as asthma and sinus inflammation.\nIndividuals with allergies react to harmless particles such as dust or pollen. Proteins in the blood called IgE antibodies treat the harmless particles as invaders and trigger an immune system response. The immune response results in harmful inflammation of healthy tissues. In ragweed allergy, inflammation occurs in the airways and causes familiar allergy symptoms like sneezing, coughing, and general discomfort.\nOmalizumab is an investigational drug that has been shown to block the effects of IgE antibodies. The blocking effect of omalizumab is temporary, but giving the drug to people before their regular allergy shots may make the shots more effective.\nParticipants in this study will be randomly assigned to receive injections of omalizumab or a placebo before an accelerated course of allergy shots (given over 12 weeks). The participants will return for follow-up for up to one year, and they may have as many as 27 study visits.\n"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy10",
+          "object": "AD is a chronic inflammatory skin disease characterized by frequent viral skin infections. Recent studies have found that components in the skin of people with AD may block AMP expression. AMPs are responsible for preventing infection from viruses.\n\nThe purpose of this study is to examine small pox virus replication and AMP expression in the skin of patients with AD as well as identify other antiviral molecules involved in immune response. These findings will be compared with those of people with psoriasis or asthma, or healthy individuals. This study will consist of one study visit at which skin and blood samples will be taken."
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy100",
+          "object": "Clostridium difficile is typically a harmless anaerobic bacterium but recently it has re-emerged as a facultative pathogen that can cause nosocomial diarrhea, colitis and even death. Peroxisome proliferator-activated receptor (PPAR) gamma has been implicated in the prevention of inflammation in autoimmune and infectious diseases; however, its role in the immunoregulatory mechanisms modulating host responses to C. difficile remains largely unknown. To characterize the role of PPAR gamma in C. difficile-associated disease (CDAD), immunity and gut pathology, we used a mouse model of C. difficile infection in wild-type and T cell-specific PPAR gamma null mice. The loss of PPAR gamma in T cells increased disease activity and colonic inflammatory lesions following C. difficile infection. Colonic expression of IL-17 was upregulated and IL-10 downregulated in colons of T cell-specific PPAR gamma null mice. Also, both the loss of PPAR gamma in T cells and C. difficile infection favored Th17 responses in spleen and colonic lamina propria of mice with CDAD. MicroRNA (miRNA)-sequencing analysis and RT-PCR validation indicated that miR-146b was significantly overexpressed in colons of C. difficile-infected mice. We next developed a computational model that predicts the upregulation of miR-146b, downregulation of the PPAR gamma co-activator NCOA4, and PPAR gamma, leading to upregulation of IL-17. Treatment of C. difficile-infected mice with the PPAR gamma agonist pioglitazone ameliorated colitis and suppressed pro-inflammatory gene expression. In conclusion, our data indicates that miRNA-146b and PPAR gamma may be implicated in the regulation of Th17 responses and colitis in C. difficile-infected mice."
+        }
+      ]
+    },
+    "http://schema.org/datePublished": {
+      "iri": "http://schema.org/datePublished",
+      "count": 4301
+    },
+    "http://schema.org/dateCreated": {
+      "iri": "http://schema.org/dateCreated",
+      "count": 4262
+    },
+    "http://schema.org/species": {
+      "iri": "http://schema.org/species",
+      "count": 2658,
+      "curie": "schema:species",
+      "examples": [
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1",
+          "object": "https://www.uniprot.org/taxonomy/9606"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy10",
+          "object": "https://www.uniprot.org/taxonomy/9606"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy100",
+          "object": "https://www.uniprot.org/taxonomy/10090"
+        }
+      ]
+    },
+    "http://schema.org/infectiousAgent": {
+      "iri": "http://schema.org/infectiousAgent",
+      "count": 1962,
+      "curie": "schema:infectiousAgent",
+      "examples": [
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1171",
+          "object": "https://www.uniprot.org/taxonomy/11052"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1390",
+          "object": "https://www.uniprot.org/taxonomy/11709"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1426",
+          "object": "https://www.uniprot.org/taxonomy/1879016"
+        }
+      ]
+    },
+    "http://schema.org/funding": {
+      "iri": "http://schema.org/funding",
+      "count": 1682
+    },
+    "http://schema.org/abstract": {
+      "iri": "http://schema.org/abstract",
+      "count": 1320
+    }
+  }
+}

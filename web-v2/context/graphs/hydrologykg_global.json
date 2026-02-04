@@ -1,0 +1,105 @@
+{
+  "endpoint": "https://frink.apps.renci.org/hydrologykg/sparql",
+  "description": "Ontology. Top classes: Thing (18863), Feature (18811), SpatialObject (18810), ISGS-Well (12409), b0 (6402). Object properties: \u2014.",
+  "uses_ontologies": [],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "http://www.w3.org/2002/07/owl#Thing",
+      "count": 18863
+    },
+    {
+      "iri": "http://www.opengis.net/ont/geosparql#Feature",
+      "count": 18811
+    },
+    {
+      "iri": "http://www.opengis.net/ont/geosparql#SpatialObject",
+      "count": 18810
+    },
+    {
+      "iri": "http://sawgraph.spatialai.org/v1/il-isgs#ISGS-Well",
+      "count": 12409
+    },
+    {
+      "iri": "b0",
+      "count": 6402
+    },
+    {
+      "iri": "http://sawgraph.spatialai.org/v1/us-sdwis#PublicWaterSystem",
+      "count": 6402
+    },
+    {
+      "iri": "http://sawgraph.spatialai.org/v1/us-sdwis#PublicWaterSystem-GW",
+      "count": 5936
+    },
+    {
+      "iri": "http://sawgraph.spatialai.org/v1/us-sdwis#PublicWaterSystem-NCWS",
+      "count": 5629
+    },
+    {
+      "iri": "http://sawgraph.spatialai.org/v1/us-sdwis#PublicWaterSystem-TNCWS",
+      "count": 4771
+    },
+    {
+      "iri": "http://sawgraph.spatialai.org/v1/us-sdwis#PublicWaterSystem-NTNCWS",
+      "count": 858
+    },
+    {
+      "iri": "http://sawgraph.spatialai.org/v1/us-sdwis#PublicWaterSystem-CWS",
+      "count": 773
+    },
+    {
+      "iri": "http://sawgraph.spatialai.org/v1/us-sdwis#PublicWaterSystem-SW",
+      "count": 254
+    },
+    {
+      "iri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property",
+      "count": 27
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#Class",
+      "count": 17
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#Class",
+      "count": 13
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#AnnotationProperty",
+      "count": 7
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#ObjectProperty",
+      "count": 6
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "count": 5
+    },
+    {
+      "iri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#List",
+      "count": 2
+    },
+    {
+      "iri": "http://qudt.org/schema/qudt/Quantity",
+      "count": 1
+    },
+    {
+      "iri": "http://qudt.org/schema/qudt/QuantityKind",
+      "count": 1
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#Resource",
+      "count": 1
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#Ontology",
+      "count": 1
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#Restriction",
+      "count": 1
+    }
+  ],
+  "dataset_properties": {}
+}

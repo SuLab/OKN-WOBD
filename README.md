@@ -27,7 +27,7 @@ python -m okn_wobd.cli fetch --resource ImmPort
 
 ### Options
 
-- `--all`: Fetch all default resources (ImmPort, VDJServer, Vivli, RADx Data Hub, Project Tycho).
+- `--all`: Fetch all available resources from the NDE API (automatically discovers all Dataset Repositories). Resources listed in `src/okn_wobd/excluded_resources.py` are excluded.
 - `--resource`: Repeatable; defaults to `ImmPort` when omitted. Examples: `ImmPort`, `"VDJ Server"`, `Vivli`, `RADx`, `PDB`, `"Project TYCHO"`.
 - `--output-dir`: Directory for saved data and checkpoints (default: `data/raw`).
 - `--page-size`: Batch size for API pagination (default: 100, maximum: 1000).
@@ -41,13 +41,13 @@ python -m okn_wobd.cli fetch --resource ImmPort
 
 The CLI records progress for each resource in `<output-dir>/<resource>_state.json`. Rerun the command without `--restart` to resume where it left off. Supply `--restart` to discard prior results and fetch everything again from the beginning.
 
-### Example: Fetch All Default Resources
+### Example: Fetch All Available Dataset Repository Resources
 
 ```bash
 okn-wobd fetch --all
 ```
 
-This fetches data for all default resources: ImmPort, VDJServer, Vivli, RADx Data Hub, and Project Tycho.
+This queries the NDE API to discover all available dataset repository resources and fetches data for each one (excluding resources configured in `src/okn_wobd/excluded_resources.py`, such as "Protein Data Bank").
 
 ### Example: Fetch Multiple Specific Resources
 
@@ -70,7 +70,7 @@ okn-wobd fetch \
   --max-window 10000 \
   --segment-field identifier \
   --segment-charset 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ \
-  --segment-max-length 4
+  --segment-max-length 8
 ```
 
 The state file tracks both the current segment and offset so interrupted runs can resume without re-downloading data.
@@ -106,6 +106,7 @@ okn-wobd convert
 - `--input-dir`: Directory containing JSONL files (default: `data/raw`).
 - `--output-dir`: Directory to write N-Triples files (default: `data/rdf`).
 - `--resource`: Repeatable; convert specific resources. If omitted, converts all JSONL files found in input directory.
+- `--log-file`: Path to write conversion log file (includes warnings about bad URIs, skipped duplicates, etc.). If omitted, logs only appear in terminal.
 
 ### Examples
 
@@ -118,6 +119,12 @@ okn-wobd convert --resource ImmPort --resource "VDJ Server"
 
 # Specify custom input/output directories
 okn-wobd convert --input-dir data/raw --output-dir data/rdf
+
+# Save conversion logs to a file (useful for reporting data quality issues)
+okn-wobd convert --log-file reports/conversion_log.txt
+
+# Convert with logging for a specific resource
+okn-wobd convert --resource ImmPort --log-file reports/immport_conversion_log.txt
 ```
 
 The converter generates one `.nt` file per resource in the output directory. Each dataset is assigned a URI in the `https://okn.wobd.org/` namespace using the pattern `https://okn.wobd.org/dataset/{resource}/{_id}`.

@@ -1,0 +1,201 @@
+{
+  "endpoint": "https://frink.apps.renci.org/climatemodelskg/sparql",
+  "description": "Ontology. Top classes: City (30062), No_Country_Region (6722), Member (5929), Country_Subdivision (3893), Variable (2907). Object properties: \u2014.",
+  "uses_ontologies": [],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#City",
+      "count": 30062
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#No_Country_Region",
+      "count": 6722
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Member",
+      "count": 5929
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Country_Subdivision",
+      "count": 3893
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Variable",
+      "count": 2907
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#PhysicalScheme",
+      "count": 700
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Metric",
+      "count": 699
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Result",
+      "count": 607
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#SourceComponent",
+      "count": 559
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Ensemble",
+      "count": 552
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Experiment",
+      "count": 481
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Source",
+      "count": 394
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#PhysicalFeature",
+      "count": 281
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Country",
+      "count": 252
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Forcing",
+      "count": 204
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Institute",
+      "count": 132
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Water_Bodies",
+      "count": 123
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Teleconnection",
+      "count": 121
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Ocean_Circulation",
+      "count": 113
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Weather_Event",
+      "count": 100
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#ObservationalDataset",
+      "count": 99
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Keyword",
+      "count": 85
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#SimulationType",
+      "count": 76
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "count": 74
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#SubExperiment",
+      "count": 63
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#ObjectProperty",
+      "count": 60
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Instrument",
+      "count": 49
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#Class",
+      "count": 47
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#RCM",
+      "count": 42
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Domain",
+      "count": 39
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Innovation",
+      "count": 38
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Method",
+      "count": 38
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Paper",
+      "count": 38
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Problem",
+      "count": 38
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Task",
+      "count": 38
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Model",
+      "count": 37
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Project",
+      "count": 33
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Platform",
+      "count": 27
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Activity",
+      "count": 26
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Frequency",
+      "count": 16
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Natural_Hazard",
+      "count": 16
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#SourceType",
+      "count": 16
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Field",
+      "count": 15
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Resolution",
+      "count": 15
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Realm",
+      "count": 14
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#ExperimentFamily",
+      "count": 9
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#Continent",
+      "count": 7
+    },
+    {
+      "iri": "https://climatepub4kg.github.io/ontology#MIPEra",
+      "count": 4
+    }
+  ],
+  "dataset_properties": {}
+}

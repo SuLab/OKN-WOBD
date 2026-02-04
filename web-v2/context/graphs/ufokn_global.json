@@ -1,0 +1,25 @@
+{
+  "endpoint": "https://frink.apps.renci.org/ufokn/sparql",
+  "description": "Ontology. Top classes: PropertyValue (63480), S2Cell (18064), GeoShape (9248), GeoCoordinates (9208). Object properties: \u2014.",
+  "uses_ontologies": [],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "https://schema.org/PropertyValue",
+      "count": 63480
+    },
+    {
+      "iri": "https://stko-kwg.geog.ucsb.edu/lod/ontology#S2Cell",
+      "count": 18064
+    },
+    {
+      "iri": "https://schema.org/GeoShape",
+      "count": 9248
+    },
+    {
+      "iri": "https://schema.org/GeoCoordinates",
+      "count": 9208
+    }
+  ],
+  "dataset_properties": {}
+}

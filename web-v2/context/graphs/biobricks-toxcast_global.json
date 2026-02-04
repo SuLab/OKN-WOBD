@@ -1,0 +1,13 @@
+{
+  "endpoint": "https://frink.apps.renci.org/biobricks-toxcast/sparql",
+  "description": "Ontology. Top classes: BAO_0000179 (100000). Object properties: \u2014.",
+  "uses_ontologies": [],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "http://www.bioassayontology.org/bao#BAO_0000179",
+      "count": 100000
+    }
+  ],
+  "dataset_properties": {}
+}

@@ -1,0 +1,47 @@
+{
+  "endpoint": "https://frink.apps.renci.org/spoke-genelab/sparql",
+  "description": "Ontology. Top classes: Gene (59756), Statement (27903), OBI_0000070 (6467), MethylationRegion (5663), Study (140). Object properties: \u2014.",
+  "uses_ontologies": [
+    "OBI"
+  ],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "https://w3id.org/biolink/vocab/Gene",
+      "count": 59756
+    },
+    {
+      "iri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Statement",
+      "count": 27903
+    },
+    {
+      "iri": "http://purl.obolibrary.org/obo/OBI_0000070",
+      "count": 6467
+    },
+    {
+      "iri": "https://purl.org/okn/frink/kg/spoke-genelab/schema/MethylationRegion",
+      "count": 5663
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/Study",
+      "count": 140
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/AnatomicalEntity",
+      "count": 33
+    },
+    {
+      "iri": "https://purl.org/okn/frink/kg/spoke-genelab/schema/Mission",
+      "count": 23
+    },
+    {
+      "iri": "https://purl.org/okn/frink/kg/spoke-genelab/schema/MetaNode",
+      "count": 8
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/Cell",
+      "count": 7
+    }
+  ],
+  "dataset_properties": {}
+}

@@ -1,0 +1,41 @@
+{
+  "endpoint": "https://frink.apps.renci.org/spatialkg/sparql",
+  "description": "Ontology. Top classes: Thing (33333), Geometry (33323), SpatialObject (33323), Property (10), AnnotationProperty (7). Object properties: \u2014.",
+  "uses_ontologies": [],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "http://www.w3.org/2002/07/owl#Thing",
+      "count": 33333
+    },
+    {
+      "iri": "http://www.opengis.net/ont/geosparql#Geometry",
+      "count": 33323
+    },
+    {
+      "iri": "http://www.opengis.net/ont/geosparql#SpatialObject",
+      "count": 33323
+    },
+    {
+      "iri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property",
+      "count": 10
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#AnnotationProperty",
+      "count": 7
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#ObjectProperty",
+      "count": 2
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#Resource",
+      "count": 1
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#Ontology",
+      "count": 1
+    }
+  ],
+  "dataset_properties": {}
+}

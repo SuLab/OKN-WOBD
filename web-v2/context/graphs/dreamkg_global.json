@@ -1,0 +1,65 @@
+{
+  "endpoint": "https://frink.apps.renci.org/dreamkg/sparql",
+  "description": "Ontology. Top classes: Entity (1586), OpeningHoursSpecification (609), ServiceChannel (174), CategoryCode (157), ContactPoint (87). Object properties: \u2014.",
+  "uses_ontologies": [],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "http://www.w3.org/ns/prov#Entity",
+      "count": 1586
+    },
+    {
+      "iri": "http://schema.org/OpeningHoursSpecification",
+      "count": 609
+    },
+    {
+      "iri": "http://schema.org/ServiceChannel",
+      "count": 174
+    },
+    {
+      "iri": "http://schema.org/CategoryCode",
+      "count": 157
+    },
+    {
+      "iri": "http://schema.org/ContactPoint",
+      "count": 87
+    },
+    {
+      "iri": "http://schema.org/Organization",
+      "count": 87
+    },
+    {
+      "iri": "http://schema.org/Place",
+      "count": 87
+    },
+    {
+      "iri": "http://schema.org/Service",
+      "count": 87
+    },
+    {
+      "iri": "http://schema.org/TextObject",
+      "count": 87
+    },
+    {
+      "iri": "http://schema.org/WebPage",
+      "count": 87
+    },
+    {
+      "iri": "http://schema.org/Audience",
+      "count": 81
+    },
+    {
+      "iri": "http://schema.org/AdministrativeArea",
+      "count": 39
+    },
+    {
+      "iri": "http://www.w3.org/ns/prov#Collection",
+      "count": 2
+    },
+    {
+      "iri": "http://www.w3.org/ns/prov#Activity",
+      "count": 1
+    }
+  ],
+  "dataset_properties": {}
+}

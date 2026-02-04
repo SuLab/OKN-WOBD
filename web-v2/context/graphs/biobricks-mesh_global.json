@@ -1,0 +1,37 @@
+{
+  "endpoint": "https://frink.apps.renci.org/biobricks-mesh/sparql",
+  "description": "Ontology. Top classes: TreeNumber (63110), TopicalDescriptor (29381), AllowedDescriptorQualifierPair (4231), Concept (2797), GeographicalDescriptor (399). Object properties: \u2014.",
+  "uses_ontologies": [],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "http://id.nlm.nih.gov/mesh/vocab#TreeNumber",
+      "count": 63110
+    },
+    {
+      "iri": "http://id.nlm.nih.gov/mesh/vocab#TopicalDescriptor",
+      "count": 29381
+    },
+    {
+      "iri": "http://id.nlm.nih.gov/mesh/vocab#AllowedDescriptorQualifierPair",
+      "count": 4231
+    },
+    {
+      "iri": "http://id.nlm.nih.gov/mesh/vocab#Concept",
+      "count": 2797
+    },
+    {
+      "iri": "http://id.nlm.nih.gov/mesh/vocab#GeographicalDescriptor",
+      "count": 399
+    },
+    {
+      "iri": "http://id.nlm.nih.gov/mesh/vocab#PublicationType",
+      "count": 71
+    },
+    {
+      "iri": "http://id.nlm.nih.gov/mesh/vocab#DisallowedDescriptorQualifierPair",
+      "count": 11
+    }
+  ],
+  "dataset_properties": {}
+}

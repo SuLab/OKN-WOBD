@@ -53,6 +53,7 @@ def summarize_file(path: Path) -> dict[str, object]:
     disease_count = 0
     species_count = 0
     infectious_agent_count = 0
+    all_three_count = 0
 
     with path.open("r", encoding="utf-8") as handle:
         for line in handle:
@@ -66,14 +67,22 @@ def summarize_file(path: Path) -> dict[str, object]:
             except json.JSONDecodeError:
                 continue
 
-            if record.get("disease") or record.get("healthCondition"):
+            has_disease = bool(record.get("disease") or record.get("healthCondition"))
+            has_species = bool(record.get("species"))
+            has_agent = bool(record.get("infectiousAgent"))
+
+            if has_disease:
                 disease_count += 1
 
-            if record.get("species"):
+            if has_species:
                 species_count += 1
 
-            if record.get("infectiousAgent"):
+            if has_agent:
                 infectious_agent_count += 1
+
+            # Count records with all three fields
+            if has_disease and has_species and has_agent:
+                all_three_count += 1
 
     return {
         "resource": normalize_resource_name(path.stem),
@@ -82,6 +91,7 @@ def summarize_file(path: Path) -> dict[str, object]:
         "disease": disease_count,
         "species": species_count,
         "infectious_agent": infectious_agent_count,
+        "all_three": all_three_count,
     }
 
 
@@ -91,14 +101,15 @@ def ensure_parent_directory(path: Path) -> None:
 
 def generate_markdown(rows: list[dict[str, object]]) -> str:
     header = (
-        "| Resource | File | Records | Disease | Species | Infectious Agent |\n"
-        "| --- | --- | ---: | ---: | ---: | ---: |\n"
+        "| Resource | File | Records | Disease | Infectious Agent | Species | Disease+InfectiousAgent+Species |\n"
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: |\n"
     )
     body_lines: list[str] = []
     for row in rows:
         body_lines.append(
             f"| {row['resource']} | `{row['file']}` | {row['total']:,} | "
-            f"{row['disease']:,} | {row['species']:,} | {row['infectious_agent']:,} |"
+            f"{row['disease']:,} | {row['infectious_agent']:,} | {row['species']:,} | "
+            f"{row['all_three']:,} |"
         )
     return header + "\n".join(body_lines) + ("\n" if body_lines else "")
 

@@ -1,0 +1,57 @@
+{
+  "endpoint": "https://frink.apps.renci.org/geoconnex/sparql",
+  "description": "Ontology. Top classes: GovernmentOrganization (24838), PropertyValue (24806), Dataset (24296), DataDownload (23950), Point (958). Object properties: \u2014.",
+  "uses_ontologies": [],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "https://schema.org/GovernmentOrganization",
+      "count": 24838
+    },
+    {
+      "iri": "https://schema.org/PropertyValue",
+      "count": 24806
+    },
+    {
+      "iri": "https://schema.org/Dataset",
+      "count": 24296
+    },
+    {
+      "iri": "https://schema.org/DataDownload",
+      "count": 23950
+    },
+    {
+      "iri": "http://www.opengis.net/ont/sf#Point",
+      "count": 958
+    },
+    {
+      "iri": "schema:GeoCoordinates",
+      "count": 688
+    },
+    {
+      "iri": "https://schema.org/GeoCoordinates",
+      "count": 238
+    },
+    {
+      "iri": "https://schema.org/GeoShape",
+      "count": 92
+    },
+    {
+      "iri": "http://www.opengis.net/ont/sf#MultiPolygon",
+      "count": 89
+    },
+    {
+      "iri": "http://www.opengis.net/ont/sf#LineString",
+      "count": 23
+    },
+    {
+      "iri": "https://schema.org/governmentAgency",
+      "count": 19
+    },
+    {
+      "iri": "http://www.opengis.net/ont/sf#Polygon",
+      "count": 3
+    }
+  ],
+  "dataset_properties": {}
+}

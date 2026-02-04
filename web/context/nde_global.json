@@ -1,0 +1,361 @@
+{
+  "endpoint": "https://frink.apps.renci.org/nde/sparql",
+  "prefixes": {
+    "schema": "http://schema.org/",
+    "ns1": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "ns2": "http://www.w3.org/2002/07/owl#"
+  },
+  "classes": [
+    {
+      "iri": "http://schema.org/Dataset",
+      "count": 9863
+    },
+    {
+      "iri": "http://schema.org/DefinedTerm",
+      "count": 1275
+    },
+    {
+      "iri": "http://schema.org/Person",
+      "count": 824
+    },
+    {
+      "iri": "http://schema.org/MonetaryGrant",
+      "count": 569
+    },
+    {
+      "iri": "http://schema.org/Organization",
+      "count": 413
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#Class",
+      "count": 9
+    },
+    {
+      "iri": "http://schema.org/DataCatalog",
+      "count": 7
+    }
+  ],
+  "dataset_properties": {
+    "http://schema.org/author": {
+      "iri": "http://schema.org/author",
+      "count": 23043
+    },
+    "http://schema.org/sameAs": {
+      "iri": "http://schema.org/sameAs",
+      "count": 19502
+    },
+    "http://schema.org/identifier": {
+      "iri": "http://schema.org/identifier",
+      "count": 12531
+    },
+    "http://schema.org/healthCondition": {
+      "iri": "http://schema.org/healthCondition",
+      "count": 10771
+    },
+    "http://schema.org/includedInDataCatalog": {
+      "iri": "http://schema.org/includedInDataCatalog",
+      "count": 10641,
+      "curie": "schema:includedInDataCatalog",
+      "examples": [
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1",
+          "object": "https://okn.wobd.org/catalog/immport"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy10",
+          "object": "https://okn.wobd.org/catalog/immport"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy100",
+          "object": "https://okn.wobd.org/catalog/immport"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1015",
+          "object": "https://okn.wobd.org/catalog/immport"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1025",
+          "object": "https://okn.wobd.org/catalog/immport"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1026",
+          "object": "https://okn.wobd.org/catalog/immport"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1027",
+          "object": "https://okn.wobd.org/catalog/immport"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1028",
+          "object": "https://okn.wobd.org/catalog/immport"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1029",
+          "object": "https://okn.wobd.org/catalog/immport"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1039",
+          "object": "https://okn.wobd.org/catalog/immport"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1041",
+          "object": "https://okn.wobd.org/catalog/immport"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1041",
+          "object": "https://okn.wobd.org/catalog/immunespace"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1043",
+          "object": "https://okn.wobd.org/catalog/immport"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1045",
+          "object": "https://okn.wobd.org/catalog/immport"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1064",
+          "object": "https://okn.wobd.org/catalog/immport"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1079",
+          "object": "https://okn.wobd.org/catalog/immport"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1085",
+          "object": "https://okn.wobd.org/catalog/immport"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1086",
+          "object": "https://okn.wobd.org/catalog/immport"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1086",
+          "object": "https://okn.wobd.org/catalog/immunespace"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1092",
+          "object": "https://okn.wobd.org/catalog/immport"
+        }
+      ]
+    },
+    "http://schema.org/name": {
+      "iri": "http://schema.org/name",
+      "count": 9863,
+      "curie": "schema:name",
+      "examples": [
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1",
+          "object": "Efficacy and Safety Evaluation of Allergen Immunotherapy Co-Administered with Omalizumab (an anti-IgE Monoclonal Antibody) (ITN019AD)"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy10",
+          "object": "Role of Antimicrobial Peptides in Host Defense Against Vaccinia Virus (AMP 01)"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy100",
+          "object": "PPARG and microRNA-146 in mucosal immune responses to C. difficile"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1015",
+          "object": "MaHPIC: Host M. mulatta infected with P. cynomolgi"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1025",
+          "object": "Asthma Phenotypes in the Inner City (APIC/ICAC-19)"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1026",
+          "object": "Biomarkers of Cockroach Sublingual Immunotherapy 2 (BioCSI 2/ICAC-17)"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1027",
+          "object": "The Role of Epigenetics in Inner City Asthma (ICAC-15)"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1028",
+          "object": "Preventative Omalizumab or Step-up Therapy for Severe Fall Exacerbations (PROSE/ICAC-20)"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1029",
+          "object": "Subcutaneous Immunotherapy for Cockroach (SCITCO/ICAC-18)"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1039",
+          "object": "Scleroderma: Cyclophosphamide or Transplantation (SCOT)"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1041",
+          "object": "CMV CD8 T Cells"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1043",
+          "object": "A Haystack Heuristic for Autoimmune Disease Biomarker Discovery Using Next-Gen Immune Repertoire Sequencing Data"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1045",
+          "object": "KIR and HLA in MS"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1064",
+          "object": "An Arntl2-Driven Secretome Enables Lung Adenocarcinoma Metastatic Self-Sufficiency"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1079",
+          "object": "A targetable CD109-Janus kinase-Stat axis in metastatic lung cancer."
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1085",
+          "object": "RNAseq of Tumor-Associated Microglia Reveals Ccl5 as a Stromal Chemokine Critical for NF1 Glioma Growth"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1086",
+          "object": "Responses to Inactivated Influenza Vaccine (IIV) in adults with or without antibiotics"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1092",
+          "object": "Transcriptional responses induced by controlled human malaria infection (CHMI)"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1093",
+          "object": "Apc Restoration in Colorectal Cancer"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1094",
+          "object": "A Retrospective Multicenter Study to Determine 5-Year Clinical Outcomes in Subjects Previously Enrolled in the CTOT-01 Study (CTOT-17)"
+        }
+      ]
+    },
+    "http://schema.org/url": {
+      "iri": "http://schema.org/url",
+      "count": 9863
+    },
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": {
+      "iri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "count": 9863
+    },
+    "http://schema.org/date": {
+      "iri": "http://schema.org/date",
+      "count": 9810
+    },
+    "http://www.w3.org/2002/07/owl#sameAs": {
+      "iri": "http://www.w3.org/2002/07/owl#sameAs",
+      "count": 9741
+    },
+    "http://schema.org/dateModified": {
+      "iri": "http://schema.org/dateModified",
+      "count": 9211
+    },
+    "http://schema.org/datePublished": {
+      "iri": "http://schema.org/datePublished",
+      "count": 8490
+    },
+    "http://schema.org/dateCreated": {
+      "iri": "http://schema.org/dateCreated",
+      "count": 8451
+    },
+    "http://schema.org/description": {
+      "iri": "http://schema.org/description",
+      "count": 8126
+    },
+    "http://schema.org/species": {
+      "iri": "http://schema.org/species",
+      "count": 2842
+    },
+    "http://schema.org/infectiousAgent": {
+      "iri": "http://schema.org/infectiousAgent",
+      "count": 2427,
+      "curie": "schema:infectiousAgent",
+      "examples": [
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1171",
+          "object": "https://www.uniprot.org/taxonomy/11052"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1390",
+          "object": "https://www.uniprot.org/taxonomy/11709"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1426",
+          "object": "https://www.uniprot.org/taxonomy/1879016"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1474",
+          "object": "https://www.uniprot.org/taxonomy/31931"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1474",
+          "object": "https://www.uniprot.org/taxonomy/35277"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1521",
+          "object": "https://www.uniprot.org/taxonomy/11309"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1522",
+          "object": "https://www.uniprot.org/taxonomy/10335"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1522",
+          "object": "https://www.uniprot.org/taxonomy/10376"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1642",
+          "object": "https://www.uniprot.org/taxonomy/1301"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1642",
+          "object": "https://www.uniprot.org/taxonomy/1578"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1642",
+          "object": "https://www.uniprot.org/taxonomy/162289"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1642",
+          "object": "https://www.uniprot.org/taxonomy/39948"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1642",
+          "object": "https://www.uniprot.org/taxonomy/838"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1649",
+          "object": "https://www.uniprot.org/taxonomy/1578"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1693",
+          "object": "https://www.uniprot.org/taxonomy/1578"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1781",
+          "object": "https://www.uniprot.org/taxonomy/1986198"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1781",
+          "object": "https://www.uniprot.org/taxonomy/2901879"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1798",
+          "object": "https://www.uniprot.org/taxonomy/2559587"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1798",
+          "object": "https://www.uniprot.org/taxonomy/2901879"
+        },
+        {
+          "subject": "https://okn.wobd.org/dataset/immport/sdy1800",
+          "object": "https://www.uniprot.org/taxonomy/1986198"
+        }
+      ]
+    },
+    "http://schema.org/funding": {
+      "iri": "http://schema.org/funding",
+      "count": 1682
+    },
+    "http://schema.org/abstract": {
+      "iri": "http://schema.org/abstract",
+      "count": 1320
+    }
+  }
+}

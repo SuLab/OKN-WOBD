@@ -1,0 +1,38 @@
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <http://schema.org/>
+
+SELECT DISTINCT ?item ?itemLabel ?itemDescription
+FROM <https://purl.org/okn/frink/kg/wikidata>
+WHERE {
+  # Match label exactly (case-insensitive)
+  ?item rdfs:label ?itemLabel .
+  FILTER(LANG(?itemLabel) = "en")
+  FILTER(LCASE(STR(?itemLabel)) = LCASE("aspirin"))
+  
+  # Filter to drug/medication-related entities
+  # Broader criteria: instance of medication OR subclass of medication OR has medical use property
+  {
+    # Instance of medication (Q12140) or pharmaceutical drug (Q8386)
+    ?item wdt:P31/wdt:P279* ?medType .
+    FILTER(?medType IN (wd:Q12140, wd:Q8386))
+  }
+  UNION
+  {
+    # Has "medical condition treated" property (P2175) - indicates it's used as treatment
+    ?item wdt:P2175 ?condition .
+  }
+  UNION
+  {
+    # Has "has use" property with value "medication" (Q12140)
+    ?item wdt:P366 wd:Q12140 .
+  }
+  
+  # Get description if available
+  OPTIONAL {
+    ?item schema:description ?itemDescription .
+    FILTER(LANG(?itemDescription) = "en")
+  }
+}
+LIMIT 10

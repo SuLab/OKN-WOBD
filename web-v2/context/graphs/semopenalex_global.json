@@ -1,0 +1,13 @@
+{
+  "endpoint": "https://frink.apps.renci.org/semopenalex/sparql",
+  "description": "Ontology. Top classes: Author (100000). Object properties: \u2014.",
+  "uses_ontologies": [],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "https://semopenalex.org/ontology/Author",
+      "count": 100000
+    }
+  ],
+  "dataset_properties": {}
+}

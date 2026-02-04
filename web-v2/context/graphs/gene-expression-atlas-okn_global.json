@@ -1,0 +1,90 @@
+{
+  "endpoint": "https://frink.apps.renci.org/gene-expression-atlas-okn/sparql",
+  "description": "Brief description of what this graph contains and what it's good for",
+  "uses_ontologies": [],
+  "good_for": [
+    "dataset_search"
+  ],
+  "notable_relationships": [
+    "Datasets to diseases via schema:healthCondition (MONDO IRIs)",
+    "Datasets to species via schema:species (UniProt taxonomy IRIs)"
+  ],
+  "example_predicates": [
+    "schema:healthCondition (links to disease entities)",
+    "schema:species (links to species/organism entities)"
+  ],
+  "queryable_by": [
+    {
+      "entity_type": "Disease",
+      "property": "schema:healthCondition"
+    },
+    {
+      "entity_type": "Species",
+      "property": "schema:species"
+    }
+  ],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "https://w3id.org/biolink/vocab/Association",
+      "count": 58021
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/Gene",
+      "count": 30008
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/Assay",
+      "count": 5840
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/BiologicalProcess",
+      "count": 2306
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/ProteinDomain",
+      "count": 1382
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/Pathway",
+      "count": 1021
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/AnatomicalEntity",
+      "count": 389
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/Cell",
+      "count": 371
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/Disease",
+      "count": 346
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/LifeStage",
+      "count": 271
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/PopulationOfIndividualOrganisms",
+      "count": 16
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/BiologicalSex",
+      "count": 12
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/MolecularActivity",
+      "count": 9
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/CellularComponent",
+      "count": 6
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/Attribute",
+      "count": 2
+    }
+  ],
+  "dataset_properties": {}
+}

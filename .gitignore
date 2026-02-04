@@ -1,5 +1,10 @@
 # Custom
 data/raw/*_state.json
+data/raw/*.jsonl
+data/gene_expression/*
+data/rdf/*
+reports/segmentation_warnings_log.json
+data/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -17,7 +22,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+/lib/
 lib64/
 parts/
 sdist/
@@ -154,5 +159,18 @@ cython_debug/
 
 # macOS
 .DS_Store
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Next.js
+.next/
+out/
+build/
+dist/
 
 

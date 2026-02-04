@@ -1,0 +1,137 @@
+{
+  "endpoint": "https://frink.apps.renci.org/sockg/sparql",
+  "description": "Ontology. Top classes: QuantityValue (94105), ExperimentalUnit (3863), S2Cell_Level13 (1069), Cultivar (308), Class (91). Object properties: \u2014.",
+  "uses_ontologies": [],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "http://qudt.org/schema/qudt/QuantityValue",
+      "count": 94105
+    },
+    {
+      "iri": "https://idir.uta.edu/sockg-ontology#ExperimentalUnit",
+      "count": 3863
+    },
+    {
+      "iri": "http://stko-kwg.geog.ucsb.edu/lod/ontology/S2Cell_Level13",
+      "count": 1069
+    },
+    {
+      "iri": "https://idir.uta.edu/sockg-ontology#Cultivar",
+      "count": 308
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#Class",
+      "count": 91
+    },
+    {
+      "iri": "https://idir.uta.edu/sockg-ontology#ActiveIngredient",
+      "count": 84
+    },
+    {
+      "iri": "https://idir.uta.edu/sockg-ontology#AmendmentType",
+      "count": 73
+    },
+    {
+      "iri": "http://stko-kwg.geog.ucsb.edu/lod/ontology/AdministrativeRegion_2",
+      "count": 62
+    },
+    {
+      "iri": "https://idir.uta.edu/sockg-ontology#Location",
+      "count": 58
+    },
+    {
+      "iri": "https://lod.nal.usda.gov/nalt/7140",
+      "count": 48
+    },
+    {
+      "iri": "http://www.opengis.net/ont/geosparql#Geometry",
+      "count": 41
+    },
+    {
+      "iri": "http://stko-kwg.geog.ucsb.edu/lod/ontology/AdministrativeRegion_1",
+      "count": 36
+    },
+    {
+      "iri": "https://idir.uta.edu/sockg-ontology#GrowthStage",
+      "count": 33
+    },
+    {
+      "iri": "http://qudt.org/schema/qudt/Unit",
+      "count": 25
+    },
+    {
+      "iri": "https://idir.uta.edu/sockg-ontology#CuttingHeight",
+      "count": 17
+    },
+    {
+      "iri": "https://idir.uta.edu/sockg-ontology#Equipment",
+      "count": 12
+    },
+    {
+      "iri": "https://idir.uta.edu/sockg-ontology#HarvestedFraction",
+      "count": 12
+    },
+    {
+      "iri": "https://idir.uta.edu/sockg-ontology#AmendmentPlacement",
+      "count": 10
+    },
+    {
+      "iri": "https://idir.uta.edu/sockg-ontology#CoverCrop",
+      "count": 8
+    },
+    {
+      "iri": "https://idir.uta.edu/sockg-ontology#ChamberPlacement",
+      "count": 7
+    },
+    {
+      "iri": "https://idir.uta.edu/sockg-ontology#FundingSource",
+      "count": 7
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#ObjectProperty",
+      "count": 4
+    },
+    {
+      "iri": "https://idir.uta.edu/sockg-ontology#AnimalClass",
+      "count": 4
+    },
+    {
+      "iri": "https://idir.uta.edu/sockg-ontology#FertilizerAmendment",
+      "count": 4
+    },
+    {
+      "iri": "https://idir.uta.edu/sockg-ontology#Irrigation",
+      "count": 4
+    },
+    {
+      "iri": "https://idir.uta.edu/sockg-ontology#AnimalSpecies",
+      "count": 3
+    },
+    {
+      "iri": "https://idir.uta.edu/sockg-ontology#GrazingRate",
+      "count": 3
+    },
+    {
+      "iri": "http://purl.org/ontology/bibo/Book",
+      "count": 2
+    },
+    {
+      "iri": "http://stko-kwg.geog.ucsb.edu/lod/ontology/AdministrativeRegion_0",
+      "count": 2
+    },
+    {
+      "iri": "https://idir.uta.edu/sockg-ontology#BroadleafOrGrass",
+      "count": 2
+    },
+    {
+      "iri": "https://idir.uta.edu/sockg-ontology#LossesOrDeposition",
+      "count": 2
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#Datatype",
+      "count": 1
+    }
+  ],
+  "dataset_properties": {}
+}

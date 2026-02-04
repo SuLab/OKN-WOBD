@@ -1,0 +1,13 @@
+{
+  "endpoint": "https://frink.apps.renci.org/biohealth/sparql",
+  "description": "Ontology. Top classes: Entity (100000). Object properties: \u2014.",
+  "uses_ontologies": [],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "https://w3id.org/biolink/vocab/Entity",
+      "count": 100000
+    }
+  ],
+  "dataset_properties": {}
+}

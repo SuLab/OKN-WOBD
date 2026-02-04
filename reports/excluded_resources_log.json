@@ -1,0 +1,81 @@
+{
+  "timestamp": "2025-12-09T00:55:58.558594+00:00",
+  "excluded_resources": [
+    {
+      "name": "Protein Data Bank",
+      "reason": "explicitly excluded",
+      "has_datasets": false
+    }
+  ],
+  "non_dataset_repositories": [
+    {
+      "name": "bio.tools",
+      "type": "Computational Tool Repository",
+      "reason": "Not a Dataset Repository"
+    }
+  ],
+  "sources_without_datasets": [
+    {
+      "name": "AmoebaDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "CryptoDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "GiardiaDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "HostDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "PlasmoDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "VectorBase",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "FungiDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "MicrosporidiaDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "ToxoDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "TrichDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "TriTrypDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    },
+    {
+      "name": "PiroplasmaDB",
+      "reason": "no datasets",
+      "dataset_count": 0
+    }
+  ],
+  "total_sources": 46,
+  "dataset_repositories_found": 31
+}

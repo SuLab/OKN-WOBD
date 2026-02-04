@@ -1,0 +1,41 @@
+PREFIX schema: <http://schema.org/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+# Sample query showing a few datasets with their distribution contentUrl
+# Useful for quick verification that contentUrl is properly linked
+
+SELECT DISTINCT 
+    ?dataset 
+    ?datasetName
+    ?contentUrl
+    ?encodingFormat
+WHERE {
+    ?dataset rdf:type schema:Dataset .
+    
+    # Get dataset name if available
+    OPTIONAL {
+        ?dataset schema:name ?datasetName .
+    }
+    
+    # Link to distribution and get contentUrl
+    ?dataset schema:distribution ?distribution .
+    ?distribution schema:contentUrl ?contentUrl .
+    
+    # Get encodingFormat if available
+    OPTIONAL {
+        ?distribution schema:encodingFormat ?encodingFormat .
+    }
+    
+    # Filter to OmicsDI datasets only
+    FILTER (CONTAINS(STR(?dataset), "omics_discovery_index_omicsdi"))
+    
+    # Show a variety - some with omicsdi.org URLs, some with other sources
+    FILTER (
+        CONTAINS(STR(?contentUrl), "omicsdi.org") ||
+        CONTAINS(STR(?contentUrl), "ftp://") ||
+        CONTAINS(STR(?contentUrl), "http://") ||
+        CONTAINS(STR(?contentUrl), "https://")
+    )
+}
+ORDER BY RAND()
+LIMIT 10

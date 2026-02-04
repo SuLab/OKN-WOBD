@@ -1,0 +1,13 @@
+{
+  "endpoint": "https://frink.apps.renci.org/biobricks-pubchem-annotations/sparql",
+  "description": "Ontology. Top classes: Annotation (100000). Object properties: \u2014.",
+  "uses_ontologies": [],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "http://www.w3.org/ns/oa#Annotation",
+      "count": 100000
+    }
+  ],
+  "dataset_properties": {}
+}

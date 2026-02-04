@@ -1,0 +1,21 @@
+{
+  "endpoint": "https://frink.apps.renci.org/nasa-gesdisc-kg/sparql",
+  "description": "Ontology. Top classes: Publication (92896), Dataset (5495), ScienceKeyword (1609). Object properties: \u2014.",
+  "uses_ontologies": [],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "https://nasa-gesdisc.proto-okn.net/kg/schema/Publication",
+      "count": 92896
+    },
+    {
+      "iri": "https://nasa-gesdisc.proto-okn.net/kg/schema/Dataset",
+      "count": 5495
+    },
+    {
+      "iri": "https://nasa-gesdisc.proto-okn.net/kg/schema/ScienceKeyword",
+      "count": 1609
+    }
+  ],
+  "dataset_properties": {}
+}

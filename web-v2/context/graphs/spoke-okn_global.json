@@ -1,0 +1,29 @@
+{
+  "endpoint": "https://frink.apps.renci.org/spoke-okn/sparql",
+  "description": "Ontology. Top classes: AdministrativeArea (91727), Gene (7293), ChemicalEntity (798), Disease (180), EnvironmentalFeature (2). Object properties: \u2014.",
+  "uses_ontologies": [],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "https://schema.org/AdministrativeArea",
+      "count": 91727
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/Gene",
+      "count": 7293
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/ChemicalEntity",
+      "count": 798
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/Disease",
+      "count": 180
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/EnvironmentalFeature",
+      "count": 2
+    }
+  ],
+  "dataset_properties": {}
+}

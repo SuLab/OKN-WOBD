@@ -1,0 +1,245 @@
+{
+  "endpoint": "https://frink.apps.renci.org/wikidata/sparql",
+  "description": "Wikidata for drugs, genes, species, and disease relationships",
+  "uses_ontologies": [],
+  "good_for": [
+    "entity_lookup",
+    "entity_relationships"
+  ],
+  "notable_relationships": [
+    "Drugs to disease indications (wdt:P2176) with MONDO mappings (wdt:P6680)",
+    "Genes to disease associations (wdt:P2293)",
+    "Species taxonomy (NCBITaxon via wdt:P685)"
+  ],
+  "example_predicates": [
+    "wdt:P2176 (drug used for treatment)",
+    "wdt:P2293 (genetic association)",
+    "wdt:P6680 (exact match to MONDO)",
+    "wdt:P351 (Entrez Gene ID)"
+  ],
+  "prefixes": {
+    "schema": "http://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "ns1": "http://wikiba.se/ontology#"
+  },
+  "classes": [
+    {
+      "iri": "http://wikiba.se/ontology#Item",
+      "count": 77125
+    },
+    {
+      "iri": "http://wikiba.se/ontology#Property",
+      "count": 11240
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#Restriction",
+      "count": 11240
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P4354",
+      "count": 236
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P3254",
+      "count": 65
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P1630",
+      "count": 13
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P9073",
+      "count": 11
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P625",
+      "count": 7
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P8966",
+      "count": 7
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P155",
+      "count": 4
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P190",
+      "count": 4
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P105",
+      "count": 3
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P1855",
+      "count": 3
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P2264",
+      "count": 3
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P2788",
+      "count": 3
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P1896",
+      "count": 2
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P345",
+      "count": 2
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P364",
+      "count": 2
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P8379",
+      "count": 2
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P10726",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P162",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P1629",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P17",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P1921",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P214",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P2271",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P2358",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P2499",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P2667",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P276",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P2876",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P300",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P41",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P460",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P50",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P5353",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P5494",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P570",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P580",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P582",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P585",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P6193",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P646",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P7859",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P8303",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P9284",
+      "count": 1
+    },
+    {
+      "iri": "http://www.wikidata.org/prop/novalue/P97",
+      "count": 1
+    }
+  ],
+  "dataset_properties": {
+    "http://schema.org/about": {
+      "iri": "http://schema.org/about",
+      "count": 14844
+    },
+    "http://schema.org/dateModified": {
+      "iri": "http://schema.org/dateModified",
+      "count": 14844
+    },
+    "http://schema.org/version": {
+      "iri": "http://schema.org/version",
+      "count": 14844
+    },
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": {
+      "iri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "count": 14843
+    },
+    "http://wikiba.se/ontology#statements": {
+      "iri": "http://wikiba.se/ontology#statements",
+      "count": 13791
+    },
+    "http://wikiba.se/ontology#identifiers": {
+      "iri": "http://wikiba.se/ontology#identifiers",
+      "count": 13417
+    },
+    "http://wikiba.se/ontology#sitelinks": {
+      "iri": "http://wikiba.se/ontology#sitelinks",
+      "count": 13417
+    }
+  }
+}

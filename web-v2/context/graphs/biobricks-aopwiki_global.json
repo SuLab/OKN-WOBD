@@ -1,0 +1,107 @@
+{
+  "endpoint": "https://frink.apps.renci.org/biobricks-aopwiki/sparql",
+  "description": "Ontology. Top classes: data_1025 (12500), data_2291 (7883), KeyEventRelationship (2060), data_2298 (1621), data_1027 (1518). Object properties: \u2014.",
+  "uses_ontologies": [
+    "GO"
+  ],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "http://edamontology.org/data_1025",
+      "count": 12500
+    },
+    {
+      "iri": "http://edamontology.org/data_2291",
+      "count": 7883
+    },
+    {
+      "iri": "http://aopkb.org/aop_ontology#KeyEventRelationship",
+      "count": 2060
+    },
+    {
+      "iri": "http://edamontology.org/data_2298",
+      "count": 1621
+    },
+    {
+      "iri": "http://edamontology.org/data_1027",
+      "count": 1518
+    },
+    {
+      "iri": "http://edamontology.org/data_1033",
+      "count": 1478
+    },
+    {
+      "iri": "http://aopkb.org/aop_ontology#KeyEvent",
+      "count": 1469
+    },
+    {
+      "iri": "http://semanticscience.org/resource/CHEMINF_000407",
+      "count": 799
+    },
+    {
+      "iri": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C54571",
+      "count": 658
+    },
+    {
+      "iri": "http://purl.obolibrary.org/obo/GO_0008150",
+      "count": 504
+    },
+    {
+      "iri": "http://aopkb.org/aop_ontology#AdverseOutcomePathway",
+      "count": 493
+    },
+    {
+      "iri": "http://semanticscience.org/resource/CHEMINF_000408",
+      "count": 408
+    },
+    {
+      "iri": "http://semanticscience.org/resource/CHEMINF_000405",
+      "count": 406
+    },
+    {
+      "iri": "http://semanticscience.org/resource/CHEMINF_000140",
+      "count": 403
+    },
+    {
+      "iri": "http://semanticscience.org/resource/CHEMINF_000567",
+      "count": 402
+    },
+    {
+      "iri": "http://semanticscience.org/resource/CHEMINF_000000",
+      "count": 391
+    },
+    {
+      "iri": "http://semanticscience.org/resource/CHEMINF_000446",
+      "count": 391
+    },
+    {
+      "iri": "http://semanticscience.org/resource/CHEMINF_000412",
+      "count": 333
+    },
+    {
+      "iri": "http://semanticscience.org/resource/CHEMINF_000409",
+      "count": 302
+    },
+    {
+      "iri": "http://semanticscience.org/resource/CHEMINF_000406",
+      "count": 210
+    },
+    {
+      "iri": "http://purl.bioontology.org/ontology/NCBITAXON/131567",
+      "count": 166
+    },
+    {
+      "iri": "http://aopkb.org/aop_ontology#OrganContext",
+      "count": 83
+    },
+    {
+      "iri": "http://aopkb.org/aop_ontology#CellTypeContext",
+      "count": 69
+    },
+    {
+      "iri": "http://semanticscience.org/resource/CHEMINF_000564",
+      "count": 34
+    }
+  ],
+  "dataset_properties": {}
+}

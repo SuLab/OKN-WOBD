@@ -1,0 +1,15 @@
+{
+  "endpoint": "https://frink.apps.renci.org/biobricks-tox21/sparql",
+  "description": "Ontology. Top classes: CHEMINF_000446 (8947). Object properties: \u2014.",
+  "uses_ontologies": [
+    "CHEMINF"
+  ],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "http://purl.obolibrary.org/obo/CHEMINF_000446",
+      "count": 8947
+    }
+  ],
+  "dataset_properties": {}
+}

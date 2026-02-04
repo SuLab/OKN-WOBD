@@ -1,0 +1,27 @@
+{
+  "endpoint": "https://frink.apps.renci.org/biobricks-ice/sparql",
+  "description": "Ontology. Top classes: BAO_0000040 (33321), CHEMINF_000000 (31756), ChemicalEntity (31755), BAO_0000179 (3168). Object properties: \u2014.",
+  "uses_ontologies": [
+    "CHEMINF"
+  ],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "http://www.bioassayontology.org/bao#BAO_0000040",
+      "count": 33321
+    },
+    {
+      "iri": "http://purl.obolibrary.org/obo/CHEMINF_000000",
+      "count": 31756
+    },
+    {
+      "iri": "https://w3id.org/biolink/vocab/ChemicalEntity",
+      "count": 31755
+    },
+    {
+      "iri": "http://www.bioassayontology.org/bao#BAO_0000179",
+      "count": 3168
+    }
+  ],
+  "dataset_properties": {}
+}

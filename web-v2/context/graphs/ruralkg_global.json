@@ -1,0 +1,73 @@
+{
+  "endpoint": "https://frink.apps.renci.org/ruralkg/sparql",
+  "description": "Ontology. Top classes: City (31120), NSDUHAnswer (14923), TreatmentProvider (9037), County (3253), CountyStatus (3234). Object properties: \u2014.",
+  "uses_ontologies": [],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "http://sail.ua.edu/ruralkg/administrativearea/City",
+      "count": 31120
+    },
+    {
+      "iri": "http://sail.ua.edu/ruralkg/variable/NSDUHAnswer",
+      "count": 14923
+    },
+    {
+      "iri": "http://sail.ua.edu/ruralkg/treatment/TreatmentProvider",
+      "count": 9037
+    },
+    {
+      "iri": "http://sail.ua.edu/ruralkg/administrativearea/County",
+      "count": 3253
+    },
+    {
+      "iri": "http://sail.ua.edu/ruralkg/settlementtype/CountyStatus",
+      "count": 3234
+    },
+    {
+      "iri": "http://sail.ua.edu/ruralkg/variable/NSDUH",
+      "count": 2464
+    },
+    {
+      "iri": "http://sail.ua.edu/ruralkg/variable/NIBRSAnswer",
+      "count": 2258
+    },
+    {
+      "iri": "http://sail.ua.edu/ruralkg/variable/NIBRS",
+      "count": 469
+    },
+    {
+      "iri": "http://sail.ua.edu/ruralkg/treatment/MentalHealthService",
+      "count": 176
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#Class",
+      "count": 129
+    },
+    {
+      "iri": "http://sail.ua.edu/ruralkg/administrativearea/State",
+      "count": 56
+    },
+    {
+      "iri": "http://sail.ua.edu/ruralkg/substanceabuse/Substance",
+      "count": 23
+    },
+    {
+      "iri": "http://sail.ua.edu/ruralkg/treatment/MentalHealthServiceCategory",
+      "count": 21
+    },
+    {
+      "iri": "http://sail.ua.edu/ruralkg/substanceabuse/SubstanceRelatedIncident",
+      "count": 17
+    },
+    {
+      "iri": "http://sail.ua.edu/ruralkg/settlementtype/RUCC",
+      "count": 10
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#Ontology",
+      "count": 1
+    }
+  ],
+  "dataset_properties": {}
+}

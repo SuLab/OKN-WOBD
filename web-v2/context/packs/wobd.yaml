@@ -1,0 +1,69 @@
+id: wobd
+label: "WOBD"
+description: "WOBD-selected graphs for biomedical data discovery"
+version: "0.1.0"
+
+endpoint_mode:
+  default: federated
+  federated_endpoint: "https://frink.apps.renci.org/federation/sparql"
+  direct_endpoints: {}
+
+graphs:
+  default_shortnames: ["nde", "ubergraph"]
+  allow_user_select: true
+
+prefixes:
+  schema: "http://schema.org/"
+  rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  rdfs: "http://www.w3.org/2000/01/rdf-schema#"
+  obo: "http://purl.obolibrary.org/obo/"
+
+guardrails:
+  max_limit: 500
+  timeout_seconds: 25
+  max_rows_download: 2000
+  allow_raw_sparql: true
+  allow_open_nl2sparql: true
+  allow_service: true
+  service_policy: "allow_any_frink"
+  service_allowlist: []
+  forbid_ops: ["INSERT", "DELETE", "LOAD", "CLEAR", "DROP", "CREATE", "MOVE", "COPY", "ADD"]
+
+templates:
+  - id: dataset_search
+    description: "Find datasets by keywords/healthCondition"
+    required_slots: []  # All slots are optional; template accepts keywords, health_conditions, species, or drugs
+  - id: entity_lookup
+    description: "Resolve CURIE/URI/label to entity"
+    required_slots: ["q"]
+
+schema_hints:
+  example_queries:
+    - "SELECT ?dataset ?name WHERE { ?dataset a schema:Dataset ; schema:name ?name } LIMIT 10"
+  common_predicates:
+    - "schema:name"
+    - "schema:description"
+    - "schema:healthCondition"
+    - "schema:species"
+
+intent_routing:
+  default_lane: "template"
+  open_query_threshold: 0.55
+
+graphs_metadata:
+  - id: nde
+    description: "NIAID biomedical datasets"
+    good_for: ["dataset_search"]
+    uses_ontologies: ["MONDO", "NCBITaxon"]
+    queryable_by:
+      - entity_type: "Disease"
+        property: "schema:healthCondition"
+      - entity_type: "Species"
+        property: "schema:species"
+  
+  - id: ubergraph
+    description: "Merged biomedical ontologies"
+    good_for: ["entity_lookup", "ontology_reasoning"]
+    # provides_ontologies is defined in context/graphs/ubergraph.yaml with full list
+
+

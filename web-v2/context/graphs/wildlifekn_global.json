@@ -1,0 +1,37 @@
+{
+  "endpoint": "https://frink.apps.renci.org/wildlifekn/sparql",
+  "description": "Ontology. Top classes: Statement (10410), Location (657), Location (657), Bird_name (303), Bird_name (303). Object properties: \u2014.",
+  "uses_ontologies": [],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Statement",
+      "count": 10410
+    },
+    {
+      "iri": "https://wildlife.proto-okn.net/kg/Location",
+      "count": 657
+    },
+    {
+      "iri": "https://wildlife.proto-okn.net/kg/schema/Location",
+      "count": 657
+    },
+    {
+      "iri": "https://wildlife.proto-okn.net/kg/Bird_name",
+      "count": 303
+    },
+    {
+      "iri": "https://wildlife.proto-okn.net/kg/schema/Bird_name",
+      "count": 303
+    },
+    {
+      "iri": "https://wildlife.proto-okn.net/kg/Amphibian_name",
+      "count": 97
+    },
+    {
+      "iri": "https://wildlife.proto-okn.net/kg/schema/Amphibian_name",
+      "count": 97
+    }
+  ],
+  "dataset_properties": {}
+}

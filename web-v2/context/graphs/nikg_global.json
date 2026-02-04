@@ -1,0 +1,29 @@
+{
+  "endpoint": "https://frink.apps.renci.org/nikg/sparql",
+  "description": "Ontology. Top classes: Incident (15328), Point (9133), Location (9132), CensusTract (361), Class (4). Object properties: \u2014.",
+  "uses_ontologies": [],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "https://metadata.phila.gov/Incident",
+      "count": 15328
+    },
+    {
+      "iri": "http://www.opengis.net/ont/sf#Point",
+      "count": 9133
+    },
+    {
+      "iri": "https://metadata.phila.gov/Location",
+      "count": 9132
+    },
+    {
+      "iri": "https://metadata.phila.gov/CensusTract",
+      "count": 361
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#Class",
+      "count": 4
+    }
+  ],
+  "dataset_properties": {}
+}

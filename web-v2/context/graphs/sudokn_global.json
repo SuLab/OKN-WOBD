@@ -1,0 +1,209 @@
+{
+  "endpoint": "https://frink.apps.renci.org/sudokn/sparql",
+  "description": "Ontology. Top classes: MaterialProduct (62515), City (9101), AddressLine (2471), GeospatialSite (2153), GeospatialLocation (2127). Object properties: \u2014.",
+  "uses_ontologies": [],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "https://spec.industrialontologies.org/ontology/core/Core/MaterialProduct",
+      "count": 62515
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/City",
+      "count": 9101
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/AddressLine",
+      "count": 2471
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/GeospatialSite",
+      "count": 2153
+    },
+    {
+      "iri": "https://spec.industrialontologies.org/ontology/supplychain/SupplyChain/GeospatialLocation",
+      "count": 2127
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/EmailAddress",
+      "count": 2051
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/WebAddress",
+      "count": 1376
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/BusinessDescription",
+      "count": 1312
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#Class",
+      "count": 1094
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/AluminumProcessingCapability",
+      "count": 762
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/State",
+      "count": 736
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/StainlessSteelProcessingCapability",
+      "count": 621
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/SteelProcessingCapability",
+      "count": 556
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/CopperProcessingCapability",
+      "count": 408
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/BrassProcessingCapability",
+      "count": 382
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/CNCMachiningCapability",
+      "count": 360
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/CarbonSteelProcessingCapability",
+      "count": 342
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/FabricatingCapability",
+      "count": 324
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/JoiningCapability",
+      "count": 292
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/PlasticProcessingCapability",
+      "count": 272
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/BronzeProcessingCapability",
+      "count": 259
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/MachiningCapability",
+      "count": 239
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/ZincAlloyProcessingCapability",
+      "count": 215
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/EpoxyProcessingCapability",
+      "count": 167
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/PVCProcessingCapability",
+      "count": 152
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/MetalProcessingCapability",
+      "count": 149
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/PowderCoatingCapability",
+      "count": 149
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/TitaniumProcessingCapability",
+      "count": 148
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/SiliconeProcessingCapability",
+      "count": 140
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/CeramicProcessingCapability",
+      "count": 139
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/LaserCuttingCapability",
+      "count": 137
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/TurningCapability",
+      "count": 136
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/NickelProcessingCapability",
+      "count": 131
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/PolypropyleneProcessingCapability",
+      "count": 130
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/PETProcessingCapability",
+      "count": 128
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/RubberProcessingCapability",
+      "count": 121
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/ABSProcessingCapability",
+      "count": 118
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/PolyethyleneProcessingCapability",
+      "count": 116
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/MillingCapability",
+      "count": 114
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/CarbonFiberProcessingCapability",
+      "count": 112
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/TeflonProcessingCapability",
+      "count": 112
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/Country",
+      "count": 110
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/AcrylicProcessingCapability",
+      "count": 108
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/CNCMillingCapability",
+      "count": 108
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/InjectionMoldingCapability",
+      "count": 106
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/GalvanizedSteelProcessingCapability",
+      "count": 105
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/HDPEProcessingCapability",
+      "count": 103
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/LDPEProcessingCapability",
+      "count": 102
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/PrecisionMachiningCapability",
+      "count": 101
+    },
+    {
+      "iri": "http://asu.edu/semantics/SUDOKN/SheetMetalProcessingProcessingCapability",
+      "count": 101
+    }
+  ],
+  "dataset_properties": {}
+}

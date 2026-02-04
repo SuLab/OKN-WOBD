@@ -1,0 +1,13 @@
+{
+  "endpoint": "https://frink.apps.renci.org/scales/sparql",
+  "description": "Ontology. Top classes: Arrest (100000). Object properties: \u2014.",
+  "uses_ontologies": [],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "http://release.niem.gov/niem/domains/jxdm/7.2/#Arrest",
+      "count": 100000
+    }
+  ],
+  "dataset_properties": {}
+}

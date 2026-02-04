@@ -1,0 +1,209 @@
+{
+  "endpoint": "https://frink.apps.renci.org/sawgraph/sparql",
+  "description": "Ontology. Top classes: Thing (11288), Concept (7134), ResultQualifier (7062), b0 (7006), b1 (7006). Object properties: \u2014.",
+  "uses_ontologies": [],
+  "prefixes": {},
+  "classes": [
+    {
+      "iri": "http://www.w3.org/2002/07/owl#Thing",
+      "count": 11288
+    },
+    {
+      "iri": "http://qudt.org/schema/qudt/Concept",
+      "count": 7134
+    },
+    {
+      "iri": "http://w3id.org/coso/v1/contaminoso#ResultQualifier",
+      "count": 7062
+    },
+    {
+      "iri": "b0",
+      "count": 7006
+    },
+    {
+      "iri": "b1",
+      "count": 7006
+    },
+    {
+      "iri": "b2",
+      "count": 7006
+    },
+    {
+      "iri": "b3",
+      "count": 7006
+    },
+    {
+      "iri": "http://purl.org/spatialai/stad/v2/core/Datapoint",
+      "count": 7006
+    },
+    {
+      "iri": "http://qudt.org/schema/qudt/Quantifiable",
+      "count": 7006
+    },
+    {
+      "iri": "http://qudt.org/schema/qudt/Quantity",
+      "count": 7006
+    },
+    {
+      "iri": "http://sawgraph.spatialai.org/v1/me-egad#EGAD-MethodDetectionLimit",
+      "count": 7006
+    },
+    {
+      "iri": "http://w3id.org/coso/v1/contaminoso#DetectionLimit",
+      "count": 7006
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#Class",
+      "count": 1459
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#Class",
+      "count": 1416
+    },
+    {
+      "iri": "http://www.opengis.net/ont/geosparql#SpatialObject",
+      "count": 898
+    },
+    {
+      "iri": "http://www.opengis.net/ont/geosparql#Geometry",
+      "count": 841
+    },
+    {
+      "iri": "http://www.opengis.net/ont/sf#Point",
+      "count": 841
+    },
+    {
+      "iri": "http://sawgraph.spatialai.org/v1/me-egad#EGAD-PFAS-Observation",
+      "count": 698
+    },
+    {
+      "iri": "http://w3id.org/coso/v1/contaminoso#ContaminantObservation",
+      "count": 698
+    },
+    {
+      "iri": "http://w3id.org/coso/v1/contaminoso#ContaminantSampleObservation",
+      "count": 697
+    },
+    {
+      "iri": "http://www.w3.org/ns/sosa/Observation",
+      "count": 697
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#Restriction",
+      "count": 667
+    },
+    {
+      "iri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#List",
+      "count": 347
+    },
+    {
+      "iri": "http://www.w3.org/ns/prov#Agent",
+      "count": 343
+    },
+    {
+      "iri": "b4",
+      "count": 121
+    },
+    {
+      "iri": "b5",
+      "count": 121
+    },
+    {
+      "iri": "b6",
+      "count": 121
+    },
+    {
+      "iri": "b7",
+      "count": 121
+    },
+    {
+      "iri": "b8",
+      "count": 121
+    },
+    {
+      "iri": "http://qudt.org/schema/qudt/Enumeration",
+      "count": 121
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#NamedIndividual",
+      "count": 121
+    },
+    {
+      "iri": "b9",
+      "count": 94
+    },
+    {
+      "iri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property",
+      "count": 82
+    },
+    {
+      "iri": "http://sawgraph.spatialai.org/v1/me-egad#EGAD-SamplePointType",
+      "count": 65
+    },
+    {
+      "iri": "http://sawgraph.spatialai.org/v1/me-egad#EGAD-PFAS-Site",
+      "count": 57
+    },
+    {
+      "iri": "http://sawgraph.spatialai.org/v1/me-egad#EGAD-Site",
+      "count": 57
+    },
+    {
+      "iri": "http://w3id.org/coso/v1/contaminoso#Feature",
+      "count": 57
+    },
+    {
+      "iri": "http://w3id.org/sawgraph/v1/me-egad#EGAD-PFAS-Site",
+      "count": 57
+    },
+    {
+      "iri": "http://w3id.org/sawgraph/v1/me-egad#EGAD-Site",
+      "count": 57
+    },
+    {
+      "iri": "http://www.opengis.net/ont/geosparql#Feature",
+      "count": 57
+    },
+    {
+      "iri": "http://www.w3.org/ns/sosa/FeatureOfInterest",
+      "count": 57
+    },
+    {
+      "iri": "http://sawgraph.spatialai.org/v1/me-egad#EGAD-ConcentrationQualifier",
+      "count": 56
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#ObjectProperty",
+      "count": 32
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#AnnotationProperty",
+      "count": 21
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#Resource",
+      "count": 14
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#Ontology",
+      "count": 10
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "count": 8
+    },
+    {
+      "iri": "b10",
+      "count": 7
+    },
+    {
+      "iri": "b11",
+      "count": 7
+    },
+    {
+      "iri": "b12",
+      "count": 7
+    }
+  ],
+  "dataset_properties": {}
+}

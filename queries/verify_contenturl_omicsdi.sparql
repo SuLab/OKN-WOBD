@@ -1,0 +1,36 @@
+PREFIX schema: <http://schema.org/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+# Query to verify contentUrl from distribution/DataDownload entities in OmicsDI
+# This shows datasets with their distribution contentUrl values
+
+SELECT DISTINCT 
+    ?dataset 
+    ?datasetName
+    ?distribution
+    ?contentUrl
+    ?encodingFormat
+WHERE {
+    ?dataset rdf:type schema:Dataset .
+    
+    # Get dataset name if available
+    OPTIONAL {
+        ?dataset schema:name ?datasetName .
+    }
+    
+    # Link to distribution (DataDownload entity)
+    ?dataset schema:distribution ?distribution .
+    
+    # Get contentUrl from the distribution entity
+    ?distribution schema:contentUrl ?contentUrl .
+    
+    # Get encodingFormat if available
+    OPTIONAL {
+        ?distribution schema:encodingFormat ?encodingFormat .
+    }
+    
+    # Filter to OmicsDI datasets only
+    FILTER (CONTAINS(STR(?dataset), "omics_discovery_index_omicsdi"))
+}
+ORDER BY ?dataset
+LIMIT 25
