@@ -96,8 +96,18 @@ _CUSTOM_PROPERTIES = {
     "enrichment_source": OKN_WOBD.enrichment_source,
     "test_condition": OKN_WOBD.test_condition,
     "control_condition": OKN_WOBD.control_condition,
-    "sample_id": OKN_WOBD.sample_id,
-    "study_id": OKN_WOBD.study_id,
+    "test_samples": OKN_WOBD.test_samples,
+    "control_samples": OKN_WOBD.control_samples,
+    "test_studies": OKN_WOBD.test_studies,
+    "control_studies": OKN_WOBD.control_studies,
+    "search_pattern_test": OKN_WOBD.search_pattern_test,
+    "search_pattern_control": OKN_WOBD.search_pattern_control,
+    "disease_terms": OKN_WOBD.disease_terms,
+    "tissue_include_terms": OKN_WOBD.tissue_include_terms,
+    "tissue_exclude_terms": OKN_WOBD.tissue_exclude_terms,
+    "timestamp": OKN_WOBD.timestamp,
+    "summary": OKN_WOBD.summary,
+    "interpretation": OKN_WOBD.interpretation,
 }
 
 

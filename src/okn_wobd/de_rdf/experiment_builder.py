@@ -6,9 +6,9 @@ get a populated ``TurtleWriter`` ready for serialization.
 
 import logging
 import re
-from typing import Optional
+from typing import List, Optional
 
-from rdflib import URIRef
+from rdflib import Literal, URIRef
 
 from .config import (
     BIOLINK,
@@ -47,10 +47,13 @@ def build_rdf(
 
     # --- Study node ---
     study_uri = create_node_uri("experiment", experiment.id)
-    writer.add_node(study_uri, "DEExperiment", {
+    study_props = {
         "name": experiment.name,
         "description": experiment.description or None,
-    })
+    }
+    if experiment.timestamp:
+        study_props["timestamp"] = experiment.timestamp
+    writer.add_node(study_uri, "DEExperiment", study_props)
 
     # Taxon
     taxon_uri = NCBITAXON[experiment.taxon_id]
@@ -90,10 +93,29 @@ def build_rdf(
             assay_props["fdr_threshold"] = experiment.fdr_threshold
         if experiment.log2fc_threshold:
             assay_props["log2fc_threshold"] = experiment.log2fc_threshold
-        if experiment.test_condition:
-            assay_props["test_condition"] = experiment.test_condition
-        if experiment.control_condition:
-            assay_props["control_condition"] = experiment.control_condition
+        # Build rich condition descriptions from search provenance
+        assay_props["test_condition"] = _build_condition_description(
+            experiment.test_condition,
+            experiment.search_pattern_test,
+            experiment.disease_terms,
+            experiment.tissue_include_terms,
+            experiment.tissue_exclude_terms,
+            group="test",
+        )
+        assay_props["control_condition"] = _build_condition_description(
+            experiment.control_condition,
+            experiment.search_pattern_control,
+            group="control",
+        )
+        if experiment.search_pattern_test:
+            assay_props["search_pattern_test"] = experiment.search_pattern_test
+        if experiment.search_pattern_control:
+            assay_props["search_pattern_control"] = experiment.search_pattern_control
+
+    if experiment.summary:
+        assay_props["summary"] = experiment.summary
+    if experiment.interpretation:
+        assay_props["interpretation"] = experiment.interpretation
 
     writer.add_node(assay_uri, "DEAssay", assay_props)
     writer.add_relationship(study_uri, "HAS_OUTPUT", assay_uri)
@@ -202,20 +224,61 @@ def _add_enrichment(
 def _add_provenance(
     writer: TurtleWriter, assay_uri: URIRef, experiment: DEExperiment
 ) -> None:
-    """Attach provenance triples (sample IDs, study IDs) to the assay node."""
+    """Attach provenance triples to the assay node.
+
+    Sample IDs, study IDs, and search terms are stored as
+    comma-separated string literals for Protégé compatibility.
+    """
     graph = writer.graph
     from .biolink_mapping import get_property_predicate
-    from .turtle_writer import _to_literal
 
-    sample_pred = get_property_predicate("sample_id")
-    study_pred = get_property_predicate("study_id")
+    for prop, items in [
+        ("test_samples", experiment.sample_ids_test),
+        ("control_samples", experiment.sample_ids_control),
+        ("test_studies", experiment.study_ids_test),
+        ("control_studies", experiment.study_ids_control),
+        ("disease_terms", experiment.disease_terms),
+        ("tissue_include_terms", experiment.tissue_include_terms),
+        ("tissue_exclude_terms", experiment.tissue_exclude_terms),
+    ]:
+        if items:
+            graph.add((
+                assay_uri,
+                get_property_predicate(prop),
+                Literal(", ".join(items)),
+            ))
 
-    for sid in experiment.sample_ids_test:
-        graph.add((assay_uri, sample_pred, _to_literal(sid)))
-    for sid in experiment.sample_ids_control:
-        graph.add((assay_uri, sample_pred, _to_literal(sid)))
-    for study in experiment.study_ids:
-        graph.add((assay_uri, study_pred, _to_literal(study)))
+
+def _build_condition_description(
+    condition: str,
+    search_pattern: str = "",
+    disease_terms: Optional[List[str]] = None,
+    tissue_include: Optional[List[str]] = None,
+    tissue_exclude: Optional[List[str]] = None,
+    group: str = "test",
+) -> str:
+    """Build a human-readable condition description from search provenance.
+
+    The description captures enough detail for someone to understand
+    how samples were selected in ARCHS4.
+    """
+    parts = []
+
+    if group == "test":
+        parts.append(f"Disease group: {condition}")
+        if disease_terms:
+            parts.append(f"Disease search terms: {', '.join(disease_terms)}")
+        if tissue_include:
+            parts.append(f"Tissue include filter: {', '.join(tissue_include)}")
+        if tissue_exclude:
+            parts.append(f"Tissue exclude filter: {', '.join(tissue_exclude)}")
+    else:
+        parts.append(f"Control group: {condition}")
+
+    if search_pattern:
+        parts.append(f"ARCHS4 metadata search pattern: {search_pattern}")
+
+    return "; ".join(parts) if parts else condition
 
 
 def _ontology_uri(ontology_id: str, default_ns) -> Optional[URIRef]:

@@ -35,6 +35,8 @@ def from_chatgeo(
     enrichment_result: Optional[EnrichmentResult] = None,
     experiment_id: Optional[str] = None,
     config: Optional[RdfConfig] = None,
+    summary: str = "",
+    interpretation: str = "",
 ) -> TurtleWriter:
     """Convert ChatGEO results to an RDF graph.
 
@@ -44,6 +46,8 @@ def from_chatgeo(
         experiment_id: Optional experiment identifier. If not provided,
             auto-generated from disease, tissue, and date.
         config: Optional RDF configuration
+        summary: Text summary of DE results
+        interpretation: AI-generated interpretation of results
 
     Returns:
         A populated TurtleWriter ready for serialization
@@ -113,12 +117,18 @@ def from_chatgeo(
                     )
                 )
 
-    # Collect study IDs
-    study_ids = list(set(prov.test_studies + prov.control_studies))
-
     # Build experiment name
     tissue_part = f" in {prov.query_tissue}" if prov.query_tissue else ""
     name = f"DE: {prov.query_disease}{tissue_part}"
+
+    # Extract search terms from query_spec (if LLM-generated)
+    disease_terms = []
+    tissue_include = []
+    tissue_exclude = []
+    if prov.query_spec:
+        disease_terms = prov.query_spec.get("disease_terms", [])
+        tissue_include = prov.query_spec.get("tissue_include", [])
+        tissue_exclude = prov.query_spec.get("tissue_exclude", [])
 
     # Construct DEExperiment
     experiment = DEExperiment(
@@ -134,13 +144,21 @@ def from_chatgeo(
         timestamp=prov.timestamp,
         sample_ids_test=prov.test_sample_ids,
         sample_ids_control=prov.control_sample_ids,
-        study_ids=study_ids,
+        study_ids_test=prov.test_studies,
+        study_ids_control=prov.control_studies,
         platform="ARCHS4",
+        search_pattern_test=prov.search_pattern_test,
+        search_pattern_control=prov.search_pattern_control,
+        disease_terms=disease_terms,
+        tissue_include_terms=tissue_include,
+        tissue_exclude_terms=tissue_exclude,
         test_method=prov.test_method,
         normalization_method=prov.normalization_method,
         fdr_method=prov.fdr_method,
         fdr_threshold=prov.thresholds.get("fdr", 0.01),
         log2fc_threshold=prov.thresholds.get("log2fc", 2.0),
+        summary=summary,
+        interpretation=interpretation,
         genes=genes,
         enrichment_results=enrichment_assocs,
     )

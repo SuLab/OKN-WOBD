@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 # HGNC complete set download URL (TSV)
 HGNC_DOWNLOAD_URL = (
-    "https://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/tsv/hgnc_complete_set.txt"
+    "https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt"
 )
 
 # Default cache location

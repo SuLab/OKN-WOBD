@@ -69,8 +69,16 @@ class DEExperiment:
     timestamp: str = ""
     sample_ids_test: List[str] = field(default_factory=list)
     sample_ids_control: List[str] = field(default_factory=list)
-    study_ids: List[str] = field(default_factory=list)
+    study_ids_test: List[str] = field(default_factory=list)
+    study_ids_control: List[str] = field(default_factory=list)
     platform: str = "ARCHS4"
+
+    # Search provenance — captures how samples were discovered
+    search_pattern_test: str = ""  # regex/pattern used to find test samples
+    search_pattern_control: str = ""  # regex/pattern used to find control samples
+    disease_terms: List[str] = field(default_factory=list)  # expanded disease synonyms
+    tissue_include_terms: List[str] = field(default_factory=list)  # tissue include filters
+    tissue_exclude_terms: List[str] = field(default_factory=list)  # tissue exclude filters
 
     # Methods
     test_method: str = "deseq2"
@@ -78,6 +86,10 @@ class DEExperiment:
     fdr_method: str = ""
     fdr_threshold: float = 0.01
     log2fc_threshold: float = 2.0
+
+    # Summaries
+    summary: str = ""  # Text summary of results
+    interpretation: str = ""  # AI-generated interpretation
 
     # Results
     genes: List[DEGene] = field(default_factory=list)

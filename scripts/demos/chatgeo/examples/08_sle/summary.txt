@@ -5,11 +5,11 @@ DIFFERENTIAL EXPRESSION ANALYSIS RESULTS
 QUERY
   Disease: systemic lupus erythematosus
   Tissue: blood
-  Timestamp: 2026-02-02T15:15:58.902319
+  Timestamp: 2026-02-04T15:33:36.915122
 
 SAMPLES
-  Test: 200 samples from 33 studies
-  Control: 200 samples from 50 studies
+  Test: 200 samples from 31 studies
+  Control: 200 samples from 93 studies
   Organisms: human
 
 METHODS
@@ -24,62 +24,62 @@ THRESHOLDS
 ----------------------------------------------------------------------
 SUMMARY
 ----------------------------------------------------------------------
-  Genes tested: 19,318
-  Genes significant: 605
-  Upregulated: 272
-  Downregulated: 333
+  Genes tested: 19,300
+  Genes significant: 3,758
+  Upregulated: 55
+  Downregulated: 3,703
 
 ----------------------------------------------------------------------
 TOP 20 UPREGULATED GENES
 ----------------------------------------------------------------------
   Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
   ----------------------------------------------------------
-  CCNL1              6.67     1.59e-57     29495.72      3606.25
-  HSPA9              6.32     2.51e-52      8293.85      3990.59
-  DEFA1B             6.09     2.61e-10       980.28        35.49
-  HINT3              5.82     2.08e-50      1051.53       375.41
-  FABP4              5.30     1.37e-13       341.08        12.47
-  CXCL11             5.17     8.94e-27       495.07       562.44
-  BPIFB3             5.16     1.18e-09         3.28         1.67
-  RACK1              5.14     5.57e-42     42048.94     25974.41
-  OTOGL              5.09     3.95e-08         3.67         6.70
-  RD3L               4.82     6.40e-10         3.73         1.26
-  APOC4-APOC2        4.74     7.42e-08        59.67        13.01
-  XIRP2              4.74     5.57e-12        14.31        10.32
-  LY6G6E             4.70     2.58e-12         3.34         0.69
-  CTNND2             4.68     1.12e-14         8.68         7.87
-  CCL7               4.67     1.54e-06       404.09        65.44
-  NXF3               4.56     1.90e-16        13.13         7.17
-  GNGT1              4.55     6.39e-07         2.32         3.03
-  DCSTAMP            4.54     2.23e-12        11.17       192.48
-  SCYGR4             4.52     5.92e-04         1.67         1.47
-  OR2L13             4.44     1.95e-13         5.26         2.52
+  DEFA1B             6.63     8.72e-23      2378.23         7.99
+  CCL8               4.47     7.88e-18      1814.13        22.82
+  OTOF               4.27     8.63e-32      1403.04        83.97
+  RNASE1             3.80     4.50e-20      1907.25       815.26
+  CXCL10             3.78     4.38e-26      2701.07       150.41
+  SPP1               3.73     1.15e-19     12716.30      1342.60
+  TREM2              3.70     1.50e-12       466.98        69.44
+  LGMN               3.61     1.10e-31      5237.79       889.72
+  FPR3               3.51     1.46e-18      2053.06       384.53
+  APOE               3.48     1.15e-18      1361.14       929.64
+  GPNMB              3.40     1.62e-15      6058.70      4429.46
+  C1QC               3.29     1.58e-12       698.32       258.75
+  OLFML2B            3.27     1.95e-17       271.83        49.63
+  APOC1              3.27     1.46e-11       605.73       229.15
+  CCL13              3.12     2.82e-05        39.34        10.50
+  VSIG4              3.11     1.35e-22       555.08       139.02
+  RSAD2              2.95     5.12e-25     11737.30      1375.68
+  DEFA3              2.90     2.56e-09      8005.01       195.93
+  SIGLEC1            2.87     6.39e-17      3697.90       522.44
+  C1QB               2.81     1.49e-13       774.04       311.60
 
 ----------------------------------------------------------------------
 TOP 20 DOWNREGULATED GENES
 ----------------------------------------------------------------------
   Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
   ----------------------------------------------------------
-  EFEMP1           -15.38     4.81e-27         1.01      1959.08
-  MXRA5            -10.58     4.54e-09         0.91       165.83
-  HSPB7            -10.38     3.36e-07         0.59       426.70
-  TMEM47           -10.11     2.09e-12         0.82       122.24
-  COL3A1            -9.56     4.36e-23         0.88     10192.91
-  GPC6              -9.38     1.07e-22         1.08       145.03
-  STC2              -9.31     2.17e-24         0.70       923.00
-  CSF2              -7.22     4.07e-25         6.01      1489.51
-  TFF1              -6.92     7.12e-05         0.10       109.26
-  IL2               -6.41     8.70e-19        13.38      2720.77
-  KRT19             -5.92     1.04e-16         9.34        68.99
-  S100A14           -5.87     5.06e-05         0.20        77.77
-  HBE1              -5.56     5.07e-19         9.65       402.43
-  GAGE2A            -5.55     9.46e-03         0.12        19.75
-  PRAME             -5.47     1.01e-07         0.74       103.56
-  WNT5A             -5.47     1.35e-17         5.93       620.90
-  GAGE12F           -5.27     3.68e-03         0.91        86.22
-  EPCAM             -5.16     5.00e-40         4.73       125.89
-  TEAD4             -5.13     5.14e-12         0.46        35.57
-  S100A16           -5.06     2.82e-14         2.70       213.90
+  TEAD4             -8.19     4.85e-30         0.69        31.89
+  COL11A1           -7.32     1.54e-13         1.13       608.97
+  DMP1              -7.16     3.77e-10         0.21         7.33
+  MGAT4C            -7.14     1.04e-22         1.29        13.99
+  GJA5              -6.99     7.37e-07         0.37       588.75
+  HAPLN1            -6.87     4.70e-10         0.65        69.61
+  TBX18             -6.70     8.56e-20         0.71        28.54
+  IL36G             -6.68     1.18e-16         0.57       214.69
+  C2ORF78           -6.67     4.30e-11         0.12         4.04
+  CCL20             -6.61     7.98e-64        56.39      1519.88
+  AKAIN1            -6.61     1.92e-07         0.28         2.23
+  XAGE1B            -6.60     6.63e-15         0.97        80.35
+  TRIM49B           -6.58     2.54e-06         0.09         1.99
+  FIBIN             -6.58     1.15e-10         0.18         2.93
+  FHL5              -6.56     6.23e-08         0.23         2.36
+  GJA8              -6.54     1.61e-06         0.11         1.89
+  FOXC2             -6.49     8.04e-12         0.16        35.02
+  SERTAD4           -6.45     4.33e-20         0.64         7.67
+  OR5AP2            -6.45     4.71e-06         0.12         1.93
+  AQP4              -6.44     6.09e-08         0.52         4.41
 
 ======================================================================
 
@@ -91,38 +91,38 @@ ENRICHMENT ANALYSIS
   Sources: GO:BP, GO:CC, GO:MF, KEGG, REAC
   Threshold: 0.05
 
-  Total significant terms: 349
-  Upregulated: 64 terms
-  Downregulated: 285 terms
+  Total significant terms: 1042
+  Upregulated: 170 terms
+  Downregulated: 872 terms
 
 ----------------------------------------------------------------------
 TOP 10 ENRICHED TERMS (UPREGULATED GENES)
 ----------------------------------------------------------------------
   Source   Term ID             P-adj  Genes  Term Name
   ------------------------------------------------------------------
-  GO:BP    GO:0071222       1.08e-08     19  cellular response to lipopolysaccha...
-  GO:BP    GO:0071219       2.40e-08     19  cellular response to molecule of ba...
-  GO:BP    GO:0009605       3.15e-08     65  response to external stimulus
-  GO:BP    GO:0051707       6.43e-08     50  response to other organism
-  GO:BP    GO:0043207       6.87e-08     50  response to external biotic stimulu...
-  GO:BP    GO:0032496       1.00e-07     22  response to lipopolysaccharide
-  GO:BP    GO:0009607       1.62e-07     50  response to biotic stimulus
-  GO:BP    GO:0071216       1.72e-07     19  cellular response to biotic stimulu...
-  GO:BP    GO:0044419       2.17e-07     52  biological process involved in inte...
-  GO:BP    GO:0002237       2.71e-07     22  response to molecule of bacterial o...
+  GO:BP    GO:0044419       5.05e-23     36  biological process involved in inte...
+  GO:BP    GO:0009607       8.92e-23     35  response to biotic stimulus
+  GO:BP    GO:0006952       3.08e-22     36  defense response
+  GO:BP    GO:0051707       8.09e-22     34  response to other organism
+  GO:BP    GO:0043207       8.61e-22     34  response to external biotic stimulu...
+  GO:BP    GO:0098542       5.48e-21     31  defense response to other organism
+  GO:BP    GO:0009605       9.69e-21     38  response to external stimulus
+  GO:BP    GO:0140546       2.91e-20     29  defense response to symbiont
+  GO:BP    GO:0006955       4.09e-18     34  immune response
+  GO:BP    GO:0002376       4.94e-18     38  immune system process
 
 ----------------------------------------------------------------------
 TOP 10 ENRICHED TERMS (DOWNREGULATED GENES)
 ----------------------------------------------------------------------
   Source   Term ID             P-adj  Genes  Term Name
   ------------------------------------------------------------------
-  GO:BP    GO:0048513       1.73e-28    133  animal organ development
-  GO:BP    GO:0007275       4.58e-25    162  multicellular organism development
-  GO:BP    GO:0048856       3.88e-24    184  anatomical structure development
-  GO:BP    GO:0032502       3.23e-23    192  developmental process
-  GO:BP    GO:0009888       1.15e-22     98  tissue development
-  GO:BP    GO:0009653       4.84e-21    112  anatomical structure morphogenesis
-  GO:BP    GO:0007155       1.77e-18     78  cell adhesion
-  GO:BP    GO:0032501       2.91e-18    195  multicellular organismal process
-  GO:MF    GO:0005201       7.04e-18     28  extracellular matrix structural con...
-  GO:CC    GO:0062023       1.48e-17     38  collagen-containing extracellular m...
+  GO:BP    GO:0032501      1.23e-127   1705  multicellular organismal process
+  GO:CC    GO:0071944      7.14e-125   1573  cell periphery
+  GO:CC    GO:0005886       8.68e-96   1413  plasma membrane
+  GO:BP    GO:0003008       3.55e-94    712  system process
+  GO:BP    GO:0032502       9.40e-89   1478  developmental process
+  GO:BP    GO:0048856       3.59e-86   1378  anatomical structure development
+  GO:BP    GO:0048731       2.36e-79   1019  system development
+  GO:BP    GO:0007275       3.80e-75   1128  multicellular organism development
+  GO:BP    GO:0050877       9.56e-69    491  nervous system process
+  GO:MF    GO:0038023       5.32e-62    629  signaling receptor activity

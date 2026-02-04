@@ -15,7 +15,7 @@ from rdflib import Namespace, URIRef
 # =============================================================================
 
 # Core project namespace
-OKN_WOBD = Namespace("https://okn.wobd.org/")
+OKN_WOBD = Namespace("http://purl.org/okn/wobd/")
 
 # Biolink Model
 BIOLINK = Namespace("https://w3id.org/biolink/vocab/")
@@ -68,7 +68,7 @@ NAMESPACES: Dict[str, Namespace] = {
 class RdfConfig:
     """Configuration for DE RDF export."""
 
-    base_uri: str = "https://okn.wobd.org/"
+    base_uri: str = "http://purl.org/okn/wobd/"
     output_format: str = "turtle"  # "turtle" or "nt"
     include_all_genes: bool = False  # include non-significant genes
     include_enrichment: bool = True

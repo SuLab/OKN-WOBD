@@ -5,11 +5,11 @@ DIFFERENTIAL EXPRESSION ANALYSIS RESULTS
 QUERY
   Disease: rheumatoid arthritis
   Tissue: synovial
-  Timestamp: 2026-02-02T15:40:49.787630
+  Timestamp: 2026-02-04T15:26:23.201603
 
 SAMPLES
-  Test: 500 samples from 30 studies
-  Control: 192 samples from 21 studies
+  Test: 200 samples from 25 studies
+  Control: 195 samples from 22 studies
   Organisms: human
 
 METHODS
@@ -24,62 +24,62 @@ THRESHOLDS
 ----------------------------------------------------------------------
 SUMMARY
 ----------------------------------------------------------------------
-  Genes tested: 19,376
-  Genes significant: 4,148
-  Upregulated: 3,995
-  Downregulated: 153
+  Genes tested: 19,354
+  Genes significant: 4,126
+  Upregulated: 3,974
+  Downregulated: 152
 
 ----------------------------------------------------------------------
 TOP 20 UPREGULATED GENES
 ----------------------------------------------------------------------
   Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
   ----------------------------------------------------------
-  DSG1              12.39     8.61e-70       333.68         2.55
-  GOLGA6L6           9.50     2.03e-63        28.68         0.98
-  KLK3               9.35     1.96e-49        11.34         0.19
-  ST8SIA3            9.04     1.47e-85        13.75         0.35
-  OR51G2             9.02     6.45e-46         9.44         0.40
-  HNRNPCL3           8.99     3.10e-36         7.80         0.01
-  OR4K1              8.77     1.09e-31         6.54         0.02
-  KRTAP19-3          8.74     3.96e-27         6.24         0.00
-  CYLC1              8.65     4.33e-35         6.83         0.07
-  GOLGA6L24P         8.61     8.21e-18         8.45         0.73
-  ANKRD30A           8.60     1.09e-82        15.12         0.49
-  OPRPN              8.59     3.71e-42         6.88         0.08
-  OR5D3P             8.57     7.68e-35         6.06         0.24
-  MGAT4D             8.57     6.71e-52         8.12         0.34
-  OR4A15             8.55     2.42e-25         5.38         0.00
-  OR56A3             8.53     3.56e-71         7.70         0.10
-  OR6P1              8.51     2.54e-39         5.88         0.03
-  OR4M1              8.48     1.08e-56         7.66         0.84
-  CRISP1             8.48     3.00e-43         6.22         0.59
-  SPATA16            8.48     8.77e-53         6.67         0.09
+  DSG1              19.52     2.00e-05       424.85         2.51
+  GOLGA6L6           9.54     8.38e-45        30.18         0.96
+  KLK3               9.45     1.17e-34        12.29         0.18
+  ST8SIA3            9.12     2.41e-68        13.93         0.35
+  OR51G2             9.09     9.62e-31         9.80         0.39
+  HNRNPCL3           9.01     4.74e-22         7.82         0.01
+  OR4K1              8.91     3.68e-19         6.92         0.02
+  KRTAP19-3          8.82     1.59e-16         6.11         0.00
+  CYLC1              8.74     3.51e-22         7.05         0.07
+  MGAT4D             8.70     6.15e-38         8.65         0.34
+  ANKRD30A           8.69     3.58e-59        17.53         0.48
+  GOLGA6L24P         8.69     3.22e-12         8.48         0.72
+  OR5D3P             8.68     4.37e-21         6.38         0.24
+  OR4A15             8.68     8.13e-16         5.70         0.00
+  OR56A3             8.65     2.88e-57         8.41         0.10
+  OR6P1              8.64     3.63e-27         6.30         0.03
+  OPRPN              8.64     1.33e-30         6.94         0.08
+  OR4M1              8.64     7.15e-43         8.73         0.83
+  CRISP1             8.54     5.27e-28         6.25         0.58
+  TOPAZ1             8.53     4.10e-53         8.43         0.45
 
 ----------------------------------------------------------------------
 TOP 20 DOWNREGULATED GENES
 ----------------------------------------------------------------------
   Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
   ----------------------------------------------------------
-  UNCX             -11.28     5.11e-48         0.37       119.41
-  GBX2              -8.59     2.55e-78         0.93       159.86
-  FGF19             -8.12     1.28e-43         0.71        64.94
-  FAM163B           -7.17     1.59e-85         1.34       142.69
-  HOXC12            -6.81     6.11e-68         9.97      1819.67
-  HMX1              -6.50     6.85e-96         6.63       223.09
-  NKD2              -6.38    1.47e-109         4.56       416.58
-  NKX2-2            -6.28     2.64e-35         1.12        17.60
-  C1QL4             -5.93     4.42e-74         2.09       112.32
-  TLX3              -5.85     1.18e-13         0.22        16.70
-  DUSP9             -5.54     6.44e-34         0.60        60.04
-  RPRM              -5.10     1.11e-55         2.81       207.77
-  KCNQ2             -5.03     1.09e-19         2.49       459.29
-  PLPPR3            -4.91     2.81e-88         6.44       279.28
-  ADGRB1            -4.80    4.21e-125        28.83       816.36
-  PRAME             -4.74     2.70e-52         7.14       396.46
-  CTAG1A            -4.58     2.44e-05         0.14        59.03
-  HOXC13            -4.57     1.21e-39         3.44       223.16
-  WIF1              -4.53     1.85e-54        28.65      1204.35
-  NKX2-3            -4.49     6.97e-20         1.11        71.91
+  GBX2              -8.47     1.69e-41         1.04       157.41
+  FGF19             -8.29     2.50e-16         0.65        63.96
+  NKX2-3            -7.75     7.28e-31         1.38        70.81
+  FAM163B           -7.07     3.27e-47         1.30       140.49
+  HOXC12            -6.77     2.75e-39        10.08      1791.68
+  HMX1              -6.53     3.91e-60        12.16       219.66
+  RPRM              -6.18     3.27e-49         3.40       204.57
+  NKD2              -6.17     6.77e-61         4.71       410.18
+  MAGEA4            -5.96     3.69e-09         0.70       489.12
+  TLX3              -5.63     7.75e-08         0.38        16.44
+  MAGEA9            -5.35     6.02e-07         0.64       102.74
+  DLL3              -5.11     5.70e-39         4.38        75.96
+  KCNQ2             -4.91     4.29e-11         2.63       452.22
+  ADGRB1            -4.91     1.80e-75        27.25       803.86
+  PLPPR3            -4.86     1.02e-49         7.05       274.99
+  HOXC13            -4.61     2.40e-24         3.88       219.81
+  C1QL4             -4.51     6.04e-27         2.19       110.59
+  PRAME             -4.51     3.17e-26         7.69       390.37
+  PRSS56            -4.47     6.40e-07         1.01        66.58
+  FGF3              -4.40     2.06e-08         0.26        10.70
 
 ======================================================================
 
@@ -91,38 +91,38 @@ ENRICHMENT ANALYSIS
   Sources: GO:BP, GO:CC, GO:MF, KEGG, REAC
   Threshold: 0.05
 
-  Total significant terms: 720
-  Upregulated: 379 terms
-  Downregulated: 341 terms
+  Total significant terms: 657
+  Upregulated: 380 terms
+  Downregulated: 277 terms
 
 ----------------------------------------------------------------------
 TOP 10 ENRICHED TERMS (UPREGULATED GENES)
 ----------------------------------------------------------------------
   Source   Term ID             P-adj  Genes  Term Name
   ------------------------------------------------------------------
-  GO:BP    GO:0050907      1.10e-264    394  detection of chemical stimulus invo...
-  GO:BP    GO:0050911      5.59e-257    365  detection of chemical stimulus invo...
-  GO:BP    GO:0007606      6.55e-249    412  sensory perception of chemical stim...
-  GO:BP    GO:0050906      1.16e-247    419  detection of stimulus involved in s...
-  GO:BP    GO:0009593      1.32e-243    399  detection of chemical stimulus
-  GO:BP    GO:0007608      1.63e-243    372  sensory perception of smell
-  GO:MF    GO:0004984      1.21e-240    364  olfactory receptor activity
-  GO:BP    GO:0051606      7.17e-226    456  detection of stimulus
-  GO:MF    GO:0004930      1.53e-222    546  G protein-coupled receptor activity
-  KEGG     KEGG:04740      1.11e-218    372  Olfactory transduction
+  GO:BP    GO:0050907      2.82e-264    393  detection of chemical stimulus invo...
+  GO:BP    GO:0050911      2.44e-256    364  detection of chemical stimulus invo...
+  GO:BP    GO:0007606      3.09e-250    412  sensory perception of chemical stim...
+  GO:BP    GO:0050906      1.41e-247    418  detection of stimulus involved in s...
+  GO:BP    GO:0007608      1.02e-244    372  sensory perception of smell
+  GO:BP    GO:0009593      2.09e-243    398  detection of chemical stimulus
+  GO:MF    GO:0004984      7.28e-240    363  olfactory receptor activity
+  GO:BP    GO:0051606      4.14e-226    455  detection of stimulus
+  GO:MF    GO:0004930      4.97e-226    548  G protein-coupled receptor activity
+  GO:BP    GO:0007600      5.23e-217    561  sensory perception
 
 ----------------------------------------------------------------------
 TOP 10 ENRICHED TERMS (DOWNREGULATED GENES)
 ----------------------------------------------------------------------
   Source   Term ID             P-adj  Genes  Term Name
   ------------------------------------------------------------------
-  GO:BP    GO:0007389       2.13e-26     37  pattern specification process
-  GO:BP    GO:0048731       2.83e-25     85  system development
-  GO:BP    GO:0007275       1.33e-23     89  multicellular organism development
-  GO:MF    GO:0000981       5.92e-22     51  DNA-binding transcription factor ac...
-  GO:MF    GO:0003700       1.02e-20     51  DNA-binding transcription factor ac...
-  GO:BP    GO:0003002       1.68e-20     31  regionalization
-  GO:BP    GO:0032502       2.89e-20     99  developmental process
-  GO:BP    GO:0009887       3.37e-20     43  animal organ morphogenesis
-  GO:BP    GO:0048513       5.33e-20     69  animal organ development
-  GO:BP    GO:0048856       1.51e-19     94  anatomical structure development
+  GO:BP    GO:0048731       2.77e-24     85  system development
+  GO:BP    GO:0007275       2.31e-23     90  multicellular organism development
+  GO:MF    GO:0000981       1.37e-21     51  DNA-binding transcription factor ac...
+  GO:BP    GO:0007389       3.23e-21     33  pattern specification process
+  GO:MF    GO:0003700       2.35e-20     51  DNA-binding transcription factor ac...
+  GO:BP    GO:0032502       7.87e-20    100  developmental process
+  GO:MF    GO:0000977       1.98e-19     49  RNA polymerase II transcription reg...
+  GO:MF    GO:0000987       2.50e-19     46  cis-regulatory region sequence-spec...
+  GO:BP    GO:0048513       2.79e-19     69  animal organ development
+  GO:BP    GO:0048856       3.34e-19     95  anatomical structure development

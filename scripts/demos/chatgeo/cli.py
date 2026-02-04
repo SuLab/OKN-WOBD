@@ -353,6 +353,7 @@ def run_analysis(
         (output_dir / "summary.txt").write_text(summary)
 
         # AI interpretation
+        interpretation_text = ""
         if interpret:
             try:
                 from .interpretation import interpret_results, save_interpretation
@@ -360,8 +361,8 @@ def run_analysis(
                 if verbose:
                     print("Generating AI interpretation...")
 
-                interpretation = interpret_results(result, enrichment_result)
-                save_interpretation(interpretation, output_dir, result)
+                interpretation_text = interpret_results(result, enrichment_result)
+                save_interpretation(interpretation_text, output_dir, result)
 
                 if verbose:
                     print(f"  Saved interpretation to: {output_dir / 'interpretation.md'}")
@@ -383,7 +384,10 @@ def run_analysis(
                 if verbose:
                     print("Generating RDF export...")
 
-                writer = from_chatgeo(result, enrichment_result, config=rdf_config)
+                writer = from_chatgeo(
+                    result, enrichment_result, config=rdf_config,
+                    summary=summary, interpretation=interpretation_text,
+                )
                 ext = "ttl" if rdf_format == "turtle" else "nt"
                 rdf_path = output_dir / f"results.{ext}"
                 writer.write(rdf_path, fmt=rdf_format)
