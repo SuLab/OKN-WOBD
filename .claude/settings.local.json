@@ -32,7 +32,17 @@
       "Bash(git -C /Users/bgood/Documents/GitHub/OKN-WOBD add scripts/demos/demo_doxycycline_sfrp2.py scripts/demos/plotly_visualizer.py scripts/demos/demo_provenance_graph.html)",
       "Bash(git -C /Users/bgood/Documents/GitHub/OKN-WOBD commit -m \"$\\(cat <<''EOF''\nAdd study ID and assay to GXA edges, fix HTML tooltip rendering\n\n- Include study ID and assay name in GXA drug and disease expression edges\n- Add custom tooltip implementation that properly renders HTML\n- Hide native vis.js tooltip via CSS to prevent escaped HTML display\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(ARCHS4_DATA_DIR=/Users/bgood/scripps/data/archs4 python:*)",
+      "WebFetch(domain:archs4.org)",
+      "Bash(find:*)",
+      "Bash(pip show:*)",
+      "Bash(du:*)",
+      "Bash(tree:*)",
+      "Bash(export ARCHS4_DATA_DIR=\"/Users/bgood/scripps/data/archs4\")",
+      "Bash(ARCHS4_DATA_DIR=/Users/bgood/scripps/data/archs4 python3:*)",
+      "Bash(ARCHS4_DATA_DIR=/Users/bgood/scripps/data/archs4 PYTHONDONTWRITEBYTECODE=1 python3:*)",
+      "Bash(git status:*)"
     ],
     "deny": [],
     "ask": []

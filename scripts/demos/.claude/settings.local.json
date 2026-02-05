@@ -8,7 +8,30 @@
       "Bash(python gene_neighborhood.py:*)",
       "Bash(wc:*)",
       "Bash(git log:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(pip show:*)",
+      "Bash(echo:*)",
+      "Bash(python:*)",
+      "Bash(source .env)",
+      "Bash(export ARCHS4_DATA_DIR ANTHROPIC_API_KEY)",
+      "Bash(source:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(pkill:*)",
+      "Bash(ps:*)",
+      "Bash(pgrep:*)",
+      "Bash(tee:*)",
+      "Bash(git push)",
+      "Bash(tree:*)",
+      "Bash(export ARCHS4_DATA_DIR=/Users/bgood/scripps/data/archs4)",
+      "Bash(git check-ignore:*)",
+      "Bash(jq:*)",
+      "Bash(pip install:*)",
+      "Bash(python3.11:*)",
+      "Bash(bash:*)",
+      "Bash(git push:*)"
     ]
   }
 }
