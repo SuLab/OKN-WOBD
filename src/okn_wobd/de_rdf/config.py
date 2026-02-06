@@ -38,6 +38,15 @@ DOID = Namespace("http://purl.obolibrary.org/obo/DOID_")
 REACTOME = Namespace("https://reactome.org/content/detail/")
 KEGG = Namespace("https://www.genome.jp/entry/")
 
+# GXA-related namespaces
+ENSEMBL = Namespace("http://identifiers.org/ensembl/")
+CL = Namespace("http://purl.obolibrary.org/obo/CL_")
+PATO = Namespace("http://purl.obolibrary.org/obo/PATO_")
+HANCESTRO = Namespace("http://purl.obolibrary.org/obo/HANCESTRO_")
+EFO = Namespace("http://www.ebi.ac.uk/efo/EFO_")
+INTERPRO = Namespace("https://www.ebi.ac.uk/interpro/entry/InterPro/")
+GEA = Namespace("https://www.ebi.ac.uk/gxa/experiments/")
+
 # Standard namespaces (rdflib provides RDF, RDFS, OWL, XSD)
 
 # All namespaces for graph binding
@@ -56,6 +65,13 @@ NAMESPACES: Dict[str, Namespace] = {
     "DOID": DOID,
     "REACT": REACTOME,
     "KEGG": KEGG,
+    "ensembl": ENSEMBL,
+    "CL": CL,
+    "PATO": PATO,
+    "HANCESTRO": HANCESTRO,
+    "EFO": EFO,
+    "INTERPRO": INTERPRO,
+    "GEA": GEA,
 }
 
 
@@ -138,13 +154,19 @@ def get_namespace_for_node_type(node_type: str) -> Namespace:
     """
     mapping = {
         "Gene": NCBIGENE,
+        "MGene": ENSEMBL,
         "BiologicalProcess": GO,
         "MolecularActivity": GO,
         "CellularComponent": GO,
+        "GOTerm": GO,
         "Disease": MONDO,
         "AnatomicalEntity": UBERON,
+        "Anatomy": UBERON,
         "OrganismTaxon": NCBITAXON,
         "Pathway": REACTOME,
+        "ReactomePathway": REACTOME,
         "KEGGPathway": KEGG,
+        "CellType": CL,
+        "InterProDomain": INTERPRO,
     }
     return mapping.get(node_type, OKN_WOBD)

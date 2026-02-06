@@ -14,21 +14,35 @@ from .config import BIOLINK, OKN_WOBD
 # =============================================================================
 
 BIOLINK_NODE_CLASSES = {
-    # Core DE types
+    # Core DE types (ChatGEO names)
     "DEExperiment": BIOLINK.Study,
     "DEAssay": BIOLINK.Assay,
     "Gene": BIOLINK.Gene,
+    # GXA aliases (map to same Biolink classes)
+    "Study": BIOLINK.Study,
+    "Assay": BIOLINK.Assay,
+    "MGene": BIOLINK.Gene,
     # Ontology types
     "Disease": BIOLINK.Disease,
     "AnatomicalEntity": BIOLINK.AnatomicalEntity,
+    "Anatomy": BIOLINK.AnatomicalEntity,
     "OrganismTaxon": BIOLINK.OrganismTaxon,
+    "CellType": BIOLINK.Cell,
     # GO categories
     "BiologicalProcess": BIOLINK.BiologicalProcess,
     "MolecularActivity": BIOLINK.MolecularActivity,
     "CellularComponent": BIOLINK.CellularComponent,
+    "GOTerm": BIOLINK.BiologicalProcess,
     # Pathways
     "Pathway": BIOLINK.Pathway,
     "KEGGPathway": BIOLINK.Pathway,
+    "ReactomePathway": BIOLINK.Pathway,
+    "InterProDomain": BIOLINK.ProteinDomain,
+    # GXA characteristic types
+    "Sex": BIOLINK.BiologicalSex,
+    "DevelopmentalStage": BIOLINK.LifeStage,
+    "EthnicGroup": BIOLINK.PopulationOfIndividualOrganisms,
+    "OrganismStatus": BIOLINK.Attribute,
 }
 
 # GO source prefix → Biolink class
@@ -52,6 +66,8 @@ BIOLINK_PREDICATES = {
     "MEASURED_DIFFERENTIAL_EXPRESSION": BIOLINK.affects_expression_of,
     # Enrichment
     "ENRICHED_IN": BIOLINK.associated_with,
+    # Attribute
+    "HAS_ATTRIBUTE": BIOLINK.has_attribute,
     # Generic
     "ASSOCIATED_WITH": BIOLINK.associated_with,
     "RELATED_TO": BIOLINK.related_to,
@@ -108,6 +124,18 @@ _CUSTOM_PROPERTIES = {
     "timestamp": OKN_WOBD.timestamp,
     "summary": OKN_WOBD.summary,
     "interpretation": OKN_WOBD.interpretation,
+    # GXA-specific properties
+    "organism": OKN_WOBD.organism,
+    "technology": OKN_WOBD.technology,
+    "experimental_factors": OKN_WOBD.experimental_factors,
+    "pubmed_id": OKN_WOBD.pubmed_id,
+    "effect_size": OKN_WOBD.effect_size,
+    "project_title": OKN_WOBD.project_title,
+    "source": OKN_WOBD.source,
+    "submitter_name": OKN_WOBD.submitter_name,
+    "array_design": OKN_WOBD.array_design,
+    "contrast_id": OKN_WOBD.contrast_id,
+    "secondary_accessions": OKN_WOBD.secondary_accessions,
 }
 
 
