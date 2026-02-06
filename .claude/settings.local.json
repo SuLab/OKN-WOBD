@@ -42,7 +42,13 @@
       "Bash(export ARCHS4_DATA_DIR=\"/Users/bgood/scripps/data/archs4\")",
       "Bash(ARCHS4_DATA_DIR=/Users/bgood/scripps/data/archs4 python3:*)",
       "Bash(ARCHS4_DATA_DIR=/Users/bgood/scripps/data/archs4 PYTHONDONTWRITEBYTECODE=1 python3:*)",
-      "Bash(git status:*)"
+      "Bash(git status:*)",
+      "Bash(wc:*)",
+      "Bash(python3.11 -m pip install:*)",
+      "Bash(python3.11 -m okn_wobd.cli:*)",
+      "Bash(python3.11:*)",
+      "Bash(okn-wobd gxa convert:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
