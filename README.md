@@ -171,3 +171,129 @@ The script extracts SPARQL queries from the markdown file, loads all RDF files f
 - Verifying queries return expected results against your data
 
 See the [documentation](./docs/README.md) for more details, including competency questions and SPARQL query examples.
+
+## GXA (Gene Expression Atlas) to RDF
+
+The `gxa` command group converts differential expression experiment data from the [EBI Gene Expression Atlas](https://www.ebi.ac.uk/gxa/) into Biolink-compatible RDF (Turtle format). Each experiment becomes one `.ttl` file containing study metadata, assay contrasts, differentially expressed genes, and pathway enrichment results.
+
+### Downloading GXA Data
+
+Download experiment archives from the EBI FTP server:
+
+```bash
+# Download all E-GEOD experiments (default prefix)
+okn-wobd gxa fetch --data-dir /path/to/gxa_data
+
+# Download a single experiment
+okn-wobd gxa fetch --data-dir /path/to/gxa_data --experiment E-GEOD-5305
+
+# Preview what would be downloaded
+okn-wobd gxa fetch --data-dir /path/to/gxa_data --dry-run
+```
+
+Each experiment is saved to a subdirectory named `{accession}-gea/` containing:
+- `.idf.txt` — experiment metadata (title, description, submitter)
+- `.condensed-sdrf.tsv` — sample annotations (organism, disease, tissue)
+- `-configuration.xml` — assay group and contrast definitions
+- `-analytics.tsv` — differential expression results (p-values, fold changes)
+- `.gsea.tsv` — gene set enrichment results (GO, Reactome, InterPro)
+
+### Converting to RDF
+
+Convert downloaded experiments to RDF Turtle files:
+
+```bash
+# Convert all experiments in the data directory
+okn-wobd gxa convert --data-dir /path/to/gxa_data --output-dir data/gxa_rdf
+
+# Convert a single experiment
+okn-wobd gxa convert --data-dir /path/to/gxa_data --output-dir data/gxa_rdf \
+    --experiment E-GEOD-5305
+
+# Adjust filtering thresholds
+okn-wobd gxa convert --data-dir /path/to/gxa_data --output-dir data/gxa_rdf \
+    --p-value 0.05 --max-genes 500 --max-terms 50
+
+# Skip pathway enrichment (DE genes only)
+okn-wobd gxa convert --data-dir /path/to/gxa_data --output-dir data/gxa_rdf --no-gsea
+```
+
+Output files are written as `{accession}.ttl` in the output directory. Already-processed experiments (existing `.ttl` files) are automatically skipped on re-runs.
+
+### Fetch + Convert in One Step
+
+```bash
+okn-wobd gxa run --data-dir /path/to/gxa_data --output-dir data/gxa_rdf
+```
+
+### RDF Data Model
+
+The GXA pipeline produces a unified Biolink-based graph that shares the same structure as the ChatGEO/de_rdf output:
+
+```
+Study (biolink:Study)
+  ├── IN_TAXON → OrganismTaxon (biolink:OrganismTaxon)
+  ├── STUDIES → Disease (biolink:Disease)
+  ├── HAS_ATTRIBUTE → Sex, DevelopmentalStage, ... (study-level annotations)
+  └── HAS_OUTPUT → Assay (biolink:Assay)
+        ├── HAS_ATTRIBUTE → Anatomy, CellType, Disease (assay-level annotations)
+        ├── MEASURED_DIFFERENTIAL_EXPRESSION → Gene (biolink:Gene)
+        │     [reified as biolink:GeneExpressionMixin with log2fc, adj_p_value, direction]
+        └── ENRICHED_IN → GOTerm / ReactomePathway / InterProDomain
+              [reified as biolink:Association with adj_p_value, effect_size, enrichment_source]
+```
+
+### Querying GXA RDF
+
+Load a `.ttl` file into any SPARQL-capable tool (rdflib, Protege, FRINK) and query it. Example queries:
+
+**Find differentially expressed genes with fold changes:**
+```sparql
+PREFIX biolink: <https://w3id.org/biolink/vocab/>
+PREFIX okn: <http://purl.org/okn/wobd/>
+
+SELECT ?study ?assay ?gene ?symbol ?fc ?pval WHERE {
+  ?study a biolink:Study ;
+         biolink:has_output ?assay .
+  ?assoc a biolink:GeneExpressionMixin ;
+         biolink:subject ?assay ;
+         biolink:object ?gene ;
+         okn:log2fc ?fc ;
+         okn:adj_p_value ?pval .
+  ?gene biolink:symbol ?symbol .
+}
+ORDER BY ASC(?pval)
+LIMIT 20
+```
+
+**Find enriched pathways and GO terms:**
+```sparql
+PREFIX biolink: <https://w3id.org/biolink/vocab/>
+PREFIX okn: <http://purl.org/okn/wobd/>
+
+SELECT ?assay ?term_type ?term ?name ?pval ?source WHERE {
+  ?assoc a biolink:Association ;
+         biolink:subject ?assay ;
+         biolink:object ?term ;
+         okn:adj_p_value ?pval ;
+         okn:enrichment_source ?source .
+  ?term a ?term_type ;
+        biolink:name ?name .
+  FILTER(?term_type IN (biolink:BiologicalProcess, biolink:Pathway, biolink:ProteinDomain))
+}
+ORDER BY ASC(?pval)
+LIMIT 20
+```
+
+**Get study metadata and organism:**
+```sparql
+PREFIX biolink: <https://w3id.org/biolink/vocab/>
+PREFIX okn: <http://purl.org/okn/wobd/>
+
+SELECT ?study ?title ?organism ?taxon WHERE {
+  ?study a biolink:Study ;
+         biolink:name ?title ;
+         okn:organism ?organism ;
+         biolink:in_taxon ?taxon .
+}
+```

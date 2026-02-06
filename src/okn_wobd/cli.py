@@ -1512,6 +1512,230 @@ def convert_command(
             continue
 
 
+# =============================================================================
+# GXA command group
+# =============================================================================
+
+
+@cli.group("gxa")
+def gxa_group() -> None:
+    """Gene Expression Atlas (GXA) pipeline commands."""
+    pass
+
+
+@gxa_group.command("convert")
+@click.option(
+    "--data-dir",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    required=True,
+    help="Directory containing GXA experiment subdirectories (*-gea/).",
+)
+@click.option(
+    "--output-dir",
+    type=click.Path(path_type=Path),
+    default=Path("data/gxa_rdf"),
+    show_default=True,
+    help="Directory for output .ttl files.",
+)
+@click.option(
+    "--experiment",
+    type=str,
+    default=None,
+    help="Process a single experiment (e.g., E-GEOD-5305).",
+)
+@click.option(
+    "--p-value",
+    type=float,
+    default=0.01,
+    show_default=True,
+    help="P-value threshold for DE and GSEA filtering.",
+)
+@click.option(
+    "--max-genes",
+    type=int,
+    default=200,
+    show_default=True,
+    help="Maximum DE genes per assay.",
+)
+@click.option(
+    "--max-terms",
+    type=int,
+    default=20,
+    show_default=True,
+    help="Maximum enriched terms per type per contrast.",
+)
+@click.option(
+    "--no-gsea",
+    is_flag=True,
+    help="Skip GSEA/pathway enrichment extraction.",
+)
+def gxa_convert(
+    data_dir: Path,
+    output_dir: Path,
+    experiment: Optional[str],
+    p_value: float,
+    max_genes: int,
+    max_terms: int,
+    no_gsea: bool,
+) -> None:
+    """Convert GXA experiment data to RDF Turtle files."""
+    from okn_wobd.gxa.pipeline import run_gxa_rdf_pipeline
+
+    run_gxa_rdf_pipeline(
+        data_dir=data_dir,
+        output_dir=output_dir,
+        experiment=experiment,
+        p_value_threshold=p_value,
+        max_genes_per_assay=max_genes,
+        max_terms_per_type=max_terms,
+        include_gsea=not no_gsea,
+    )
+
+
+@gxa_group.command("fetch")
+@click.option(
+    "--data-dir",
+    type=click.Path(path_type=Path),
+    required=True,
+    help="Directory to store downloaded experiment data.",
+)
+@click.option(
+    "--prefix",
+    type=str,
+    default="E-GEOD",
+    show_default=True,
+    help="Experiment prefix filter for FTP listing.",
+)
+@click.option(
+    "--experiment",
+    type=str,
+    default=None,
+    help="Download a single experiment (e.g., E-GEOD-5305).",
+)
+@click.option(
+    "--max-size",
+    type=float,
+    default=10.0,
+    show_default=True,
+    help="Maximum file size in MB to download.",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="List files without downloading.",
+)
+def gxa_fetch(
+    data_dir: Path,
+    prefix: str,
+    experiment: Optional[str],
+    max_size: float,
+    dry_run: bool,
+) -> None:
+    """Download GXA experiment data from the EBI FTP server."""
+    from okn_wobd.gxa.downloader import GXADownloader
+
+    downloader = GXADownloader(
+        data_dir=data_dir,
+        prefix=prefix,
+        max_size_mb=max_size,
+        dry_run=dry_run,
+    )
+
+    click.echo(f"GXA Downloader")
+    click.echo(f"  Data directory: {data_dir}")
+    click.echo(f"  Prefix: {prefix}")
+    click.echo(f"  Max file size: {max_size} MB")
+    if dry_run:
+        click.echo("  Mode: DRY RUN")
+
+    try:
+        processed = downloader.run(single_experiment=experiment)
+        click.echo(f"\nProcessed {processed} experiments.")
+    except KeyboardInterrupt:
+        click.echo("\nDownload interrupted. Progress has been saved.")
+    except Exception as e:
+        click.echo(f"\nDownload failed: {e}", err=True)
+
+
+@gxa_group.command("run")
+@click.option(
+    "--data-dir",
+    type=click.Path(path_type=Path),
+    required=True,
+    help="Directory for experiment data (download target and convert source).",
+)
+@click.option(
+    "--output-dir",
+    type=click.Path(path_type=Path),
+    default=Path("data/gxa_rdf"),
+    show_default=True,
+    help="Directory for output .ttl files.",
+)
+@click.option(
+    "--prefix",
+    type=str,
+    default="E-GEOD",
+    show_default=True,
+    help="Experiment prefix filter for FTP download.",
+)
+@click.option(
+    "--experiment",
+    type=str,
+    default=None,
+    help="Process a single experiment.",
+)
+@click.option(
+    "--p-value",
+    type=float,
+    default=0.01,
+    show_default=True,
+    help="P-value threshold.",
+)
+@click.option(
+    "--max-genes",
+    type=int,
+    default=200,
+    show_default=True,
+    help="Maximum DE genes per assay.",
+)
+@click.option(
+    "--no-gsea",
+    is_flag=True,
+    help="Skip GSEA extraction.",
+)
+def gxa_run(
+    data_dir: Path,
+    output_dir: Path,
+    prefix: str,
+    experiment: Optional[str],
+    p_value: float,
+    max_genes: int,
+    no_gsea: bool,
+) -> None:
+    """Fetch + convert in one step."""
+    from okn_wobd.gxa.downloader import GXADownloader
+    from okn_wobd.gxa.pipeline import run_gxa_rdf_pipeline
+
+    # Step 1: Fetch
+    click.echo("Step 1: Downloading GXA data...")
+    downloader = GXADownloader(
+        data_dir=data_dir,
+        prefix=prefix,
+    )
+    downloader.run(single_experiment=experiment)
+
+    # Step 2: Convert
+    click.echo("\nStep 2: Converting to RDF...")
+    run_gxa_rdf_pipeline(
+        data_dir=data_dir,
+        output_dir=output_dir,
+        experiment=experiment,
+        p_value_threshold=p_value,
+        max_genes_per_assay=max_genes,
+        include_gsea=not no_gsea,
+    )
+
+
 def main() -> None:  # pragma: no cover
     cli()
 

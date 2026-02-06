@@ -1,4 +1,4 @@
-# Custom 
+# Custom
 data/raw/*_state.json
 data/raw/*.jsonl
 data/gene_expression/*
@@ -174,3 +174,8 @@ build/
 dist/
 
 
+.claude/settings.local.json
+scripts/.claude/settings.local.json
+scripts/demos/.claude/settings.local.json
+.claude/settings.local.json
+.claude/settings.local.json

@@ -1,0 +1,128 @@
+======================================================================
+DIFFERENTIAL EXPRESSION ANALYSIS RESULTS
+======================================================================
+
+QUERY
+  Disease: mitochondrial myopathy
+  Tissue: muscle
+  Timestamp: 2026-02-04T15:28:34.020582
+
+SAMPLES
+  Test: 13 samples from 1 studies
+  Control: 200 samples from 74 studies
+  Organisms: human
+
+METHODS
+  Normalization: deseq2
+  Statistical test: deseq2
+  FDR correction: deseq2
+
+THRESHOLDS
+  FDR: 0.01
+  Log2 FC: 2.0
+
+----------------------------------------------------------------------
+SUMMARY
+----------------------------------------------------------------------
+  Genes tested: 19,331
+  Genes significant: 3,161
+  Upregulated: 25
+  Downregulated: 3,136
+
+----------------------------------------------------------------------
+TOP 20 UPREGULATED GENES
+----------------------------------------------------------------------
+  Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
+  ----------------------------------------------------------
+  FGF21              5.20     4.22e-05        82.85         2.44
+  CXCL9              3.23     5.43e-04       254.54        33.91
+  NPIPB12            3.15     2.38e-07       997.08       154.32
+  HSPB2-C11ORF52       3.01     1.69e-03        93.54        24.75
+  KLHDC7B            2.98     5.01e-03       122.54       116.11
+  NPIPA7             2.95     5.20e-07       401.38        72.46
+  SLC26A9            2.83     1.43e-03       253.69        29.09
+  DIRAS1             2.75     1.44e-04       576.85       181.08
+  OLIG1              2.65     6.63e-03        49.23         8.95
+  PRKACA             2.52     5.76e-08      7808.46      1904.37
+  MT-ND2             2.45     1.17e-04    562700.00     91013.05
+  MT-ND1             2.35     2.40e-04    548366.62    115542.69
+  MT-ND3             2.35     4.77e-05    125175.15     32473.57
+  MT-ATP6            2.33     1.14e-04    407730.77    101548.68
+  HSPB6              2.30     2.37e-03     48892.77     12323.84
+  SYS1-DBNDD2        2.23     2.11e-03        62.23        17.54
+  MT-CO3             2.17     3.03e-05    716008.38    198150.71
+  MT-CYB             2.15     2.99e-04    510312.85    135675.36
+  NPIPB3             2.12     1.19e-04      3905.54      1217.95
+  ZDHHC11B           2.12     1.31e-03       505.15       144.54
+
+----------------------------------------------------------------------
+TOP 20 DOWNREGULATED GENES
+----------------------------------------------------------------------
+  Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
+  ----------------------------------------------------------
+  CHRM2            -11.93     1.17e-04         0.38       336.65
+  MMP1             -10.41     2.60e-10         0.85      7419.99
+  CEMIP            -10.26     1.33e-23         3.00      9535.04
+  H1-4             -10.24     2.84e-16         0.31      1015.80
+  CXCL8            -10.02     6.62e-14         1.46      6091.61
+  HSPA1A            -9.54     6.16e-07         0.00       333.76
+  HLA-DRA           -9.42     8.08e-05         0.23      1108.87
+  HAPLN1            -9.39     8.38e-08         0.08      1963.23
+  FCGR2A            -9.38     2.05e-12        74.38     19046.60
+  PTX3              -9.32     1.29e-16         3.31      5387.57
+  PCDH10            -8.85     3.60e-14         1.00      1217.03
+  CA12              -8.78     2.07e-18         1.92      1829.72
+  H4C5              -8.73     6.38e-10         0.15       474.25
+  MARCHF4           -8.58     8.03e-10         0.15       173.45
+  H2AC19            -8.54     1.68e-18         0.46       480.12
+  EPHA5             -8.53     2.39e-09         0.08       129.66
+  CACNG7            -8.39     1.27e-06         0.08       149.17
+  H2AC20            -8.32     4.38e-16         0.69       576.80
+  PAPPA             -8.28     3.56e-19         9.54      5502.69
+  IL13RA2           -8.07     4.53e-07         0.00       199.70
+
+======================================================================
+
+----------------------------------------------------------------------
+ENRICHMENT ANALYSIS
+----------------------------------------------------------------------
+  Backend: gprofiler
+  Organism: hsapiens
+  Sources: GO:BP, GO:CC, GO:MF, KEGG, REAC
+  Threshold: 0.05
+
+  Total significant terms: 919
+  Upregulated: 102 terms
+  Downregulated: 817 terms
+
+----------------------------------------------------------------------
+TOP 10 ENRICHED TERMS (UPREGULATED GENES)
+----------------------------------------------------------------------
+  Source   Term ID             P-adj  Genes  Term Name
+  ------------------------------------------------------------------
+  KEGG     KEGG:04714       2.80e-12     10  Thermogenesis
+  GO:CC    GO:0098803       5.21e-12      8  respiratory chain complex
+  KEGG     KEGG:05208       1.67e-10      9  Chemical carcinogenesis - reactive ...
+  KEGG     KEGG:00190       2.06e-10      8  Oxidative phosphorylation
+  GO:MF    GO:0015453       2.26e-10      7  oxidoreduction-driven active transm...
+  GO:BP    GO:0006119       8.43e-10      8  oxidative phosphorylation
+  KEGG     KEGG:05012       8.63e-10      9  Parkinson disease
+  KEGG     KEGG:05020       1.06e-09      9  Prion disease
+  GO:BP    GO:0019646       2.69e-09      7  aerobic electron transport chain
+  GO:BP    GO:0042775       4.92e-09      7  mitochondrial ATP synthesis coupled...
+
+----------------------------------------------------------------------
+TOP 10 ENRICHED TERMS (DOWNREGULATED GENES)
+----------------------------------------------------------------------
+  Source   Term ID             P-adj  Genes  Term Name
+  ------------------------------------------------------------------
+  GO:CC    GO:0071944      3.13e-117   1377  cell periphery
+  GO:CC    GO:0005886       4.40e-87   1228  plasma membrane
+  GO:BP    GO:0032501       4.68e-85   1426  multicellular organismal process
+  GO:BP    GO:0032502       1.47e-70   1275  developmental process
+  GO:BP    GO:0048856       2.04e-69   1191  anatomical structure development
+  GO:CC    GO:0005576       8.42e-67    923  extracellular region
+  GO:BP    GO:0048731       6.36e-61    871  system development
+  GO:BP    GO:0007275       1.00e-60    975  multicellular organism development
+  GO:CC    GO:0016020       7.22e-59   1712  membrane
+  GO:BP    GO:0007154       1.31e-53   1219  cell communication

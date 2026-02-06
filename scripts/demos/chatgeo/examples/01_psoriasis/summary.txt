@@ -1,0 +1,128 @@
+======================================================================
+DIFFERENTIAL EXPRESSION ANALYSIS RESULTS
+======================================================================
+
+QUERY
+  Disease: psoriasis
+  Tissue: skin
+  Timestamp: 2026-02-04T15:21:09.243627
+
+SAMPLES
+  Test: 200 samples from 16 studies
+  Control: 200 samples from 82 studies
+  Organisms: human
+
+METHODS
+  Normalization: deseq2
+  Statistical test: deseq2
+  FDR correction: deseq2
+
+THRESHOLDS
+  FDR: 0.01
+  Log2 FC: 2.0
+
+----------------------------------------------------------------------
+SUMMARY
+----------------------------------------------------------------------
+  Genes tested: 19,265
+  Genes significant: 616
+  Upregulated: 494
+  Downregulated: 122
+
+----------------------------------------------------------------------
+TOP 20 UPREGULATED GENES
+----------------------------------------------------------------------
+  Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
+  ----------------------------------------------------------
+  DEFB4B             8.29     4.19e-09       334.53         0.47
+  TEX101             7.17     9.23e-36        92.49         9.43
+  LCE3D              7.06     1.83e-19    291293.15       338.98
+  DEFB4A             6.90     2.73e-15      3739.21        19.81
+  SPRR2B             6.54     1.97e-14     62871.53        79.71
+  SPRR2A             6.33     1.44e-13    128282.75       315.20
+  SPRR2F             6.33     8.28e-13     10533.81        20.80
+  CCL17              6.05     1.93e-17      7048.02        40.69
+  IDO1               6.01     5.77e-31     19595.02       151.34
+  FOXD4L3            5.99     1.44e-13       493.96         2.16
+  CRCT1              5.98     6.51e-11    250890.19       978.34
+  DEFB103B           5.90     5.07e-12      1098.66        12.07
+  IL36A              5.75     1.91e-09       214.87         1.24
+  GNG8               5.68     2.64e-17       632.55        38.31
+  LCE3E              5.55     1.70e-11     30045.30       120.80
+  LCE3A              5.50     9.90e-14       821.92         5.21
+  DEFB103A           5.45     6.72e-14      4404.43        32.29
+  CNFN               5.41     1.36e-18    190085.09       784.37
+  SPRR2E             5.32     2.44e-09    304040.34      1324.17
+  VMO1               5.23     3.58e-23      5067.68        89.45
+
+----------------------------------------------------------------------
+TOP 20 DOWNREGULATED GENES
+----------------------------------------------------------------------
+  Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
+  ----------------------------------------------------------
+  PTX3              -6.81     4.65e-30       138.79      4019.88
+  MYH7              -6.68     5.65e-07         2.51      6245.36
+  DKK1              -5.42     3.88e-20        39.23      2571.10
+  SERPINE1          -5.37     1.48e-22       508.45     16282.74
+  CDH2              -5.30     4.25e-24        38.43      1403.62
+  KLRC4             -5.11     5.31e-06        42.06        58.93
+  TRAT1             -5.06     6.89e-09      1400.13       403.06
+  MARCHF4           -4.65     1.69e-14         9.49       371.69
+  KLRC4-KLRK1       -4.41     7.98e-07        16.70       109.60
+  XIRP2             -4.41     4.04e-05         3.96       208.22
+  GZMK              -4.06     2.47e-05       421.77       256.33
+  FN1               -3.99     2.81e-12      4914.23    217894.45
+  STC2              -3.97     2.46e-13       145.60      3148.50
+  DLK1              -3.83     5.12e-05        26.15       348.75
+  CXCL6             -3.80     7.46e-07        28.21       185.39
+  TNFRSF11B         -3.75     9.12e-11       416.62      3029.96
+  KLRK1             -3.68     1.63e-09      1697.19       569.34
+  SERPINE2          -3.61     5.07e-12      1217.04     17738.26
+  CD96              -3.56     9.98e-08      2297.70       976.81
+  FGF5              -3.49     2.72e-09        47.40       577.91
+
+======================================================================
+
+----------------------------------------------------------------------
+ENRICHMENT ANALYSIS
+----------------------------------------------------------------------
+  Backend: gprofiler
+  Organism: hsapiens
+  Sources: GO:BP, GO:CC, GO:MF, KEGG, REAC
+  Threshold: 0.05
+
+  Total significant terms: 322
+  Upregulated: 103 terms
+  Downregulated: 219 terms
+
+----------------------------------------------------------------------
+TOP 10 ENRICHED TERMS (UPREGULATED GENES)
+----------------------------------------------------------------------
+  Source   Term ID             P-adj  Genes  Term Name
+  ------------------------------------------------------------------
+  GO:CC    GO:0005576       2.43e-16    160  extracellular region
+  GO:CC    GO:0005886       8.92e-14    191  plasma membrane
+  GO:BP    GO:0031424       1.38e-13     20  keratinization
+  REAC     REAC:R-HSA-6805567   1.90e-13     31  Keratinization
+  GO:CC    GO:0001533       3.28e-13     17  cornified envelope
+  GO:CC    GO:0071944       3.45e-13    200  cell periphery
+  REAC     REAC:R-HSA-6809371   1.22e-12     24  Formation of the cornified envelope
+  GO:BP    GO:0043588       1.92e-12     34  skin development
+  GO:MF    GO:0008236       4.38e-12     33  serine-type peptidase activity
+  GO:MF    GO:0004252       5.17e-12     32  serine-type endopeptidase activity
+
+----------------------------------------------------------------------
+TOP 10 ENRICHED TERMS (DOWNREGULATED GENES)
+----------------------------------------------------------------------
+  Source   Term ID             P-adj  Genes  Term Name
+  ------------------------------------------------------------------
+  GO:BP    GO:0032501       4.69e-14     85  multicellular organismal process
+  GO:BP    GO:0032502       2.14e-12     78  developmental process
+  GO:BP    GO:0048856       4.50e-12     74  anatomical structure development
+  GO:BP    GO:0048731       7.45e-12     60  system development
+  GO:BP    GO:0007275       3.33e-11     64  multicellular organism development
+  GO:CC    GO:0005576       3.96e-11     58  extracellular region
+  GO:BP    GO:0051239       1.77e-10     49  regulation of multicellular organis...
+  GO:BP    GO:2000026       1.81e-10     34  regulation of multicellular organis...
+  GO:BP    GO:0048513       2.07e-10     50  animal organ development
+  GO:BP    GO:0009888       1.99e-09     39  tissue development

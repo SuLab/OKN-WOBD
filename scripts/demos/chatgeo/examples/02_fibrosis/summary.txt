@@ -1,0 +1,128 @@
+======================================================================
+DIFFERENTIAL EXPRESSION ANALYSIS RESULTS
+======================================================================
+
+QUERY
+  Disease: lung fibrosis
+  Tissue: lung
+  Timestamp: 2026-02-04T15:24:01.283149
+
+SAMPLES
+  Test: 200 samples from 40 studies
+  Control: 200 samples from 92 studies
+  Organisms: human
+
+METHODS
+  Normalization: deseq2
+  Statistical test: deseq2
+  FDR correction: deseq2
+
+THRESHOLDS
+  FDR: 0.01
+  Log2 FC: 2.0
+
+----------------------------------------------------------------------
+SUMMARY
+----------------------------------------------------------------------
+  Genes tested: 19,361
+  Genes significant: 498
+  Upregulated: 193
+  Downregulated: 305
+
+----------------------------------------------------------------------
+TOP 20 UPREGULATED GENES
+----------------------------------------------------------------------
+  Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
+  ----------------------------------------------------------
+  DEFB4B             5.49     3.37e-08        64.04         7.28
+  GPR22              5.48     2.39e-25        95.92        44.76
+  CCL20              4.81     2.11e-30      8372.32      3293.30
+  DEFB4A             4.44     2.37e-13        55.34        11.47
+  SLC6A14            4.42     3.71e-25      3927.04      1946.48
+  IL36G              4.32     1.29e-08       180.54        79.38
+  LGALS7             4.30     9.45e-14       449.48        40.98
+  CXCL1              4.15     9.65e-31      7907.37      3735.06
+  F3                 3.89     8.98e-31     10372.57      5555.17
+  PARD6B             3.77     5.70e-37      2108.32      1050.72
+  CCL7               3.67     2.57e-14       573.24        34.27
+  ANKRD36C           3.64     8.10e-33      2941.28      2157.28
+  COMP               3.60     5.24e-21      1639.21        96.36
+  RELL1              3.60     5.60e-44      1850.35       888.94
+  MRAP               3.59     4.21e-18        14.65         4.67
+  SLC35F2            3.49     2.52e-33      1181.08       683.59
+  CCL11              3.44     8.83e-12       226.57         7.24
+  CCL2               3.36     1.23e-17     11658.14      1511.87
+  NUDT19             3.35     2.39e-38      1256.08       707.27
+  SPDYE13            3.34     2.85e-03        18.06        28.71
+
+----------------------------------------------------------------------
+TOP 20 DOWNREGULATED GENES
+----------------------------------------------------------------------
+  Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
+  ----------------------------------------------------------
+  MAGEA4           -12.77     7.31e-19         0.93       781.33
+  GAGE2A           -12.25     3.32e-12         0.87       303.95
+  MAGEA3            -9.41     1.04e-13         0.67       224.52
+  MAGEA6            -7.74     5.88e-10         0.64       232.10
+  KRT81             -6.89     9.27e-57        23.03      3482.97
+  AKR1B10           -6.31     6.73e-60       180.91      6364.54
+  NR0B1             -5.61     3.63e-19         4.46       128.53
+  EEF1A2            -5.44     1.68e-62        41.29      1485.46
+  HOXB9             -5.19     1.67e-23         2.38       124.33
+  PRAME             -5.16     3.76e-09         1.75       243.51
+  ABCC2             -4.98     2.10e-56        53.75      1056.20
+  CPLX2             -4.71     4.74e-23         7.64      1455.03
+  ZIC2              -4.71     2.65e-21         2.06       129.62
+  IGFBP1            -4.59     8.97e-20         7.13       228.44
+  ZNF683            -4.39     1.44e-16        58.15       118.93
+  XAGE1A            -4.33     9.10e-14        12.50       316.70
+  MYBL2             -4.17     1.97e-28       181.43      1795.41
+  H2BC17            -4.12     1.52e-19        29.55       184.04
+  SP9               -3.82     6.04e-08         1.37        24.65
+  CSAG1             -3.80     1.50e-04         0.58        58.80
+
+======================================================================
+
+----------------------------------------------------------------------
+ENRICHMENT ANALYSIS
+----------------------------------------------------------------------
+  Backend: gprofiler
+  Organism: hsapiens
+  Sources: GO:BP, GO:CC, GO:MF, KEGG, REAC
+  Threshold: 0.05
+
+  Total significant terms: 335
+  Upregulated: 102 terms
+  Downregulated: 233 terms
+
+----------------------------------------------------------------------
+TOP 10 ENRICHED TERMS (UPREGULATED GENES)
+----------------------------------------------------------------------
+  Source   Term ID             P-adj  Genes  Term Name
+  ------------------------------------------------------------------
+  GO:MF    GO:0008009       3.53e-10     11  chemokine activity
+  GO:CC    GO:0005615       5.32e-10     65  extracellular space
+  GO:MF    GO:0005125       2.88e-09     18  cytokine activity
+  GO:MF    GO:0042379       4.43e-08     11  chemokine receptor binding
+  GO:MF    GO:0030545       4.85e-08     25  signaling receptor regulator activi...
+  GO:CC    GO:0005576       6.95e-08     71  extracellular region
+  REAC     REAC:R-HSA-6783783   1.19e-07      9  Interleukin-10 signaling
+  GO:BP    GO:2000147       2.23e-07     24  positive regulation of cell motilit...
+  GO:MF    GO:0048018       3.27e-07     23  receptor ligand activity
+  KEGG     KEGG:04061       3.29e-07     11  Viral protein interaction with cyto...
+
+----------------------------------------------------------------------
+TOP 10 ENRICHED TERMS (DOWNREGULATED GENES)
+----------------------------------------------------------------------
+  Source   Term ID             P-adj  Genes  Term Name
+  ------------------------------------------------------------------
+  GO:CC    GO:0005694       1.16e-14     75  chromosome
+  GO:CC    GO:0000785       1.51e-12     58  chromatin
+  GO:BP    GO:0048856       1.66e-12    143  anatomical structure development
+  REAC     REAC:R-HSA-69278   1.79e-12     39  Cell Cycle, Mitotic
+  GO:BP    GO:1903047       2.20e-11     41  mitotic cell cycle process
+  GO:BP    GO:0032502       4.29e-11    148  developmental process
+  REAC     REAC:R-HSA-1640170   7.80e-11     41  Cell Cycle
+  GO:BP    GO:0000278       1.01e-10     44  mitotic cell cycle
+  GO:BP    GO:0032501       7.85e-10    156  multicellular organismal process
+  GO:BP    GO:0140014       1.28e-09     24  mitotic nuclear division
