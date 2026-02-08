@@ -1,57 +1,37 @@
-# Template for graph metadata YAML files
-# Copy this file to {graph-shortname}.yaml and fill in the values
-#
-# This metadata is merged into the auto-generated {graph}_global.json by build_graph_context.py
-# Fields marked "optional" can be omitted if not applicable
+# Gene Expression Atlas OKN - GXA differential expression and contrasts
+# Uses Study (not schema:Dataset) as primary entity; Disease via studies (EFO)
+id: gene-expression-atlas-okn
+endpoint: "https://frink.apps.renci.org/gene-expression-atlas-okn/sparql"
+description: "Gene Expression Atlas differential expression, contrasts, and DE associations"
 
-# Required: Graph shortname (must match the filename: {id}.yaml)
-id: graph-shortname
+# Primary class for introspection: GXA uses biolink:Study individuals (e.g. E-GEOD-76), not schema:Dataset
+primary_class: "https://w3id.org/biolink/vocab/Study"
 
-# Required: SPARQL endpoint URL
-# For FRINK graphs: https://frink.apps.renci.org/{shortname}/sparql
-# For external graphs: the actual SPARQL endpoint URL
-endpoint: "https://frink.apps.renci.org/graph-shortname/sparql"
-
-# Optional: Human-readable description
-# If omitted, build_graph_context.py will derive a description from the graph introspection
-# If provided, this overrides the auto-generated description
-description: "Brief description of what this graph contains and what it's good for"
-
-# Required: Use cases this graph supports
-# Common values: "dataset_search", "entity_lookup", "entity_relationships", "ontology_reasoning"
-# Multiple values allowed
 good_for:
   - "dataset_search"
-  # - "entity_lookup"
+  - "gene_expression_coverage"
+  - "gene_de_for_dataset"
+  - "datasets_for_gene_de"
 
-# Optional: Ontologies provided by this graph (e.g. MONDO, GO, HP, NCBITaxon)
-# Only include if the graph is a source/authority for these ontologies
-provides_ontologies:
-  - "MONDO"
-  # - "GO"
-
-# Optional: Notable relationship patterns in this graph
-# Describe key relationship types that users should know about
-# Format: "Subject to object via predicate (description)"
 notable_relationships:
-  - "Datasets to diseases via schema:healthCondition (MONDO IRIs)"
-  - "Datasets to species via schema:species (UniProt taxonomy IRIs)"
-  # Add more relationship patterns...
+  - "Study to diseases via studies (EFO IRIs - e.g. EFO_0001461, EFO_0002460)"
+  - "Contrast/Assay to tissue via biolink:has_attribute (UBERON IRIs)"
+  - "Gene to organism via biolink:in_taxon (NCBITaxon IDs)"
+  - "GeneExpressionMixin associations link contrast (subject) to gene (object) with log2fc, adj_p_value"
 
-# Optional: Example predicates with brief descriptions
-# List important predicates users should know about
-# Format: "prefix:property (human-readable description)"
-# You can extract candidates from the *_global.json file's top properties
 example_predicates:
-  - "schema:healthCondition (links to disease entities)"
-  - "schema:species (links to species/organism entities)"
-  # Add more predicates from the graph...
+  - "studies (Study → Disease EFO individuals)"
+  - "biolink:has_attribute (Contrast → UBERON tissue)"
+  - "biolink:in_taxon (Gene → NCBITaxon)"
+  - "spokegenelab:factors_1, spokegenelab:factors_2 (contrast factor levels)"
+  - "biolink:name (contrast label)"
 
-# Optional: Entity types that can be used to query this graph
-# Maps entity types to the properties used to query them
 queryable_by:
   - entity_type: "Disease"
-    property: "schema:healthCondition"
+    property: "studies"
   - entity_type: "Species"
-    property: "schema:species"
-  # Add more queryable entity types...
+    property: "biolink:in_taxon"
+  - entity_type: "Tissue"
+    property: "biolink:has_attribute"
+  - entity_type: "Gene"
+    property: "biolink:object (GeneExpressionMixin)"

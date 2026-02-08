@@ -6,7 +6,9 @@ version: "0.1.0"
 endpoint_mode:
   default: federated
   federated_endpoint: "https://frink.apps.renci.org/federation/sparql"
-  direct_endpoints: {}
+  direct_endpoints:
+    nde: "https://frink.apps.renci.org/nde/sparql"
+    gene-expression-atlas-okn: "https://frink.apps.renci.org/gene-expression-atlas-okn/sparql"
 
 graphs:
   default_shortnames: ["nde", "ubergraph"]
@@ -18,6 +20,12 @@ prefixes:
   rdfs: "http://www.w3.org/2000/01/rdf-schema#"
   obo: "http://purl.obolibrary.org/obo/"
 
+# Guardrails: limits and safety for SPARQL execution and chat UI.
+# - max_limit: cap on LIMIT in generated queries (500).
+# - timeout_seconds: default request timeout (25s); GXA direct uses 120s.
+# - max_rows_download: cap on rows when downloading results (2000).
+# - forbid_ops: SPARQL operations rejected by validator (no write ops).
+# GEO is not a graph in FRINK; NDE results with GSE IDs get links only.
 guardrails:
   max_limit: 500
   timeout_seconds: 25
@@ -36,6 +44,30 @@ templates:
   - id: entity_lookup
     description: "Resolve CURIE/URI/label to entity"
     required_slots: ["q"]
+  - id: gene_expression_dataset_search
+    description: "List gene expression experiments (datasets) that have differential expression results"
+    required_slots: []
+    optional_slots: ["organism_taxon_ids", "tissue_uberon_ids", "factor_terms", "disease_efo_ids"]
+  - id: gene_expression_genes_in_experiment
+    description: "List differentially expressed genes for a given gene expression experiment (per contrast)"
+    required_slots: ["experiment_id"]
+    optional_slots: ["organism_taxon_ids", "tissue_uberon_ids", "factor_terms", "min_abs_log2fc", "max_adj_p_value"]
+  - id: gene_expression_experiments_for_gene
+    description: "Find gene expression experiments/contrasts where a gene is differentially expressed"
+    required_slots: ["gene_symbols"]
+    optional_slots: ["organism_taxon_ids", "tissue_uberon_ids", "factor_terms"]
+  - id: gene_expression_gene_cross_dataset_summary
+    description: "Summarize a gene's DE evidence across experiments (per contrast)"
+    required_slots: ["gene_symbol"]
+    optional_slots: ["organism_taxon_ids", "tissue_uberon_ids", "factor_terms"]
+  - id: gene_expression_genes_agreement
+    description: "Find genes DE in the same direction across multiple experiments"
+    required_slots: []
+    optional_slots: ["organism_taxon_ids", "tissue_uberon_ids", "factor_terms"]
+  - id: gene_expression_genes_discordance
+    description: "Find genes DE in opposite directions across contrasts"
+    required_slots: []
+    optional_slots: ["organism_taxon_ids", "tissue_uberon_ids", "factor_terms"]
 
 schema_hints:
   example_queries:
@@ -66,4 +98,13 @@ graphs_metadata:
     good_for: ["entity_lookup", "ontology_reasoning"]
     # provides_ontologies is defined in context/graphs/ubergraph.yaml with full list
 
+  - id: gene-expression-atlas-okn
+    description: "Gene Expression Atlas (GXA) differential expression and contrasts"
+    good_for: ["dataset_search", "gene_expression_coverage", "gene_de_for_dataset", "datasets_for_gene_de"]
+    uses_ontologies: ["NCBITaxon", "UBERON", "EFO"]
+    queryable_by:
+      - entity_type: "Disease"
+        property: "studies (Study → EFO)"
+      - entity_type: "Gene"
+        property: "biolink:object (GeneExpressionMixin)"
 

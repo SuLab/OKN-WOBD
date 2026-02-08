@@ -1,0 +1,21 @@
+PREFIX biolink:      <https://w3id.org/biolink/vocab/>
+PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
+
+SELECT DISTINCT ?experimentId ?contrastId ?contrastLabel ?geneSymbol ?log2fc ?adjPValue
+WHERE {
+  ?assoc a biolink:GeneExpressionMixin ;
+         biolink:object ?gene ;
+         biolink:subject ?contrast ;
+         spokegenelab:log2fc ?log2fc .
+  OPTIONAL { ?assoc spokegenelab:adj_p_value ?adjPValue . }
+  ?contrast a biolink:Assay .
+  FILTER(CONTAINS(STR(?contrast), "E-GEOD-76"))
+  BIND(REPLACE(STR(?contrast), "^.*/(E-[A-Z0-9-]+)-.*$", "$1") AS ?experimentId)
+  OPTIONAL { ?contrast spokegenelab:contrast_id ?contrastIdProp . }
+  BIND(COALESCE(?contrastIdProp, REPLACE(STR(?contrast), "^.*-(g[0-9]+_g[0-9]+)$", "$1")) AS ?contrastId)
+  OPTIONAL { ?contrast biolink:name ?contrastLabel . }
+  OPTIONAL { ?gene biolink:symbol ?geneSymbol . }
+  FILTER(BOUND(?contrastLabel) && REGEX(STR(?contrastLabel), "aortic banding.*1 hour.*vs.*sham.*1 hour", "i"))
+}
+ORDER BY ?contrastId ?geneSymbol
+LIMIT 500

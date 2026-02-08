@@ -1,37 +1,57 @@
 {
   "endpoint": "https://frink.apps.renci.org/gene-expression-atlas-okn/sparql",
-  "description": "Brief description of what this graph contains and what it's good for",
+  "description": "Gene Expression Atlas differential expression, contrasts, and DE associations",
   "uses_ontologies": [],
   "good_for": [
-    "dataset_search"
+    "dataset_search",
+    "gene_expression_coverage",
+    "gene_de_for_dataset",
+    "datasets_for_gene_de"
   ],
   "notable_relationships": [
-    "Datasets to diseases via schema:healthCondition (MONDO IRIs)",
-    "Datasets to species via schema:species (UniProt taxonomy IRIs)"
+    "Study to diseases via studies (EFO IRIs - e.g. EFO_0001461, EFO_0002460)",
+    "Contrast/Assay to tissue via biolink:has_attribute (UBERON IRIs)",
+    "Gene to organism via biolink:in_taxon (NCBITaxon IDs)",
+    "GeneExpressionMixin associations link contrast (subject) to gene (object) with log2fc, adj_p_value"
   ],
   "example_predicates": [
-    "schema:healthCondition (links to disease entities)",
-    "schema:species (links to species/organism entities)"
+    "studies (Study \u2192 Disease EFO individuals)",
+    "biolink:has_attribute (Contrast \u2192 UBERON tissue)",
+    "biolink:in_taxon (Gene \u2192 NCBITaxon)",
+    "spokegenelab:factors_1, spokegenelab:factors_2 (contrast factor levels)",
+    "biolink:name (contrast label)"
   ],
   "queryable_by": [
     {
       "entity_type": "Disease",
-      "property": "schema:healthCondition"
+      "property": "studies"
     },
     {
       "entity_type": "Species",
-      "property": "schema:species"
+      "property": "biolink:in_taxon"
+    },
+    {
+      "entity_type": "Tissue",
+      "property": "biolink:has_attribute"
+    },
+    {
+      "entity_type": "Gene",
+      "property": "biolink:object (GeneExpressionMixin)"
     }
   ],
-  "prefixes": {},
+  "prefixes": {
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "ns1": "https://spoke.ucsf.edu/genelab/",
+    "ns2": "https://w3id.org/biolink/vocab/"
+  },
   "classes": [
+    {
+      "iri": "https://w3id.org/biolink/vocab/Gene",
+      "count": 130008
+    },
     {
       "iri": "https://w3id.org/biolink/vocab/Association",
       "count": 58021
-    },
-    {
-      "iri": "https://w3id.org/biolink/vocab/Gene",
-      "count": 30008
     },
     {
       "iri": "https://w3id.org/biolink/vocab/Assay",
@@ -86,5 +106,74 @@
       "count": 2
     }
   ],
-  "dataset_properties": {}
+  "dataset_properties": {
+    "https://w3id.org/biolink/vocab/has_output": {
+      "iri": "https://w3id.org/biolink/vocab/has_output",
+      "count": 5840
+    },
+    "https://w3id.org/biolink/vocab/in_taxon": {
+      "iri": "https://w3id.org/biolink/vocab/in_taxon",
+      "count": 4143
+    },
+    "https://spoke.ucsf.edu/genelab/experimental_factors": {
+      "iri": "https://spoke.ucsf.edu/genelab/experimental_factors",
+      "count": 3405
+    },
+    "https://spoke.ucsf.edu/genelab/secondary_accessions": {
+      "iri": "https://spoke.ucsf.edu/genelab/secondary_accessions",
+      "count": 2576
+    },
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": {
+      "iri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "count": 2083
+    },
+    "https://spoke.ucsf.edu/genelab/project_title": {
+      "iri": "https://spoke.ucsf.edu/genelab/project_title",
+      "count": 2083
+    },
+    "https://spoke.ucsf.edu/genelab/project_type": {
+      "iri": "https://spoke.ucsf.edu/genelab/project_type",
+      "count": 2083
+    },
+    "https://spoke.ucsf.edu/genelab/source": {
+      "iri": "https://spoke.ucsf.edu/genelab/source",
+      "count": 2083
+    },
+    "https://spoke.ucsf.edu/genelab/submitter_affiliation": {
+      "iri": "https://spoke.ucsf.edu/genelab/submitter_affiliation",
+      "count": 2083
+    },
+    "https://spoke.ucsf.edu/genelab/submitter_email": {
+      "iri": "https://spoke.ucsf.edu/genelab/submitter_email",
+      "count": 2083
+    },
+    "https://spoke.ucsf.edu/genelab/submitter_name": {
+      "iri": "https://spoke.ucsf.edu/genelab/submitter_name",
+      "count": 2083
+    },
+    "https://w3id.org/biolink/vocab/description": {
+      "iri": "https://w3id.org/biolink/vocab/description",
+      "count": 2083
+    },
+    "https://w3id.org/biolink/vocab/id": {
+      "iri": "https://w3id.org/biolink/vocab/id",
+      "count": 2083
+    },
+    "https://w3id.org/biolink/vocab/name": {
+      "iri": "https://w3id.org/biolink/vocab/name",
+      "count": 2083
+    },
+    "https://spoke.ucsf.edu/genelab/pubmed_id": {
+      "iri": "https://spoke.ucsf.edu/genelab/pubmed_id",
+      "count": 1545
+    },
+    "https://w3id.org/biolink/vocab/has_attribute": {
+      "iri": "https://w3id.org/biolink/vocab/has_attribute",
+      "count": 1247
+    },
+    "https://w3id.org/biolink/vocab/studies": {
+      "iri": "https://w3id.org/biolink/vocab/studies",
+      "count": 1090
+    }
+  }
 }
