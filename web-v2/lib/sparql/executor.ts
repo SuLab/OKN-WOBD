@@ -2,7 +2,7 @@
 
 import type { SPARQLResult } from "@/types";
 
-const FRINK_FEDERATION_URL = process.env.NEXT_PUBLIC_FRINK_FEDERATION_URL || 
+const FRINK_FEDERATION_URL = process.env.NEXT_PUBLIC_FRINK_FEDERATION_URL ||
   "https://frink.apps.renci.org/federation/sparql";
 
 export interface ExecutionOptions {

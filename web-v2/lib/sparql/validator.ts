@@ -29,20 +29,17 @@ export function validateSPARQL(query: string, guardrails: {
     }
   }
 
-  // Require SELECT or ASK (no CONSTRUCT/DESCRIBE for now, can be added later)
-  // Look at the first non-empty, non-PREFIX line rather than the raw string,
-  // so queries that start with PREFIX lines are allowed.
-  const firstNonEmptyNonPrefixLine = upperQuery
-    .split("\n")
-    .map(line => line.trim())
-    .find(line => line.length > 0 && !line.startsWith("PREFIX"));
+  // Require SELECT or ASK (no CONSTRUCT/DESCRIBE for now, can be added later).
+  // Be robust: as long as the query string contains SELECT or ASK anywhere (ignoring case),
+  // we treat it as a read-only query. This avoids false negatives due to comments, PREFIX
+  // blocks, or minor formatting differences introduced by tooling.
+  const hasSelectOrAsk =
+    /\bSELECT\b/.test(upperQuery) || /\bASK\b/.test(upperQuery);
 
-  if (
-    !firstNonEmptyNonPrefixLine ||
-    (!firstNonEmptyNonPrefixLine.startsWith("SELECT") &&
-      !firstNonEmptyNonPrefixLine.startsWith("ASK"))
-  ) {
-    errors.push("Query must be SELECT or ASK (CONSTRUCT/DESCRIBE not yet supported)");
+  if (!hasSelectOrAsk) {
+    errors.push(
+      "Query must be SELECT or ASK (CONSTRUCT/DESCRIBE not yet supported)"
+    );
   }
 
   // Check for LIMIT

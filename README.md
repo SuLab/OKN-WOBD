@@ -297,3 +297,15 @@ SELECT ?study ?title ?organism ?taxon WHERE {
          biolink:in_taxon ?taxon .
 }
 ```
+## Chat UI and query service (web-v2)
+
+The `web-v2` app provides a natural-language chat interface that runs SPARQL against the [FRINK](https://frink.apps.renci.org/) federation and direct endpoints (NDE, Gene Expression Atlas). See `docs/gene_expression_query_progress.md` for implementation status and test questions.
+
+### Limitations and guardrails
+
+- **Endpoints:** Queries run against FRINK. NDE and Gene Expression Atlas (GXA) use **direct endpoints** when the query targets those graphs; other queries use the federated endpoint. Routing is determined by query content (which graph the template used), not by intent metadata.
+- **Timeouts:** Default request timeout is 25 seconds (configurable in the context pack). GXA direct requests use a longer timeout (120 s) because that endpoint can be slow.
+- **Result limits:** Maximum `LIMIT` in generated queries and max rows for download are enforced by the context pack (`guardrails.max_limit`, `guardrails.max_rows_download`). Queries that omit `LIMIT` may be capped by the endpoint.
+- **Forbidden SPARQL operations:** Write operations are disallowed (INSERT, DELETE, LOAD, CLEAR, DROP, CREATE, MOVE, COPY, ADD). The validator rejects such queries before execution.
+- **GEO not in FRINK:** NCBI GEO is not loaded as a graph in FRINK. NDE dataset results that have a GSE identifier show links to GEO (and to Expression Atlas via E-GEOD); there is no SPARQL query over GEO data in this app.
+- **Graphs and templates:** The WOBD context pack (`web-v2/context/packs/wobd.yaml`) defines default graphs (nde, ubergraph), direct endpoints (nde, gene-expression-atlas-okn), guardrails, and template IDs. User-facing template exposure (e.g. showing the user which query template was used) is planned for a future UI update; meta-coverage and diagrams (Phases 9–10) are deferred until after that.

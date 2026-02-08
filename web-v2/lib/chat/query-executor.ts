@@ -307,6 +307,82 @@ async function executeSPARQLQuery(
         }
     }
 
+    // NDE↔GXA bridge: when dataset_search and include_gxa_bridge, attach GXA coverage (experimentId, contrastCount, sampleContrastLabel) to NDE rows that have GSE identifier
+    if (
+        rowCount > 0 &&
+        lane === "template" &&
+        intent?.task === "dataset_search" &&
+        (intent.slots as Record<string, unknown>)?.include_gxa_bridge === true
+    ) {
+        const bindings = results.results.bindings as Record<string, { type: string; value: string }>[];
+        const gseToEGeod = (val: string): string | null => {
+            const m = String(val).trim().match(/GSE(\d+)/i);
+            return m ? `E-GEOD-${m[1]}` : null;
+        };
+        const experimentIds: string[] = [];
+        for (const row of bindings) {
+            const idVal = row.identifier?.value;
+            if (idVal) {
+                const e = gseToEGeod(idVal);
+                if (e && !experimentIds.includes(e)) experimentIds.push(e);
+            }
+        }
+        if (experimentIds.length > 0) {
+            try {
+                const { buildGXACoverageForExperimentIdsQuery } = await import("@/lib/ontology/templates");
+                const gxaQuery = buildGXACoverageForExperimentIdsQuery(experimentIds);
+                if (gxaQuery) {
+                    const gxaResponse = await fetch("/api/tools/sparql/execute", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            query: gxaQuery,
+                            pack_id: packId,
+                            mode: "federated",
+                            graphs: ["gene-expression-atlas-okn"],
+                            attempt_repair: false,
+                            run_preflight: false,
+                        }),
+                        signal,
+                    });
+                    const gxaResult = await gxaResponse.json();
+                    const gxaBindings = (gxaResult.bindings || []) as Record<string, { type: string; value: string }>[];
+                    const gxaByExperiment: Record<string, { contrastCount: string; sampleContrastLabel: string }> = {};
+                    for (const row of gxaBindings) {
+                        const eid = row.experimentId?.value;
+                        if (eid) {
+                            gxaByExperiment[eid] = {
+                                contrastCount: row.contrastCount?.value ?? "",
+                                sampleContrastLabel: row.sampleContrastLabel?.value ?? "",
+                            };
+                        }
+                    }
+                    const headVars = results.head?.vars ?? [];
+                    const addedVars = ["experimentId", "contrastCount", "sampleContrastLabel"].filter((v) => !headVars.includes(v));
+                    const newHead = addedVars.length > 0
+                        ? { ...results.head, vars: [...headVars, ...addedVars] }
+                        : results.head;
+                    const mergedBindings = bindings.map((row) => {
+                        const idVal = row.identifier?.value;
+                        const eGeod = idVal ? gseToEGeod(idVal) : null;
+                        const gxa = eGeod ? gxaByExperiment[eGeod] : null;
+                        if (!gxa) return row;
+                        return {
+                            ...row,
+                            experimentId: { type: "literal" as const, value: eGeod },
+                            contrastCount: { type: "literal" as const, value: gxa.contrastCount },
+                            sampleContrastLabel: { type: "literal" as const, value: gxa.sampleContrastLabel },
+                        };
+                    });
+                    results.head = newHead;
+                    results.results.bindings = mergedBindings;
+                }
+            } catch (bridgeErr) {
+                console.warn("[QueryExecutor] NDE↔GXA bridge failed:", bridgeErr);
+            }
+        }
+    }
+
     // Format response message
     // Note: If fallback found results above, this code won't execute (early return)
     // This message is only shown if:
