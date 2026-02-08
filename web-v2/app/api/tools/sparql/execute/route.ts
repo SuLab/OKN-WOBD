@@ -52,37 +52,45 @@ export async function POST(request: Request) {
     // Use normalized query if available
     let finalQuery = validation.normalized_query || query;
 
+    // Decide routing from the query before we inject FROM (injection adds graphs from intent, which can
+    // include gene-expression-atlas-okn for "contain gene expression data" even when the template built an NDE query)
+    const gxaGraphPattern = /gene-expression-atlas-okn/i;
+    const queryTargetsGXA = gxaGraphPattern.test(finalQuery);
+    const ndeGraphPattern = /nde/i;
+    const queryTargetsNDE = ndeGraphPattern.test(finalQuery);
+
     // Inject FROM clauses if in federated mode with graphs
     if (mode === "federated" && graphs && Array.isArray(graphs) && graphs.length > 0) {
       finalQuery = injectFromClauses(finalQuery, graphs);
     }
 
-    // Determine endpoint - check if query targets GXA graph and use direct endpoint
     let endpoint = pack?.endpoint_mode.federated_endpoint ||
       process.env.NEXT_PUBLIC_FRINK_FEDERATION_URL ||
       "https://frink.apps.renci.org/federation/sparql";
 
-    // If query targets gene-expression-atlas-okn graph, use direct endpoint
-    const gxaGraphPattern = /gene-expression-atlas-okn/i;
-    const hasGXAGraph = gxaGraphPattern.test(finalQuery) ||
-      (graphs && Array.isArray(graphs) && graphs.some((g: string) => gxaGraphPattern.test(g)));
+    const hasNDEGraph = queryTargetsNDE ||
+      (graphs && Array.isArray(graphs) && graphs.some((g: string) => ndeGraphPattern.test(g)));
 
-    if (hasGXAGraph && pack?.endpoint_mode.direct_endpoints?.["gene-expression-atlas-okn"]) {
+    if (queryTargetsGXA && pack?.endpoint_mode.direct_endpoints?.["gene-expression-atlas-okn"]) {
       endpoint = pack.endpoint_mode.direct_endpoints["gene-expression-atlas-okn"];
       // Remove all FROM clauses when querying direct endpoint (default graph is the GXA graph)
+      finalQuery = removeFromClauses(finalQuery);
+    } else if (!queryTargetsGXA && hasNDEGraph && pack?.endpoint_mode.direct_endpoints?.["nde"]) {
+      endpoint = pack.endpoint_mode.direct_endpoints["nde"];
+      // Strip FROM so we query the endpoint's default graph. The NDE endpoint returns 0 when given FROM <.../nde> (named graph is empty); data is on default graph.
       finalQuery = removeFromClauses(finalQuery);
     }
 
     // GXA direct endpoint can take 1–2 minutes; use a longer timeout when routing to it
     const baseTimeout = options?.timeout_s ?? pack?.guardrails?.timeout_seconds ?? 25;
-    const timeout = hasGXAGraph && endpoint?.includes("gene-expression-atlas-okn")
+    const timeout = queryTargetsGXA && endpoint?.includes("gene-expression-atlas-okn")
       ? Math.max(baseTimeout, 120)
       : baseTimeout;
 
     // Optional preflight probes (skip for GXA direct endpoint, which can be slow and
     // has been flaky with small sample queries)
     let preflightResult = null;
-    if (run_preflight !== false && pack?.schema_hints && !hasGXAGraph) {
+    if (run_preflight !== false && pack?.schema_hints && !queryTargetsGXA) {
       try {
         preflightResult = await runPreflight(
           finalQuery,

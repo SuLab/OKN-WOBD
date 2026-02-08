@@ -6,7 +6,7 @@ import {
   buildNDESpeciesQueryIRI,
   buildNDESpeciesQueryCURIE,
   buildNDEFallbackQuery,
-  buildGeneExpressionQuery,
+  buildGXAExperimentsForGenesQuery,
   buildWikidataDrugQuery,
   buildNDEDiseaseAndOrganismQuery,
 } from "@/lib/ontology/templates";
@@ -76,14 +76,27 @@ export async function buildDatasetSearchQuery(intent: Intent, pack: ContextPack)
         organismTerms.some((term: any) => (term.matchScore || 0) >= 3);
       const useTextMatching = hasHighConfidence && (diseaseLabels.length > 0 || organismLabels.length > 0);
 
-      // Build combined query
-      const combinedQuery = buildNDEDiseaseAndOrganismQuery(
-        mondoIRIs,
-        speciesIRIs,
-        diseaseLabels,
-        organismLabels,
-        useTextMatching
-      );
+      // Keyword fallback: match name/description so we get results when ontology IRIs are not in the graph
+      const keywordFallbackTerms = [...new Set([...diseaseLabels, ...organismLabels])]
+        .filter(Boolean)
+        .slice(0, 5);
+
+      // When we have keyword fallback, use the simple REGEX-only query so NDE returns results (the full
+      // disease+organism query with OPTIONALs returns 0 on the NDE endpoint even with FROM stripped)
+      const combinedQuery =
+        keywordFallbackTerms.length > 0
+          ? buildNDEFallbackQuery(
+            keywordFallbackTerms[0],
+            keywordFallbackTerms.slice(1)
+          )
+          : buildNDEDiseaseAndOrganismQuery(
+            mondoIRIs,
+            speciesIRIs,
+            diseaseLabels,
+            organismLabels,
+            useTextMatching,
+            keywordFallbackTerms
+          );
 
       // Add limit if specified
       const limit = (intent.slots?.limit as number);
@@ -223,27 +236,35 @@ export async function buildDatasetSearchQuery(intent: Intent, pack: ContextPack)
         .slice(0, 3);
 
       // Only use preferred names (labels) for text search - no synonyms to reduce ambiguity
-      const labels = selectedTerms
+      const diseaseLabels = selectedTerms
         .map((term: any) => term.label)
         .filter(Boolean);
 
       // Determine if we should use text matching based on confidence scores
-      // Only use text matching for high-confidence matches (score 4 or 3) to reduce noise
-      // This prevents substring matches from creating noisy results in multi-hop/federated queries
       const hasHighConfidence = selectedTerms.some((term: any) =>
         (term.matchScore || 0) >= 3
       );
-      const useTextMatching = hasHighConfidence && labels.length > 0;
+      const useTextMatching = hasHighConfidence && diseaseLabels.length > 0;
 
-      console.log(`[Template] useTextMatching: ${useTextMatching}, labels: ${labels.length}`);
+      // Keyword fallback for disease-only: match dataset name/description so we get results
+      // when NDE has datasets that mention the disease in name/description but lack schema:healthCondition
+      const keywordFallbackTerms = [...new Set(diseaseLabels)].filter(Boolean).slice(0, 5);
+
+      console.log(`[Template] useTextMatching: ${useTextMatching}, diseaseLabels: ${diseaseLabels.length}, keywordFallback: ${keywordFallbackTerms.length}`);
       console.log(`[Template] ndeEncoding: ${ndeEncoding}`);
-      console.log(`[Template] About to call buildNDEDatasetQuery with ${mondoIRIs.length} MONDO IRIs`);
 
-      // Use ontology-grounded query template with optional text search
-      // Default to IRI-only matching for precision, add text matching only for high-confidence matches
-      const ontologyQuery = ndeEncoding === "iri"
-        ? buildNDEDatasetQueryIRI(mondoIRIs, labels, [], useTextMatching)
-        : buildNDEDatasetQueryCURIE(mondoIRIs, labels, [], useTextMatching);
+      // When we have keyword fallback, use the simple REGEX-only query so NDE returns results
+      const ontologyQuery =
+        keywordFallbackTerms.length > 0
+          ? buildNDEFallbackQuery(keywordFallbackTerms[0], keywordFallbackTerms.slice(1))
+          : buildNDEDiseaseAndOrganismQuery(
+            mondoIRIs,
+            [],
+            diseaseLabels,
+            [],
+            useTextMatching,
+            keywordFallbackTerms
+          );
 
       console.log(`[Template] Generated query, length: ${ontologyQuery?.length || 0} chars`);
       console.log(`[Template] Query is truthy: ${!!ontologyQuery}, type: ${typeof ontologyQuery}`);
@@ -462,16 +483,12 @@ export async function buildDatasetSearchQuery(intent: Intent, pack: ContextPack)
 
         console.log(`[Template] Building gene expression query for symbols: ${geneSymbols.join(", ")}, upregulated: ${upregulated}`);
 
-        // Use proper gene expression query template with biolink vocabulary
-        const geneQuery = buildGeneExpressionQuery(geneSymbols, upregulated);
-
-        // Add limit if specified
-        const limit = (intent.slots?.limit as number);
-        if (limit) {
-          const maxLimit = Math.min(limit, pack.guardrails.max_limit);
-          const withoutLimit = geneQuery.replace(/\s*LIMIT\s+\d+$/i, "").trim();
-          return `${withoutLimit}\nLIMIT ${maxLimit}`;
-        }
+        // Use GXA experiments-for-genes query template
+        const limit = Math.min(
+          (intent.slots?.limit as number) || pack.guardrails?.max_limit || 100,
+          pack.guardrails?.max_limit || 500
+        );
+        const geneQuery = buildGXAExperimentsForGenesQuery(geneSymbols, limit, upregulated);
 
         return geneQuery;
       } else {

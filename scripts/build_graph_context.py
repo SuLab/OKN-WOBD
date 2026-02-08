@@ -309,6 +309,17 @@ def load_yaml_metadata(yaml_path: Path) -> Dict[str, Any]:
     return out
 
 
+def get_primary_class_from_yaml(yaml_path: Path, default: str) -> str:
+    """Read primary_class from graph YAML if present; otherwise return default.
+    Used for introspection: graphs like gene-expression-atlas-okn use Study, not schema:Dataset.
+    """
+    if not yaml_path.exists():
+        return default
+    with open(yaml_path, encoding="utf-8") as f:
+        meta = yaml.safe_load(f) or {}
+    return meta.get("primary_class") or default
+
+
 # ---------------------------------------------------------------------------
 # Shared
 # ---------------------------------------------------------------------------
@@ -832,10 +843,16 @@ def cmd_build_one(
     iri_prefix: Optional[str] = None,
     budget: Optional[IntrospectBudget] = None,
 ) -> int:
+    # Override primary_class from graph YAML if present (e.g. gene-expression-atlas-okn uses Study)
+    yaml_path = output.parent / f"{graph}.yaml"
+    effective_primary = get_primary_class_from_yaml(yaml_path, primary_class)
+    if effective_primary != primary_class:
+        print(f"Using primary_class from {graph}.yaml: {effective_primary}", file=sys.stderr)
+
     effective_timeout = max(HEAVY_GRAPH_MIN_TIMEOUT, timeout) if graph in HEAVY_GRAPHS else timeout
     if build_type == "knowledge_graph":
         ctx = build_context_kg(
-            endpoint, graph, primary_class, effective_timeout, budget=budget
+            endpoint, graph, effective_primary, effective_timeout, budget=budget
         )
     elif build_type == "ontology":
         ctx = build_context_ontology(
@@ -909,9 +926,9 @@ def fetch_registry(registry_url: str, timeout: int) -> List[tuple[str, str]]:
 
 
 def _fallback_from_yaml(yaml_dir: Path) -> List[tuple[str, str, str]]:
-    """Fallback: read nde.yaml and ubergraph.yaml for (id, endpoint, type) when registry is unavailable."""
+    """Fallback: read nde.yaml, ubergraph.yaml, gene-expression-atlas-okn.yaml for (id, endpoint, type) when registry is unavailable."""
     graphs: List[tuple[str, str, str]] = []
-    for p in [yaml_dir / "nde.yaml", yaml_dir / "ubergraph.yaml"]:
+    for p in [yaml_dir / "nde.yaml", yaml_dir / "ubergraph.yaml", yaml_dir / "gene-expression-atlas-okn.yaml"]:
         if not p.exists():
             continue
         with open(p, encoding="utf-8") as f:
@@ -941,7 +958,7 @@ def cmd_build_frink(
             graphs = _fallback_from_yaml(yaml_dir)
             if graphs:
                 graphs = [(g, ep, gt) for g, ep, gt in graphs if g.lower() not in EXCLUDED_GRAPHS]
-                print(f"Registry unavailable ({e}), using nde.yaml and ubergraph.yaml", file=sys.stderr)
+                print(f"Registry unavailable ({e}), using YAML fallback (nde, ubergraph, gene-expression-atlas-okn)", file=sys.stderr)
                 for gid, ep, gtype in graphs:
                     out = output_dir / f"{gid}_global.json"
                     try:
