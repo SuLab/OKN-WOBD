@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "okn-wobd": {
+      "command": "python3.11",
+      "args": ["-m", "okn_wobd.mcp_server"],
+      "cwd": "/Users/bgood/Documents/GitHub/OKN-WOBD",
+      "env": {
+        "PYTHONPATH": "/Users/bgood/Documents/GitHub/OKN-WOBD/src"
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+# Biomni MCP server configuration for OKN-WOBD
+# See: https://github.com/anthropics/biomni
+name: okn-wobd
+description: >
+  Biomedical analysis tools for gene-disease path finding, gene neighborhood
+  queries, drug-disease opposing expression patterns, and differential
+  expression analysis via ARCHS4.
+transport: stdio
+command: python3.11
+args:
+  - "-m"
+  - okn_wobd.mcp_server
+env:
+  PYTHONPATH: src
