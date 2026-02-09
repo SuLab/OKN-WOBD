@@ -1,0 +1,128 @@
+======================================================================
+DIFFERENTIAL EXPRESSION ANALYSIS RESULTS
+======================================================================
+
+QUERY
+  Disease: alzheimer disease
+  Tissue: brain
+  Timestamp: 2026-02-04T15:30:59.744855
+
+SAMPLES
+  Test: 200 samples from 43 studies
+  Control: 200 samples from 126 studies
+  Organisms: human
+
+METHODS
+  Normalization: deseq2
+  Statistical test: deseq2
+  FDR correction: deseq2
+
+THRESHOLDS
+  FDR: 0.01
+  Log2 FC: 2.0
+
+----------------------------------------------------------------------
+SUMMARY
+----------------------------------------------------------------------
+  Genes tested: 19,340
+  Genes significant: 593
+  Upregulated: 37
+  Downregulated: 556
+
+----------------------------------------------------------------------
+TOP 20 UPREGULATED GENES
+----------------------------------------------------------------------
+  Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
+  ----------------------------------------------------------
+  ASB17              3.21     3.14e-16        12.79         2.78
+  PRAMEF20           3.18     8.76e-04         0.78         0.23
+  KPRP               2.83     8.07e-03         4.81         0.65
+  FAM177B            2.82     3.57e-23       176.77        71.85
+  OR13G1             2.79     1.80e-13         4.26         1.42
+  FAM151A            2.73     5.18e-23        51.03        20.44
+  SAGE1              2.72     1.40e-07         3.65         3.43
+  KRTAP11-1          2.70     1.54e-04         1.17         0.17
+  ZP4                2.69     1.39e-03         0.75         1.80
+  RHOXF2B            2.51     4.57e-04         1.59         0.76
+  FCGR1A             2.44     1.31e-14      1043.30       977.07
+  OR2M5              2.44     2.59e-09         3.04         1.41
+  FCGR2C             2.30     2.04e-13       109.81        71.09
+  OR2T34             2.25     6.78e-03         1.03         0.46
+  OR14A2             2.24     5.08e-08         7.08         1.81
+  OR2M7              2.22     6.61e-05         1.96         0.84
+  GBP7               2.22     3.50e-16        20.04        10.11
+  LCE5A              2.22     2.23e-04         1.42         0.49
+  CHIA               2.21     2.79e-03         0.85         0.63
+  OR14K1             2.20     2.68e-04         0.85         0.26
+
+----------------------------------------------------------------------
+TOP 20 DOWNREGULATED GENES
+----------------------------------------------------------------------
+  Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
+  ----------------------------------------------------------
+  HOXB9            -12.55     1.38e-29        16.27      1013.84
+  HOXA7            -10.48     9.50e-36         3.12        94.33
+  PHOX2B           -10.18     1.23e-22         1.60       227.17
+  NEUROG1          -10.01     9.37e-23         2.83        99.24
+  FOXA2             -9.76     3.90e-20         2.87        99.11
+  HOXC5             -8.42     4.91e-13         1.81        93.36
+  HOXB5             -7.30     4.10e-21         5.72      1435.07
+  LHX3              -7.10     1.69e-26         0.83      1110.19
+  HOXA3             -6.68     5.33e-32         9.21       332.71
+  SLC18A3           -6.68     1.23e-26         0.95       198.97
+  HOXD4             -6.67     2.32e-17         2.76       111.69
+  DLK1              -6.64     2.38e-46        41.12      5887.05
+  COL3A1            -6.38     1.62e-72        66.88     14797.58
+  COL1A1            -6.19    2.11e-103       191.33     22714.68
+  ISL1              -6.08     2.51e-38         5.21      1505.63
+  HOXA4             -5.83     3.19e-16         5.28       223.31
+  COL1A2            -5.47     3.81e-92       305.09     18556.44
+  TFPI2             -5.46     3.04e-54         8.95      1140.24
+  MDK               -5.17     8.72e-86       420.58      9214.28
+  HOXB3             -5.15     2.13e-33        20.41       921.90
+
+======================================================================
+
+----------------------------------------------------------------------
+ENRICHMENT ANALYSIS
+----------------------------------------------------------------------
+  Backend: gprofiler
+  Organism: hsapiens
+  Sources: GO:BP, GO:CC, GO:MF, KEGG, REAC
+  Threshold: 0.05
+
+  Total significant terms: 715
+  Upregulated: 18 terms
+  Downregulated: 697 terms
+
+----------------------------------------------------------------------
+TOP 10 ENRICHED TERMS (UPREGULATED GENES)
+----------------------------------------------------------------------
+  Source   Term ID             P-adj  Genes  Term Name
+  ------------------------------------------------------------------
+  KEGG     KEGG:04740       5.21e-06      8  Olfactory transduction
+  GO:MF    GO:0004984       2.35e-05      8  olfactory receptor activity
+  GO:MF    GO:0004888       3.55e-05     12  transmembrane signaling receptor ac...
+  GO:MF    GO:0004930       5.32e-05     10  G protein-coupled receptor activity
+  GO:BP    GO:0050911       1.04e-04      8  detection of chemical stimulus invo...
+  REAC     REAC:R-HSA-9752946   1.16e-04      8  Expression and translocation of olf...
+  REAC     REAC:R-HSA-381753   1.35e-04      8  Olfactory Signaling Pathway
+  GO:BP    GO:0007608       1.75e-04      8  sensory perception of smell
+  GO:BP    GO:0050907       2.41e-04      8  detection of chemical stimulus invo...
+  GO:BP    GO:0009593       4.43e-04      8  detection of chemical stimulus
+
+----------------------------------------------------------------------
+TOP 10 ENRICHED TERMS (DOWNREGULATED GENES)
+----------------------------------------------------------------------
+  Source   Term ID             P-adj  Genes  Term Name
+  ------------------------------------------------------------------
+  GO:BP    GO:0009653       8.42e-53    211  anatomical structure morphogenesis
+  GO:BP    GO:0048513       1.06e-49    221  animal organ development
+  GO:BP    GO:0007275       1.24e-45    272  multicellular organism development
+  GO:BP    GO:0048856       2.25e-44    309  anatomical structure development
+  GO:BP    GO:0048731       3.74e-44    247  system development
+  GO:BP    GO:0032502       3.20e-43    323  developmental process
+  GO:BP    GO:0009888       3.93e-43    168  tissue development
+  GO:BP    GO:0009887       1.95e-42    119  animal organ morphogenesis
+  GO:BP    GO:0009790       2.16e-42    124  embryo development
+  GO:CC    GO:0031012       1.92e-39     84  extracellular matrix

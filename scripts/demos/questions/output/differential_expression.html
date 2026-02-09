@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What genes are differentially expressed in psoriasis in skin tissue vs normal?</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f8f9fa;
+            color: #2c3e50;
+            line-height: 1.6;
+            padding: 0 20px 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            padding: 40px 0 20px;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 30px;
+        }
+        header h1 {
+            font-size: 1.6em;
+            color: #2c3e50;
+            font-style: italic;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+        .badge {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin: 2px;
+        }
+        .step {
+            background: white;
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .step-header {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        .step-number {
+            background: #3498db;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .step-title {
+            font-weight: 600;
+            font-size: 1.05em;
+        }
+        .step-toggle {
+            margin-left: auto;
+            color: #aaa;
+            font-size: 1.2em;
+            transition: transform 0.2s;
+        }
+        .step-toggle.collapsed { transform: rotate(-90deg); }
+        .step-body {
+            margin-top: 14px;
+            padding-left: 40px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .step-body.collapsed { max-height: 0; margin-top: 0; }
+        .step-body table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .step-body th, .step-body td {
+            padding: 6px 12px;
+            border: 1px solid #e9ecef;
+            text-align: left;
+            font-size: 0.9em;
+        }
+        .step-body th { background: #f8f9fa; font-weight: 600; }
+        .viz-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .viz-section h3 { margin-bottom: 14px; }
+        .answer-section {
+            background: #eaf7ed;
+            border-left: 4px solid #27ae60;
+            border-radius: 0 8px 8px 0;
+            padding: 20px 24px;
+            margin: 24px 0;
+        }
+        .answer-section h2 {
+            color: #27ae60;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+        .provenance {
+            background: white;
+            border-radius: 8px;
+            padding: 16px 24px;
+            margin-top: 24px;
+            font-size: 0.85em;
+            color: #666;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .provenance h3 {
+            font-size: 0.95em;
+            color: #888;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .provenance-body { display: none; }
+        .provenance-body.expanded { display: block; }
+        .provenance dt { font-weight: 600; margin-top: 6px; }
+        .provenance dd { margin-left: 16px; word-break: break-all; }
+        code { background: #f0f0f0; padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }
+        .no-data { color: #999; font-style: italic; }
+        .query-block { margin: 10px 0; }
+        .query-block summary { cursor: pointer; font-weight: 600; font-size: 0.9em; color: #555; }
+        .query-block pre {
+            background: #1e1e2e; color: #cdd6f4; padding: 12px 16px;
+            border-radius: 6px; overflow-x: auto; font-size: 0.82em;
+            line-height: 1.5; margin-top: 6px;
+        }
+        .query-endpoint { font-size: 0.8em; color: #888; margin-left: 8px; font-weight: normal; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>"What genes are differentially expressed in psoriasis in skin tissue vs normal?"</h1>
+        <div><span class="badge">ARCHS4</span> <span class="badge">g:Profiler</span></div>
+    </header>
+
+    
+    <div class="step">
+        <div class="step-header">
+            <div class="step-number">1</div>
+            <div class="step-title">Parse natural language query</div>
+            <div class="step-toggle">&#9660;</div>
+        </div>
+        <div class="step-body">
+            <p><strong>Disease term:</strong> psoriasis</p><p><strong>Tissue term:</strong> skin</p>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-header">
+            <div class="step-number">2</div>
+            <div class="step-title">Discover disease and control samples in ARCHS4</div>
+            <div class="step-toggle">&#9660;</div>
+        </div>
+        <div class="step-body">
+            <p><strong>Disease samples:</strong> 500</p><p><strong>Control samples:</strong> 500</p><p><strong>Mode:</strong> pooled</p>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-header">
+            <div class="step-number">3</div>
+            <div class="step-title">Differential expression results</div>
+            <div class="step-toggle">&#9660;</div>
+        </div>
+        <div class="step-body">
+            <p><strong>Total significant genes:</strong> 731</p><p><strong>Upregulated:</strong> 446</p><p><strong>Downregulated:</strong> 285</p><h4>Top Upregulated</h4><table><thead><tr><th>Gene</th><th>log2FC</th><th>Adj. P-value</th></tr></thead><tbody><tr><td>DEFB4B</td><td>8.41</td><td>4.70e-25</td></tr><tr><td>IL36A</td><td>7.55</td><td>6.58e-37</td></tr><tr><td>SPRR2F</td><td>6.62</td><td>3.57e-34</td></tr><tr><td>TEX101</td><td>6.09</td><td>3.42e-68</td></tr><tr><td>LCE3D</td><td>5.89</td><td>1.08e-24</td></tr><tr><td>CRCT1</td><td>5.75</td><td>8.17e-23</td></tr><tr><td>INS</td><td>5.53</td><td>1.55e-04</td></tr><tr><td>DEFB103A</td><td>5.50</td><td>7.50e-26</td></tr><tr><td>DEFB4A</td><td>5.48</td><td>2.66e-16</td></tr><tr><td>LCE3A</td><td>5.44</td><td>1.00e-22</td></tr></tbody></table><h4>Top Downregulated</h4><table><thead><tr><th>Gene</th><th>log2FC</th><th>Adj. P-value</th></tr></thead><tbody><tr><td>DKK1</td><td>-7.08</td><td>5.80e-72</td></tr><tr><td>KLRC4</td><td>-6.17</td><td>1.78e-18</td></tr><tr><td>PTX3</td><td>-6.10</td><td>6.58e-53</td></tr><tr><td>KLRC4-KLRK1</td><td>-5.83</td><td>1.25e-25</td></tr><tr><td>CDH2</td><td>-5.70</td><td>1.97e-51</td></tr><tr><td>SERPINE1</td><td>-5.64</td><td>2.39e-55</td></tr><tr><td>STC2</td><td>-5.28</td><td>6.02e-50</td></tr><tr><td>TNFRSF11B</td><td>-5.08</td><td>1.12e-41</td></tr><tr><td>FN1</td><td>-5.04</td><td>3.91e-41</td></tr><tr><td>MYH7</td><td>-5.04</td><td>6.15e-09</td></tr></tbody></table>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-header">
+            <div class="step-number">4</div>
+            <div class="step-title">Pathway enrichment (g:Profiler)</div>
+            <div class="step-toggle">&#9660;</div>
+        </div>
+        <div class="step-body">
+            <h4>Top GO Biological Processes</h4><table><thead><tr><th>Term</th><th>P-value</th><th>Genes</th></tr></thead><tbody><tr><td>keratinization</td><td>2.51e-36</td><td>35</td></tr><tr><td>keratinocyte differentiation</td><td>4.05e-28</td><td>39</td></tr><tr><td>skin development</td><td>1.04e-24</td><td>46</td></tr><tr><td>epidermis development</td><td>8.46e-24</td><td>49</td></tr><tr><td>epidermal cell differentiation</td><td>4.01e-23</td><td>40</td></tr><tr><td>epithelial cell differentiation</td><td>3.44e-16</td><td>55</td></tr><tr><td>epithelium development</td><td>4.69e-11</td><td>63</td></tr><tr><td>defense response to bacterium</td><td>3.33e-09</td><td>29</td></tr><tr><td>antimicrobial humoral response</td><td>1.50e-08</td><td>20</td></tr><tr><td>response to bacterium</td><td>1.27e-07</td><td>41</td></tr></tbody></table>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-header">
+            <div class="step-number">5</div>
+            <div class="step-title">KEGG pathway enrichment</div>
+            <div class="step-toggle">&#9660;</div>
+        </div>
+        <div class="step-body">
+            <table><thead><tr><th>Pathway</th><th>P-value</th><th>Genes</th></tr></thead><tbody><tr><td>Cytokine-cytokine receptor interaction</td><td>2.53e-04</td><td>19</td></tr><tr><td>alpha-Linolenic acid metabolism</td><td>7.31e-04</td><td>6</td></tr><tr><td>Serotonergic synapse</td><td>8.60e-04</td><td>11</td></tr><tr><td>Linoleic acid metabolism</td><td>1.77e-03</td><td>6</td></tr><tr><td>Arachidonic acid metabolism</td><td>1.83e-03</td><td>8</td></tr><tr><td>Ether lipid metabolism</td><td>4.02e-03</td><td>7</td></tr><tr><td>Retinol metabolism</td><td>4.10e-03</td><td>8</td></tr><tr><td>Pentose and glucuronate interconversions</td><td>5.28e-03</td><td>6</td></tr><tr><td>IL-17 signaling pathway</td><td>5.97e-03</td><td>9</td></tr><tr><td>Bile secretion</td><td>2.79e-02</td><td>8</td></tr></tbody></table>
+        </div>
+    </div>
+    
+    
+    <div class="answer-section">
+        <h2>Answer</h2>
+        <p>Differential expression analysis of psoriasis in skin tissue identified 731 significantly differentially expressed genes.</p><p>Top enriched GO process: keratinization</p>
+    </div>
+    
+    <div class="provenance">
+        <h3>Provenance &#9660;</h3>
+        <div class="provenance-body">
+            <dl>
+            <dt>timestamp</dt><dd>2026-02-03T07:19:06.106581+00:00</dd>
+            <dt>sources</dt><dd>ARCHS4, g:Profiler</dd>
+            <dt>query</dt><dd>psoriasis in skin tissue</dd>
+            <dt>disease_term</dt><dd>psoriasis</dd>
+            <dt>tissue_term</dt><dd>skin</dd>
+            </dl>
+            
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.step-header').forEach(function(header) {
+            header.addEventListener('click', function() {
+                var body = this.nextElementSibling;
+                var toggle = this.querySelector('.step-toggle');
+                body.classList.toggle('collapsed');
+                toggle.classList.toggle('collapsed');
+            });
+        });
+        document.querySelectorAll('.provenance h3').forEach(function(h) {
+            h.addEventListener('click', function() {
+                this.nextElementSibling.classList.toggle('expanded');
+            });
+        });
+    </script>
+</body>
+</html>
