@@ -12,6 +12,8 @@ Usage:
 
 import contextlib
 import io
+import logging
+import logging.handlers
 import os
 import sys
 from pathlib import Path
@@ -19,6 +21,40 @@ from pathlib import Path
 from mcp.server.fastmcp import FastMCP
 
 __version__ = "0.1.0"
+
+# ---------------------------------------------------------------------------
+# Logging
+# ---------------------------------------------------------------------------
+
+def _configure_logging() -> None:
+    """Set up file-based logging for the MCP server.
+
+    Log file defaults to ``~/.okn_wobd/mcp_server.log`` (override with
+    ``OKN_MCP_LOG_FILE``).  Level defaults to INFO (override with
+    ``OKN_MCP_LOG_LEVEL``).  Uses a RotatingFileHandler (5 MB, 3 backups).
+    """
+    log_file = os.environ.get(
+        "OKN_MCP_LOG_FILE",
+        str(Path.home() / ".okn_wobd" / "mcp_server.log"),
+    )
+    log_level = os.environ.get("OKN_MCP_LOG_LEVEL", "INFO").upper()
+
+    log_path = Path(log_file)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    handler = logging.handlers.RotatingFileHandler(
+        log_path, maxBytes=5 * 1024 * 1024, backupCount=3,
+    )
+    handler.setFormatter(
+        logging.Formatter("%(asctime)s %(name)s %(levelname)s %(message)s")
+    )
+
+    logger = logging.getLogger("okn_wobd.mcp_server")
+    logger.setLevel(getattr(logging, log_level, logging.INFO))
+    logger.addHandler(handler)
+
+    logger.info("MCP server starting (version %s)", __version__)
+
 
 # ---------------------------------------------------------------------------
 # Path / env setup
@@ -127,6 +163,7 @@ def _register_chatgeo_tools():
 # ---------------------------------------------------------------------------
 
 def main():
+    _configure_logging()
     _setup_demo_imports()
     _register_analysis_tools()
     _register_chatgeo_tools()

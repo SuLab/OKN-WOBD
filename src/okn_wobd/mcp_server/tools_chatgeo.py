@@ -10,9 +10,11 @@ the ~60-second client timeout.
 
 from __future__ import annotations
 
+import logging
 import os
 import threading
 import time
+import traceback
 import uuid
 from pathlib import Path
 from typing import List, Optional
@@ -20,6 +22,8 @@ from typing import List, Optional
 from mcp.server.fastmcp import FastMCP
 
 from okn_wobd.mcp_server.server import redirect_prints
+
+logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
@@ -49,12 +53,17 @@ _jobs_lock = threading.Lock()
 
 def _run_de_background(job_id: str, kwargs: dict) -> None:
     """Run differential expression in a background thread."""
+    logger.info("Background job %s started (disease=%s, method=%s)",
+                job_id, kwargs.get("disease"), kwargs.get("method"))
+    start = time.time()
     try:
         with redirect_prints():
             from chatgeo.cli import run_analysis
 
             result = run_analysis(**kwargs)
     except SystemExit as e:
+        logger.error("Background job %s failed with SystemExit(%s)\n%s",
+                      job_id, e.code, traceback.format_exc())
         with _jobs_lock:
             _jobs[job_id] = {
                 "status": "error",
@@ -66,6 +75,8 @@ def _run_de_background(job_id: str, kwargs: dict) -> None:
             }
         return
     except Exception as e:
+        logger.error("Background job %s failed: %s\n%s",
+                      job_id, e, traceback.format_exc())
         with _jobs_lock:
             _jobs[job_id] = {
                 "status": "error",
@@ -74,8 +85,14 @@ def _run_de_background(job_id: str, kwargs: dict) -> None:
             }
         return
 
+    elapsed = time.time() - start
     if result is None:
+        logger.warning("Background job %s returned None after %.1fs", job_id, elapsed)
         result = {"error": "Analysis returned no results."}
+    else:
+        n_genes = result.get("n_significant", "?")
+        logger.info("Background job %s completed in %.1fs (%s significant genes)",
+                     job_id, elapsed, n_genes)
 
     with _jobs_lock:
         _jobs[job_id] = {
@@ -141,6 +158,7 @@ def register_tools(mcp: FastMCP) -> None:
             dict with ``job_id`` and ``status`` ("running") — poll with
             ``get_analysis_result``.
         """
+        logger.info("differential_expression called: query=%r, method=%s", query, method)
         err = _check_archs4()
         if err:
             return {"error": err}
@@ -151,6 +169,7 @@ def register_tools(mcp: FastMCP) -> None:
                 from chatgeo.cli import parse_query
                 parsed_disease, parsed_tissue = parse_query(query)
         except Exception as e:
+            logger.error("Query parse failed: %s", e)
             return {"error": f"Query parse failed: {e}"}
 
         if disease:
@@ -195,6 +214,8 @@ def register_tools(mcp: FastMCP) -> None:
             daemon=True,
         )
         thread.start()
+        logger.info("Dispatched background job %s (disease=%s, tissue=%s, method=%s)",
+                     job_id, parsed_disease, parsed_tissue, method)
 
         return {
             "job_id": job_id,
@@ -224,6 +245,7 @@ def register_tools(mcp: FastMCP) -> None:
             If completed: ``{"status": "completed", "result": {...}}``
             If errored: ``{"status": "error", "result": {"error": ...}}``
         """
+        logger.debug("get_analysis_result polled for job %s", job_id)
         with _jobs_lock:
             job = _jobs.get(job_id)
 
@@ -271,6 +293,7 @@ def register_tools(mcp: FastMCP) -> None:
         Returns:
             Dict with sample counts, GEO study accessions, and sample IDs.
         """
+        logger.info("find_samples called: disease_term=%r, tissue=%r", disease_term, tissue)
         err = _check_archs4()
         if err:
             return {"error": err}
@@ -291,6 +314,7 @@ def register_tools(mcp: FastMCP) -> None:
                     max_control_samples=max_control_samples,
                 )
         except Exception as e:
+            logger.error("find_samples failed: %s", e)
             return {"error": str(e)}
 
         # Extract study IDs from sample metadata
@@ -301,6 +325,8 @@ def register_tools(mcp: FastMCP) -> None:
         if not pooled.control_samples.empty and "series_id" in pooled.control_samples.columns:
             control_studies = sorted(set(pooled.control_samples["series_id"].tolist()))
 
+        logger.info("find_samples result: %d test, %d control samples",
+                     pooled.n_test, pooled.n_control)
         return {
             "disease_term": disease_term,
             "tissue": tissue,
@@ -340,6 +366,7 @@ def register_tools(mcp: FastMCP) -> None:
         Returns:
             Dict with enriched terms grouped by source, plus mapping stats.
         """
+        logger.info("enrichment_analysis called: %d genes, organism=%s", len(gene_list), organism)
         if not gene_list:
             return {"error": "gene_list must not be empty."}
 
@@ -359,8 +386,10 @@ def register_tools(mcp: FastMCP) -> None:
                     correction="g_SCS",
                 )
         except ImportError as e:
+            logger.error("enrichment_analysis missing dependency: %s", e)
             return {"error": f"Missing dependency: {e}. Install with: pip install gprofiler-official"}
         except Exception as e:
+            logger.error("enrichment_analysis failed: %s", e)
             return {"error": str(e)}
 
         # Group results by source
@@ -378,6 +407,8 @@ def register_tools(mcp: FastMCP) -> None:
             }
             by_source.setdefault(t.source, []).append(entry)
 
+        logger.info("enrichment_analysis result: %d terms, %d/%d genes mapped",
+                     len(terms), n_mapped, len(gene_list))
         return {
             "input_genes": len(gene_list),
             "genes_mapped": n_mapped,

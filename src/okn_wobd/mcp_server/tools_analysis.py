@@ -6,11 +6,14 @@ and ``analysis_tools.drug_disease`` from ``scripts/demos/``.
 
 from __future__ import annotations
 
+import logging
 from typing import Optional
 
 from mcp.server.fastmcp import FastMCP
 
 from okn_wobd.mcp_server.server import redirect_prints
+
+logger = logging.getLogger(__name__)
 
 
 def register_tools(mcp: FastMCP) -> None:
@@ -34,6 +37,7 @@ def register_tools(mcp: FastMCP) -> None:
             Dict with ``gene``, ``total_connections``, ``connections`` list,
             and ``summary`` (counts by source and path type).
         """
+        logger.info("gene_disease_paths called: gene=%s", gene_symbol)
         try:
             with redirect_prints():
                 from analysis_tools import GeneDiseasePathFinder
@@ -41,8 +45,11 @@ def register_tools(mcp: FastMCP) -> None:
                 finder = GeneDiseasePathFinder(verbose=False)
                 connections = finder.find_all_connections(gene_symbol.upper())
         except Exception as e:
+            logger.error("gene_disease_paths failed for %s: %s", gene_symbol, e)
             return {"error": str(e), "gene": gene_symbol}
 
+        logger.debug("gene_disease_paths result: %d connections for %s",
+                      len(connections), gene_symbol)
         # Build summary
         by_source: dict[str, int] = {}
         by_path_type: dict[str, int] = {}
@@ -91,6 +98,8 @@ def register_tools(mcp: FastMCP) -> None:
         if not gene_symbol and not ncbi_gene_id:
             return {"error": "Provide gene_symbol or ncbi_gene_id."}
 
+        logger.info("gene_neighborhood called: gene=%s, ncbi_id=%s",
+                     gene_symbol, ncbi_gene_id)
         try:
             with redirect_prints():
                 from analysis_tools import GeneNeighborhoodQuery
@@ -105,10 +114,15 @@ def register_tools(mcp: FastMCP) -> None:
                     biobricks_limit=limit,
                 )
         except SystemExit:
+            logger.error("gene_neighborhood: gene not found: %s",
+                          gene_symbol or ncbi_gene_id)
             return {"error": f"Gene not found: {gene_symbol or ncbi_gene_id}"}
         except Exception as e:
+            logger.error("gene_neighborhood failed for %s: %s",
+                          gene_symbol or ncbi_gene_id, e)
             return {"error": str(e), "gene": gene_symbol or ncbi_gene_id}
 
+        logger.debug("gene_neighborhood result: %s", gene_symbol or ncbi_gene_id)
         return neighborhood.to_dict()
 
     @mcp.tool()
@@ -152,6 +166,8 @@ def register_tools(mcp: FastMCP) -> None:
         if disease_direction not in ("up", "down"):
             return {"error": "disease_direction must be 'up' or 'down'."}
 
+        logger.info("drug_disease_opposing_expression called: drug=%s, disease=%s",
+                     drug_direction, disease_direction)
         try:
             with redirect_prints():
                 from analysis_tools import find_drug_disease_genes
@@ -165,6 +181,7 @@ def register_tools(mcp: FastMCP) -> None:
                     limit=limit,
                 )
         except Exception as e:
+            logger.error("drug_disease_opposing_expression failed: %s", e)
             return {"error": str(e)}
 
         # Summarise
@@ -172,6 +189,7 @@ def register_tools(mcp: FastMCP) -> None:
         unique_diseases = len({r["disease"] for r in results})
         unique_drugs = len({r.get("drug_name") or r.get("drug_test_group") for r in results})
 
+        logger.debug("drug_disease_opposing_expression result: %d combinations", len(results))
         return {
             "drug_label": drug_label,
             "disease_label": disease_label,
