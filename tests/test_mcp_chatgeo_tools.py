@@ -2,6 +2,7 @@
 
 import os
 import sys
+import time
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -245,3 +246,118 @@ class TestEnrichmentAnalysisTool:
 
         assert result["total_terms"] == 0
         assert result["by_source"] == {}
+
+
+# ---------------------------------------------------------------------------
+# Background job dispatch (deseq2)
+# ---------------------------------------------------------------------------
+
+class TestBackgroundJobDispatch:
+
+    def test_deseq2_returns_job_id(self):
+        """DESeq2 method should dispatch to background and return job_id."""
+        fn = _get_tool_fn("differential_expression")
+        with patch.dict(os.environ, {"ARCHS4_DATA_DIR": "/tmp"}):
+            with patch("pathlib.Path.is_dir", return_value=True):
+                # Don't actually run the analysis — it will fail in the
+                # background thread, but we only need to verify the dispatch
+                result = fn(query="psoriasis in skin", method="deseq2")
+
+        assert "job_id" in result
+        assert result["status"] == "running"
+        assert "get_analysis_result" in result["message"]
+
+    @patch("chatgeo.cli.run_analysis")
+    def test_mann_whitney_runs_synchronously(self, mock_run):
+        """Mann-Whitney should NOT dispatch to background."""
+        mock_run.return_value = {
+            "sample_discovery": {},
+            "de_results": {"genes_tested": 0, "genes_significant": 0, "significant_genes": []},
+            "enrichment": {},
+            "provenance": {},
+        }
+
+        fn = _get_tool_fn("differential_expression")
+        with patch.dict(os.environ, {"ARCHS4_DATA_DIR": "/tmp"}):
+            with patch("pathlib.Path.is_dir", return_value=True):
+                result = fn(query="psoriasis in skin", method="mann-whitney")
+
+        # Should get direct results, not a job_id
+        assert "job_id" not in result
+        assert "de_results" in result
+
+
+# ---------------------------------------------------------------------------
+# get_analysis_result
+# ---------------------------------------------------------------------------
+
+class TestGetAnalysisResult:
+
+    def test_unknown_job_id(self):
+        fn = _get_tool_fn("get_analysis_result")
+        result = fn(job_id="nonexistent")
+        assert "error" in result
+
+    def test_completed_job(self):
+        from okn_wobd.mcp_server.tools_chatgeo import _jobs, _jobs_lock
+
+        job_id = "test-done"
+        with _jobs_lock:
+            _jobs[job_id] = {
+                "status": "completed",
+                "result": {"de_results": {"genes_significant": 42}},
+                "finished_at": time.time(),
+            }
+
+        fn = _get_tool_fn("get_analysis_result")
+        result = fn(job_id=job_id)
+
+        assert result["status"] == "completed"
+        assert result["result"]["de_results"]["genes_significant"] == 42
+
+        # Cleanup
+        with _jobs_lock:
+            _jobs.pop(job_id, None)
+
+    def test_running_job(self):
+        from okn_wobd.mcp_server.tools_chatgeo import _jobs, _jobs_lock
+
+        job_id = "test-running"
+        with _jobs_lock:
+            _jobs[job_id] = {
+                "status": "running",
+                "result": None,
+                "started_at": time.time() - 30,
+            }
+
+        fn = _get_tool_fn("get_analysis_result")
+        result = fn(job_id=job_id)
+
+        assert result["status"] == "running"
+        assert result["elapsed_seconds"] >= 29
+        assert "poll again" in result["message"].lower()
+
+        # Cleanup
+        with _jobs_lock:
+            _jobs.pop(job_id, None)
+
+    def test_error_job(self):
+        from okn_wobd.mcp_server.tools_chatgeo import _jobs, _jobs_lock
+
+        job_id = "test-error"
+        with _jobs_lock:
+            _jobs[job_id] = {
+                "status": "error",
+                "result": {"error": "No test samples found"},
+                "finished_at": time.time(),
+            }
+
+        fn = _get_tool_fn("get_analysis_result")
+        result = fn(job_id=job_id)
+
+        assert result["status"] == "error"
+        assert "No test samples" in result["result"]["error"]
+
+        # Cleanup
+        with _jobs_lock:
+            _jobs.pop(job_id, None)
