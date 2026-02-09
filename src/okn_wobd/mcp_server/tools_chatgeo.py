@@ -3,9 +3,9 @@
 Wraps ``chatgeo.cli.run_analysis``, ``chatgeo.sample_finder.SampleFinder``,
 and ``chatgeo.enrichment_analyzer.GProfilerBackend`` from ``scripts/demos/``.
 
-Long-running analyses (e.g. DESeq2) are dispatched to a background thread
-and polled via the ``get_analysis_result`` tool, keeping individual MCP
-tool calls within the ~60-second client timeout.
+All analyses are dispatched to a background thread and polled via the
+``get_analysis_result`` tool, keeping individual MCP tool calls within
+the ~60-second client timeout.
 """
 
 from __future__ import annotations
@@ -45,9 +45,6 @@ def _check_archs4() -> Optional[str]:
 
 _jobs: dict[str, dict] = {}
 _jobs_lock = threading.Lock()
-
-# Methods that are fast enough to run synchronously (~20-40s)
-_FAST_METHODS = {"mann-whitney", "mann_whitney_u", "welch-t", "welch_t"}
 
 
 def _run_de_background(job_id: str, kwargs: dict) -> None:
@@ -118,13 +115,13 @@ def register_tools(mcp: FastMCP) -> None:
 
         **Requires** the ARCHS4_DATA_DIR environment variable to be set.
 
-        **Method and runtime:**
-        - ``mann-whitney`` (default): fast (~20-40s), runs synchronously,
-          returns results directly.
-        - ``welch-t``: fast (~20-40s), runs synchronously.
-        - ``deseq2``: rigorous but slow (2-5 min). Runs in the **background**
-          and returns a ``job_id`` immediately.  Call ``get_analysis_result``
-          with the ``job_id`` to poll for results.
+        **All methods run in the background** and return a ``job_id``
+        immediately. Call ``get_analysis_result`` with the ``job_id`` to
+        poll for results.
+
+        - ``mann-whitney`` (default): ~30-60s
+        - ``welch-t``: ~30-60s
+        - ``deseq2``: rigorous but slower (2-5 min)
 
         Consider calling ``find_samples`` first to verify data availability.
 
@@ -133,18 +130,16 @@ def register_tools(mcp: FastMCP) -> None:
             disease: Override parsed disease term.
             tissue: Override or specify tissue constraint.
             species: Species ("human", "mouse", or "both").
-            method: DE method — "mann-whitney" (default, fast) or "deseq2"
-                    (rigorous, runs in background) or "welch-t" (fast).
+            method: DE method — "mann-whitney" (default), "welch-t", or
+                    "deseq2" (rigorous but slower).
             fdr_threshold: FDR significance threshold (default 0.01).
             log2fc_threshold: Log2 fold-change threshold (default 2.0).
             max_test_samples: Max test samples (default 100).
             max_control_samples: Max control samples (default 100).
 
         Returns:
-            For fast methods: dict with ``sample_discovery``, ``de_results``,
-            ``enrichment``, and ``provenance``.
-            For deseq2: dict with ``job_id`` and ``status`` ("running") —
-            poll with ``get_analysis_result``.
+            dict with ``job_id`` and ``status`` ("running") — poll with
+            ``get_analysis_result``.
         """
         err = _check_archs4()
         if err:
@@ -183,23 +178,7 @@ def register_tools(mcp: FastMCP) -> None:
             verbose=False,
         )
 
-        # Fast methods: run synchronously
-        if method in _FAST_METHODS or mapped_method in _FAST_METHODS:
-            try:
-                with redirect_prints():
-                    from chatgeo.cli import run_analysis
-                    result = run_analysis(**run_kwargs)
-            except SystemExit as e:
-                return {"error": f"Analysis failed (exit code {e.code}). "
-                        "Common causes: no matching samples found, ARCHS4 data issue."}
-            except Exception as e:
-                return {"error": str(e)}
-
-            if result is None:
-                return {"error": "Analysis returned no results."}
-            return result
-
-        # Slow methods (deseq2): run in background
+        # Dispatch all methods to background thread to avoid MCP timeouts
         job_id = str(uuid.uuid4())[:8]
         with _jobs_lock:
             _jobs[job_id] = {
@@ -221,8 +200,7 @@ def register_tools(mcp: FastMCP) -> None:
             "job_id": job_id,
             "status": "running",
             "message": (
-                f"DESeq2 analysis started in background (job {job_id}). "
-                f"This typically takes 2-5 minutes. "
+                f"Analysis started in background (job {job_id}, method={method}). "
                 f"Call get_analysis_result(job_id='{job_id}') to check progress."
             ),
         }
@@ -231,11 +209,12 @@ def register_tools(mcp: FastMCP) -> None:
     def get_analysis_result(job_id: str) -> dict:
         """Poll for the result of a background differential expression analysis.
 
-        When ``differential_expression`` is called with ``method='deseq2'``,
-        it returns a ``job_id`` and runs in the background. Use this tool
-        to check whether the job has completed and retrieve its results.
+        ``differential_expression`` always returns a ``job_id`` and runs in
+        the background. Use this tool to check whether the job has completed
+        and retrieve its results.
 
-        Typical DESeq2 runtime is 2-5 minutes. Poll every 30-60 seconds.
+        Poll every 30-60 seconds. Typical runtime: 30-60s for mann-whitney /
+        welch-t, 2-5 minutes for deseq2.
 
         Args:
             job_id: The job ID returned by ``differential_expression``.

@@ -78,6 +78,7 @@ class TestDifferentialExpressionTool:
 
     @patch("chatgeo.cli.run_analysis")
     def test_wraps_run_analysis(self, mock_run):
+        """All methods dispatch to background and return job_id."""
         mock_run.return_value = {
             "sample_discovery": {"n_disease_samples": 50, "n_control_samples": 100},
             "de_results": {"genes_tested": 15000, "genes_significant": 42, "significant_genes": []},
@@ -86,13 +87,24 @@ class TestDifferentialExpressionTool:
         }
 
         fn = _get_tool_fn("differential_expression")
+        poll_fn = _get_tool_fn("get_analysis_result")
         with patch.dict(os.environ, {"ARCHS4_DATA_DIR": "/tmp"}):
-            with patch("os.path.isdir", return_value=True):
-                with patch("pathlib.Path.is_dir", return_value=True):
-                    result = fn(query="psoriasis in skin tissue")
+            with patch("pathlib.Path.is_dir", return_value=True):
+                result = fn(query="psoriasis in skin tissue")
 
-        assert "error" not in result
-        assert result["de_results"]["genes_significant"] == 42
+        # Should return job_id, not direct results
+        assert "job_id" in result
+        assert result["status"] == "running"
+
+        # Wait for background thread to finish
+        for _ in range(50):
+            poll = poll_fn(job_id=result["job_id"])
+            if poll["status"] != "running":
+                break
+            time.sleep(0.1)
+
+        assert poll["status"] == "completed"
+        assert poll["result"]["de_results"]["genes_significant"] == 42
         # Verify it passed interpret=False
         mock_run.assert_called_once()
         call_kwargs = mock_run.call_args[1]
@@ -100,30 +112,53 @@ class TestDifferentialExpressionTool:
 
     @patch("chatgeo.cli.run_analysis")
     def test_catches_system_exit(self, mock_run):
+        """SystemExit in background thread is caught and reported as error."""
         mock_run.side_effect = SystemExit(1)
 
         fn = _get_tool_fn("differential_expression")
+        poll_fn = _get_tool_fn("get_analysis_result")
         with patch.dict(os.environ, {"ARCHS4_DATA_DIR": "/tmp"}):
             with patch("pathlib.Path.is_dir", return_value=True):
                 result = fn(query="nonexistent disease")
 
-        assert "error" in result
-        assert "exit code" in result["error"].lower()
+        assert "job_id" in result
+
+        # Wait for background thread to finish
+        for _ in range(50):
+            poll = poll_fn(job_id=result["job_id"])
+            if poll["status"] != "running":
+                break
+            time.sleep(0.1)
+
+        assert poll["status"] == "error"
+        assert "exit code" in poll["result"]["error"].lower()
 
     @patch("chatgeo.cli.run_analysis")
     def test_catches_exceptions(self, mock_run):
+        """Exceptions in background thread are caught and reported as error."""
         mock_run.side_effect = RuntimeError("HDF5 file corrupted")
 
         fn = _get_tool_fn("differential_expression")
+        poll_fn = _get_tool_fn("get_analysis_result")
         with patch.dict(os.environ, {"ARCHS4_DATA_DIR": "/tmp"}):
             with patch("pathlib.Path.is_dir", return_value=True):
                 result = fn(query="psoriasis")
 
-        assert "error" in result
-        assert "HDF5" in result["error"]
+        assert "job_id" in result
+
+        # Wait for background thread to finish
+        for _ in range(50):
+            poll = poll_fn(job_id=result["job_id"])
+            if poll["status"] != "running":
+                break
+            time.sleep(0.1)
+
+        assert poll["status"] == "error"
+        assert "HDF5" in poll["result"]["error"]
 
     @patch("chatgeo.cli.run_analysis")
     def test_disease_tissue_override(self, mock_run):
+        """Disease/tissue overrides are passed to run_analysis in background."""
         mock_run.return_value = {
             "sample_discovery": {},
             "de_results": {"genes_tested": 0, "genes_significant": 0, "significant_genes": []},
@@ -132,10 +167,21 @@ class TestDifferentialExpressionTool:
         }
 
         fn = _get_tool_fn("differential_expression")
+        poll_fn = _get_tool_fn("get_analysis_result")
         with patch.dict(os.environ, {"ARCHS4_DATA_DIR": "/tmp"}):
             with patch("pathlib.Path.is_dir", return_value=True):
-                fn(query="something", disease="asthma", tissue="lung")
+                result = fn(query="something", disease="asthma", tissue="lung")
 
+        assert "job_id" in result
+
+        # Wait for background thread to finish
+        for _ in range(50):
+            poll = poll_fn(job_id=result["job_id"])
+            if poll["status"] != "running":
+                break
+            time.sleep(0.1)
+
+        assert poll["status"] == "completed"
         call_kwargs = mock_run.call_args[1]
         assert call_kwargs["disease"] == "asthma"
         assert call_kwargs["tissue"] == "lung"
@@ -249,7 +295,7 @@ class TestEnrichmentAnalysisTool:
 
 
 # ---------------------------------------------------------------------------
-# Background job dispatch (deseq2)
+# Background job dispatch (all methods)
 # ---------------------------------------------------------------------------
 
 class TestBackgroundJobDispatch:
@@ -259,32 +305,33 @@ class TestBackgroundJobDispatch:
         fn = _get_tool_fn("differential_expression")
         with patch.dict(os.environ, {"ARCHS4_DATA_DIR": "/tmp"}):
             with patch("pathlib.Path.is_dir", return_value=True):
-                # Don't actually run the analysis — it will fail in the
-                # background thread, but we only need to verify the dispatch
                 result = fn(query="psoriasis in skin", method="deseq2")
 
         assert "job_id" in result
         assert result["status"] == "running"
         assert "get_analysis_result" in result["message"]
 
-    @patch("chatgeo.cli.run_analysis")
-    def test_mann_whitney_runs_synchronously(self, mock_run):
-        """Mann-Whitney should NOT dispatch to background."""
-        mock_run.return_value = {
-            "sample_discovery": {},
-            "de_results": {"genes_tested": 0, "genes_significant": 0, "significant_genes": []},
-            "enrichment": {},
-            "provenance": {},
-        }
-
+    def test_mann_whitney_returns_job_id(self):
+        """Mann-Whitney should also dispatch to background and return job_id."""
         fn = _get_tool_fn("differential_expression")
         with patch.dict(os.environ, {"ARCHS4_DATA_DIR": "/tmp"}):
             with patch("pathlib.Path.is_dir", return_value=True):
                 result = fn(query="psoriasis in skin", method="mann-whitney")
 
-        # Should get direct results, not a job_id
-        assert "job_id" not in result
-        assert "de_results" in result
+        assert "job_id" in result
+        assert result["status"] == "running"
+        assert "get_analysis_result" in result["message"]
+
+    def test_welch_t_returns_job_id(self):
+        """Welch-t should also dispatch to background and return job_id."""
+        fn = _get_tool_fn("differential_expression")
+        with patch.dict(os.environ, {"ARCHS4_DATA_DIR": "/tmp"}):
+            with patch("pathlib.Path.is_dir", return_value=True):
+                result = fn(query="psoriasis in skin", method="welch-t")
+
+        assert "job_id" in result
+        assert result["status"] == "running"
+        assert "get_analysis_result" in result["message"]
 
 
 # ---------------------------------------------------------------------------
