@@ -77,7 +77,7 @@ def run_analysis(
     disease: str,
     tissue: Optional[str] = None,
     species: Literal["human", "mouse", "both"] = "human",
-    method: str = "deseq2",
+    method: str = "mann_whitney_u",
     fdr_threshold: float = 0.01,
     log2fc_threshold: float = 2.0,
     max_test_samples: int = 500,
@@ -489,11 +489,11 @@ Examples:
     )
     parser.add_argument(
         "--method",
-        choices=["deseq2", "mann-whitney", "welch-t"],
-        default="deseq2",
-        help="DE method (default: deseq2). DESeq2 handles normalization "
-             "internally. Legacy methods (mann-whitney, welch-t) use "
-             "log2(CPM+1) normalization.",
+        choices=["mann-whitney", "welch-t", "deseq2"],
+        default="mann-whitney",
+        help="DE method (default: mann-whitney). Mann-Whitney U is "
+             "recommended for ARCHS4 data (see README). DESeq2 is available "
+             "but assumes raw counts, not ARCHS4 pseudocounts.",
     )
 
     # Gene filtering
