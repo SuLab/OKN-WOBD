@@ -195,17 +195,60 @@ def run_analysis(
                 print(f"LLM query builder failed ({e}), using pattern fallback")
             query_spec = build_query_spec_fallback(disease, tissue)
 
-    # Find samples
-    if verbose:
-        print("Searching for samples...")
+    # Find samples — try ontology-enhanced search first
+    use_ontology = os.environ.get("CHATGEO_ONTOLOGY_SEARCH", "1") != "0"
+    pooled = None
 
-    pooled = finder.find_pooled_samples(
-        disease_term=disease,
-        tissue=tissue,
-        max_test_samples=max_test_samples,
-        max_control_samples=max_control_samples,
-        query_spec=query_spec,
-    )
+    if use_ontology:
+        if verbose:
+            print("Searching for samples (ontology-enhanced)...")
+        try:
+            pooled = finder.find_pooled_samples_ontology(
+                disease_term=disease,
+                tissue=tissue,
+                max_test_samples=max_test_samples,
+                max_control_samples=max_control_samples,
+                query_spec=query_spec,
+                keyword_fallback=True,
+            )
+            if pooled is not None and verbose:
+                ont_stats = (pooled.filtering_stats or {}).get("ontology_discovery", {})
+                if ont_stats:
+                    mondo_ids = ont_stats.get("mondo_ids_resolved", [])
+                    labels = ont_stats.get("mondo_labels", {})
+                    label_str = ", ".join(
+                        f"{mid} ({labels.get(mid, '?')})" for mid in mondo_ids[:3]
+                    )
+                    print(f"  MONDO: {label_str}")
+                    print(f"  Expanded to {len(ont_stats.get('expanded_mondo_ids', []))} MONDO terms")
+                    print(f"  NDE records: {ont_stats.get('nde_records_found', 0)}")
+                    print(f"  GEO studies in ARCHS4: {ont_stats.get('gse_studies_in_archs4', 0)}")
+                    print(f"  Ontology samples: {ont_stats.get('ontology_test_samples', 0)} test, "
+                          f"{ont_stats.get('ontology_control_samples', 0)} control")
+                    print(f"  Keyword samples: {ont_stats.get('keyword_test_samples', 0)} test, "
+                          f"{ont_stats.get('keyword_control_samples', 0)} control")
+                    print(f"  Merged: {ont_stats.get('merged_test_samples', 0)} test, "
+                          f"{ont_stats.get('merged_control_samples', 0)} control")
+            # Fall back if ontology found no test samples
+            if pooled is not None and pooled.n_test == 0:
+                if verbose:
+                    print("  Ontology search found 0 test samples, falling back to keyword-only")
+                pooled = None
+        except Exception as e:
+            if verbose:
+                print(f"  Ontology search failed ({e}), falling back to keyword-only")
+            pooled = None
+
+    if pooled is None:
+        if verbose:
+            print("Searching for samples (keyword)...")
+        pooled = finder.find_pooled_samples(
+            disease_term=disease,
+            tissue=tissue,
+            max_test_samples=max_test_samples,
+            max_control_samples=max_control_samples,
+            query_spec=query_spec,
+        )
 
     if verbose and pooled.filtering_stats:
         ts = pooled.filtering_stats.get("test", {})

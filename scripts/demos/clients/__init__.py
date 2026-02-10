@@ -12,3 +12,5 @@ from clients.niaid import NIAIDClient, SearchResult, COMMON_SPECIES, COMMON_DISE
 from clients.archs4 import ARCHS4Client, ARCHS4DataFile
 from clients.cellxgene import CellxGeneClient, ExpressionStats, ConditionComparison
 from clients.http_utils import create_session
+from clients.ontology import DiseaseOntologyClient, MondoResolution, OntologyExpansion
+from clients.nde_geo import NDEGeoDiscovery, GEOStudyMatch, NDEGeoDiscoveryResult

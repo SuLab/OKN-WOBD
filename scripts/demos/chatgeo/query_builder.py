@@ -377,30 +377,66 @@ class PatternQueryStrategy(QueryStrategy):
 
 
 class OntologyQueryStrategy(QueryStrategy):
-    """
-    Placeholder for ontology-based expansion using MONDO/UBERON.
+    """Ontology-based expansion using MONDO via Ubergraph.
 
-    This strategy will query ontology services to find:
-    - MONDO disease synonyms and related terms
-    - UBERON tissue/anatomy synonyms
+    Resolves disease names to MONDO IDs, fetches direct subclass labels,
+    and combines them with PatternQueryStrategy synonyms for comprehensive
+    keyword expansion.
 
-    Current implementation falls back to pattern matching.
+    Falls back to PatternQueryStrategy if Ubergraph is unreachable.
     """
 
     def __init__(self):
         self._pattern_fallback = PatternQueryStrategy()
+        self._ontology_client = None
+
+    @property
+    def ontology_client(self):
+        if self._ontology_client is None:
+            try:
+                from clients.ontology import DiseaseOntologyClient
+                self._ontology_client = DiseaseOntologyClient()
+            except Exception:
+                self._ontology_client = False  # sentinel
+        return self._ontology_client if self._ontology_client is not False else None
 
     @property
     def name(self) -> str:
         return "ontology"
 
     def expand(self, term: str) -> QueryExpansion:
-        # TODO: Implement MONDO/UBERON query expansion
-        # For now, fall back to pattern strategy
-        result = self._pattern_fallback.expand(term)
+        # Always get pattern-based expansion as baseline
+        pattern_result = self._pattern_fallback.expand(term)
+        expanded = set(pattern_result.expanded_terms)
+
+        # Try ontology expansion
+        client = self.ontology_client
+        if client is not None:
+            try:
+                resolution = client.resolve_disease(term, max_results=1)
+                if resolution.top_id:
+                    # Get direct subclasses only for keyword expansion
+                    subclasses = client.sparql.get_subclasses(
+                        resolution.top_uri,
+                        endpoint="ubergraph",
+                        direct_only=True,
+                        limit=20,
+                    )
+                    for sc in subclasses:
+                        label = sc.get("label", "")
+                        if label:
+                            expanded.add(label)
+                    # Also add the resolved label itself
+                    for label in resolution.labels.values():
+                        expanded.add(label)
+            except Exception:
+                pass  # fall through to pattern-only
+
+        expanded.add(term)
+
         return QueryExpansion(
-            original_term=result.original_term,
-            expanded_terms=result.expanded_terms,
+            original_term=term,
+            expanded_terms=sorted(expanded),
             strategy_name=self.name,
         )
 

@@ -218,6 +218,8 @@ class TestFindSamplesTool:
 
         instance = MockFinder.return_value
         instance.find_pooled_samples.return_value = mock_pooled
+        # Ontology path returns None → falls back to keyword search
+        instance.find_pooled_samples_ontology.return_value = None
 
         fn = _get_tool_fn("find_samples")
         with patch.dict(os.environ, {"ARCHS4_DATA_DIR": "/tmp"}):

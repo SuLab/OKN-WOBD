@@ -274,11 +274,16 @@ def register_tools(mcp: FastMCP) -> None:
         tissue: Optional[str] = None,
         max_test_samples: int = 100,
         max_control_samples: int = 100,
+        use_ontology: bool = True,
     ) -> dict:
         """Find ARCHS4 test and control samples for a disease condition.
 
         Searches ARCHS4 metadata for samples matching the disease term and
-        healthy controls. This is a fast operation (~5-10 seconds) and is
+        healthy controls. When ``use_ontology`` is True (default), also
+        discovers studies via MONDO ontology annotations in NDE, dramatically
+        improving recall for well-annotated diseases.
+
+        This is a moderately fast operation (~10-30 seconds) and is
         recommended before calling ``differential_expression`` to verify
         data availability and sample counts.
 
@@ -289,11 +294,15 @@ def register_tools(mcp: FastMCP) -> None:
             tissue: Optional tissue constraint (e.g. "skin").
             max_test_samples: Maximum test samples (default 100).
             max_control_samples: Maximum control samples (default 100).
+            use_ontology: Use ontology-enhanced search (default True).
+                Set to False for keyword-only search.
 
         Returns:
-            Dict with sample counts, GEO study accessions, and sample IDs.
+            Dict with sample counts, GEO study accessions, sample IDs,
+            and ontology discovery stats when applicable.
         """
-        logger.info("find_samples called: disease_term=%r, tissue=%r", disease_term, tissue)
+        logger.info("find_samples called: disease_term=%r, tissue=%r, use_ontology=%s",
+                     disease_term, tissue, use_ontology)
         err = _check_archs4()
         if err:
             return {"error": err}
@@ -307,12 +316,25 @@ def register_tools(mcp: FastMCP) -> None:
                 query_builder = QueryBuilder(strategy=PatternQueryStrategy())
                 finder = SampleFinder(data_dir=data_dir, query_builder=query_builder)
 
-                pooled = finder.find_pooled_samples(
-                    disease_term=disease_term,
-                    tissue=tissue,
-                    max_test_samples=max_test_samples,
-                    max_control_samples=max_control_samples,
-                )
+                pooled = None
+                if use_ontology:
+                    pooled = finder.find_pooled_samples_ontology(
+                        disease_term=disease_term,
+                        tissue=tissue,
+                        max_test_samples=max_test_samples,
+                        max_control_samples=max_control_samples,
+                        keyword_fallback=True,
+                    )
+                    if pooled is not None and pooled.n_test == 0:
+                        pooled = None
+
+                if pooled is None:
+                    pooled = finder.find_pooled_samples(
+                        disease_term=disease_term,
+                        tissue=tissue,
+                        max_test_samples=max_test_samples,
+                        max_control_samples=max_control_samples,
+                    )
         except Exception as e:
             logger.error("find_samples failed: %s", e)
             return {"error": str(e)}
@@ -325,9 +347,7 @@ def register_tools(mcp: FastMCP) -> None:
         if not pooled.control_samples.empty and "series_id" in pooled.control_samples.columns:
             control_studies = sorted(set(pooled.control_samples["series_id"].tolist()))
 
-        logger.info("find_samples result: %d test, %d control samples",
-                     pooled.n_test, pooled.n_control)
-        return {
+        result = {
             "disease_term": disease_term,
             "tissue": tissue,
             "n_test_samples": pooled.n_test,
@@ -342,6 +362,69 @@ def register_tools(mcp: FastMCP) -> None:
             "control_sample_ids": pooled.control_ids[:50],
             "overlap_removed": pooled.overlap_removed,
         }
+
+        # Include ontology stats if available
+        ont_stats = (pooled.filtering_stats or {}).get("ontology_discovery")
+        if ont_stats:
+            result["ontology_discovery"] = ont_stats
+
+        logger.info("find_samples result: %d test, %d control samples",
+                     pooled.n_test, pooled.n_control)
+        return result
+
+    @mcp.tool()
+    def resolve_disease_ontology(
+        disease_name: str,
+        expand: bool = True,
+        max_terms: int = 50,
+    ) -> dict:
+        """Resolve a disease name to MONDO IDs and expand via ontology hierarchy.
+
+        Useful for exploring what MONDO terms will be queried before running
+        differential expression. Shows the resolved MONDO IDs, their labels,
+        and the expanded set of subtypes.
+
+        Does **not** require ARCHS4 data.
+
+        Args:
+            disease_name: Disease name (e.g. "atherosclerosis", "psoriasis").
+            expand: Whether to expand via ontology hierarchy (default True).
+            max_terms: Maximum terms in expansion (default 50).
+
+        Returns:
+            Dict with resolved MONDO IDs, labels, confidence, and expansion.
+        """
+        logger.info("resolve_disease_ontology called: disease_name=%r", disease_name)
+        try:
+            with redirect_prints():
+                from clients.ontology import DiseaseOntologyClient
+
+                client = DiseaseOntologyClient()
+                resolution = client.resolve_disease(disease_name)
+
+                result = {
+                    "disease_name": disease_name,
+                    "mondo_ids": resolution.mondo_ids,
+                    "labels": resolution.labels,
+                    "confidence": resolution.confidence,
+                }
+
+                if expand and resolution.top_id:
+                    expansion = client.expand_mondo_id(
+                        resolution.top_id, max_terms=max_terms
+                    )
+                    result["expansion"] = {
+                        "root_id": expansion.root_id,
+                        "n_terms": len(expansion.expanded_ids),
+                        "expanded_ids": expansion.expanded_ids,
+                        "labels": expansion.labels,
+                    }
+
+        except Exception as e:
+            logger.error("resolve_disease_ontology failed: %s", e)
+            return {"error": str(e)}
+
+        return result
 
     @mcp.tool()
     def enrichment_analysis(
