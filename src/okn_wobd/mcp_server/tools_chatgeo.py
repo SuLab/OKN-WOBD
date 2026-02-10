@@ -318,13 +318,33 @@ def register_tools(mcp: FastMCP) -> None:
 
                 pooled = None
                 if use_ontology:
-                    pooled = finder.find_pooled_samples_ontology(
-                        disease_term=disease_term,
-                        tissue=tissue,
-                        max_test_samples=max_test_samples,
-                        max_control_samples=max_control_samples,
-                        keyword_fallback=True,
-                    )
+                    # Run ontology path with a timeout to avoid MCP
+                    # client timeouts (~60s).  If it doesn't finish in
+                    # 30s we fall back to the fast keyword-only search.
+                    import concurrent.futures
+                    _ONT_TIMEOUT = 30  # seconds
+
+                    def _run_ontology():
+                        return finder.find_pooled_samples_ontology(
+                            disease_term=disease_term,
+                            tissue=tissue,
+                            max_test_samples=max_test_samples,
+                            max_control_samples=max_control_samples,
+                            keyword_fallback=False,
+                        )
+
+                    try:
+                        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                            future = pool.submit(_run_ontology)
+                            pooled = future.result(timeout=_ONT_TIMEOUT)
+                    except concurrent.futures.TimeoutError:
+                        logger.warning("Ontology search timed out after %ds, "
+                                       "falling back to keyword search", _ONT_TIMEOUT)
+                        pooled = None
+                    except Exception as e:
+                        logger.warning("Ontology search failed: %s", e)
+                        pooled = None
+
                     if pooled is not None and pooled.n_test == 0:
                         pooled = None
 
