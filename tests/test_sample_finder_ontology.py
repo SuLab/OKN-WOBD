@@ -35,10 +35,30 @@ def _make_finder(archs4_meta_by_series=None, archs4_search=None):
     """Create a SampleFinder with mocked clients."""
     mock_client = MagicMock()
     if archs4_meta_by_series is not None:
+        # Per-study metadata (used by _classify_study_samples)
         mock_client.get_metadata_by_series.side_effect = (
             archs4_meta_by_series if callable(archs4_meta_by_series)
             else lambda gse: archs4_meta_by_series.get(gse, pd.DataFrame())
         )
+        # Per-study sample IDs (used by _classify_studies_batch)
+        def _get_sample_ids(gse):
+            df = archs4_meta_by_series.get(gse, pd.DataFrame())
+            if df.empty:
+                return []
+            return df["geo_accession"].tolist()
+        mock_client.get_series_sample_ids.side_effect = _get_sample_ids
+
+        # Batch metadata by sample IDs (used by _classify_studies_batch)
+        def _get_meta_by_samples(sample_ids, fields=None):
+            dfs = []
+            for df in archs4_meta_by_series.values():
+                if not df.empty:
+                    mask = df["geo_accession"].isin(sample_ids)
+                    if mask.any():
+                        dfs.append(df[mask])
+            return pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame()
+        mock_client.get_metadata_by_samples.side_effect = _get_meta_by_samples
+
     if archs4_search is not None:
         mock_client.search_metadata.return_value = archs4_search
 
@@ -196,9 +216,9 @@ class TestFindPooledSamplesOntology:
             confidence="exact",
             top_id="0005311",
         )
-        mock_ont.expand_mondo_id.return_value = MagicMock(
-            expanded_ids=["0005311", "0004993"],
-        )
+        mock_ont.expand_mondo_ids_batch.return_value = {
+            "0005311": MagicMock(expanded_ids=["0005311", "0004993"]),
+        }
 
         mock_nde = MagicMock()
         mock_nde.discover_studies.return_value = MagicMock(

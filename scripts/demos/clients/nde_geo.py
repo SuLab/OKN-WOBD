@@ -79,17 +79,23 @@ class NDEGeoDiscovery:
     def discover_studies(
         self,
         mondo_ids: List[str],
-        max_records_per_id: int = 200,
+        max_records: int = 1000,
         species_filter: str = "Homo sapiens",
         filter_archs4: bool = True,
+        batch_size: int = 10,
     ) -> NDEGeoDiscoveryResult:
         """Discover GEO datasets annotated with the given MONDO IDs.
 
+        Uses batched OR queries to minimize NDE API calls.  For example,
+        20 MONDO IDs are sent as 2 queries of 10 each instead of 20
+        individual queries.
+
         Args:
             mondo_ids: List of numeric MONDO IDs (e.g. ["0005311", "0004993"])
-            max_records_per_id: Max NDE records to fetch per MONDO ID
+            max_records: Max total NDE records to fetch
             species_filter: Species name filter (empty to skip)
             filter_archs4: If True, check each GSE against ARCHS4 availability
+            batch_size: Max MONDO IDs per NDE OR-query (default 10)
 
         Returns:
             NDEGeoDiscoveryResult with matched studies
@@ -98,62 +104,76 @@ class NDEGeoDiscovery:
         seen_gse: Set[str] = set()
         studies: List[GEOStudyMatch] = []
 
-        for mondo_id in mondo_ids:
-            query = f'healthCondition.identifier:"{mondo_id}"'
+        # Batch MONDO IDs into OR queries
+        for i in range(0, len(mondo_ids), batch_size):
+            batch = mondo_ids[i : i + batch_size]
+            id_clause = " OR ".join(f'"{mid}"' for mid in batch)
+            query = f"healthCondition.identifier:({id_clause})"
             if species_filter:
                 query += f' AND species.name:"{species_filter}"'
 
+            logger.info("NDE batch query: %d IDs (batch %d/%d)",
+                        len(batch), i // batch_size + 1,
+                        (len(mondo_ids) + batch_size - 1) // batch_size)
             try:
                 hits = self.nde_client.fetch_all(
                     query=query,
-                    max_results=max_records_per_id,
+                    max_results=max_records,
                     page_size=100,
                 )
             except Exception as e:
-                logger.warning("NDE query failed for MONDO:%s: %s", mondo_id, e)
+                logger.warning("NDE batch query failed: %s", e)
                 continue
 
             all_hits.extend(hits)
 
-            for hit in hits:
-                gse_ids = self._extract_gse_ids(hit)
-                title = (hit.get("name", "") or "")[:80]
-                health_conditions = self._extract_health_conditions(hit)
-                hit_mondo_ids = self._extract_mondo_ids(hit)
+        # Extract GSE IDs from all hits
+        for hit in all_hits:
+            gse_ids = self._extract_gse_ids(hit)
+            title = (hit.get("name", "") or "")[:80]
+            health_conditions = self._extract_health_conditions(hit)
+            hit_mondo_ids = self._extract_mondo_ids(hit)
 
-                for gse_id in gse_ids:
-                    if gse_id in seen_gse:
-                        continue
-                    seen_gse.add(gse_id)
-                    studies.append(
-                        GEOStudyMatch(
-                            gse_id=gse_id,
-                            title=title,
-                            health_conditions=health_conditions,
-                            mondo_ids=hit_mondo_ids,
-                        )
+            for gse_id in gse_ids:
+                if gse_id in seen_gse:
+                    continue
+                seen_gse.add(gse_id)
+                studies.append(
+                    GEOStudyMatch(
+                        gse_id=gse_id,
+                        title=title,
+                        health_conditions=health_conditions,
+                        mondo_ids=hit_mondo_ids,
                     )
-
-        # Filter by ARCHS4 availability
-        if filter_archs4 and studies:
-            client = self.archs4_client
-            if client is not None:
-                for study in studies:
-                    try:
-                        study.in_archs4 = client.has_series(study.gse_id)
-                    except Exception:
-                        study.in_archs4 = None
-                before = len(studies)
-                studies = [s for s in studies if s.in_archs4 is True]
-                logger.info(
-                    "ARCHS4 filter: %d/%d studies available", len(studies), before
                 )
+
+        # Filter by ARCHS4 availability (batch via get_series_sample_ids)
+        if filter_archs4 and studies:
+            studies = self._filter_archs4_available(studies)
 
         return NDEGeoDiscoveryResult(
             mondo_ids_queried=mondo_ids,
             total_nde_records=len(all_hits),
             studies=studies,
         )
+
+    def _filter_archs4_available(
+        self, studies: List[GEOStudyMatch]
+    ) -> List[GEOStudyMatch]:
+        """Filter studies to only those present in ARCHS4."""
+        client = self.archs4_client
+        if client is None:
+            return studies
+
+        for study in studies:
+            try:
+                study.in_archs4 = client.has_series(study.gse_id)
+            except Exception:
+                study.in_archs4 = None
+        before = len(studies)
+        studies = [s for s in studies if s.in_archs4 is True]
+        logger.info("ARCHS4 filter: %d/%d studies available", len(studies), before)
+        return studies
 
     @staticmethod
     def _extract_gse_ids(hit: Dict) -> List[str]:

@@ -248,12 +248,110 @@ class DiseaseOntologyClient:
             uri, endpoint="ubergraph", limit=max_terms
         )
 
-        expanded_ids = []
-        labels: Dict[str, str] = {}
-        seen = set()
+        expanded_ids, labels = self._parse_subclass_results(subclasses)
 
-        for sc in subclasses:
-            sc_uri = sc.get("subclass", "")
+        # Ensure root is included
+        if mondo_id not in set(expanded_ids):
+            expanded_ids.insert(0, mondo_id)
+
+        result = OntologyExpansion(
+            root_id=mondo_id, expanded_ids=expanded_ids, labels=labels
+        )
+        self._cache_set(cache_key, result)
+        return result
+
+    def expand_mondo_ids_batch(
+        self,
+        mondo_ids: List[str],
+        max_terms: int = 50,
+    ) -> Dict[str, OntologyExpansion]:
+        """Expand multiple MONDO IDs in a single SPARQL query using VALUES.
+
+        Much faster than calling expand_mondo_id() in a loop — sends one
+        query to Ubergraph instead of N.
+
+        Args:
+            mondo_ids: List of numeric MONDO IDs
+            max_terms: Maximum total subclass results
+
+        Returns:
+            Dict mapping each mondo_id to its OntologyExpansion
+        """
+        if not mondo_ids:
+            return {}
+
+        # Check cache first — only query uncached IDs
+        results: Dict[str, OntologyExpansion] = {}
+        uncached = []
+        for mid in mondo_ids:
+            cache_key = f"expand:{mid}:{max_terms}"
+            cached = self._cache_get(cache_key)
+            if cached is not None:
+                results[mid] = cached
+            else:
+                uncached.append(mid)
+
+        if not uncached:
+            return results
+
+        # Build VALUES clause for batch query
+        values_entries = " ".join(
+            f"<{MONDO_URI_PREFIX}{mid}>" for mid in uncached
+        )
+        query = f"""
+        SELECT DISTINCT ?parent ?subclass ?label WHERE {{
+            VALUES ?parent {{ {values_entries} }}
+            ?subclass rdfs:subClassOf* ?parent .
+            ?subclass a owl:Class .
+            OPTIONAL {{ ?subclass rdfs:label ?label . }}
+            FILTER(STRSTARTS(STR(?subclass), "{MONDO_URI_PREFIX}"))
+        }} LIMIT {max_terms * len(uncached)}
+        """
+
+        try:
+            rows = self.sparql.query_simple(query, endpoint="ubergraph")
+        except Exception as e:
+            logger.warning("Batch expansion SPARQL failed: %s — falling back to sequential", e)
+            for mid in uncached:
+                results[mid] = self.expand_mondo_id(mid, max_terms=max_terms)
+            return results
+
+        # Group results by parent
+        by_parent: Dict[str, List[Dict[str, str]]] = {mid: [] for mid in uncached}
+        for row in rows:
+            parent_uri = row.get("parent", "")
+            if parent_uri.startswith(MONDO_URI_PREFIX):
+                parent_id = parent_uri[len(MONDO_URI_PREFIX):]
+                if parent_id in by_parent:
+                    by_parent[parent_id].append(row)
+
+        # Build OntologyExpansion for each parent
+        for mid in uncached:
+            expanded_ids, labels = self._parse_subclass_results(
+                by_parent[mid], uri_key="subclass"
+            )
+            if mid not in set(expanded_ids):
+                expanded_ids.insert(0, mid)
+
+            expansion = OntologyExpansion(
+                root_id=mid, expanded_ids=expanded_ids, labels=labels
+            )
+            results[mid] = expansion
+            self._cache_set(f"expand:{mid}:{max_terms}", expansion)
+
+        return results
+
+    @staticmethod
+    def _parse_subclass_results(
+        rows: List[Dict[str, str]], uri_key: str = "subclass"
+    ) -> Tuple[List[str], Dict[str, str]]:
+        """Parse SPARQL subclass results into ID list and label dict."""
+        expanded_ids: List[str] = []
+        labels: Dict[str, str] = {}
+        seen: set = set()
+
+        for sc in rows:
+            sc_uri = sc.get(uri_key, "")
             sc_label = sc.get("label", "")
             if sc_uri.startswith(MONDO_URI_PREFIX):
                 sc_id = sc_uri[len(MONDO_URI_PREFIX):]
@@ -263,12 +361,4 @@ class DiseaseOntologyClient:
                         labels[sc_id] = sc_label
                     seen.add(sc_id)
 
-        # Ensure root is included
-        if mondo_id not in seen:
-            expanded_ids.insert(0, mondo_id)
-
-        result = OntologyExpansion(
-            root_id=mondo_id, expanded_ids=expanded_ids, labels=labels
-        )
-        self._cache_set(cache_key, result)
-        return result
+        return expanded_ids, labels

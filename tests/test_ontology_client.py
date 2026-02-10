@@ -216,6 +216,96 @@ class TestExpandMondoId:
 
 
 # ---------------------------------------------------------------------------
+# Batch expansion with VALUES
+# ---------------------------------------------------------------------------
+
+class TestExpandMondoIdsBatch:
+
+    def test_single_sparql_call(self):
+        client = _make_client()
+        client.sparql.query_simple.return_value = [
+            {"parent": f"{MONDO_URI_PREFIX}0005311", "subclass": f"{MONDO_URI_PREFIX}0005311", "label": "atherosclerosis"},
+            {"parent": f"{MONDO_URI_PREFIX}0005311", "subclass": f"{MONDO_URI_PREFIX}0004993", "label": "coronary atherosclerosis"},
+            {"parent": f"{MONDO_URI_PREFIX}0002491", "subclass": f"{MONDO_URI_PREFIX}0002491", "label": "cerebral atherosclerosis"},
+        ]
+
+        results = client.expand_mondo_ids_batch(["0005311", "0002491"])
+
+        # Single SPARQL call for both IDs
+        assert client.sparql.query_simple.call_count == 1
+        assert "0005311" in results
+        assert "0002491" in results
+
+    def test_values_clause_in_query(self):
+        client = _make_client()
+        client.sparql.query_simple.return_value = []
+
+        client.expand_mondo_ids_batch(["0005311", "0004993"])
+
+        query_arg = client.sparql.query_simple.call_args[0][0]
+        assert "VALUES" in query_arg
+        assert "MONDO_0005311" in query_arg
+        assert "MONDO_0004993" in query_arg
+
+    def test_groups_by_parent(self):
+        client = _make_client()
+        client.sparql.query_simple.return_value = [
+            {"parent": f"{MONDO_URI_PREFIX}0005311", "subclass": f"{MONDO_URI_PREFIX}0004993", "label": "coronary"},
+            {"parent": f"{MONDO_URI_PREFIX}0005311", "subclass": f"{MONDO_URI_PREFIX}0005311", "label": "atherosclerosis"},
+            {"parent": f"{MONDO_URI_PREFIX}0099999", "subclass": f"{MONDO_URI_PREFIX}0099998", "label": "other subtype"},
+        ]
+
+        results = client.expand_mondo_ids_batch(["0005311", "0099999"])
+
+        assert "0004993" in results["0005311"].expanded_ids
+        assert "0099998" in results["0099999"].expanded_ids
+        # Each parent's subtypes should not leak into the other
+        assert "0099998" not in results["0005311"].expanded_ids
+
+    def test_root_included_if_not_in_results(self):
+        client = _make_client()
+        client.sparql.query_simple.return_value = [
+            {"parent": f"{MONDO_URI_PREFIX}0005311", "subclass": f"{MONDO_URI_PREFIX}0004993", "label": "coronary"},
+        ]
+
+        results = client.expand_mondo_ids_batch(["0005311"])
+
+        assert "0005311" in results["0005311"].expanded_ids
+
+    def test_uses_cache(self):
+        client = _make_client()
+        client.sparql.query_simple.return_value = [
+            {"parent": f"{MONDO_URI_PREFIX}0005311", "subclass": f"{MONDO_URI_PREFIX}0005311", "label": "atherosclerosis"},
+        ]
+
+        # First call
+        client.expand_mondo_ids_batch(["0005311"])
+        # Second call — should use cache
+        results = client.expand_mondo_ids_batch(["0005311"])
+
+        assert client.sparql.query_simple.call_count == 1
+        assert "0005311" in results
+
+    def test_empty_input(self):
+        client = _make_client()
+        results = client.expand_mondo_ids_batch([])
+        assert results == {}
+
+    def test_fallback_on_sparql_failure(self):
+        client = _make_client()
+        client.sparql.query_simple.side_effect = Exception("timeout")
+        client.sparql.get_subclasses.return_value = [
+            {"subclass": f"{MONDO_URI_PREFIX}0005311", "label": "atherosclerosis"},
+        ]
+
+        results = client.expand_mondo_ids_batch(["0005311"])
+
+        # Should fall back to sequential expand_mondo_id
+        assert "0005311" in results
+        assert client.sparql.get_subclasses.call_count == 1
+
+
+# ---------------------------------------------------------------------------
 # Rank match helper
 # ---------------------------------------------------------------------------
 

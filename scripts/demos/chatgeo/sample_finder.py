@@ -692,12 +692,14 @@ class SampleFinder:
             logger.info("No MONDO IDs found for '%s'", disease_term)
             return None
 
-        # 2. Expand via hierarchy
+        # 2. Expand via hierarchy (single SPARQL VALUES query)
         all_mondo_ids = []
+        top_ids = resolution.mondo_ids[:3]
         try:
-            for mid in resolution.mondo_ids[:3]:  # limit expansion to top 3
-                expansion = ont_client.expand_mondo_id(mid, max_terms=50)
-                all_mondo_ids.extend(expansion.expanded_ids)
+            expansions = ont_client.expand_mondo_ids_batch(top_ids, max_terms=50)
+            for mid in top_ids:
+                if mid in expansions:
+                    all_mondo_ids.extend(expansions[mid].expanded_ids)
             all_mondo_ids = list(dict.fromkeys(all_mondo_ids))  # dedup preserving order
         except Exception as e:
             logger.warning("Ontology expansion failed: %s — using resolved IDs only", e)
@@ -717,7 +719,7 @@ class SampleFinder:
             logger.info("NDE found 0 ARCHS4-available studies for MONDO IDs")
             return None
 
-        # 4. Classify samples within each study
+        # 4. Classify samples within each study (batch metadata fetch)
         # Build disease/control regex from query_spec or disease_term
         if query_spec:
             disease_regex = query_spec.disease_regex
@@ -726,23 +728,10 @@ class SampleFinder:
             disease_regex = re.escape(disease_term)
             control_regex = "healthy|control|normal"
 
-        ont_test_dfs = []
-        ont_control_dfs = []
-        studies_with_samples = 0
-
-        for study in discovery.studies:
-            test_df, control_df = self._classify_study_samples(
-                study.gse_id, disease_regex, control_regex
-            )
-            if not test_df.empty or not control_df.empty:
-                studies_with_samples += 1
-            if not test_df.empty:
-                ont_test_dfs.append(test_df)
-            if not control_df.empty:
-                ont_control_dfs.append(control_df)
-
-        ont_test = pd.concat(ont_test_dfs, ignore_index=True) if ont_test_dfs else pd.DataFrame()
-        ont_control = pd.concat(ont_control_dfs, ignore_index=True) if ont_control_dfs else pd.DataFrame()
+        gse_ids = [s.gse_id for s in discovery.studies]
+        ont_test, ont_control, studies_with_samples = self._classify_studies_batch(
+            gse_ids, disease_regex, control_regex
+        )
 
         # 5. Optionally merge with keyword search
         kw_test = pd.DataFrame()
@@ -877,6 +866,90 @@ class SampleFinder:
         control_df = metadata[control_mask & ~disease_mask]
 
         return test_df, control_df
+
+    def _classify_studies_batch(
+        self,
+        gse_ids: List[str],
+        disease_regex: str,
+        control_regex: str,
+    ) -> Tuple[pd.DataFrame, pd.DataFrame, int]:
+        """Classify samples across multiple studies using batch metadata fetch.
+
+        Instead of N separate get_metadata_by_series calls, collects all
+        sample IDs first then makes a single get_metadata_by_samples call,
+        dramatically reducing HDF5 I/O.
+
+        Args:
+            gse_ids: List of GEO series accessions
+            disease_regex: Regex pattern for disease/test samples
+            control_regex: Regex pattern for control samples
+
+        Returns:
+            Tuple of (test_df, control_df, n_studies_with_samples)
+        """
+        # Collect all sample IDs across studies in one pass
+        all_sample_ids: List[str] = []
+        for gse_id in gse_ids:
+            try:
+                sample_ids = self.client.get_series_sample_ids(gse_id)
+                all_sample_ids.extend(sample_ids)
+            except Exception as e:
+                logger.debug("Could not get sample IDs for %s: %s", gse_id, e)
+
+        if not all_sample_ids:
+            return pd.DataFrame(), pd.DataFrame(), 0
+
+        # Single batch metadata fetch for all samples
+        try:
+            all_metadata = self.client.get_metadata_by_samples(all_sample_ids)
+        except Exception as e:
+            logger.warning("Batch metadata fetch failed: %s — falling back to per-study", e)
+            return self._classify_studies_sequential(gse_ids, disease_regex, control_regex)
+
+        if all_metadata is None or all_metadata.empty:
+            return pd.DataFrame(), pd.DataFrame(), 0
+
+        # Classify all samples at once using regex
+        text = self._combine_text_fields(all_metadata)
+        disease_mask = text.str.contains(disease_regex, case=False, regex=True, na=False)
+        control_mask = text.str.contains(control_regex, case=False, regex=True, na=False)
+
+        test_df = all_metadata[disease_mask]
+        control_df = all_metadata[control_mask & ~disease_mask]
+
+        # Count studies with classifiable samples
+        studies_with_samples = 0
+        if "series_id" in all_metadata.columns:
+            classified = all_metadata[disease_mask | control_mask]
+            studies_with_samples = classified["series_id"].nunique()
+
+        return test_df, control_df, studies_with_samples
+
+    def _classify_studies_sequential(
+        self,
+        gse_ids: List[str],
+        disease_regex: str,
+        control_regex: str,
+    ) -> Tuple[pd.DataFrame, pd.DataFrame, int]:
+        """Fallback: classify studies one at a time."""
+        ont_test_dfs = []
+        ont_control_dfs = []
+        studies_with_samples = 0
+
+        for gse_id in gse_ids:
+            test_df, control_df = self._classify_study_samples(
+                gse_id, disease_regex, control_regex
+            )
+            if not test_df.empty or not control_df.empty:
+                studies_with_samples += 1
+            if not test_df.empty:
+                ont_test_dfs.append(test_df)
+            if not control_df.empty:
+                ont_control_dfs.append(control_df)
+
+        ont_test = pd.concat(ont_test_dfs, ignore_index=True) if ont_test_dfs else pd.DataFrame()
+        ont_control = pd.concat(ont_control_dfs, ignore_index=True) if ont_control_dfs else pd.DataFrame()
+        return ont_test, ont_control, studies_with_samples
 
     @staticmethod
     def _merge_sample_sources(

@@ -177,18 +177,42 @@ class TestDiscoverStudies:
         query_arg = mock_nde.fetch_all.call_args[1]["query"]
         assert 'Homo sapiens' in query_arg
 
-    def test_nde_query_failure_continues(self):
+    def test_nde_batch_failure_continues(self):
+        """With batching, IDs are grouped. A failed batch is skipped but
+        subsequent batches still succeed."""
         mock_nde = MagicMock()
         mock_nde.fetch_all.side_effect = [
-            Exception("timeout"),
-            [_make_hit(identifier="GSE12345")],
+            Exception("timeout"),  # first batch fails
+            [_make_hit(identifier="GSE12345")],  # second batch succeeds
+        ]
+
+        # Use batch_size=1 so each ID is its own batch
+        discovery = NDEGeoDiscovery(nde_client=mock_nde)
+        result = discovery.discover_studies(
+            ["0005311", "0004993"], filter_archs4=False, batch_size=1
+        )
+
+        # Second batch should still succeed
+        assert result.n_studies == 1
+
+    def test_batched_or_query(self):
+        """Multiple MONDO IDs should be combined into a single OR query."""
+        mock_nde = MagicMock()
+        mock_nde.fetch_all.return_value = [
+            _make_hit(identifier="GSE12345"),
         ]
 
         discovery = NDEGeoDiscovery(nde_client=mock_nde)
-        result = discovery.discover_studies(["0005311", "0004993"], filter_archs4=False)
+        discovery.discover_studies(
+            ["0005311", "0004993", "0002491"], filter_archs4=False, batch_size=10
+        )
 
-        # Second MONDO ID should still succeed
-        assert result.n_studies == 1
+        # Should have made exactly 1 call (all 3 IDs in one batch)
+        assert mock_nde.fetch_all.call_count == 1
+        query_arg = mock_nde.fetch_all.call_args[1]["query"]
+        assert "0005311" in query_arg
+        assert "0004993" in query_arg
+        assert "OR" in query_arg
 
     def test_empty_result(self):
         mock_nde = MagicMock()
