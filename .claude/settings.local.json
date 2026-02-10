@@ -48,7 +48,21 @@
       "Bash(python3.11 -m okn_wobd.cli:*)",
       "Bash(python3.11:*)",
       "Bash(okn-wobd gxa convert:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git -C /Users/bgood/Documents/GitHub/mcp-proto-okn log --oneline)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(echo:*)",
+      "Bash(RUN_INTEGRATION_TESTS=1 python3.11 -m pytest:*)",
+      "Bash(git -C /Users/bgood/Documents/GitHub/OKN-WOBD diff pyproject.toml)",
+      "Bash(git -C /Users/bgood/Documents/GitHub/OKN-WOBD add pyproject.toml config/mcp-dev.json config/biomni.yaml src/okn_wobd/mcp_server/__init__.py src/okn_wobd/mcp_server/__main__.py src/okn_wobd/mcp_server/server.py src/okn_wobd/mcp_server/tools_analysis.py src/okn_wobd/mcp_server/tools_chatgeo.py tests/test_mcp_server.py tests/test_mcp_analysis_tools.py tests/test_mcp_chatgeo_tools.py tests/test_mcp_integration.py)",
+      "Bash(git -C /Users/bgood/Documents/GitHub/OKN-WOBD commit -m \"$\\(cat <<''EOF''\nAdd MCP server exposing analysis tools for Claude Desktop and Biomni\n\nImplements an MCP stdio server \\(src/okn_wobd/mcp_server/\\) that wraps the\nexisting analysis_tools and chatgeo packages as 7 MCP tools:\n- health_check, gene_disease_paths, gene_neighborhood,\n  drug_disease_opposing_expression, differential_expression,\n  find_samples, enrichment_analysis\n\nKey design decisions:\n- stdout→stderr redirect \\(MCP uses stdout for JSON-RPC\\)\n- SystemExit catch \\(chatgeo calls sys.exit on errors\\)\n- Error dicts instead of exceptions for graceful degradation\n- Conservative defaults \\(200 samples, 30s SPARQL timeout\\) to stay\n  within Claude Desktop''s ~60s tool call timeout\n- Tool descriptions include runtime estimates to guide LLM usage\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C /Users/bgood/Documents/GitHub/OKN-WOBD add src/okn_wobd/mcp_server/tools_chatgeo.py tests/test_mcp_chatgeo_tools.py)",
+      "Bash(git -C /Users/bgood/Documents/GitHub/OKN-WOBD commit -m \"$\\(cat <<''EOF''\nAdd background job dispatch for slow DE methods \\(deseq2\\)\n\nFast methods \\(mann-whitney, welch-t\\) run synchronously within the ~60s\nMCP client timeout. DESeq2 is dispatched to a background thread and\nreturns a job_id immediately — poll with get_analysis_result\\(\\) tool.\n\nChanges:\n- Default method: deseq2 → mann-whitney \\(fast, ~20-40s\\)\n- Default samples: 500 → 100 \\(faster data retrieval\\)\n- New get_analysis_result tool for polling background jobs\n- Thread-safe job store with status tracking and elapsed time\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(ARCHS4_DATA_DIR=/Users/bgood/scripps/data/archs4 python3.11:*)",
+      "WebFetch(domain:api.data.niaid.nih.gov)",
+      "WebFetch(domain:data.niaid.nih.gov)",
+      "WebFetch(domain:arxiv.org)",
+      "WebFetch(domain:docs.biothings.io)"
     ],
     "deny": [],
     "ask": []
