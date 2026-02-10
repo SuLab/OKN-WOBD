@@ -18,7 +18,7 @@ anthropic         # optional, for AI interpretation
 python-dotenv     # optional, for .env file support
 ```
 
-**ARCHS4 HDF5 data files** (~15 GB each):
+**ARCHS4 HDF5 data files** (~58 GB each):
 
 Download from [ARCHS4](https://maayanlab.cloud/archs4/download.html) and place in a local directory:
 
@@ -319,6 +319,25 @@ DESeq2 remains available via `--method deseq2` and is appropriate when:
 - [ARCHS4 platform](https://maayanlab.cloud/archs4/) and [Nature Communications paper](https://doi.org/10.1038/s41467-018-03751-6)
 - [DESeq2 vignette](https://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html)
 - [tximport documentation](https://bioconductor.org/packages/tximport/)
+
+## Performance: SQLite Metadata Index
+
+ARCHS4's HDF5 file contains ~1.05M samples across ~36K studies. The `archs4py` library has no indexing, so every metadata lookup loads the entire series_id array and does a linear scan. The ontology-enhanced pipeline calls `get_series_sample_ids()` for each of ~272 NDE-discovered studies, resulting in 272 redundant full scans.
+
+`ARCHS4Client` now automatically builds and uses a SQLite metadata index (`*.metadata.db` alongside the HDF5 file). The index is built on first use (~15s) and provides indexed lookups, FTS5 full-text search, and REGEXP fallback.
+
+| Operation | Without Index | With Index | Speedup |
+|-----------|--------------|------------|---------|
+| `has_series(gse_id)` | ~600ms | <0.01ms | ~60,000x |
+| 272-study batch classify | ~170s | <1ms | ~170,000x |
+| `search_metadata` (FTS5) | ~5-15s | 33ms | ~300x |
+| Full ontology pipeline (osteoarthritis) | 173s | 11s | **16x** |
+
+The index is transparent — all existing code benefits without changes. To disable it:
+
+```python
+client = ARCHS4Client(use_index=False)
+```
 
 ## Module Structure
 
