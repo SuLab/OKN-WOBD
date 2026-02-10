@@ -705,12 +705,13 @@ class SampleFinder:
             logger.warning("Ontology expansion failed: %s — using resolved IDs only", e)
             all_mondo_ids = list(resolution.mondo_ids)
 
-        # 3. Discover GSE IDs via NDE
-        # Limit MONDO IDs to avoid excessive NDE queries (each is an HTTP call)
+        # 3. Discover GSE IDs via NDE (SPARQL preferred, REST API fallback)
+        # Skip ARCHS4 filtering here — _classify_studies_batch handles it
+        # by looking up sample IDs per study (studies not in ARCHS4 return nothing).
         query_mondo_ids = all_mondo_ids[:20]
         logger.info("Querying NDE for %d/%d MONDO IDs", len(query_mondo_ids), len(all_mondo_ids))
         try:
-            discovery = nde.discover_studies(query_mondo_ids, filter_archs4=True)
+            discovery = nde.discover_studies(query_mondo_ids, filter_archs4=False)
         except Exception as e:
             logger.warning("NDE study discovery failed: %s", e)
             return None

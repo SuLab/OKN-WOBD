@@ -12,6 +12,7 @@ if _demos not in sys.path:
     sys.path.insert(0, _demos)
 
 from clients.nde_geo import (
+    MONDO_URI_PREFIX,
     GEOStudyMatch,
     NDEGeoDiscovery,
     NDEGeoDiscoveryResult,
@@ -121,7 +122,14 @@ class TestExtractMondoIds:
 # Discover studies
 # ---------------------------------------------------------------------------
 
-class TestDiscoverStudies:
+class TestDiscoverStudiesRest:
+    """Tests for REST API-based discovery (fallback path)."""
+
+    def _make_rest_discovery(self, mock_nde, mock_archs4=None):
+        """Create a discovery instance that skips SPARQL (forces REST)."""
+        d = NDEGeoDiscovery(nde_client=mock_nde, _archs4_client=mock_archs4)
+        d._sparql_client = False  # force REST fallback
+        return d
 
     def test_basic_discovery(self):
         mock_nde = MagicMock()
@@ -130,8 +138,7 @@ class TestDiscoverStudies:
                       healthCondition=[{"identifier": "MONDO:0005311", "name": "atherosclerosis"}]),
         ]
 
-        discovery = NDEGeoDiscovery(nde_client=mock_nde)
-        # Skip ARCHS4 filtering
+        discovery = self._make_rest_discovery(mock_nde)
         result = discovery.discover_studies(["0005311"], filter_archs4=False)
 
         assert result.n_studies == 1
@@ -140,11 +147,10 @@ class TestDiscoverStudies:
 
     def test_dedup_across_mondo_ids(self):
         mock_nde = MagicMock()
-        # Same GSE returned for two different MONDO IDs
         hit = _make_hit(identifier="GSE12345")
         mock_nde.fetch_all.return_value = [hit]
 
-        discovery = NDEGeoDiscovery(nde_client=mock_nde)
+        discovery = self._make_rest_discovery(mock_nde)
         result = discovery.discover_studies(["0005311", "0004993"], filter_archs4=False)
 
         gse_ids = [s.gse_id for s in result.studies]
@@ -160,7 +166,7 @@ class TestDiscoverStudies:
         mock_archs4 = MagicMock()
         mock_archs4.has_series.side_effect = lambda gse: gse == "GSE12345"
 
-        discovery = NDEGeoDiscovery(nde_client=mock_nde, _archs4_client=mock_archs4)
+        discovery = self._make_rest_discovery(mock_nde, mock_archs4)
         result = discovery.discover_studies(["0005311"], filter_archs4=True)
 
         assert result.n_studies == 1
@@ -170,7 +176,7 @@ class TestDiscoverStudies:
         mock_nde = MagicMock()
         mock_nde.fetch_all.return_value = []
 
-        discovery = NDEGeoDiscovery(nde_client=mock_nde)
+        discovery = self._make_rest_discovery(mock_nde)
         discovery.discover_studies(["0005311"], species_filter="Homo sapiens",
                                    filter_archs4=False)
 
@@ -186,8 +192,7 @@ class TestDiscoverStudies:
             [_make_hit(identifier="GSE12345")],  # second batch succeeds
         ]
 
-        # Use batch_size=1 so each ID is its own batch
-        discovery = NDEGeoDiscovery(nde_client=mock_nde)
+        discovery = self._make_rest_discovery(mock_nde)
         result = discovery.discover_studies(
             ["0005311", "0004993"], filter_archs4=False, batch_size=1
         )
@@ -202,7 +207,7 @@ class TestDiscoverStudies:
             _make_hit(identifier="GSE12345"),
         ]
 
-        discovery = NDEGeoDiscovery(nde_client=mock_nde)
+        discovery = self._make_rest_discovery(mock_nde)
         discovery.discover_studies(
             ["0005311", "0004993", "0002491"], filter_archs4=False, batch_size=10
         )
@@ -218,11 +223,166 @@ class TestDiscoverStudies:
         mock_nde = MagicMock()
         mock_nde.fetch_all.return_value = []
 
-        discovery = NDEGeoDiscovery(nde_client=mock_nde)
+        discovery = self._make_rest_discovery(mock_nde)
         result = discovery.discover_studies(["9999999"], filter_archs4=False)
 
         assert result.n_studies == 0
         assert result.gse_ids == []
+
+
+# ---------------------------------------------------------------------------
+# SPARQL-based discovery
+# ---------------------------------------------------------------------------
+
+class TestDiscoverStudiesSparql:
+
+    def _make_sparql_row(self, gse_id, mondo_id, name="Test Study"):
+        """Build a row like SPARQLClient.query_simple returns."""
+        return {
+            "mondoUri": f"{MONDO_URI_PREFIX}{mondo_id}",
+            "identifier": gse_id,
+            "name": name,
+        }
+
+    def _make_sparql_discovery(self, sparql_rows):
+        """Create a discovery with a mock SPARQL client."""
+        mock_sparql = MagicMock()
+        mock_sparql.query_simple.return_value = sparql_rows
+        d = NDEGeoDiscovery()
+        d._sparql_client = mock_sparql
+        return d
+
+    def test_basic_sparql_discovery(self):
+        rows = [
+            self._make_sparql_row("GSE12345", "0005311", "Atherosclerosis Study"),
+            self._make_sparql_row("GSE67890", "0005311", "Plaque Study"),
+        ]
+        discovery = self._make_sparql_discovery(rows)
+
+        result = discovery.discover_studies(["0005311"], filter_archs4=False)
+
+        assert result.n_studies == 2
+        assert {s.gse_id for s in result.studies} == {"GSE12345", "GSE67890"}
+        assert result.total_nde_records == 2
+
+    def test_sparql_dedup(self):
+        """Same GSE returned for two MONDO IDs should be deduplicated."""
+        rows = [
+            self._make_sparql_row("GSE12345", "0005311"),
+            self._make_sparql_row("GSE12345", "0004993"),
+        ]
+        discovery = self._make_sparql_discovery(rows)
+
+        result = discovery.discover_studies(
+            ["0005311", "0004993"], filter_archs4=False
+        )
+
+        assert result.n_studies == 1
+        assert result.studies[0].gse_id == "GSE12345"
+
+    def test_sparql_values_clause(self):
+        """VALUES clause should contain all MONDO URIs."""
+        mock_sparql = MagicMock()
+        mock_sparql.query_simple.return_value = []
+        d = NDEGeoDiscovery()
+        d._sparql_client = mock_sparql
+
+        d.discover_studies(
+            ["0005311", "0004993"], filter_archs4=False
+        )
+
+        query_arg = mock_sparql.query_simple.call_args[0][0]
+        assert "VALUES" in query_arg
+        assert "MONDO_0005311" in query_arg
+        assert "MONDO_0004993" in query_arg
+
+    def test_sparql_species_filter(self):
+        """Human species filter should add a taxonomy triple."""
+        mock_sparql = MagicMock()
+        mock_sparql.query_simple.return_value = []
+        d = NDEGeoDiscovery()
+        d._sparql_client = mock_sparql
+
+        d.discover_studies(
+            ["0005311"], species_filter="Homo sapiens", filter_archs4=False
+        )
+
+        query_arg = mock_sparql.query_simple.call_args[0][0]
+        assert "taxonomy/9606" in query_arg
+
+    def test_sparql_no_species_filter(self):
+        """Empty species filter should not include taxonomy triple."""
+        mock_sparql = MagicMock()
+        mock_sparql.query_simple.return_value = []
+        d = NDEGeoDiscovery()
+        d._sparql_client = mock_sparql
+
+        d.discover_studies(
+            ["0005311"], species_filter="", filter_archs4=False
+        )
+
+        query_arg = mock_sparql.query_simple.call_args[0][0]
+        assert "taxonomy" not in query_arg
+
+    def test_sparql_archs4_filtering(self):
+        rows = [
+            self._make_sparql_row("GSE12345", "0005311"),
+            self._make_sparql_row("GSE67890", "0005311"),
+        ]
+        mock_sparql = MagicMock()
+        mock_sparql.query_simple.return_value = rows
+
+        mock_archs4 = MagicMock()
+        mock_archs4.has_series.side_effect = lambda gse: gse == "GSE12345"
+
+        d = NDEGeoDiscovery(_archs4_client=mock_archs4)
+        d._sparql_client = mock_sparql
+
+        result = d.discover_studies(["0005311"], filter_archs4=True)
+
+        assert result.n_studies == 1
+        assert result.studies[0].gse_id == "GSE12345"
+
+    def test_sparql_failure_falls_back_to_rest(self):
+        """If SPARQL fails, discover_studies should fall back to REST."""
+        mock_sparql = MagicMock()
+        mock_sparql.query_simple.side_effect = Exception("SPARQL timeout")
+
+        mock_nde = MagicMock()
+        mock_nde.fetch_all.return_value = [
+            _make_hit(identifier="GSE12345"),
+        ]
+
+        d = NDEGeoDiscovery(nde_client=mock_nde)
+        d._sparql_client = mock_sparql
+
+        result = d.discover_studies(["0005311"], filter_archs4=False)
+
+        # Should have fallen back to REST
+        assert mock_nde.fetch_all.called
+        assert result.n_studies == 1
+        assert result.studies[0].gse_id == "GSE12345"
+
+    def test_sparql_empty_result(self):
+        discovery = self._make_sparql_discovery([])
+
+        result = discovery.discover_studies(["9999999"], filter_archs4=False)
+
+        assert result.n_studies == 0
+        assert result.gse_ids == []
+
+    def test_sparql_single_query_call(self):
+        """Should make exactly 1 SPARQL call regardless of MONDO ID count."""
+        mock_sparql = MagicMock()
+        mock_sparql.query_simple.return_value = []
+        d = NDEGeoDiscovery()
+        d._sparql_client = mock_sparql
+
+        d.discover_studies(
+            ["0005311", "0004993", "0002491"], filter_archs4=False
+        )
+
+        assert mock_sparql.query_simple.call_count == 1
 
 
 # ---------------------------------------------------------------------------
