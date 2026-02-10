@@ -199,8 +199,19 @@ class TestFindSamplesTool:
             result = fn(disease_term="psoriasis")
             assert "error" in result
 
+    def test_returns_job_id(self):
+        """find_samples should dispatch to background and return job_id."""
+        fn = _get_tool_fn("find_samples")
+        with patch.dict(os.environ, {"ARCHS4_DATA_DIR": "/tmp"}):
+            with patch("pathlib.Path.is_dir", return_value=True):
+                result = fn(disease_term="psoriasis")
+
+        assert "job_id" in result
+        assert result["status"] == "running"
+        assert "get_analysis_result" in result["message"]
+
     @patch("chatgeo.sample_finder.SampleFinder")
-    def test_returns_sample_info(self, MockFinder):
+    def test_returns_sample_info_via_polling(self, MockFinder):
         import pandas as pd
 
         mock_pooled = MagicMock()
@@ -213,6 +224,7 @@ class TestFindSamplesTool:
         mock_pooled.test_ids = [f"GSM{i}" for i in range(10)]
         mock_pooled.control_ids = [f"GSM{i}" for i in range(100, 120)]
         mock_pooled.overlap_removed = 2
+        mock_pooled.filtering_stats = None
         mock_pooled.test_samples = pd.DataFrame({"series_id": ["GSE001"] * 10, "geo_accession": [f"GSM{i}" for i in range(10)]})
         mock_pooled.control_samples = pd.DataFrame({"series_id": ["GSE002"] * 20, "geo_accession": [f"GSM{i}" for i in range(100, 120)]})
 
@@ -222,14 +234,26 @@ class TestFindSamplesTool:
         instance.find_pooled_samples_ontology.return_value = None
 
         fn = _get_tool_fn("find_samples")
+        poll_fn = _get_tool_fn("get_analysis_result")
         with patch.dict(os.environ, {"ARCHS4_DATA_DIR": "/tmp"}):
             with patch("pathlib.Path.is_dir", return_value=True):
                 result = fn(disease_term="psoriasis", tissue="skin")
 
-        assert result["n_test_samples"] == 10
-        assert result["n_control_samples"] == 20
-        assert "GSE001" in result["test_studies"]
-        assert result["overlap_removed"] == 2
+        assert "job_id" in result
+        assert result["status"] == "running"
+
+        # Wait for background thread to finish
+        for _ in range(50):
+            poll = poll_fn(job_id=result["job_id"])
+            if poll["status"] != "running":
+                break
+            time.sleep(0.1)
+
+        assert poll["status"] == "completed"
+        assert poll["result"]["n_test_samples"] == 10
+        assert poll["result"]["n_control_samples"] == 20
+        assert "GSE001" in poll["result"]["test_studies"]
+        assert poll["result"]["overlap_removed"] == 2
 
 
 # ---------------------------------------------------------------------------

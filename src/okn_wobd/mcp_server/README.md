@@ -68,7 +68,7 @@ Edit `scripts/demos/.env`:
 
 | Variable | Required for | Description |
 |----------|-------------|-------------|
-| `ARCHS4_DATA_DIR` | ChatGEO tools | Path to directory with ARCHS4 HDF5 files (~15 GB each) |
+| `ARCHS4_DATA_DIR` | ChatGEO tools | Path to directory with ARCHS4 HDF5 files (~58 GB each) |
 | `ANTHROPIC_API_KEY` | LLM interpretation | Anthropic API key (optional — interpretation is off by default in MCP) |
 
 The three SPARQL-based analysis tools (`gene_disease_paths`, `gene_neighborhood`, `drug_disease_opposing_expression`) and `enrichment_analysis` work without ARCHS4 data.

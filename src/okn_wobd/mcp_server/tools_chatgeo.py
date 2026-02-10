@@ -102,6 +102,116 @@ def _run_de_background(job_id: str, kwargs: dict) -> None:
         }
 
 
+def _run_find_samples_background(
+    job_id: str,
+    disease_term: str,
+    tissue: Optional[str],
+    max_test_samples: int,
+    max_control_samples: int,
+    use_ontology: bool,
+) -> None:
+    """Run sample search in a background thread."""
+    logger.info("Background find_samples job %s started (disease=%s, ontology=%s)",
+                job_id, disease_term, use_ontology)
+    start = time.time()
+    try:
+        with redirect_prints():
+            from chatgeo.query_builder import PatternQueryStrategy, QueryBuilder
+            from chatgeo.sample_finder import SampleFinder
+
+            data_dir = os.environ["ARCHS4_DATA_DIR"]
+            query_builder = QueryBuilder(strategy=PatternQueryStrategy())
+            finder = SampleFinder(data_dir=data_dir, query_builder=query_builder)
+
+            pooled = None
+            if use_ontology:
+                try:
+                    pooled = finder.find_pooled_samples_ontology(
+                        disease_term=disease_term,
+                        tissue=tissue,
+                        max_test_samples=max_test_samples,
+                        max_control_samples=max_control_samples,
+                        keyword_fallback=True,
+                    )
+                except Exception as e:
+                    logger.warning("Ontology search failed: %s — falling back to keyword", e)
+                    pooled = None
+
+                if pooled is not None and pooled.n_test == 0:
+                    pooled = None
+
+            if pooled is None:
+                pooled = finder.find_pooled_samples(
+                    disease_term=disease_term,
+                    tissue=tissue,
+                    max_test_samples=max_test_samples,
+                    max_control_samples=max_control_samples,
+                )
+    except SystemExit as e:
+        logger.error("find_samples job %s SystemExit(%s)\n%s",
+                      job_id, e.code, traceback.format_exc())
+        with _jobs_lock:
+            _jobs[job_id] = {
+                "status": "error",
+                "result": {
+                    "error": f"Sample search failed (exit code {e.code}). "
+                    "Common causes: no matching samples found, ARCHS4 data issue."
+                },
+                "finished_at": time.time(),
+            }
+        return
+    except Exception as e:
+        logger.error("find_samples job %s failed: %s\n%s",
+                      job_id, e, traceback.format_exc())
+        with _jobs_lock:
+            _jobs[job_id] = {
+                "status": "error",
+                "result": {"error": str(e)},
+                "finished_at": time.time(),
+            }
+        return
+
+    elapsed = time.time() - start
+
+    # Build result dict
+    test_studies = []
+    control_studies = []
+    if not pooled.test_samples.empty and "series_id" in pooled.test_samples.columns:
+        test_studies = sorted(set(pooled.test_samples["series_id"].tolist()))
+    if not pooled.control_samples.empty and "series_id" in pooled.control_samples.columns:
+        control_studies = sorted(set(pooled.control_samples["series_id"].tolist()))
+
+    result = {
+        "disease_term": disease_term,
+        "tissue": tissue,
+        "n_test_samples": pooled.n_test,
+        "n_control_samples": pooled.n_control,
+        "total_test_found": pooled.total_test_found,
+        "total_control_found": pooled.total_control_found,
+        "test_query": pooled.test_query,
+        "control_query": pooled.control_query,
+        "test_studies": test_studies,
+        "control_studies": control_studies,
+        "test_sample_ids": pooled.test_ids[:50],
+        "control_sample_ids": pooled.control_ids[:50],
+        "overlap_removed": pooled.overlap_removed,
+    }
+
+    ont_stats = (pooled.filtering_stats or {}).get("ontology_discovery")
+    if ont_stats:
+        result["ontology_discovery"] = ont_stats
+
+    logger.info("find_samples job %s completed in %.1fs (%d test, %d control)",
+                 job_id, elapsed, pooled.n_test, pooled.n_control)
+
+    with _jobs_lock:
+        _jobs[job_id] = {
+            "status": "completed",
+            "result": result,
+            "finished_at": time.time(),
+        }
+
+
 # ---------------------------------------------------------------------------
 # Tool registration
 # ---------------------------------------------------------------------------
@@ -228,17 +338,20 @@ def register_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def get_analysis_result(job_id: str) -> dict:
-        """Poll for the result of a background differential expression analysis.
+        """Poll for the result of a background job.
 
-        ``differential_expression`` always returns a ``job_id`` and runs in
-        the background. Use this tool to check whether the job has completed
-        and retrieve its results.
+        Both ``differential_expression`` and ``find_samples`` run in the
+        background and return a ``job_id``. Use this tool to check whether
+        the job has completed and retrieve its results.
 
-        Poll every 30-60 seconds. Typical runtime: 30-60s for mann-whitney /
-        welch-t, 2-5 minutes for deseq2.
+        Poll every 30-60 seconds. Typical runtime:
+        - ``find_samples``: 30-120s (longer with ontology search)
+        - ``differential_expression``: 30-60s (mann-whitney/welch-t),
+          2-5 min (deseq2)
 
         Args:
-            job_id: The job ID returned by ``differential_expression``.
+            job_id: The job ID returned by ``differential_expression``
+                or ``find_samples``.
 
         Returns:
             If still running: ``{"status": "running", "elapsed_seconds": ...}``
@@ -283,9 +396,9 @@ def register_tools(mcp: FastMCP) -> None:
         discovers studies via MONDO ontology annotations in NDE, dramatically
         improving recall for well-annotated diseases.
 
-        This is a moderately fast operation (~10-30 seconds) and is
-        recommended before calling ``differential_expression`` to verify
-        data availability and sample counts.
+        **Runs in the background** and returns a ``job_id`` immediately.
+        Call ``get_analysis_result`` with the ``job_id`` to poll for results.
+        Typical runtime: 30-120 seconds depending on disease and ontology mode.
 
         **Requires** the ARCHS4_DATA_DIR environment variable to be set.
 
@@ -298,8 +411,8 @@ def register_tools(mcp: FastMCP) -> None:
                 Set to False for keyword-only search.
 
         Returns:
-            Dict with sample counts, GEO study accessions, sample IDs,
-            and ontology discovery stats when applicable.
+            Dict with ``job_id`` and ``status`` ("running") — poll with
+            ``get_analysis_result``.
         """
         logger.info("find_samples called: disease_term=%r, tissue=%r, use_ontology=%s",
                      disease_term, tissue, use_ontology)
@@ -307,90 +420,34 @@ def register_tools(mcp: FastMCP) -> None:
         if err:
             return {"error": err}
 
-        try:
-            with redirect_prints():
-                from chatgeo.query_builder import PatternQueryStrategy, QueryBuilder
-                from chatgeo.sample_finder import SampleFinder
+        job_id = str(uuid.uuid4())[:8]
+        with _jobs_lock:
+            _jobs[job_id] = {
+                "status": "running",
+                "result": None,
+                "started_at": time.time(),
+                "query": f"find_samples: {disease_term}",
+                "method": "ontology" if use_ontology else "keyword",
+            }
 
-                data_dir = os.environ["ARCHS4_DATA_DIR"]
-                query_builder = QueryBuilder(strategy=PatternQueryStrategy())
-                finder = SampleFinder(data_dir=data_dir, query_builder=query_builder)
+        thread = threading.Thread(
+            target=_run_find_samples_background,
+            args=(job_id, disease_term, tissue,
+                  max_test_samples, max_control_samples, use_ontology),
+            daemon=True,
+        )
+        thread.start()
+        logger.info("Dispatched find_samples job %s (disease=%s, tissue=%s, ontology=%s)",
+                     job_id, disease_term, tissue, use_ontology)
 
-                pooled = None
-                if use_ontology:
-                    # Run ontology path with a timeout to avoid MCP
-                    # client timeouts (~60s).  If it doesn't finish in
-                    # 30s we fall back to the fast keyword-only search.
-                    import concurrent.futures
-                    _ONT_TIMEOUT = 30  # seconds
-
-                    def _run_ontology():
-                        return finder.find_pooled_samples_ontology(
-                            disease_term=disease_term,
-                            tissue=tissue,
-                            max_test_samples=max_test_samples,
-                            max_control_samples=max_control_samples,
-                            keyword_fallback=False,
-                        )
-
-                    try:
-                        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
-                            future = pool.submit(_run_ontology)
-                            pooled = future.result(timeout=_ONT_TIMEOUT)
-                    except concurrent.futures.TimeoutError:
-                        logger.warning("Ontology search timed out after %ds, "
-                                       "falling back to keyword search", _ONT_TIMEOUT)
-                        pooled = None
-                    except Exception as e:
-                        logger.warning("Ontology search failed: %s", e)
-                        pooled = None
-
-                    if pooled is not None and pooled.n_test == 0:
-                        pooled = None
-
-                if pooled is None:
-                    pooled = finder.find_pooled_samples(
-                        disease_term=disease_term,
-                        tissue=tissue,
-                        max_test_samples=max_test_samples,
-                        max_control_samples=max_control_samples,
-                    )
-        except Exception as e:
-            logger.error("find_samples failed: %s", e)
-            return {"error": str(e)}
-
-        # Extract study IDs from sample metadata
-        test_studies = []
-        control_studies = []
-        if not pooled.test_samples.empty and "series_id" in pooled.test_samples.columns:
-            test_studies = sorted(set(pooled.test_samples["series_id"].tolist()))
-        if not pooled.control_samples.empty and "series_id" in pooled.control_samples.columns:
-            control_studies = sorted(set(pooled.control_samples["series_id"].tolist()))
-
-        result = {
-            "disease_term": disease_term,
-            "tissue": tissue,
-            "n_test_samples": pooled.n_test,
-            "n_control_samples": pooled.n_control,
-            "total_test_found": pooled.total_test_found,
-            "total_control_found": pooled.total_control_found,
-            "test_query": pooled.test_query,
-            "control_query": pooled.control_query,
-            "test_studies": test_studies,
-            "control_studies": control_studies,
-            "test_sample_ids": pooled.test_ids[:50],
-            "control_sample_ids": pooled.control_ids[:50],
-            "overlap_removed": pooled.overlap_removed,
+        return {
+            "job_id": job_id,
+            "status": "running",
+            "message": (
+                f"Sample search started in background (job {job_id}). "
+                f"Call get_analysis_result(job_id='{job_id}') to check progress."
+            ),
         }
-
-        # Include ontology stats if available
-        ont_stats = (pooled.filtering_stats or {}).get("ontology_discovery")
-        if ont_stats:
-            result["ontology_discovery"] = ont_stats
-
-        logger.info("find_samples result: %d test, %d control samples",
-                     pooled.n_test, pooled.n_control)
-        return result
 
     @mcp.tool()
     def resolve_disease_ontology(
