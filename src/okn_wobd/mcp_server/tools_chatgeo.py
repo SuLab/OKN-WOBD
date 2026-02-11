@@ -102,6 +102,151 @@ def _run_de_background(job_id: str, kwargs: dict) -> None:
         }
 
 
+def _build_study_breakdown(test_df, control_df) -> dict:
+    """Build study-level breakdown from test/control DataFrames."""
+    import pandas as pd
+
+    test_by_study: dict[str, int] = {}
+    control_by_study: dict[str, int] = {}
+    platform_counts: dict[str, int] = {}
+
+    for label, df, counts in [
+        ("test", test_df, test_by_study),
+        ("control", control_df, control_by_study),
+    ]:
+        if df is None or df.empty or "series_id" not in df.columns:
+            continue
+        for sid in df["series_id"].dropna():
+            for part in str(sid).split(","):
+                part = part.strip()
+                if part.startswith("GSE"):
+                    counts[part] = counts.get(part, 0) + 1
+
+    # Platform distribution
+    for df in [test_df, control_df]:
+        if df is not None and not df.empty and "platform_id" in df.columns:
+            for plat in df["platform_id"].dropna():
+                plat = str(plat)
+                platform_counts[plat] = platform_counts.get(plat, 0) + 1
+
+    all_studies = set(test_by_study) | set(control_by_study)
+    studies_with_test = len(test_by_study)
+    studies_with_control = len(control_by_study)
+    studies_with_both = len(set(test_by_study) & set(control_by_study))
+
+    # Top studies by total samples
+    top_studies = []
+    for sid in all_studies:
+        n_test = test_by_study.get(sid, 0)
+        n_control = control_by_study.get(sid, 0)
+        top_studies.append({
+            "study_id": sid,
+            "n_test": n_test,
+            "n_control": n_control,
+        })
+    top_studies.sort(key=lambda s: s["n_test"] + s["n_control"], reverse=True)
+
+    return {
+        "studies_with_test": studies_with_test,
+        "studies_with_control": studies_with_control,
+        "studies_with_both": studies_with_both,
+        "top_studies": top_studies[:20],
+        "platform_distribution": platform_counts,
+        "recommendation": "study-matched" if studies_with_both >= 3 else "pooled",
+    }
+
+
+def _run_get_sample_metadata_background(
+    job_id: str,
+    disease_term: str,
+    tissue: Optional[str],
+    max_samples: int,
+    use_ontology: bool,
+) -> None:
+    """Run sample metadata lookup in a background thread."""
+    logger.info("Background get_sample_metadata job %s started", job_id)
+    start = time.time()
+    try:
+        with redirect_prints():
+            from chatgeo.query_builder import PatternQueryStrategy, QueryBuilder
+            from chatgeo.sample_finder import SampleFinder
+
+            data_dir = os.environ["ARCHS4_DATA_DIR"]
+            query_builder = QueryBuilder(strategy=PatternQueryStrategy())
+            finder = SampleFinder(data_dir=data_dir, query_builder=query_builder)
+
+            # Find samples (no size limit — we just want counts)
+            pooled = None
+            if use_ontology:
+                try:
+                    pooled = finder.find_pooled_samples_ontology(
+                        disease_term=disease_term,
+                        tissue=tissue,
+                        max_test_samples=max_samples,
+                        max_control_samples=max_samples,
+                        keyword_fallback=True,
+                    )
+                except Exception:
+                    pooled = None
+                if pooled is not None and pooled.n_test == 0:
+                    pooled = None
+
+            if pooled is None:
+                pooled = finder.find_pooled_samples(
+                    disease_term=disease_term,
+                    tissue=tissue,
+                    max_test_samples=max_samples,
+                    max_control_samples=max_samples,
+                )
+
+            study_breakdown = _build_study_breakdown(
+                pooled.test_samples, pooled.control_samples
+            )
+
+            result = {
+                "disease_term": disease_term,
+                "tissue": tissue,
+                "n_test_samples": pooled.n_test,
+                "n_control_samples": pooled.n_control,
+                "total_test_found": pooled.total_test_found,
+                "total_control_found": pooled.total_control_found,
+                "study_breakdown": study_breakdown,
+                "recommendation": study_breakdown["recommendation"],
+                "recommendation_reason": (
+                    f"{study_breakdown['studies_with_both']} studies have both test+control; "
+                    f"{'study-matched meta-analysis recommended' if study_breakdown['studies_with_both'] >= 3 else 'pooled mode recommended (fewer than 3 matched studies)'}"
+                ),
+            }
+
+    except SystemExit as e:
+        with _jobs_lock:
+            _jobs[job_id] = {
+                "status": "error",
+                "result": {"error": f"Sample metadata lookup failed (exit code {e.code})."},
+                "finished_at": time.time(),
+            }
+        return
+    except Exception as e:
+        logger.error("get_sample_metadata job %s failed: %s", job_id, e)
+        with _jobs_lock:
+            _jobs[job_id] = {
+                "status": "error",
+                "result": {"error": str(e)},
+                "finished_at": time.time(),
+            }
+        return
+
+    elapsed = time.time() - start
+    logger.info("get_sample_metadata job %s completed in %.1fs", job_id, elapsed)
+
+    with _jobs_lock:
+        _jobs[job_id] = {
+            "status": "completed",
+            "result": result,
+            "finished_at": time.time(),
+        }
+
+
 def _run_find_samples_background(
     job_id: str,
     disease_term: str,
@@ -181,6 +326,11 @@ def _run_find_samples_background(
     if not pooled.control_samples.empty and "series_id" in pooled.control_samples.columns:
         control_studies = sorted(set(pooled.control_samples["series_id"].tolist()))
 
+    # Build study breakdown
+    study_breakdown = _build_study_breakdown(
+        pooled.test_samples, pooled.control_samples
+    )
+
     result = {
         "disease_term": disease_term,
         "tissue": tissue,
@@ -195,6 +345,7 @@ def _run_find_samples_background(
         "test_sample_ids": pooled.test_ids[:50],
         "control_sample_ids": pooled.control_ids[:50],
         "overlap_removed": pooled.overlap_removed,
+        "study_breakdown": study_breakdown,
     }
 
     ont_stats = (pooled.filtering_stats or {}).get("ontology_discovery")
@@ -230,6 +381,9 @@ def register_tools(mcp: FastMCP) -> None:
         log2fc_threshold: float = 2.0,
         max_test_samples: int = 100,
         max_control_samples: int = 100,
+        mode: str = "auto",
+        meta_method: str = "stouffer",
+        min_studies: int = 3,
     ) -> dict:
         """Run differential expression analysis for a disease condition.
 
@@ -246,11 +400,15 @@ def register_tools(mcp: FastMCP) -> None:
         immediately. Call ``get_analysis_result`` with the ``job_id`` to
         poll for results.
 
-        - ``mann-whitney`` (default): ~30-60s
-        - ``welch-t``: ~30-60s
-        - ``deseq2``: rigorous but slower (2-5 min)
+        Analysis modes:
+        - ``auto`` (default): Tries study-matched meta-analysis first
+          (per-study DE + Stouffer/Fisher combination). Falls back to
+          study-prioritized pooling, then basic pooling.
+        - ``study-matched``: Per-study DE + meta-analysis only.
+        - ``pooled``: Cross-study pooling (original behavior).
 
-        Consider calling ``find_samples`` first to verify data availability.
+        Consider calling ``get_sample_metadata`` first to check study
+        availability and choose the best mode.
 
         Args:
             query: Natural language query (e.g. "psoriasis in skin tissue").
@@ -263,6 +421,9 @@ def register_tools(mcp: FastMCP) -> None:
             log2fc_threshold: Log2 fold-change threshold (default 2.0).
             max_test_samples: Max test samples (default 100).
             max_control_samples: Max control samples (default 100).
+            mode: Analysis mode — "auto" (default), "pooled", "study-matched".
+            meta_method: Meta-analysis method — "stouffer" (default) or "fisher".
+            min_studies: Minimum matched studies for study-matched mode (default 3).
 
         Returns:
             dict with ``job_id`` and ``status`` ("running") — poll with
@@ -305,6 +466,9 @@ def register_tools(mcp: FastMCP) -> None:
             max_control_samples=max_control_samples,
             interpret=False,
             verbose=False,
+            mode=mode,
+            meta_method=meta_method,
+            min_studies=min_studies,
         )
 
         # Dispatch all methods to background thread to avoid MCP timeouts
@@ -445,6 +609,69 @@ def register_tools(mcp: FastMCP) -> None:
             "status": "running",
             "message": (
                 f"Sample search started in background (job {job_id}). "
+                f"Call get_analysis_result(job_id='{job_id}') to check progress."
+            ),
+        }
+
+    @mcp.tool()
+    def get_sample_metadata(
+        disease_term: str,
+        tissue: Optional[str] = None,
+        max_samples: int = 500,
+        use_ontology: bool = True,
+    ) -> dict:
+        """Get study-level sample metadata for planning DE analysis.
+
+        Returns per-study sample counts, platform distribution, and a
+        recommendation for which analysis mode to use. Use this **before**
+        calling ``differential_expression`` to understand what data is
+        available and choose the best mode.
+
+        **Runs in the background** — poll with ``get_analysis_result``.
+
+        **Requires** ARCHS4_DATA_DIR.
+
+        Args:
+            disease_term: Disease or condition (e.g. "psoriasis").
+            tissue: Optional tissue constraint (e.g. "skin").
+            max_samples: Maximum samples to consider (default 500).
+            use_ontology: Use ontology-enhanced search (default True).
+
+        Returns:
+            Dict with ``job_id`` — poll with ``get_analysis_result``.
+            Final result includes:
+            - n_test_samples, n_control_samples
+            - study_breakdown: per-study counts, platform distribution
+            - recommendation: "study-matched" or "pooled"
+            - recommendation_reason: explanation
+        """
+        logger.info("get_sample_metadata called: disease_term=%r, tissue=%r", disease_term, tissue)
+        err = _check_archs4()
+        if err:
+            return {"error": err}
+
+        job_id = str(uuid.uuid4())[:8]
+        with _jobs_lock:
+            _jobs[job_id] = {
+                "status": "running",
+                "result": None,
+                "started_at": time.time(),
+                "query": f"get_sample_metadata: {disease_term}",
+                "method": "metadata",
+            }
+
+        thread = threading.Thread(
+            target=_run_get_sample_metadata_background,
+            args=(job_id, disease_term, tissue, max_samples, use_ontology),
+            daemon=True,
+        )
+        thread.start()
+
+        return {
+            "job_id": job_id,
+            "status": "running",
+            "message": (
+                f"Sample metadata lookup started (job {job_id}). "
                 f"Call get_analysis_result(job_id='{job_id}') to check progress."
             ),
         }

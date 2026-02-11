@@ -31,6 +31,8 @@ okn-wobd convert --resource ImmPort
 
 # Run ChatGEO differential expression analysis (from scripts/demos/)
 cd scripts/demos && python -m chatgeo.cli "psoriasis in skin tissue" --verbose
+cd scripts/demos && python -m chatgeo.cli "psoriasis in skin tissue" --mode study-matched --verbose
+cd scripts/demos && python -m chatgeo.cli "psoriasis in skin tissue" --mode pooled --verbose
 
 # Run biological question investigations (from scripts/demos/)
 cd scripts/demos && python -m questions.run_all --list          # List all questions

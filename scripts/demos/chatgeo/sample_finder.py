@@ -997,6 +997,165 @@ class SampleFinder:
         return merged_test, merged_control
 
     # =========================================================================
+    # Study-Prioritized Pooled Mode
+    # =========================================================================
+
+    def find_pooled_study_prioritized(
+        self,
+        disease_term: str,
+        tissue: Optional[str] = None,
+        max_test_samples: int = 500,
+        max_control_samples: int = 500,
+        query_spec: Optional[QuerySpec] = None,
+        platform_filter: str = "none",
+    ) -> PooledPair:
+        """Find pooled samples, prioritizing within-study controls.
+
+        Like find_pooled_samples but reduces batch effects by preferring
+        controls from the same studies as test samples:
+        1. Find all test samples (same as pooled)
+        2. Identify studies containing test samples
+        3. Find controls from those studies first
+        4. If more controls needed, add cross-study controls
+        5. Optionally filter by platform
+
+        Args:
+            disease_term: Disease/condition for test samples
+            tissue: Optional tissue constraint
+            max_test_samples: Maximum test samples
+            max_control_samples: Maximum control samples
+            query_spec: Optional structured query spec
+            platform_filter: "none" or "majority" (match dominant platform)
+
+        Returns:
+            PooledPair with provenance tracking matched vs unmatched controls
+        """
+        # Get all test and control samples via existing pipeline
+        base_pooled = self.find_pooled_samples(
+            disease_term=disease_term,
+            tissue=tissue,
+            max_test_samples=0,  # no limit yet
+            max_control_samples=0,
+            query_spec=query_spec,
+        )
+
+        test_df = base_pooled.test_samples
+        control_df = base_pooled.control_samples
+
+        if test_df.empty or control_df.empty:
+            return base_pooled
+
+        # Get study IDs from test samples
+        test_study_ids: Set[str] = set()
+        if "series_id" in test_df.columns:
+            for sid in test_df["series_id"].dropna():
+                for part in str(sid).split(","):
+                    part = part.strip()
+                    if part.startswith("GSE"):
+                        test_study_ids.add(part)
+
+        # Split controls into within-study and cross-study
+        matched_controls = pd.DataFrame()
+        unmatched_controls = pd.DataFrame()
+
+        if "series_id" in control_df.columns and test_study_ids:
+            def _is_matched(series_id) -> bool:
+                if pd.isna(series_id):
+                    return False
+                parts = str(series_id).split(",")
+                return any(p.strip() in test_study_ids for p in parts)
+
+            mask = control_df["series_id"].apply(_is_matched)
+            matched_controls = control_df[mask]
+            unmatched_controls = control_df[~mask]
+        else:
+            unmatched_controls = control_df
+
+        # Platform filtering
+        if platform_filter == "majority" and not test_df.empty:
+            test_df = self._filter_by_platform(test_df, test_df)
+            matched_controls = self._filter_by_platform(matched_controls, test_df)
+            unmatched_controls = self._filter_by_platform(unmatched_controls, test_df)
+
+        # Apply test sample limit
+        if max_test_samples > 0 and len(test_df) > max_test_samples:
+            test_df = test_df.sample(n=max_test_samples, random_state=42)
+
+        # Assemble controls: matched first, then unmatched
+        n_matched_used = min(len(matched_controls), max_control_samples) if max_control_samples > 0 else len(matched_controls)
+        if n_matched_used < len(matched_controls):
+            selected_matched = matched_controls.sample(n=n_matched_used, random_state=42)
+        else:
+            selected_matched = matched_controls
+
+        remaining_budget = (max_control_samples - n_matched_used) if max_control_samples > 0 else len(unmatched_controls)
+        if remaining_budget > 0 and not unmatched_controls.empty:
+            n_unmatched = min(len(unmatched_controls), remaining_budget)
+            selected_unmatched = unmatched_controls.sample(n=n_unmatched, random_state=42)
+            final_controls = pd.concat([selected_matched, selected_unmatched], ignore_index=True)
+        else:
+            final_controls = selected_matched
+
+        filtering_stats = {
+            **(base_pooled.filtering_stats or {}),
+            "study_prioritized": {
+                "test_studies": len(test_study_ids),
+                "matched_controls_available": len(matched_controls),
+                "matched_controls_used": len(selected_matched),
+                "unmatched_controls_used": len(final_controls) - len(selected_matched),
+                "platform_filter": platform_filter,
+            },
+        }
+
+        return PooledPair(
+            test_samples=test_df,
+            control_samples=final_controls,
+            test_query=base_pooled.test_query,
+            control_query=base_pooled.control_query,
+            total_test_found=base_pooled.total_test_found,
+            total_control_found=base_pooled.total_control_found,
+            overlap_removed=base_pooled.overlap_removed,
+            query_spec=base_pooled.query_spec,
+            filtering_stats=filtering_stats,
+        )
+
+    @staticmethod
+    def _filter_by_platform(
+        df: pd.DataFrame,
+        reference_df: pd.DataFrame,
+    ) -> pd.DataFrame:
+        """Filter samples to match the dominant platform in reference_df.
+
+        Args:
+            df: DataFrame to filter
+            reference_df: Reference DataFrame to determine dominant platform
+
+        Returns:
+            Filtered DataFrame matching dominant platform
+        """
+        if df.empty or reference_df.empty:
+            return df
+        if "platform_id" not in df.columns or "platform_id" not in reference_df.columns:
+            return df
+
+        # Find dominant platform in reference
+        platforms = reference_df["platform_id"].dropna()
+        if platforms.empty:
+            return df
+
+        dominant = platforms.value_counts().index[0]
+
+        # Filter to matching platform
+        mask = df["platform_id"] == dominant
+        filtered = df[mask]
+
+        # If filtering removes everything, return original
+        if filtered.empty:
+            return df
+
+        return filtered
+
+    # =========================================================================
     # Study-Matched Mode: Multiple Within-Study DE Analyses
     # =========================================================================
 
@@ -1007,6 +1166,7 @@ class SampleFinder:
         control_keywords: Optional[list] = None,
         min_test_per_study: int = 3,
         min_control_per_study: int = 3,
+        query_spec: Optional[QuerySpec] = None,
     ) -> StudyMatchedResult:
         """
         Find study-matched test/control pairs for within-study DE analyses.
@@ -1026,10 +1186,18 @@ class SampleFinder:
             control_keywords: Keywords for control samples
             min_test_per_study: Minimum test samples required per study
             min_control_per_study: Minimum control samples required per study
+            query_spec: Optional structured query spec for tissue-aware filtering
 
         Returns:
             StudyMatchedResult with list of StudyPair objects
         """
+        if query_spec is not None:
+            return self._find_study_matched_with_spec(
+                query_spec=query_spec,
+                min_test_per_study=min_test_per_study,
+                min_control_per_study=min_control_per_study,
+            )
+
         # Get raw test/control pair
         pair = self.find_test_control_pair(
             disease_term=disease_term,
@@ -1037,18 +1205,114 @@ class SampleFinder:
             control_keywords=control_keywords,
         )
 
-        # Group by study using StudyGrouper
+        return self._group_into_study_pairs(
+            test_df=pair.test_samples.samples,
+            control_df=pair.control_samples.samples,
+            test_query=pair.test_samples.search_pattern,
+            control_query=pair.control_samples.search_pattern,
+            total_test_found=pair.n_test,
+            total_control_found=pair.n_control,
+            overlap_removed=pair.overlap_removed,
+            min_test_per_study=min_test_per_study,
+            min_control_per_study=min_control_per_study,
+        )
+
+    def _find_study_matched_with_spec(
+        self,
+        query_spec: QuerySpec,
+        min_test_per_study: int = 3,
+        min_control_per_study: int = 3,
+    ) -> StudyMatchedResult:
+        """Find study-matched samples using QuerySpec with tissue filtering."""
+        # Broad search
+        test_metadata = self.client.search_metadata(query_spec.disease_regex)
+        test_df = test_metadata if test_metadata is not None else pd.DataFrame()
+
+        control_metadata = self.client.search_metadata(query_spec.control_regex)
+        control_df = control_metadata if control_metadata is not None else pd.DataFrame()
+
+        # Apply tissue filters
+        test_df, _ = self._apply_tissue_filters(
+            test_df,
+            include_regex=query_spec.tissue_include_regex,
+            exclude_regex=query_spec.tissue_exclude_regex,
+        )
+        control_df, _ = self._apply_tissue_filters(
+            control_df,
+            include_regex=query_spec.tissue_include_regex,
+            exclude_regex=query_spec.tissue_exclude_regex,
+        )
+
+        # Fallback for controls
+        if control_df.empty and control_metadata is not None and not control_metadata.empty:
+            if query_spec.tissue_include_regex:
+                control_df = control_metadata
+                control_df, _ = self._apply_tissue_filters(
+                    control_df,
+                    include_regex="",
+                    exclude_regex=query_spec.tissue_exclude_regex,
+                )
+
+        # Remove overlap
+        overlap_removed = 0
+        if not test_df.empty and not control_df.empty:
+            test_ids = set(test_df["geo_accession"])
+            original_count = len(control_df)
+            control_df = control_df[~control_df["geo_accession"].isin(test_ids)]
+            overlap_removed = original_count - len(control_df)
+
+        total_test = len(test_df)
+        total_control = len(control_df)
+
+        return self._group_into_study_pairs(
+            test_df=test_df,
+            control_df=control_df,
+            test_query=query_spec.disease_regex,
+            control_query=query_spec.control_regex,
+            total_test_found=total_test,
+            total_control_found=total_control,
+            overlap_removed=overlap_removed,
+            min_test_per_study=min_test_per_study,
+            min_control_per_study=min_control_per_study,
+        )
+
+    def _group_into_study_pairs(
+        self,
+        test_df: pd.DataFrame,
+        control_df: pd.DataFrame,
+        test_query: str,
+        control_query: str,
+        total_test_found: int,
+        total_control_found: int,
+        overlap_removed: int,
+        min_test_per_study: int,
+        min_control_per_study: int,
+    ) -> StudyMatchedResult:
+        """Group test/control DataFrames into per-study StudyPairs."""
         from .study_grouper import StudyGrouper
 
         grouper = StudyGrouper()
 
-        test_groups = grouper.group_by_study(pair.test_samples)
-        control_groups = grouper.group_by_study(pair.control_samples)
+        # Create dummy SampleSets for the grouper
+        test_set = SampleSet(
+            samples=test_df,
+            query_term="",
+            expansion=QueryExpansion(original_term="", expanded_terms=[], strategy_name=""),
+            search_pattern="",
+        )
+        control_set = SampleSet(
+            samples=control_df,
+            query_term="",
+            expansion=QueryExpansion(original_term="", expanded_terms=[], strategy_name=""),
+            search_pattern="",
+        )
+
+        test_groups = grouper.group_by_study(test_set)
+        control_groups = grouper.group_by_study(control_set)
 
         test_study_ids = set(test_groups.keys())
         control_study_ids = set(control_groups.keys())
 
-        # Find studies with both test and control meeting thresholds
         study_pairs = []
         for study_id in test_study_ids & control_study_ids:
             test_group = test_groups[study_id]
@@ -1066,20 +1330,139 @@ class SampleFinder:
                     )
                 )
 
-        # Sort by total samples descending
         study_pairs.sort(key=lambda p: p.n_test + p.n_control, reverse=True)
 
-        # Count studies with only test or only control
         studies_test_only = len(test_study_ids - control_study_ids)
         studies_control_only = len(control_study_ids - test_study_ids)
 
         return StudyMatchedResult(
             study_pairs=study_pairs,
-            test_query=pair.test_samples.search_pattern,
-            control_query=pair.control_samples.search_pattern,
-            total_test_found=pair.n_test,
-            total_control_found=pair.n_control,
+            test_query=test_query,
+            control_query=control_query,
+            total_test_found=total_test_found,
+            total_control_found=total_control_found,
             studies_with_test_only=studies_test_only,
             studies_with_control_only=studies_control_only,
-            overlap_removed=pair.overlap_removed,
+            overlap_removed=overlap_removed,
+        )
+
+    def find_study_matched_samples_ontology(
+        self,
+        disease_term: str,
+        tissue: Optional[str] = None,
+        min_test_per_study: int = 3,
+        min_control_per_study: int = 3,
+        query_spec: Optional[QuerySpec] = None,
+    ) -> Optional[StudyMatchedResult]:
+        """Find study-matched samples using ontology-based discovery.
+
+        Uses the MONDO→NDE→ARCHS4 pipeline to discover studies, then
+        classifies samples within each study and groups into StudyPairs.
+
+        Returns None if ontology resolution fails.
+        """
+        ont_client = self.ontology_client
+        nde = self.nde_discovery
+        if ont_client is None or nde is None:
+            logger.info("Ontology clients unavailable, skipping ontology study-matched search")
+            return None
+
+        try:
+            resolution = ont_client.resolve_disease(disease_term)
+        except Exception as e:
+            logger.warning("Disease resolution failed: %s", e)
+            return None
+
+        if not resolution.mondo_ids:
+            return None
+
+        # Expand via hierarchy
+        all_mondo_ids = []
+        top_ids = resolution.mondo_ids[:3]
+        try:
+            expansions = ont_client.expand_mondo_ids_batch(top_ids, max_terms=50)
+            for mid in top_ids:
+                if mid in expansions:
+                    all_mondo_ids.extend(expansions[mid].expanded_ids)
+            all_mondo_ids = list(dict.fromkeys(all_mondo_ids))
+        except Exception as e:
+            logger.warning("Ontology expansion failed: %s", e)
+            all_mondo_ids = list(resolution.mondo_ids)
+
+        # Discover studies
+        try:
+            discovery = nde.discover_studies(all_mondo_ids[:20], filter_archs4=False)
+        except Exception as e:
+            logger.warning("NDE study discovery failed: %s", e)
+            return None
+
+        if not discovery.studies:
+            return None
+
+        # Build regex
+        if query_spec:
+            disease_regex = query_spec.disease_regex
+            control_regex = query_spec.control_regex
+        else:
+            disease_regex = re.escape(disease_term)
+            control_regex = "healthy|control|normal"
+
+        # Classify samples per study
+        gse_ids = [s.gse_id for s in discovery.studies]
+        study_pairs = []
+        studies_test_only = 0
+        studies_control_only = 0
+        total_test = 0
+        total_control = 0
+
+        for gse_id in gse_ids:
+            test_df, control_df = self._classify_study_samples(
+                gse_id, disease_regex, control_regex
+            )
+
+            # Apply tissue filters
+            if query_spec:
+                test_df, _ = self._apply_tissue_filters(
+                    test_df,
+                    include_regex=query_spec.tissue_include_regex,
+                    exclude_regex=query_spec.tissue_exclude_regex,
+                )
+                control_df, _ = self._apply_tissue_filters(
+                    control_df,
+                    include_regex=query_spec.tissue_include_regex,
+                    exclude_regex=query_spec.tissue_exclude_regex,
+                )
+
+            n_test = len(test_df)
+            n_control = len(control_df)
+            total_test += n_test
+            total_control += n_control
+
+            if n_test > 0 and n_control > 0:
+                if n_test >= min_test_per_study and n_control >= min_control_per_study:
+                    study_pairs.append(
+                        StudyPair(
+                            study_id=gse_id,
+                            test_samples=test_df,
+                            control_samples=control_df,
+                        )
+                    )
+            elif n_test > 0:
+                studies_test_only += 1
+            elif n_control > 0:
+                studies_control_only += 1
+
+        if not study_pairs:
+            return None
+
+        study_pairs.sort(key=lambda p: p.n_test + p.n_control, reverse=True)
+
+        return StudyMatchedResult(
+            study_pairs=study_pairs,
+            test_query=disease_regex,
+            control_query=control_regex,
+            total_test_found=total_test,
+            total_control_found=total_control,
+            studies_with_test_only=studies_test_only,
+            studies_with_control_only=studies_control_only,
         )

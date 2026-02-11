@@ -90,6 +90,13 @@ class DEProvenance:
     query_spec: Optional[dict] = None
     sample_filtering: Optional[dict] = None
 
+    # Analysis mode provenance (added for batch-effect-aware modes)
+    analysis_mode: Optional[str] = None  # "pooled", "study-matched", "study-prioritized-pooled", "auto"
+    mode_fallback_reason: Optional[str] = None  # why auto fell back
+    platform_filter: Optional[str] = None  # "none", "majority"
+    platform_distribution: Optional[Dict[str, int]] = None
+    study_matching: Optional[dict] = None  # detailed study breakdown
+
     @classmethod
     def create(
         cls,
@@ -171,6 +178,16 @@ class DEProvenance:
             result["query_spec"] = self.query_spec
         if self.sample_filtering is not None:
             result["sample_filtering"] = self.sample_filtering
+        if self.analysis_mode is not None:
+            result["analysis_mode"] = self.analysis_mode
+        if self.mode_fallback_reason is not None:
+            result["mode_fallback_reason"] = self.mode_fallback_reason
+        if self.platform_filter is not None:
+            result["platform_filter"] = self.platform_filter
+        if self.platform_distribution is not None:
+            result["platform_distribution"] = self.platform_distribution
+        if self.study_matching is not None:
+            result["study_matching"] = self.study_matching
         return result
 
 
@@ -303,6 +320,9 @@ class StudyDEResult:
     n_test_samples: int
     n_control_samples: int
     gene_results: List[GeneResult]
+    platform_id: Optional[str] = None
+    test_sample_ids: Optional[List[str]] = None
+    control_sample_ids: Optional[List[str]] = None
 
     @property
     def n_genes(self) -> int:
@@ -324,30 +344,54 @@ class MetaAnalysisResult:
     combined_downregulated: List[GeneResult]
     meta_method: str  # "stouffer" | "fisher" | "random_effects"
     heterogeneity_stats: Optional[Dict[str, float]] = None
+    genes_tested: int = 0
+    genes_significant: int = 0
+    min_studies_per_gene: int = 2
+
+    @property
+    def n_upregulated(self) -> int:
+        return len(self.combined_upregulated)
+
+    @property
+    def n_downregulated(self) -> int:
+        return len(self.combined_downregulated)
 
     def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
         return {
             "provenance": self.provenance.to_dict(),
+            "mode": "study-matched",
+            "summary": {
+                "genes_tested": self.genes_tested,
+                "genes_significant": self.genes_significant,
+                "n_upregulated": self.n_upregulated,
+                "n_downregulated": self.n_downregulated,
+            },
             "meta_analysis": {
                 "n_studies": self.n_studies,
                 "method": self.meta_method,
+                "min_studies_per_gene": self.min_studies_per_gene,
                 "heterogeneity": self.heterogeneity_stats,
+                "per_study": [
+                    {
+                        "study_id": s.study_id,
+                        "n_test": s.n_test_samples,
+                        "n_control": s.n_control_samples,
+                        "n_genes_tested": s.n_genes,
+                        "platform": getattr(s, "platform_id", None),
+                    }
+                    for s in self.study_results
+                ],
             },
-            "study_results": [
-                {
-                    "study_id": s.study_id,
-                    "n_test": s.n_test_samples,
-                    "n_control": s.n_control_samples,
-                    "n_genes": s.n_genes,
-                }
-                for s in self.study_results
-            ],
             "combined_upregulated": [
                 {
                     "gene_symbol": g.gene_symbol,
                     "log2_fold_change": g.log2_fold_change,
+                    "mean_test": g.mean_test,
+                    "mean_control": g.mean_control,
+                    "pvalue": g.pvalue,
                     "pvalue_adjusted": g.pvalue_adjusted,
+                    "test_method": g.test_method,
                     "direction": g.direction,
                 }
                 for g in self.combined_upregulated
@@ -356,7 +400,11 @@ class MetaAnalysisResult:
                 {
                     "gene_symbol": g.gene_symbol,
                     "log2_fold_change": g.log2_fold_change,
+                    "mean_test": g.mean_test,
+                    "mean_control": g.mean_control,
+                    "pvalue": g.pvalue,
                     "pvalue_adjusted": g.pvalue_adjusted,
+                    "test_method": g.test_method,
                     "direction": g.direction,
                 }
                 for g in self.combined_downregulated

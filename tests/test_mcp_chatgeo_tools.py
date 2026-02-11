@@ -321,6 +321,194 @@ class TestEnrichmentAnalysisTool:
 
 
 # ---------------------------------------------------------------------------
+# differential_expression mode parameter
+# ---------------------------------------------------------------------------
+
+class TestDifferentialExpressionMode:
+
+    @patch("chatgeo.cli.run_analysis")
+    def test_mode_param_passed_through(self, mock_run):
+        """mode parameter should be forwarded to run_analysis."""
+        mock_run.return_value = {
+            "sample_discovery": {"mode": "study-matched"},
+            "de_results": {"genes_tested": 100, "genes_significant": 5, "significant_genes": []},
+            "enrichment": {},
+            "provenance": {},
+        }
+
+        fn = _get_tool_fn("differential_expression")
+        poll_fn = _get_tool_fn("get_analysis_result")
+        with patch.dict(os.environ, {"ARCHS4_DATA_DIR": "/tmp"}):
+            with patch("pathlib.Path.is_dir", return_value=True):
+                result = fn(query="psoriasis in skin", mode="study-matched", meta_method="fisher")
+
+        assert "job_id" in result
+
+        for _ in range(50):
+            poll = poll_fn(job_id=result["job_id"])
+            if poll["status"] != "running":
+                break
+            time.sleep(0.1)
+
+        assert poll["status"] == "completed"
+        call_kwargs = mock_run.call_args[1]
+        assert call_kwargs["mode"] == "study-matched"
+        assert call_kwargs["meta_method"] == "fisher"
+
+    @patch("chatgeo.cli.run_analysis")
+    def test_default_mode_is_auto(self, mock_run):
+        """Default mode should be 'auto'."""
+        mock_run.return_value = {
+            "sample_discovery": {"mode": "auto"},
+            "de_results": {"genes_tested": 0, "genes_significant": 0, "significant_genes": []},
+            "enrichment": {},
+            "provenance": {},
+        }
+
+        fn = _get_tool_fn("differential_expression")
+        poll_fn = _get_tool_fn("get_analysis_result")
+        with patch.dict(os.environ, {"ARCHS4_DATA_DIR": "/tmp"}):
+            with patch("pathlib.Path.is_dir", return_value=True):
+                result = fn(query="psoriasis")
+
+        for _ in range(50):
+            poll = poll_fn(job_id=result["job_id"])
+            if poll["status"] != "running":
+                break
+            time.sleep(0.1)
+
+        call_kwargs = mock_run.call_args[1]
+        assert call_kwargs["mode"] == "auto"
+
+
+# ---------------------------------------------------------------------------
+# get_sample_metadata
+# ---------------------------------------------------------------------------
+
+class TestGetSampleMetadata:
+
+    def test_returns_error_without_archs4(self):
+        fn = _get_tool_fn("get_sample_metadata")
+        with patch.dict(os.environ, {}, clear=True):
+            result = fn(disease_term="psoriasis")
+            assert "error" in result
+
+    def test_returns_job_id(self):
+        fn = _get_tool_fn("get_sample_metadata")
+        with patch.dict(os.environ, {"ARCHS4_DATA_DIR": "/tmp"}):
+            with patch("pathlib.Path.is_dir", return_value=True):
+                result = fn(disease_term="psoriasis")
+
+        assert "job_id" in result
+        assert result["status"] == "running"
+
+    @patch("chatgeo.sample_finder.SampleFinder")
+    def test_returns_study_breakdown(self, MockFinder):
+        import pandas as pd
+
+        mock_pooled = MagicMock()
+        mock_pooled.n_test = 20
+        mock_pooled.n_control = 30
+        mock_pooled.total_test_found = 25
+        mock_pooled.total_control_found = 35
+        mock_pooled.test_ids = [f"GSM{i}" for i in range(20)]
+        mock_pooled.control_ids = [f"GSM{i}" for i in range(100, 130)]
+        mock_pooled.overlap_removed = 0
+        mock_pooled.filtering_stats = None
+        mock_pooled.test_query = "psoriasis"
+        mock_pooled.control_query = "control"
+        mock_pooled.test_samples = pd.DataFrame({
+            "series_id": ["GSE001"] * 10 + ["GSE002"] * 10,
+            "geo_accession": [f"GSM{i}" for i in range(20)],
+        })
+        mock_pooled.control_samples = pd.DataFrame({
+            "series_id": ["GSE001"] * 10 + ["GSE003"] * 20,
+            "geo_accession": [f"GSM{i}" for i in range(100, 130)],
+        })
+
+        instance = MockFinder.return_value
+        instance.find_pooled_samples.return_value = mock_pooled
+        instance.find_pooled_samples_ontology.return_value = None
+
+        fn = _get_tool_fn("get_sample_metadata")
+        poll_fn = _get_tool_fn("get_analysis_result")
+        with patch.dict(os.environ, {"ARCHS4_DATA_DIR": "/tmp"}):
+            with patch("pathlib.Path.is_dir", return_value=True):
+                result = fn(disease_term="psoriasis")
+
+        assert "job_id" in result
+
+        for _ in range(50):
+            poll = poll_fn(job_id=result["job_id"])
+            if poll["status"] != "running":
+                break
+            time.sleep(0.1)
+
+        assert poll["status"] == "completed"
+        r = poll["result"]
+        assert "study_breakdown" in r
+        assert r["study_breakdown"]["studies_with_test"] >= 1
+        assert "recommendation" in r
+        assert "recommendation_reason" in r
+
+
+# ---------------------------------------------------------------------------
+# find_samples study breakdown
+# ---------------------------------------------------------------------------
+
+class TestFindSamplesStudyBreakdown:
+
+    @patch("chatgeo.sample_finder.SampleFinder")
+    def test_study_breakdown_in_result(self, MockFinder):
+        import pandas as pd
+
+        mock_pooled = MagicMock()
+        mock_pooled.n_test = 10
+        mock_pooled.n_control = 20
+        mock_pooled.total_test_found = 10
+        mock_pooled.total_control_found = 20
+        mock_pooled.test_query = "psoriasis"
+        mock_pooled.control_query = "control"
+        mock_pooled.test_ids = [f"GSM{i}" for i in range(10)]
+        mock_pooled.control_ids = [f"GSM{i}" for i in range(100, 120)]
+        mock_pooled.overlap_removed = 0
+        mock_pooled.filtering_stats = None
+        mock_pooled.test_samples = pd.DataFrame({
+            "series_id": ["GSE001"] * 5 + ["GSE002"] * 5,
+            "geo_accession": [f"GSM{i}" for i in range(10)],
+        })
+        mock_pooled.control_samples = pd.DataFrame({
+            "series_id": ["GSE001"] * 10 + ["GSE003"] * 10,
+            "geo_accession": [f"GSM{i}" for i in range(100, 120)],
+        })
+
+        instance = MockFinder.return_value
+        instance.find_pooled_samples.return_value = mock_pooled
+        instance.find_pooled_samples_ontology.return_value = None
+
+        fn = _get_tool_fn("find_samples")
+        poll_fn = _get_tool_fn("get_analysis_result")
+        with patch.dict(os.environ, {"ARCHS4_DATA_DIR": "/tmp"}):
+            with patch("pathlib.Path.is_dir", return_value=True):
+                result = fn(disease_term="psoriasis")
+
+        for _ in range(50):
+            poll = poll_fn(job_id=result["job_id"])
+            if poll["status"] != "running":
+                break
+            time.sleep(0.1)
+
+        assert poll["status"] == "completed"
+        r = poll["result"]
+        assert "study_breakdown" in r
+        sb = r["study_breakdown"]
+        assert sb["studies_with_test"] == 2
+        assert sb["studies_with_both"] >= 1
+        assert "top_studies" in sb
+        assert "recommendation" in sb
+
+
+# ---------------------------------------------------------------------------
 # Background job dispatch (all methods)
 # ---------------------------------------------------------------------------
 
