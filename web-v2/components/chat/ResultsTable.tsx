@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import type { SPARQLResult } from "@/types";
+import { Pagination, DEFAULT_PAGE_SIZE } from "@/components/dashboard/Pagination";
 
 /** GXA experiment ID columns – link to GEO/GXA sample metadata (Phase 5a) */
 const GXA_EXPERIMENT_ID_COLUMNS = [
@@ -92,6 +93,8 @@ export function ResultsTable({ results, onDownload }: ResultsTableProps) {
     const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
     const [groupByDataset, setGroupByDataset] = useState(false);
     const [expandedCells, setExpandedCells] = useState<Set<string>>(new Set());
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(DEFAULT_PAGE_SIZE);
 
     function toggleExpanded(cellKey: string) {
         setExpandedCells((prev) => {
@@ -197,6 +200,14 @@ export function ResultsTable({ results, onDownload }: ResultsTableProps) {
         const comparison = aVal.localeCompare(bVal);
         return sortDirection === "asc" ? comparison : -comparison;
     });
+
+    // Reset to first page when results or sort/group change
+    useEffect(() => {
+        setPage(1);
+    }, [results, groupByDataset, sortColumn, sortDirection]);
+
+    const totalRows = sortedBindings.length;
+    const paginatedRows = sortedBindings.slice((page - 1) * pageSize, page * pageSize);
 
     function handleSort(column: string) {
         if (sortColumn === column) {
@@ -491,9 +502,11 @@ export function ResultsTable({ results, onDownload }: ResultsTableProps) {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200 dark:divide-slate-700 bg-white dark:bg-slate-900">
-                        {sortedBindings.map((binding, idx) => (
+                        {paginatedRows.map((binding, idx) => {
+                            const globalIdx = (page - 1) * pageSize + idx;
+                            return (
                             <tr
-                                key={idx}
+                                key={globalIdx}
                                 className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
                             >
                                 {vars.map((varName) => {
@@ -506,7 +519,7 @@ export function ResultsTable({ results, onDownload }: ResultsTableProps) {
                                     const isIdentifierColumn = varName === NDE_IDENTIFIER_COLUMN && hasIdentifierColumn;
                                     const displayValue = formatValueForDisplay(value);
                                     const titleText = formatValue(value);
-                                    const cellKey = `${idx}-${varName}`;
+                                    const cellKey = `${globalIdx}-${varName}`;
 
                                     return (
                                         <td
@@ -546,14 +559,30 @@ export function ResultsTable({ results, onDownload }: ResultsTableProps) {
                                     );
                                 })}
                             </tr>
-                        ))}
+                            );
+                        })}
                     </tbody>
                 </table>
             </div>
 
-            {/* Footer with row count */}
-            <div className="text-xs text-slate-600 dark:text-slate-400 text-center space-y-1">
-                <div>Showing {sortedBindings.length} result{sortedBindings.length !== 1 ? "s" : ""}</div>
+            {/* Footer with row count and pagination */}
+            <div className="text-xs text-slate-600 dark:text-slate-400 text-center space-y-2">
+                {totalRows > pageSize ? (
+                    <>
+                        <div>
+                            Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, totalRows)} of {totalRows} results
+                        </div>
+                        <Pagination
+                            page={page}
+                            totalItems={totalRows}
+                            pageSize={pageSize}
+                            onPageChange={setPage}
+                            ariaLabel="Table results pagination"
+                        />
+                    </>
+                ) : (
+                    <div>Showing {totalRows} result{totalRows !== 1 ? "s" : ""}</div>
+                )}
             </div>
         </div>
     );

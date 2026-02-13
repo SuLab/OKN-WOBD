@@ -13,9 +13,8 @@ export function ExampleQuestions() {
   const router = useRouter();
 
   function handleClick(question: string) {
-    sessionStorage.setItem("wobd_pending_query", question);
     const searchParams = new URLSearchParams({ q: question });
-    router.push(`/chat?${searchParams.toString()}`);
+    router.push(`/?${searchParams.toString()}`);
   }
 
   return (

@@ -345,7 +345,7 @@ async function groundEntityToOntology(
         iri: wd.wikidata_iri,
         id: wd.wikidata_iri,
         label: wd.label,
-        description: wd.description,
+        description: wd.description != null ? [wd.description] : undefined,
         obo_id: wd.wikidata_id, // e.g., "Q421094"
         short_form: wd.wikidata_id,
         is_obsolete: false,
@@ -707,7 +707,7 @@ export async function processOntologyQuery(
           targetOntology = "MONDO";
         } else if (state.entity_type === "species") {
           targetOntology = "NCBITaxon";
-        } else if (state.entity_type === "drug" || state.entity_type === "medication") {
+        } else if (state.entity_type === "drug" || (state.entity_type as string) === "medication") {
           targetOntology = "Wikidata";
         } else if (isGeneEntity) {
           // Gene entities don't need ontology grounding - gene symbols are used directly in queries
@@ -879,7 +879,7 @@ export async function processOntologyQuery(
             }
           }
 
-          state.debug_info!.mondo_query_result_count = filteredResults.length;
+          state.debug_info!.ontology_query_result_count = filteredResults.length;
         }
 
         state.grounded_mondo_terms = filteredResults;

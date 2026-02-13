@@ -20,7 +20,7 @@ export const DATASET_SEARCH_TEMPLATE_ID = "dataset_search";
 export const datasetSearchTemplate: TemplateDefinition = {
   id: DATASET_SEARCH_TEMPLATE_ID,
   description: "Find datasets by keywords/healthCondition",
-  required_slots: [], // keywords is optional when health_conditions/species/drugs are provided
+  required_slots: ["keywords"],
 };
 
 export async function buildDatasetSearchQuery(intent: Intent, pack: ContextPack): Promise<string> {
@@ -256,14 +256,14 @@ export async function buildDatasetSearchQuery(intent: Intent, pack: ContextPack)
       // When we have keyword fallback, use the simple REGEX-only query so NDE returns results
       const ontologyQuery =
         keywordFallbackTerms.length > 0
-          ? buildNDEFallbackQuery(keywordFallbackTerms[0], keywordFallbackTerms.slice(1))
+          ? buildNDEFallbackQuery(String(keywordFallbackTerms[0]), keywordFallbackTerms.slice(1) as string[])
           : buildNDEDiseaseAndOrganismQuery(
             mondoIRIs,
             [],
             diseaseLabels,
             [],
             useTextMatching,
-            keywordFallbackTerms
+            keywordFallbackTerms as string[]
           );
 
       console.log(`[Template] Generated query, length: ${ontologyQuery?.length || 0} chars`);
@@ -314,7 +314,7 @@ export async function buildDatasetSearchQuery(intent: Intent, pack: ContextPack)
     if (geneTerms.length === 0 && ontologyState.raw_phrase) {
       const words = ontologyState.raw_phrase.split(/\s+/);
       // Gene symbols are typically 2-10 characters, capitalized, may include numbers
-      const potentialGeneSymbols = words.filter(word => {
+      const potentialGeneSymbols = words.filter((word: string) => {
         const cleaned = word.replace(/[.,;:!?]/g, '');
         return cleaned.length >= 2 &&
           cleaned.length <= 10 &&

@@ -40,34 +40,34 @@ guardrails:
 templates:
   - id: dataset_search
     description: "Find datasets by keywords/healthCondition"
-    required_slots: []  # All slots are optional; template accepts keywords, health_conditions, species, or drugs
+    required_slots: ["keywords"]  # At least one keyword required for the simple search form
   - id: entity_lookup
     description: "Resolve CURIE/URI/label to entity"
     required_slots: ["q"]
   - id: gene_expression_dataset_search
     description: "List gene expression experiments (datasets) that have differential expression results"
     required_slots: []
-    optional_slots: ["organism_taxon_ids", "tissue_uberon_ids", "factor_terms", "disease_efo_ids"]
+    optional_slots: ["organism_taxon_ids", "tissue_uberon_ids_ols", "factor_terms", "disease_efo_ids"]
   - id: gene_expression_genes_in_experiment
     description: "List differentially expressed genes for a given gene expression experiment (per contrast)"
     required_slots: ["experiment_id"]
-    optional_slots: ["organism_taxon_ids", "tissue_uberon_ids", "factor_terms", "min_abs_log2fc", "max_adj_p_value"]
+    optional_slots: ["organism_taxon_ids", "tissue_uberon_ids_ols", "factor_terms", "min_abs_log2fc", "max_adj_p_value"]
   - id: gene_expression_experiments_for_gene
     description: "Find gene expression experiments/contrasts where a gene is differentially expressed"
     required_slots: ["gene_symbols"]
-    optional_slots: ["organism_taxon_ids", "tissue_uberon_ids", "factor_terms"]
+    optional_slots: ["organism_taxon_ids", "tissue_uberon_ids_ols", "factor_terms"]
   - id: gene_expression_gene_cross_dataset_summary
     description: "Summarize a gene's DE evidence across experiments (per contrast)"
     required_slots: ["gene_symbol"]
-    optional_slots: ["organism_taxon_ids", "tissue_uberon_ids", "factor_terms"]
+    optional_slots: ["organism_taxon_ids", "tissue_uberon_ids_ols", "factor_terms"]
   - id: gene_expression_genes_agreement
     description: "Find genes DE in the same direction across multiple experiments"
     required_slots: []
-    optional_slots: ["organism_taxon_ids", "tissue_uberon_ids", "factor_terms"]
+    optional_slots: ["organism_taxon_ids", "tissue_uberon_ids_ols", "factor_terms"]
   - id: gene_expression_genes_discordance
     description: "Find genes DE in opposite directions across contrasts"
     required_slots: []
-    optional_slots: ["organism_taxon_ids", "tissue_uberon_ids", "factor_terms"]
+    optional_slots: ["organism_taxon_ids", "tissue_uberon_ids_ols", "factor_terms"]
 
 schema_hints:
   example_queries:
