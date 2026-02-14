@@ -23,8 +23,18 @@ export const datasetSearchTemplate: TemplateDefinition = {
   required_slots: ["keywords"],
 };
 
-export async function buildDatasetSearchQuery(intent: Intent, pack: ContextPack): Promise<string> {
+export interface DatasetSearchOptions {
+  /** Restrict results to NCBI GEO datasets in NDE (identifier GSE* or url/sameAs containing geo/ncbi). */
+  geoOnly?: boolean;
+}
+
+export async function buildDatasetSearchQuery(
+  intent: Intent,
+  pack: ContextPack,
+  options?: DatasetSearchOptions
+): Promise<string> {
   const slots = intent.slots || {};
+  const geoOnly = options?.geoOnly ?? false;
 
   // Check if ontology-grounded workflow was used
   const healthConditions = slots.health_conditions as string[] | undefined;
@@ -87,7 +97,8 @@ export async function buildDatasetSearchQuery(intent: Intent, pack: ContextPack)
         keywordFallbackTerms.length > 0
           ? buildNDEFallbackQuery(
             keywordFallbackTerms[0],
-            keywordFallbackTerms.slice(1)
+            keywordFallbackTerms.slice(1),
+            geoOnly
           )
           : buildNDEDiseaseAndOrganismQuery(
             mondoIRIs,
@@ -95,7 +106,9 @@ export async function buildDatasetSearchQuery(intent: Intent, pack: ContextPack)
             diseaseLabels,
             organismLabels,
             useTextMatching,
-            keywordFallbackTerms
+            keywordFallbackTerms,
+            500,
+            geoOnly
           );
 
       // Add limit if specified
@@ -256,14 +269,16 @@ export async function buildDatasetSearchQuery(intent: Intent, pack: ContextPack)
       // When we have keyword fallback, use the simple REGEX-only query so NDE returns results
       const ontologyQuery =
         keywordFallbackTerms.length > 0
-          ? buildNDEFallbackQuery(String(keywordFallbackTerms[0]), keywordFallbackTerms.slice(1) as string[])
+          ? buildNDEFallbackQuery(String(keywordFallbackTerms[0]), keywordFallbackTerms.slice(1) as string[], geoOnly)
           : buildNDEDiseaseAndOrganismQuery(
             mondoIRIs,
             [],
             diseaseLabels,
             [],
             useTextMatching,
-            keywordFallbackTerms as string[]
+            keywordFallbackTerms as string[],
+            500,
+            geoOnly
           );
 
       console.log(`[Template] Generated query, length: ${ontologyQuery?.length || 0} chars`);
@@ -506,7 +521,7 @@ export async function buildDatasetSearchQuery(intent: Intent, pack: ContextPack)
     const candidateLabels = ontologyState.candidate_labels || [];
 
     // Use fallback text search template
-    const fallbackQuery = buildNDEFallbackQuery(rawPhrase, candidateLabels);
+    const fallbackQuery = buildNDEFallbackQuery(rawPhrase, candidateLabels, geoOnly);
 
     // Add limit if specified
     const limit = (intent.slots?.limit as number);
@@ -546,13 +561,17 @@ export async function buildDatasetSearchQuery(intent: Intent, pack: ContextPack)
   }
 
   // Basic dataset search over schema:Dataset with name/description keyword filter
+  const geoFilterClause = geoOnly
+    ? "\n  OPTIONAL { ?dataset schema:identifier ?identifier . }\n  FILTER(REGEX(STR(COALESCE(?identifier, \"\")), \"GSE[0-9]+\", \"i\"))"
+    : "";
   query += `
-SELECT ?dataset ?name ?description
+SELECT ?dataset ?name ?description${geoOnly ? " ?identifier" : ""}
 WHERE {
   ?dataset a schema:Dataset ;
            schema:name ?name .
   OPTIONAL { ?dataset schema:description ?description . }
   ${filterClause}
+  ${geoFilterClause}
 }
 ${(intent.slots?.limit as number) ? `LIMIT ${Math.min((intent.slots?.limit as number), pack.guardrails.max_limit)}` : ""}
   `.trim();

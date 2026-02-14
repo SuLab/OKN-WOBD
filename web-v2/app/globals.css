@@ -5,9 +5,9 @@
 :root {
   color-scheme: light dark;
   /* NIAID Data Discovery Portal palette (dashboard and result cards) */
-  --niaid-header: #184260;
+  --niaid-header: #20558A;
   --niaid-link: #0071bc;
-  --niaid-button: #28a745;
+  --niaid-button: #0b8484;
   --niaid-card-bg: #ffffff;
   --niaid-page-bg: #f5f5f5;
   --niaid-badge-positive: #e0f2e6;

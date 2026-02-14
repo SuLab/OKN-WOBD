@@ -14,6 +14,8 @@ export const GXA_TASKS = [
 ] as const;
 
 const DATASET_SEARCH_TEMPLATE_ID = "dataset_search";
+const GEO_DATASET_SEARCH_TEMPLATE_ID = "geo_dataset_search";
+const NDE_TEMPLATE_IDS = [DATASET_SEARCH_TEMPLATE_ID, GEO_DATASET_SEARCH_TEMPLATE_ID];
 
 export function buildIntent(
   templateId: string,
@@ -22,7 +24,7 @@ export function buildIntent(
 ): Intent {
   const graphs = GXA_TASKS.includes(templateId as (typeof GXA_TASKS)[number])
     ? ["gene-expression-atlas-okn"]
-    : templateId === DATASET_SEARCH_TEMPLATE_ID
+    : NDE_TEMPLATE_IDS.includes(templateId)
       ? ["nde"]
       : pack.graphs.default_shortnames;
 
@@ -53,7 +55,11 @@ export interface RunQueryParams {
 export interface RunQueryResult {
   results: SPARQLResult | null;
   error: string | null;
+  /** When "only gene expression" filter returns no rows but unfiltered had results (drug_datasets). */
+  filteredEmptyHint?: string;
 }
+
+const DRUG_DATASETS_TEMPLATE_ID = "drug_datasets";
 
 export async function runTemplateQuery({
   templateId,
@@ -61,6 +67,46 @@ export async function runTemplateQuery({
   pack,
   signal,
 }: RunQueryParams): Promise<RunQueryResult> {
+  if (templateId === DRUG_DATASETS_TEMPLATE_ID) {
+    const drugs = Array.isArray(slots.drug)
+      ? (slots.drug as string[]).map((d) => String(d).trim()).filter(Boolean)
+      : typeof slots.drug === "string" && slots.drug.trim()
+        ? [slots.drug.trim()]
+        : [];
+    if (drugs.length === 0) {
+      return { results: null, error: "At least one drug name is required." };
+    }
+    const onlyGeneExpression =
+      slots.only_gene_expression === "true" ||
+      (Array.isArray(slots.only_gene_expression) && slots.only_gene_expression[0] === "true");
+    const maxResultsRaw = Array.isArray(slots.max_results)
+      ? slots.max_results[0]
+      : slots.max_results;
+    const maxResults =
+      typeof maxResultsRaw === "string" && maxResultsRaw.trim() !== ""
+        ? Math.min(Math.max(1, parseInt(maxResultsRaw, 10) || 500), 500)
+        : undefined;
+    const res = await fetch("/api/tools/drug-datasets", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ drugs, onlyGeneExpression, maxResults }),
+      signal,
+    });
+    const data = await res.json();
+    if (signal?.aborted) return { results: null, error: "Query was cancelled." };
+    if (data.error && !data.results) {
+      return { results: null, error: data.error };
+    }
+    if (!data.results) {
+      return { results: null, error: data.error || "No results from pipeline." };
+    }
+    return {
+      results: data.results,
+      error: null,
+      filteredEmptyHint: data.filtered_empty_hint ?? undefined,
+    };
+  }
+
   const intent = buildIntent(templateId, slots, pack);
 
   const sparqlRes = await fetch("/api/tools/nl/intent-to-sparql", {

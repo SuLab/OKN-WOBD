@@ -6,6 +6,7 @@ import {
   BarChart2,
   GitMerge,
   ArrowLeftRight,
+  Pill,
   type LucideIcon,
 } from "lucide-react";
 
@@ -24,6 +25,16 @@ export interface TemplateMetaItem {
 
 export const TEMPLATE_META: TemplateMetaItem[] = [
   {
+    id: "drug_datasets",
+    titlePart1: "Datasets",
+    titlePart2: " for a drug",
+    description: "Find NDE datasets for diseases treated by a drug (multi-hop: drug → Wikidata → NDE)",
+    icon: Pill,
+    iconColor: "text-teal-600 dark:text-teal-400",
+    blurb: "Enter a drug name (e.g. methotrexate). We look up diseases it treats in Wikidata, then find NDE datasets. Optionally restrict to GEO/gene expression and include GXA/SPOKE-GeneLab links for matching experiments.",
+    buttonLabel: "Find datasets",
+  },
+  {
     id: "dataset_search",
     titlePart1: "Datasets",
     titlePart2: " by keywords",
@@ -32,6 +43,16 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
     iconColor: "text-blue-600 dark:text-blue-400",
     blurb: "This query finds datasets in NDE that study a specific disease, organism, or other criteria.",
     buttonLabel: "Search Datasets",
+  },
+  {
+    id: "geo_dataset_search",
+    titlePart1: "NCBI GEO",
+    titlePart2: " datasets in NDE",
+    description: "Find NCBI GEO datasets in NDE by keywords, disease, or organism",
+    icon: Database,
+    iconColor: "text-emerald-600 dark:text-emerald-400",
+    blurb: "Search only NCBI GEO datasets within the NDE graph. Same schema.org as other NDE resources; results are restricted to datasets with GSE identifiers or GEO URLs.",
+    buttonLabel: "Search GEO",
   },
   {
     id: "gene_expression_dataset_search",

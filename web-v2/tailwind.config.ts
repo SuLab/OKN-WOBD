@@ -26,7 +26,7 @@ const config: Config = {
         },
         // NIAID Data Discovery Portal palette (dashboard and result cards)
         niaid: {
-          header: "#184260",
+          header: "#20558A",
           link: "#0071bc",
           button: "#28A745",
           cardBg: "#ffffff",

@@ -21,6 +21,7 @@ export default function TemplatePage() {
   const [slotValues, setSlotValues] = useState<Record<string, string | string[]>>({});
   const [results, setResults] = useState<SPARQLResult | null>(null);
   const [resultsError, setResultsError] = useState<string | null>(null);
+  const [filteredEmptyHint, setFilteredEmptyHint] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const runningRef = useRef(false);
@@ -61,7 +62,7 @@ export default function TemplatePage() {
     const signal = abortRef.current.signal;
 
     try {
-      const { results: res, error: err } = await runTemplateQuery({
+      const { results: res, error: err, filteredEmptyHint: hint } = await runTemplateQuery({
         templateId,
         slots: slotValues,
         pack,
@@ -71,9 +72,11 @@ export default function TemplatePage() {
       if (err) {
         setResultsError(err);
         setResults(null);
+        setFilteredEmptyHint(null);
         return;
       }
       setResults(res);
+      setFilteredEmptyHint(hint ?? null);
     } catch (e: unknown) {
       if (signal.aborted) return;
       const isAbort = e instanceof Error && e.name === "AbortError";
@@ -220,6 +223,7 @@ export default function TemplatePage() {
                     results={results}
                     templateId={templateId}
                     templateLabel={template.description}
+                    emptyMessage={filteredEmptyHint ?? undefined}
                   />
                 ) : (
                   <ResultsTable results={results} />
