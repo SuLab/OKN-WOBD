@@ -6,6 +6,11 @@ import {
   buildDatasetSearchQuery,
 } from "./templates/dataset_search";
 import {
+  GEO_DATASET_SEARCH_TEMPLATE_ID,
+  geoDatasetSearchTemplate,
+  buildGeoDatasetSearchQuery,
+} from "./templates/geo_dataset_search";
+import {
   ENTITY_LOOKUP_TEMPLATE_ID,
   entityLookupTemplate,
   buildEntityLookupQuery,
@@ -43,6 +48,7 @@ import {
 
 export type TemplateId =
   | typeof DATASET_SEARCH_TEMPLATE_ID
+  | typeof GEO_DATASET_SEARCH_TEMPLATE_ID
   | typeof ENTITY_LOOKUP_TEMPLATE_ID
   | typeof GENE_EXPRESSION_DATASET_SEARCH_TEMPLATE_ID
   | typeof GENE_EXPRESSION_GENES_IN_EXPERIMENT_TEMPLATE_ID
@@ -62,6 +68,10 @@ const TEMPLATE_REGISTRY: Record<string, RegisteredTemplate> = {
   [DATASET_SEARCH_TEMPLATE_ID]: {
     id: DATASET_SEARCH_TEMPLATE_ID,
     generate: buildDatasetSearchQuery,
+  },
+  [GEO_DATASET_SEARCH_TEMPLATE_ID]: {
+    id: GEO_DATASET_SEARCH_TEMPLATE_ID,
+    generate: buildGeoDatasetSearchQuery,
   },
   [ENTITY_LOOKUP_TEMPLATE_ID]: {
     id: ENTITY_LOOKUP_TEMPLATE_ID,
@@ -104,6 +114,7 @@ export function listTemplateDefinitionsForPack(pack: ContextPack) {
   // Combine pack.templates metadata with built-in ones if needed
   return pack.templates ?? [
     datasetSearchTemplate,
+    geoDatasetSearchTemplate,
     entityLookupTemplate,
     geneExpressionDatasetSearchTemplate,
     geneExpressionGenesInExperimentTemplate,

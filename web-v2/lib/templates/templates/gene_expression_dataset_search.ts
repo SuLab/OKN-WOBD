@@ -1,5 +1,6 @@
 import type { ContextPack, TemplateDefinition } from "@/lib/context-packs/types";
 import type { Intent } from "@/types";
+import { resolveTissueToUberonIds } from "@/lib/ontology";
 import { buildGXAExperimentCoverageQuery } from "@/lib/ontology/templates";
 
 export const GENE_EXPRESSION_DATASET_SEARCH_TEMPLATE_ID = "gene_expression_dataset_search";
@@ -32,14 +33,11 @@ export async function buildGeneExpressionDatasetSearchQuery(
 
   // Phase 4: ontology-grounded context filters
   const organismTaxonIds = parseStringArray(intent.slots?.organism_taxon_ids ?? intent.slots?.species);
-  const rawTissue = parseStringArray(intent.slots?.tissue_uberon_ids ?? intent.slots?.tissue_iris);
-  const tissueUberonIds = rawTissue
-    .map((t) => {
-      const fromIri = t.match(/UBERON_([\d]+)$/i)?.[1];
-      const fromCurie = t.match(/UBERON[_\s:]*([\d]+)/i)?.[1];
-      return fromIri ?? fromCurie ?? t.replace(/^UBERON[_\s:]*/i, "").replace(/^http:\/\/purl\.obolibrary\.org\/obo\/UBERON_/i, "");
-    })
-    .filter(Boolean);
+  const rawTissue = [
+    ...parseStringArray(intent.slots?.tissue_uberon_ids ?? intent.slots?.tissue_iris),
+    ...parseStringArray(intent.slots?.tissue_uberon_ids_ols),
+  ];
+  const tissueUberonIds = await resolveTissueToUberonIds(rawTissue);
   const factorTerms = parseStringArray(intent.slots?.factor_terms ?? intent.slots?.perturbation);
   const rawDisease = parseStringArray(intent.slots?.disease_efo_ids ?? intent.slots?.disease_iris);
   const diseaseEfoIds = rawDisease

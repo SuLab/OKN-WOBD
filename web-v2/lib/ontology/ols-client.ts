@@ -74,7 +74,7 @@ export async function searchOLS(
         label: firstDoc.label,
         obo_id: firstDoc.obo_id,
         short_form: firstDoc.short_form,
-        type: firstDoc.type,
+        type: (firstDoc as { type?: string }).type,
         synonyms: firstDoc.synonyms ? (Array.isArray(firstDoc.synonyms) ? firstDoc.synonyms.length : 'not array') : 'none',
         synonyms_sample: firstDoc.synonyms && Array.isArray(firstDoc.synonyms) ? firstDoc.synonyms.slice(0, 3) : undefined,
       });
@@ -128,7 +128,7 @@ export function scoreMatch(
           synScope = scope.toUpperCase() as SynonymScope;
         }
       } else {
-        synStr = synonym.toString();
+        synStr = String(synonym);
       }
 
       const synLower = synStr.toLowerCase().trim();
@@ -155,7 +155,7 @@ export function scoreMatch(
   if (result.synonyms && Array.isArray(result.synonyms)) {
     for (const synonym of result.synonyms) {
       const synStr = typeof synonym === "string" ? synonym :
-        (typeof synonym === "object" && synonym !== null ? (synonym as any).value || synonym.toString() : synonym.toString());
+        (typeof synonym === "object" && synonym !== null ? (synonym as { value?: string }).value || String(synonym) : String(synonym));
       const synLower = synStr.toLowerCase().trim();
       if (synLower.includes(queryLower) || queryLower.includes(synLower)) {
         return { score: 1, matchType: "synonym", matchedText: synStr };
@@ -341,6 +341,107 @@ function isNCBITaxonTerm(result: OLSSearchResult): boolean {
   }
 
   return false;
+}
+
+/**
+ * Check if a result is from UBERON ontology (anatomy/tissue)
+ */
+function isUBERONTerm(result: OLSSearchResult): boolean {
+  if (result.obo_id && result.obo_id.startsWith("UBERON:")) {
+    return true;
+  }
+  if (result.ontology_prefix === "UBERON") {
+    return true;
+  }
+  if (result.ontology_name === "uberon") {
+    return true;
+  }
+  if (result.iri && result.iri.includes("/UBERON_")) {
+    return true;
+  }
+  if (result.short_form && result.short_form.startsWith("UBERON_")) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Ground a single candidate term to UBERON using OLS.
+ * Returns the best matching UBERON term(s); each result includes uberonId (numeric part, e.g. "0000948").
+ */
+export async function groundTermToUBERON(
+  candidateTerm: string,
+  topN: number = 3
+): Promise<Array<OLSSearchResult & { matchScore: number; matchType: string; matchedText: string; uberonId?: string }>> {
+  try {
+    console.log(`[OLS] Searching for "${candidateTerm}" in UBERON...`);
+    const results = await searchOLS(candidateTerm, "uberon", 20);
+    console.log(`[OLS] Found ${results.length} total results for "${candidateTerm}"`);
+
+    if (results.length === 0) {
+      console.warn(`[OLS] No results from OLS API for "${candidateTerm}"`);
+      return [];
+    }
+
+    const uberonResults = results.filter(isUBERONTerm);
+    console.log(`[OLS] Filtered to ${uberonResults.length} UBERON terms (removed ${results.length - uberonResults.length} non-UBERON terms)`);
+
+    if (uberonResults.length === 0) {
+      console.warn(`[OLS] No UBERON terms found for "${candidateTerm}"`);
+      return [];
+    }
+
+    const ranked = rankMONDOCTerms(uberonResults, candidateTerm);
+
+    const filtered = ranked.filter((r) => r.matchScore > 0);
+    console.log(`[OLS] ${filtered.length} UBERON results with score > 0 for "${candidateTerm}"`);
+
+    if (filtered.length > 0) {
+      console.log(`[OLS] Top UBERON match for "${candidateTerm}":`, filtered[0].label, `(${filtered[0].obo_id}, score: ${filtered[0].matchScore})`);
+    }
+
+    const withIds = filtered.slice(0, topN).map((r) => {
+      const shortForm = r.short_form || r.obo_id?.replace(":", "_") || "";
+      const match = shortForm.match(/UBERON[_\s:]*(\d+)/i);
+      return { ...r, uberonId: match ? match[1] : undefined };
+    });
+
+    return withIds;
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error(`[OLS] Failed to ground "${candidateTerm}" to UBERON:`, err);
+    return [];
+  }
+}
+
+/** Regex for an existing UBERON numeric ID (from CURIE, IRI, or bare digits). */
+const UBERON_ID_REGEX = /^(?:UBERON[_\s:]*)?(\d+)$/i;
+const UBERON_IRI_REGEX = /UBERON_(\d+)/i;
+
+/**
+ * Resolve tissue names or UBERON IDs to numeric UBERON IDs for SPARQL filters.
+ * Values that already look like UBERON (e.g. "0000948", "UBERON:0000948") are normalized;
+ * other values (e.g. "heart") are grounded via OLS and the best match's ID is used.
+ */
+export async function resolveTissueToUberonIds(rawTissue: string[]): Promise<string[]> {
+  if (!rawTissue?.length) return [];
+
+  const out: string[] = [];
+  for (const t of rawTissue) {
+    const trimmed = t.replace(/^http:\/\/purl\.obolibrary\.org\/obo\/UBERON_/i, "").trim();
+    const fromCurieOrBare = trimmed.match(UBERON_ID_REGEX)?.[1];
+    const fromIri = trimmed.match(UBERON_IRI_REGEX)?.[1];
+    const numericId = fromCurieOrBare ?? fromIri;
+    if (numericId) {
+      out.push(numericId);
+      continue;
+    }
+    const grounded = await groundTermToUBERON(trimmed, 1);
+    const id = grounded[0]?.uberonId;
+    if (id) out.push(id);
+    else console.warn(`[OLS] No UBERON match for tissue "${t}", skipping`);
+  }
+  return [...new Set(out)];
 }
 
 /**

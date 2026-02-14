@@ -824,7 +824,7 @@ export function InspectDrawer({ message }: InspectDrawerProps) {
                       {message.ontology_state.debug_info.ontology_query_executed !== undefined && (
                         <p className="text-slate-600 dark:text-slate-400">
                           {(() => {
-                            const ontologyName = message.ontology_state.entity_type === "drug" || message.ontology_state.entity_type === "medication"
+                            const ontologyName = (message.ontology_state.entity_type as string) === "drug" || (message.ontology_state.entity_type as string) === "medication"
                               ? "Wikidata"
                               : message.ontology_state.entity_type === "species"
                                 ? "NCBITaxon"
@@ -837,7 +837,7 @@ export function InspectDrawer({ message }: InspectDrawerProps) {
                       {message.ontology_state.debug_info.ontology_query_result_count !== undefined && (
                         <p className="text-slate-600 dark:text-slate-400">
                           {(() => {
-                            const ontologyName = message.ontology_state.entity_type === "drug" || message.ontology_state.entity_type === "medication"
+                            const ontologyName = (message.ontology_state.entity_type as string) === "drug" || (message.ontology_state.entity_type as string) === "medication"
                               ? "Wikidata"
                               : message.ontology_state.entity_type === "species"
                                 ? "NCBITaxon"
@@ -850,7 +850,7 @@ export function InspectDrawer({ message }: InspectDrawerProps) {
                       {message.ontology_state.debug_info.ontology_query_result_count === 0 && (
                         <p className="text-yellow-600 dark:text-yellow-400 text-xs mt-2">
                           ⚠️ No {(() => {
-                            const ontologyName = message.ontology_state.entity_type === "drug" || message.ontology_state.entity_type === "medication"
+                            const ontologyName = (message.ontology_state.entity_type as string) === "drug" || (message.ontology_state.entity_type as string) === "medication"
                               ? "Wikidata"
                               : message.ontology_state.entity_type === "species"
                                 ? "NCBITaxon"
@@ -859,7 +859,7 @@ export function InspectDrawer({ message }: InspectDrawerProps) {
                           })()} terms found. This could mean:
                           <ul className="list-disc list-inside ml-4 mt-1">
                             <li>The terms don't exist in {(() => {
-                              const ontologyName = message.ontology_state.entity_type === "drug" || message.ontology_state.entity_type === "medication"
+                              const ontologyName = (message.ontology_state.entity_type as string) === "drug" || (message.ontology_state.entity_type as string) === "medication"
                                 ? "Wikidata"
                                 : message.ontology_state.entity_type === "species"
                                   ? "NCBITaxon"

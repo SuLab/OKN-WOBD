@@ -13,19 +13,19 @@ interface KeyStorage {
 class MemoryKeyStorage implements KeyStorage {
   private keys: Map<string, string> = new Map();
 
-  private getKey(provider: Provider, sessionId: string): string | null {
+  getKey(provider: Provider, sessionId: string): string | null {
     return this.keys.get(`${sessionId}:${provider}`) || null;
   }
 
-  private setKey(provider: Provider, sessionId: string, key: string): void {
+  setKey(provider: Provider, sessionId: string, key: string): void {
     this.keys.set(`${sessionId}:${provider}`, key);
   }
 
-  private removeKey(provider: Provider, sessionId: string): void {
+  removeKey(provider: Provider, sessionId: string): void {
     this.keys.delete(`${sessionId}:${provider}`);
   }
 
-  private clearSession(sessionId: string): void {
+  clearSession(sessionId: string): void {
     const keysToDelete: string[] = [];
     for (const key of this.keys.keys()) {
       if (key.startsWith(`${sessionId}:`)) {

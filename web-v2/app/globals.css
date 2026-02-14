@@ -4,6 +4,24 @@
 
 :root {
   color-scheme: light dark;
+  /* NIAID Data Discovery Portal palette (dashboard and result cards) */
+  --niaid-header: #20558A;
+  --niaid-link: #0071bc;
+  --niaid-button: #0b8484;
+  --niaid-card-bg: #ffffff;
+  --niaid-page-bg: #f5f5f5;
+  --niaid-badge-positive: #e0f2e6;
+  --niaid-badge-neutral: #f0f0f0;
+  --niaid-tag-species: #ebf7ee;
+  --niaid-tag-health: #fae8eb;
+  --niaid-tag-measurement: #efecf6;
+  --niaid-tag-funding: #fcf2e6;
+  --niaid-tag-license: #e6f3f9;
+  --niaid-tag-topic: #f0f0f0;
+  /* NIAID Dataset Discovery Portal pagination (teal) */
+  --niaid-pagination-active: #0d9488;
+  --niaid-pagination-border: #14b8a6;
+  --niaid-pagination-text: #0f766e;
 }
 
 body {

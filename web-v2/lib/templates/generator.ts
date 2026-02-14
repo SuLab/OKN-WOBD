@@ -20,7 +20,16 @@ export async function generateSPARQLFromIntent(intent: Intent, pack: ContextPack
   // Check required slots
   const slots = intent.slots || {};
   const packTemplateMeta = pack.templates?.find(t => t.id === template.id);
-  const requiredSlots = packTemplateMeta?.required_slots ?? [];
+  let requiredSlots = packTemplateMeta?.required_slots ?? [];
+
+  // dataset_search / geo_dataset_search: when used in ontology workflow with health_conditions, keywords is not required
+  if ((template.id === "dataset_search" || template.id === "geo_dataset_search") && intent.ontology_workflow) {
+    const healthConditions = slots.health_conditions;
+    const hasHealthConditions = Array.isArray(healthConditions) && healthConditions.length > 0;
+    if (hasHealthConditions) {
+      requiredSlots = requiredSlots.filter((s: string) => s !== "keywords");
+    }
+  }
 
   for (const slot of requiredSlots) {
     if (slots[slot] === undefined || slots[slot] === null || slots[slot] === "") {

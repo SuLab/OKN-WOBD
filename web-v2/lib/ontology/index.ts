@@ -37,6 +37,8 @@ export {
 export {
   searchOLS,
   groundTermToMONDO,
+  groundTermToUBERON,
+  resolveTissueToUberonIds,
   scoreMatch,
   rankMONDOCTerms,
 } from "./ols-client";

@@ -409,10 +409,12 @@ LIMIT 50`;
 /**
  * Build SPARQL query for fallback text search
  * Stage 6: Fallback text search (only if ontology workflow fails)
+ * @param geoOnly - If true, restrict to NCBI GEO datasets. In NDE, GEO uses schema:identifier values like GSE100, GSE10000 (pattern GSE[0-9]+); verified against frink NDE.
  */
 export function buildNDEFallbackQuery(
   rawPhrase: string,
-  candidateLabels: string[]
+  candidateLabels: string[],
+  geoOnly: boolean = false
 ): string {
   const searchTerms = [rawPhrase, ...candidateLabels].filter(Boolean);
 
@@ -421,15 +423,15 @@ export function buildNDEFallbackQuery(
   }
 
   // Escape for regex - properly escape special characters for SPARQL REGEX
-  // Note: In SPARQL REGEX, we need to escape regex special chars, but the string is already in quotes
   const escapedTerms = searchTerms.map(term => {
-    // Remove trailing periods and other punctuation that might cause issues
     const cleaned = term.trim().replace(/\.$/, "");
-    // Escape regex special characters
     return cleaned.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }).filter(Boolean);
 
   const regexPattern = escapedTerms.join("|");
+  const geoFilter = geoOnly
+    ? `\n  FILTER(REGEX(STR(COALESCE(?identifier, "")), "GSE[0-9]+", "i"))`
+    : "";
 
   return `PREFIX schema: <http://schema.org/>
 
@@ -446,6 +448,7 @@ WHERE {
     || (BOUND(?description) &&
         REGEX(STR(?description), "${regexPattern}", "i"))
   )
+  ${geoFilter}
 }
 LIMIT 50`;
 }
@@ -732,7 +735,9 @@ export function buildGXACoverageForExperimentIdsQuery(experimentIds: string[]): 
     .map((id) => id.replace(/"/g, '\\"').trim())
     .filter(Boolean);
   if (safeIds.length === 0) return "";
-  const valuesList = safeIds.map((id) => `"${id}"`).join(" ");
+  // Match contrasts by CONTAINS so we don't depend on exact URI shape (same as genes-for-experiment)
+  const containsFilters = safeIds.map((id) => `CONTAINS(STR(?contrast), "${id}")`).join(" || ");
+  // Extract experimentId; optional suffix (E-GEOD-76 or E-GEOD-76-g1_g2) so BIND works for both
   return `PREFIX biolink: <https://w3id.org/biolink/vocab/>
 
 SELECT ?experimentId (COUNT(DISTINCT ?contrast) AS ?contrastCount) (SAMPLE(?contrastLabel) AS ?sampleContrastLabel)
@@ -741,8 +746,8 @@ WHERE {
   ?association a biolink:GeneExpressionMixin ;
       biolink:subject ?contrast .
   OPTIONAL { ?contrast biolink:name ?contrastLabel . }
-  BIND(REPLACE(STR(?contrast), "^.*/(E-[A-Z0-9-]+)-.*$", "$1") AS ?experimentId)
-  FILTER(?experimentId IN (${valuesList}))
+  FILTER(${containsFilters})
+  BIND(REPLACE(STR(?contrast), "^.*/(E-[A-Z0-9-]+)(-.*)?$", "$1") AS ?experimentId)
 }
 GROUP BY ?experimentId
 ORDER BY ?experimentId`;
@@ -1289,6 +1294,8 @@ LIMIT ${Math.min(limit, 200)}`;
  * @param organismLabels - Optional array of organism labels for text matching
  * @param useTextMatching - If true, adds text matching as fallback
  * @param keywordFallbackTerms - Optional terms to match on ?name / ?description (e.g. ["influenza"])
+ * @param limit - Max number of dataset rows to return (default 500, capped at 500)
+ * @param geoOnly - If true, restrict to NCBI GEO datasets. In NDE, GEO uses schema:identifier GSE[0-9]+ (e.g. GSE100, GSE100000); also match url/sameAs containing geo/ncbi.
  */
 export function buildNDEDiseaseAndOrganismQuery(
   diseaseIRIs: string[],
@@ -1296,7 +1303,9 @@ export function buildNDEDiseaseAndOrganismQuery(
   diseaseLabels: string[] = [],
   organismLabels: string[] = [],
   useTextMatching: boolean = false,
-  keywordFallbackTerms: string[] = []
+  keywordFallbackTerms: string[] = [],
+  limit: number = 500,
+  geoOnly: boolean = false
 ): string {
   if (diseaseIRIs.length === 0 && organismIRIs.length === 0 && keywordFallbackTerms.length === 0) {
     throw new Error("At least one disease or organism IRI or keyword term required");
@@ -1391,18 +1400,117 @@ export function buildNDEDiseaseAndOrganismQuery(
     requireMatch = "FILTER(BOUND(?disease) || BOUND(?organism))";
   }
 
-  return `PREFIX schema: <http://schema.org/>
+  // Restrict to NCBI GEO datasets when geoOnly: identifier GSE\\d+ or url/sameAs containing geo/ncbi
+  const geoFilter = geoOnly
+    ? `
+  FILTER(
+    REGEX(STR(COALESCE(?identifier, "")), "GSE[0-9]+", "i")
+    || REGEX(STR(COALESCE(?url, "")), "ncbi.*geo|geo.*ncbi", "i")
+    || REGEX(STR(COALESCE(?sameAs, "")), "ncbi.*geo|geo.*ncbi", "i")
+    || REGEX(STR(COALESCE(?owlSameAs, "")), "ncbi.*geo|geo.*ncbi", "i")
+  )`
+    : "";
 
-SELECT DISTINCT ${selectVars}
+  // Group by all non-aggregated vars so we can aggregate url/sameAs (GEO links often in url or sameAs)
+  const groupByVars = selectVars.trim().split(/\s+/).filter(Boolean).join(" ");
+  return `PREFIX schema: <http://schema.org/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+SELECT ${selectVars}
+  (GROUP_CONCAT(DISTINCT STR(?url); SEPARATOR=" ") AS ?urls)
+  (GROUP_CONCAT(DISTINCT STR(?sameAs); SEPARATOR=" ") AS ?sameAsList)
+  (GROUP_CONCAT(DISTINCT STR(?owlSameAs); SEPARATOR=" ") AS ?owlSameAsList)
 FROM <https://purl.org/okn/frink/kg/nde>
 WHERE {
   ?dataset a schema:Dataset ;
            schema:name ?name .
   OPTIONAL { ?dataset schema:description ?description }
   OPTIONAL { ?dataset schema:identifier ?identifier }
+  OPTIONAL { ?dataset schema:url ?url }
+  OPTIONAL { ?dataset schema:sameAs ?sameAs }
+  OPTIONAL { ?dataset owl:sameAs ?owlSameAs }
   ${diseasePattern}
   ${organismPattern}
   ${requireMatch}
+  ${geoFilter}
 }
-LIMIT 50`;
+GROUP BY ${groupByVars}
+LIMIT ${Math.min(limit, 500)}`;
+}
+
+/**
+ * Build SPARQL query for SPOKE-OKN: summary of genes associated with the given disease IRIs
+ * (MONDO or Wikidata). Returns one row with total distinct gene count and sample gene symbols.
+ * @param diseaseIRIs - Full IRIs (e.g. http://purl.obolibrary.org/obo/MONDO_0005015)
+ * @param sampleLimit - Max sample genes in GROUP_CONCAT (default 15)
+ */
+export function buildSPOKEOKNSummaryForDiseasesQuery(
+  diseaseIRIs: string[],
+  sampleLimit: number = 15
+): string | null {
+  if (diseaseIRIs.length === 0) return null;
+  const iriList = diseaseIRIs
+    .map((iri) => iri.trim())
+    .filter(Boolean)
+    .slice(0, 50)
+    .map((iri) => `<${iri.replace(/[<>]/g, "")}>`)
+    .join(" ");
+  return `PREFIX biolink: <https://w3id.org/biolink/vocab/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT (COUNT(DISTINCT ?gene) AS ?geneCount) (GROUP_CONCAT(DISTINCT ?geneSymbol; SEPARATOR=", ") AS ?sampleGeneSymbols)
+WHERE {
+  VALUES ?disease { ${iriList} }
+  {
+    ?assoc biolink:subject ?disease ; biolink:object ?gene .
+    ?gene a biolink:Gene .
+  } UNION {
+    ?assoc biolink:object ?disease ; biolink:subject ?gene .
+    ?gene a biolink:Gene .
+  }
+  OPTIONAL { ?gene biolink:name ?geneSymbol . }
+  OPTIONAL { ?gene rdfs:label ?geneSymbol . }
+  FILTER(BOUND(?geneSymbol) && STR(?geneSymbol) != "")
+}
+LIMIT 1`;
+}
+
+/**
+ * Build SPARQL query for SPOKE-GeneLab (GXA graph): summary of genes in expression studies
+ * for the given EFO disease IRIs. Study biolink:studies Disease (EFO; same pattern as
+ * scripts/demos/analysis_tools/drug_disease.py). Returns one row with gene count and sample gene symbols.
+ * @param efoDiseaseIRIs - Full EFO IRIs (e.g. http://www.ebi.ac.uk/efo/EFO_0000275)
+ * @param sampleLimit - Max sample genes in GROUP_CONCAT (default 15)
+ */
+export function buildSPOKEGeneLabSummaryForDiseasesQuery(
+  efoDiseaseIRIs: string[],
+  sampleLimit: number = 15
+): string | null {
+  if (efoDiseaseIRIs.length === 0) return null;
+  const iriList = efoDiseaseIRIs
+    .map((iri) => iri.trim())
+    .filter(Boolean)
+    .slice(0, 50)
+    .map((iri) => `<${iri.replace(/[<>]/g, "")}>`)
+    .join(" ");
+  return `PREFIX biolink: <https://w3id.org/biolink/vocab/>
+PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
+
+SELECT (COUNT(DISTINCT ?gene) AS ?geneCount) (GROUP_CONCAT(DISTINCT ?geneSymbol; SEPARATOR=", ") AS ?sampleGeneSymbols)
+FROM <https://purl.org/okn/frink/kg/gene-expression-atlas-okn>
+WHERE {
+  VALUES ?disease { ${iriList} }
+  ?assoc a biolink:GeneExpressionMixin ;
+         biolink:subject ?contrast ;
+         biolink:object ?gene .
+  ?contrast a biolink:Assay .
+  FILTER(REGEX(STR(?contrast), "E-[A-Z0-9-]+-g[0-9]+_g[0-9]+"))
+  BIND(REPLACE(STR(?contrast), "^.*/(E-[A-Z0-9-]+)-.*$", "$1") AS ?experimentId)
+  BIND(IRI(CONCAT("https://spoke.ucsf.edu/genelab/", ?experimentId)) AS ?study)
+  ?study biolink:studies ?disease .
+  OPTIONAL { ?gene biolink:symbol ?geneSymbol . }
+  OPTIONAL { ?gene biolink:name ?geneSymbol . }
+  FILTER(BOUND(?geneSymbol) && STR(?geneSymbol) != "")
+}
+LIMIT 1`;
 }

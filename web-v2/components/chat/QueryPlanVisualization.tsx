@@ -126,7 +126,7 @@ export function QueryPlanVisualization({ plan, allMessages }: QueryPlanVisualiza
                                                 View Results ({resultCount} rows)
                                             </summary>
                                             <div className="mt-2">
-                                                <ResultsTable bindings={message.results.results.bindings} />
+                                                <ResultsTable results={message.results} />
                                             </div>
                                         </details>
                                     )}

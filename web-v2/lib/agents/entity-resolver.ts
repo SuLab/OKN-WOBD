@@ -79,7 +79,6 @@ export function entityResolutionToContext(
 ): StepResultContext {
     const context: StepResultContext = {
         step_id: stepId,
-        entity_iris: resolutionResult.entity_iris,
     };
 
     // Add type-specific fields

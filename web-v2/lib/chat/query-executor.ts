@@ -112,6 +112,9 @@ async function executeSPARQLQuery(
     lane: "template" | "open" | "raw",
     signal?: AbortSignal
 ): Promise<QueryExecutionResult> {
+    // Dataset search only needs NDE graph; avoid ubergraph for speed.
+    const executeGraphs = intent?.task === "dataset_search" ? ["nde"] : (intent?.graphs || []);
+
     const executeResponse = await fetch("/api/tools/sparql/execute", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -119,7 +122,7 @@ async function executeSPARQLQuery(
             query: sparql,
             pack_id: packId,
             mode: intent?.graph_mode || "federated",
-            graphs: intent?.graphs || [],
+            graphs: executeGraphs,
             attempt_repair: true,
             run_preflight: false, // Can be enabled later
         }),
@@ -235,6 +238,7 @@ async function executeSPARQLQuery(
                 const fallbackQuery = buildNDEFallbackQuery(primaryTerm, candidateLabels);
 
                 // Execute fallback query
+                const fallbackGraphs = intent?.task === "dataset_search" ? ["nde"] : (intent?.graphs || []);
                 const fallbackResponse = await fetch("/api/tools/sparql/execute", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -242,7 +246,7 @@ async function executeSPARQLQuery(
                         query: fallbackQuery,
                         pack_id: packId,
                         mode: intent?.graph_mode || "federated",
-                        graphs: intent?.graphs || [],
+                        graphs: fallbackGraphs,
                         attempt_repair: true,
                         run_preflight: false,
                     }),
@@ -288,8 +292,8 @@ async function executeSPARQLQuery(
                             latency_ms: (fallbackResult.stats?.latency_ms || 0) + latency,
                             repair_attempt: fallbackResult.repair_attempt,
                             preflight_result: fallbackResult.preflight,
-                            limit_applied: hasLimit ? limitValue : undefined,
-                            results_limited: hasLimit && limitValue && fallbackRowCount >= limitValue,
+                            limit_applied: hasLimit ? (limitValue ?? undefined) : undefined,
+                            results_limited: Boolean(hasLimit && limitValue != null && fallbackRowCount >= limitValue),
                         },
                     };
 
@@ -375,7 +379,7 @@ async function executeSPARQLQuery(
                         };
                     });
                     results.head = newHead;
-                    results.results.bindings = mergedBindings;
+                    results.results.bindings = mergedBindings as SPARQLResult["results"]["bindings"];
                 }
             } catch (bridgeErr) {
                 console.warn("[QueryExecutor] NDE↔GXA bridge failed:", bridgeErr);
@@ -411,8 +415,8 @@ async function executeSPARQLQuery(
             latency_ms: latency,
             repair_attempt: result.repair_attempt,
             preflight_result: result.preflight,
-            limit_applied: hasLimit ? limitValue : undefined,
-            results_limited: hasLimit && limitValue && rowCount >= limitValue,
+            limit_applied: hasLimit ? (limitValue ?? undefined) : undefined,
+            results_limited: Boolean(hasLimit && limitValue != null && rowCount >= limitValue),
         },
     };
 

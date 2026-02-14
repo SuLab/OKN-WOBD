@@ -24,6 +24,80 @@ export interface HGNCSearchResponse {
   };
 }
 
+/** Fetch approved gene name by HGNC ID (fetch returns full record including name). */
+async function fetchGeneNameByHgncId(hgncId: string): Promise<string | null> {
+  if (!hgncId) return null;
+  try {
+    const encoded = encodeURIComponent(hgncId);
+    const res = await fetch(
+      `https://rest.genenames.org/fetch/hgnc_id/${encoded}`,
+      { method: "GET", headers: { Accept: "application/json" } }
+    );
+    if (!res.ok) return null;
+    const data: HGNCSearchResponse = await res.json();
+    const doc = data.response?.docs?.[0];
+    return doc?.name ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Search HGNC for autocomplete (gene symbol or name).
+ * HGNC search returns only hgnc_id, symbol, score; we optionally fetch names for the first few results.
+ * @param query - Search string (symbol or name)
+ * @param limit - Max results (default 15)
+ * @returns Array of gene results with symbol, name (when available), hgncId for dropdown
+ */
+export async function searchHGNCForAutocomplete(
+  query: string,
+  limit: number = 15
+): Promise<HGNCGeneResult[]> {
+  const searchTerm = query.trim();
+  if (!searchTerm || searchTerm.length < 2) return [];
+
+  const encoded = encodeURIComponent(searchTerm);
+  const isLikelySymbol = /^[A-Za-z0-9_-]+$/.test(searchTerm) && searchTerm.length <= 20;
+  const url = isLikelySymbol
+    ? `https://rest.genenames.org/search/symbol/${encoded}*`
+    : `https://rest.genenames.org/search/${encoded}`;
+
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) return [];
+
+    const data: HGNCSearchResponse = await res.json();
+    if (!data.response?.docs?.length) return [];
+
+    const toEnrich = Math.min(limit, 10);
+    const results: HGNCGeneResult[] = data.response.docs
+      .filter((doc) => doc.symbol)
+      .slice(0, limit)
+      .map((doc) => ({
+        symbol: doc.symbol!,
+        name: doc.name ?? doc.symbol ?? "",
+        hgncId: doc.hgnc_id || "",
+        aliasSymbol: doc.alias_symbol || [],
+        prevSymbol: doc.prev_symbol || [],
+        status: doc.status || "Approved",
+      }));
+
+    const names = await Promise.all(
+      results.slice(0, toEnrich).map((r) => fetchGeneNameByHgncId(r.hgncId))
+    );
+    names.forEach((name, i) => {
+      if (name) results[i].name = name;
+    });
+
+    return results;
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Search HGNC for a gene by name and return the official symbol
  * @param geneName - The gene name (e.g., "dual specificity phosphatase 2")
@@ -81,7 +155,7 @@ export async function searchHGNCByName(
           }] : [];
           
           if (pathResults.length > 0) {
-            const topScore = sortedDocs[0].score || 'N/A';
+            const topScore = (sortedDocs[0] as { score?: number }).score ?? "N/A";
             console.log(`[HGNC] Found gene via path-based name search: ${pathResults[0].symbol} (score: ${topScore})`);
             return pathResults;
           }

@@ -72,8 +72,8 @@ function MessageBubble({
   messages: ChatMessage[];
   isSelected?: boolean;
   onSelect?: () => void;
-  onRetryWithoutLimit?: (query: string, lane: "template" | "text" | "raw") => void;
-  onSelectPartialMatch?: (messageId: string, mondoIRI: string, mondoId: string, originalQuery: string, lane: "template" | "text" | "raw") => void;
+  onRetryWithoutLimit?: (messageId: string, query: string, lane: "template" | "open" | "raw") => void;
+  onSelectPartialMatch?: (messageId: string, mondoIRI: string, mondoId: string, originalQuery: string, lane: "template" | "open" | "raw") => void;
 }) {
   const isUser = message.role === "user";
   const isError = message.role === "error";
@@ -87,9 +87,10 @@ function MessageBubble({
 
   // Get entity type for display
   const entityType = message.ontology_state?.entity_type || "entity";
+  const entityTypeStr = entityType as string;
   const entityTypeLabel = entityType === "disease" || entityType === "condition"
     ? "disease"
-    : entityType === "species" || entityType === "organism"
+    : entityType === "species" || entityTypeStr === "organism"
       ? "species/organism"
       : entityType === "drug"
         ? "drug"

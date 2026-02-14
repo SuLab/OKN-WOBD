@@ -56,8 +56,6 @@ export async function POST(request: Request) {
     // include gene-expression-atlas-okn for "contain gene expression data" even when the template built an NDE query)
     const gxaGraphPattern = /gene-expression-atlas-okn/i;
     const queryTargetsGXA = gxaGraphPattern.test(finalQuery);
-    const ndeGraphPattern = /nde/i;
-    const queryTargetsNDE = ndeGraphPattern.test(finalQuery);
 
     // Inject FROM clauses if in federated mode with graphs
     if (mode === "federated" && graphs && Array.isArray(graphs) && graphs.length > 0) {
@@ -68,24 +66,24 @@ export async function POST(request: Request) {
       process.env.NEXT_PUBLIC_FRINK_FEDERATION_URL ||
       "https://frink.apps.renci.org/federation/sparql";
 
-    const hasNDEGraph = queryTargetsNDE ||
-      (graphs && Array.isArray(graphs) && graphs.some((g: string) => ndeGraphPattern.test(g)));
-
     if (queryTargetsGXA && pack?.endpoint_mode.direct_endpoints?.["gene-expression-atlas-okn"]) {
       endpoint = pack.endpoint_mode.direct_endpoints["gene-expression-atlas-okn"];
       // Remove all FROM clauses when querying direct endpoint (default graph is the GXA graph)
       finalQuery = removeFromClauses(finalQuery);
-    } else if (!queryTargetsGXA && hasNDEGraph && pack?.endpoint_mode.direct_endpoints?.["nde"]) {
-      endpoint = pack.endpoint_mode.direct_endpoints["nde"];
-      // Strip FROM so we query the endpoint's default graph. The NDE endpoint returns 0 when given FROM <.../nde> (named graph is empty); data is on default graph.
-      finalQuery = removeFromClauses(finalQuery);
     }
+    // NDE-intent queries (e.g. dataset_search) use the federated endpoint with FROM clauses
+    // (already injected above); they are no longer routed to the NDE direct endpoint.
 
-    // GXA direct endpoint can take 1–2 minutes; use a longer timeout when routing to it
+    // GXA direct endpoint can take 1–2 minutes; NDE (direct or via federation) can be slow for keyword search. Use longer timeouts.
     const baseTimeout = options?.timeout_s ?? pack?.guardrails?.timeout_seconds ?? 25;
-    const timeout = queryTargetsGXA && endpoint?.includes("gene-expression-atlas-okn")
+    const isGXA = queryTargetsGXA && endpoint?.includes("gene-expression-atlas-okn");
+    const endpointIsNDE = !queryTargetsGXA && endpoint?.includes("nde");
+    const federatedIncludesNDE = mode === "federated" && Array.isArray(graphs) && graphs.includes("nde");
+    const timeout = isGXA
       ? Math.max(baseTimeout, 120)
-      : baseTimeout;
+      : endpointIsNDE || federatedIncludesNDE
+        ? Math.max(baseTimeout, 60)
+        : baseTimeout;
 
     // Optional preflight probes (skip for GXA direct endpoint, which can be slow and
     // has been flaky with small sample queries)
