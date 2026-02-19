@@ -1,38 +1,41 @@
 # OKN-WOBD MCP Server
 
-An [MCP](https://modelcontextprotocol.io/) server that exposes biomedical analysis tools over the stdio transport. It lets AI assistants (Claude Code, Claude Desktop, Biomni, etc.) run gene-disease queries, differential expression analyses, and gene-set enrichment without leaving the conversation.
+An [MCP](https://modelcontextprotocol.io/) server that exposes biomedical analysis tools for AI assistants (Claude Code, Claude Desktop, Biomni, etc.) to run gene-disease queries, differential expression analyses, and gene-set enrichment without leaving the conversation.
+
+Supports **local** (stdio) and **remote** (Streamable HTTP, SSE) transports. Remote servers work out of the box with no authentication required — any MCP client can connect by URL, just like other public MCP servers. Optional API-key auth is available for restricted deployments.
 
 ## Architecture
 
 ```
-┌──────────────────────┐  stdio (JSON-RPC)  ┌─────────────────────────┐
-│  Claude Code / Biomni│ ◄────────────────► │  okn_wobd.mcp_server    │
-└──────────────────────┘                    │                         │
-                                            │  server.py   (FastMCP)  │
-                                            │  ├─ health_check        │
-                                            │  ├─ tools_analysis.py   │
-                                            │  │   ├─ gene_disease_paths
-                                            │  │   ├─ gene_neighborhood
-                                            │  │   └─ drug_disease_opposing_expression
-                                            │  └─ tools_chatgeo.py    │
-                                            │      ├─ differential_expression
-                                            │      ├─ get_analysis_result
-                                            │      ├─ find_samples    │
-                                            │      └─ enrichment_analysis
-                                            └────────┬────────────────┘
-                                                     │
-                              ┌───────────────┬──────┴──────┬────────────────┐
-                              ▼               ▼             ▼                ▼
-                         SPOKE/Wikidata    Ubergraph     ARCHS4 (local)   g:Profiler
-                         FRINK SPARQL      SPARQL        HDF5 files       REST API
+                                  stdio (local)
+┌──────────────────────┐  ─── or ────────────────  ┌─────────────────────────┐
+│  Claude Code / Biomni│  HTTP (streamable-http)   │  okn_wobd.mcp_server    │
+│  or other MCP client │  ─── or ────────────────  │                         │
+└──────────────────────┘  SSE   (legacy)           │  server.py   (FastMCP)  │
+                                                   │  ├─ health_check        │
+                                                   │  ├─ tools_analysis.py   │
+                                                   │  │   ├─ gene_disease_paths
+                                                   │  │   ├─ gene_neighborhood
+                                                   │  │   └─ drug_disease_opposing_expression
+                                                   │  └─ tools_chatgeo.py    │
+                                                   │      ├─ differential_expression
+                                                   │      ├─ get_analysis_result
+                                                   │      ├─ find_samples    │
+                                                   │      ├─ get_sample_metadata
+                                                   │      ├─ resolve_disease_ontology
+                                                   │      └─ enrichment_analysis
+                                                   └────────┬────────────────┘
+                                                            │
+                             ┌───────────────┬──────────────┴──────┬────────────────┐
+                             ▼               ▼                     ▼                ▼
+                        SPOKE/Wikidata    Ubergraph             ARCHS4 (local)   g:Profiler
+                        FRINK SPARQL      SPARQL                HDF5 files       REST API
 ```
 
 The server wraps two packages that live in `scripts/demos/`:
 
 - **analysis_tools** — SPARQL queries against FRINK knowledge graphs (SPOKE-OKN, Wikidata, Ubergraph, GXA).
 - **chatgeo** — Differential expression analysis using local ARCHS4 HDF5 files, with g:Profiler enrichment.
-
-MCP uses stdout for its JSON-RPC channel, so the server redirects all tool `print()` output to stderr and writes logs to a dedicated file (see [Logging](#logging) below).
 
 ## Tools
 
@@ -45,11 +48,13 @@ MCP uses stdout for its JSON-RPC channel, so the server redirects all tool `prin
 | `differential_expression` | 30 s - 5 min | ARCHS4 + g:Profiler | **yes** |
 | `get_analysis_result` | instant | polls background job | no |
 | `find_samples` | 5-10 s | ARCHS4 metadata | **yes** |
+| `get_sample_metadata` | 30-120 s | ARCHS4 metadata | **yes** |
+| `resolve_disease_ontology` | 2-5 s | Ubergraph SPARQL | no |
 | `enrichment_analysis` | 2-5 s | g:Profiler REST | no |
 
 ### Background jobs
 
-`differential_expression` dispatches all methods (mann-whitney, welch-t, deseq2) to a background thread and returns a `job_id` immediately. The client polls `get_analysis_result(job_id=...)` every 30-60 seconds until the job completes. This keeps each MCP tool call within the ~60-second client timeout.
+`differential_expression`, `find_samples`, and `get_sample_metadata` dispatch work to a background thread and return a `job_id` immediately. The client polls `get_analysis_result(job_id=...)` every 30-60 seconds until the job completes. This keeps each MCP tool call within the ~60-second client timeout.
 
 ## Prerequisites
 
@@ -71,9 +76,32 @@ Edit `scripts/demos/.env`:
 | `ARCHS4_DATA_DIR` | ChatGEO tools | Path to directory with ARCHS4 HDF5 files (~58 GB each) |
 | `ANTHROPIC_API_KEY` | LLM interpretation | Anthropic API key (optional — interpretation is off by default in MCP) |
 
-The three SPARQL-based analysis tools (`gene_disease_paths`, `gene_neighborhood`, `drug_disease_opposing_expression`) and `enrichment_analysis` work without ARCHS4 data.
+The SPARQL-based analysis tools (`gene_disease_paths`, `gene_neighborhood`, `drug_disease_opposing_expression`), `resolve_disease_ontology`, and `enrichment_analysis` work without ARCHS4 data.
 
-## Usage with Claude Code
+## Transports
+
+The server supports three transports, selected via the `OKN_MCP_TRANSPORT` environment variable:
+
+| Transport | Value | Use case |
+|-----------|-------|----------|
+| **stdio** (default) | `stdio` | Local — client spawns the server as a subprocess |
+| **Streamable HTTP** | `streamable-http` | Remote — recommended for remote/networked access |
+| **SSE** | `sse` | Remote — legacy Server-Sent Events transport |
+
+### Environment variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OKN_MCP_TRANSPORT` | `stdio` | Transport: `stdio`, `streamable-http`, or `sse` |
+| `OKN_MCP_HOST` | `0.0.0.0` | Bind address (HTTP transports only) |
+| `OKN_MCP_PORT` | `8000` | Listen port (HTTP transports only) |
+| `OKN_MCP_API_KEY` | *(none)* | If set, requires `Authorization: Bearer <key>` on all HTTP requests |
+| `OKN_MCP_LOG_FILE` | `~/.okn_wobd/mcp_server.log` | Log file path |
+| `OKN_MCP_LOG_LEVEL` | `INFO` | Log level (`DEBUG`, `INFO`, `WARNING`, `ERROR`) |
+
+## Usage: Local (stdio)
+
+### Claude Code
 
 Add the server to your Claude Code MCP configuration. The repo includes a ready-made config at `config/mcp-dev.json`:
 
@@ -92,27 +120,11 @@ Add the server to your Claude Code MCP configuration. The repo includes a ready-
 }
 ```
 
-To use it:
-
-1. Copy `config/mcp-dev.json` to your Claude Code settings directory (or merge into your existing MCP config):
-   ```bash
-   # macOS / Linux
-   cp config/mcp-dev.json ~/.claude/claude_desktop_config.json
-
-   # Or add to the project-level config
-   cp config/mcp-dev.json .mcp.json
-   ```
-
+1. Copy `config/mcp-dev.json` to your project-level `.mcp.json` (or merge into your existing Claude Code settings).
 2. Edit the paths to match your local checkout.
+3. Restart Claude Code. Verify with: `> Use the health_check tool`
 
-3. Restart Claude Code. The tools will appear in the tool list. You can verify with:
-   ```
-   > Use the health_check tool
-   ```
-
-Claude Code will then be able to call tools like `gene_disease_paths(gene_symbol="TP53")` or `differential_expression(query="psoriasis in skin tissue")` directly in conversation.
-
-## Usage with Biomni
+### Biomni
 
 [Biomni](https://github.com/lhallee/Biomni) discovers MCP servers from YAML config files. The repo includes `config/biomni.yaml`:
 
@@ -131,42 +143,211 @@ env:
   PYTHONPATH: src
 ```
 
-To use it:
-
 1. Copy or symlink the config into Biomni's server directory:
    ```bash
    cp config/biomni.yaml /path/to/biomni/servers/okn-wobd.yaml
    ```
-
-2. Make sure `PYTHONPATH` resolves correctly. If running Biomni from a different directory, use absolute paths:
-   ```yaml
-   env:
-     PYTHONPATH: /path/to/OKN-WOBD/src
-   ```
-   and add:
-   ```yaml
-   cwd: /path/to/OKN-WOBD
-   ```
-
+2. If running Biomni from a different directory, use absolute paths in the YAML.
 3. Start Biomni. The OKN-WOBD tools will be registered automatically.
+
+## Usage: Remote (HTTP)
+
+### Starting the server
+
+```bash
+# Streamable HTTP on default port 8000 (open access, no auth)
+OKN_MCP_TRANSPORT=streamable-http okn-wobd-mcp
+
+# Custom port
+OKN_MCP_PORT=9000 OKN_MCP_TRANSPORT=streamable-http okn-wobd-mcp
+
+# SSE transport (legacy)
+OKN_MCP_TRANSPORT=sse okn-wobd-mcp
+```
+
+The server will print its listen address to stderr and begin accepting connections. By default there is no authentication — any MCP client can connect, just like other public-facing MCP servers.
+
+To optionally require a Bearer token, set `OKN_MCP_API_KEY`:
+
+```bash
+OKN_MCP_API_KEY=my-secret-key OKN_MCP_TRANSPORT=streamable-http okn-wobd-mcp
+```
+
+### Connecting from Claude Code
+
+Any MCP client can connect by URL. The repo includes `config/mcp-remote.json`:
+
+```json
+{
+  "mcpServers": {
+    "okn-wobd": {
+      "type": "url",
+      "url": "https://your-server:8000/mcp"
+    }
+  }
+}
+```
+
+Replace `your-server` with the hostname/IP. That's it — no tokens or extra configuration needed.
+
+If the server was started with `OKN_MCP_API_KEY`, add the auth header:
+
+```json
+{
+  "mcpServers": {
+    "okn-wobd": {
+      "type": "url",
+      "url": "https://your-server:8000/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY_HERE"
+      }
+    }
+  }
+}
+```
+
+### MCP endpoint paths
+
+| Transport | Endpoint |
+|-----------|----------|
+| Streamable HTTP | `POST /mcp` |
+| SSE | `GET /sse` (stream) + `POST /messages/` (client→server) |
+
+## Public deployment
+
+To expose the server on the internet, you need to address several concerns beyond just starting the HTTP transport.
+
+### 1. TLS termination
+
+MCP clients expect HTTPS for remote servers. Use a reverse proxy to terminate TLS:
+
+**nginx** (minimal example):
+```nginx
+server {
+    listen 443 ssl;
+    server_name mcp.example.com;
+
+    ssl_certificate     /etc/letsencrypt/live/mcp.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/mcp.example.com/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Connection '';
+        proxy_buffering off;            # required for SSE/streaming
+        proxy_read_timeout 600s;        # long-running tools
+    }
+}
+```
+
+Or use **Caddy** for automatic Let's Encrypt:
+```
+mcp.example.com {
+    reverse_proxy 127.0.0.1:8000 {
+        flush_interval -1    # disable buffering for SSE
+    }
+}
+```
+
+### 2. Authentication (optional)
+
+The server runs open by default — no tokens required. This is the simplest setup and matches the pattern of most public MCP servers.
+
+If you want to restrict access, set `OKN_MCP_API_KEY` to require a Bearer token. The built-in middleware validates `Authorization: Bearer <key>` on every request, returning 401 for missing/wrong keys.
+
+Other optional hardening:
+- Rate limiting at the reverse proxy layer
+- IP allowlisting if clients have known addresses
+- OAuth 2.0 via the MCP SDK's built-in auth provider support
+
+### 3. ARCHS4 data
+
+The ChatGEO tools (`differential_expression`, `find_samples`, `get_sample_metadata`) require local access to ARCHS4 HDF5 files (~58 GB each). The server machine must have:
+- Sufficient disk space for the HDF5 files
+- `ARCHS4_DATA_DIR` set in the environment or in `scripts/demos/.env`
+
+The SPARQL-based tools and `enrichment_analysis` work without local data and only make outbound HTTP requests.
+
+### 4. Resource requirements
+
+| Resource | Minimum | Recommended |
+|----------|---------|-------------|
+| Disk | ~120 GB (2 ARCHS4 HDF5 files) | 200 GB+ (room for logs, cache) |
+| RAM | 4 GB | 8 GB+ (HDF5 reads are memory-mapped) |
+| CPU | 2 cores | 4+ cores (parallel SPARQL queries, DE analysis) |
+| Network | Outbound HTTPS to SPARQL endpoints + g:Profiler | — |
+
+### 5. Quick tunnel for testing
+
+For quick remote testing without a public server, use a tunnel:
+
+```bash
+# Start the server
+OKN_MCP_TRANSPORT=streamable-http okn-wobd-mcp
+
+# In another terminal — ngrok
+ngrok http 8000
+# → https://abc123.ngrok.io
+
+# Or Cloudflare Tunnel
+cloudflared tunnel --url http://localhost:8000
+```
+
+Then point your remote Claude Code config at the tunnel URL:
+```json
+{
+  "mcpServers": {
+    "okn-wobd": {
+      "type": "url",
+      "url": "https://abc123.ngrok.io/mcp"
+    }
+  }
+}
+```
+
+### 6. Process management
+
+For long-running deployments, use a process manager:
+
+```bash
+# systemd service (Linux)
+# /etc/systemd/system/okn-wobd-mcp.service
+[Unit]
+Description=OKN-WOBD MCP Server
+After=network.target
+
+[Service]
+User=okn
+WorkingDirectory=/opt/OKN-WOBD
+Environment=OKN_MCP_TRANSPORT=streamable-http
+Environment=OKN_MCP_API_KEY=<your-key>
+Environment=ARCHS4_DATA_DIR=/data/archs4
+ExecStart=/opt/OKN-WOBD/venv/bin/okn-wobd-mcp
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
 
 ## Running directly
 
-You can also start the server manually for testing:
+You can start the server manually for testing:
 
 ```bash
-# Via module
+# stdio (default)
 python3.11 -m okn_wobd.mcp_server
-
-# Via installed script
 okn-wobd-mcp
+
+# HTTP
+OKN_MCP_TRANSPORT=streamable-http okn-wobd-mcp
 ```
 
-The server reads JSON-RPC from stdin and writes responses to stdout. In practice you won't interact with it directly — the MCP client (Claude Code, Biomni) handles the protocol.
+In stdio mode the server reads JSON-RPC from stdin and writes responses to stdout — the MCP client handles the protocol. In HTTP mode it starts a uvicorn server and logs to stderr.
 
 ## Logging
 
-The server writes structured logs to a file (not stdout/stderr, which would interfere with the MCP JSON-RPC channel).
+The server writes structured logs to a rotating file.
 
 | Setting | Default | Override |
 |---------|---------|----------|
@@ -177,33 +358,17 @@ The server writes structured logs to a file (not stdout/stderr, which would inte
 
 The log captures:
 
-- **Server lifecycle** — startup with version info
+- **Server lifecycle** — startup with version, transport type, host/port
 - **Tool invocations** — every tool call with key arguments (INFO)
 - **Background jobs** — dispatch, thread start, completion with elapsed time and result summary, errors with tracebacks
+- **Auth events** — API-key middleware activation (INFO)
 - **Errors** — all caught exceptions with context (ERROR)
 - **Poll requests** — `get_analysis_result` polls (DEBUG)
-
-Example log output:
-
-```
-2026-02-09 14:23:01,234 okn_wobd.mcp_server.server INFO MCP server starting (version 0.1.0)
-2026-02-09 14:23:15,891 okn_wobd.mcp_server.tools_analysis INFO gene_disease_paths called: gene=TP53
-2026-02-09 14:24:02,456 okn_wobd.mcp_server.tools_chatgeo INFO differential_expression called: query='psoriasis in skin tissue', method=mann-whitney
-2026-02-09 14:24:02,789 okn_wobd.mcp_server.tools_chatgeo INFO Dispatched background job a1b2c3d4 (disease=psoriasis, tissue=skin, method=mann-whitney)
-2026-02-09 14:24:02,790 okn_wobd.mcp_server.tools_chatgeo INFO Background job a1b2c3d4 started (disease=psoriasis, method=mann_whitney_u)
-2026-02-09 14:24:48,123 okn_wobd.mcp_server.tools_chatgeo INFO Background job a1b2c3d4 completed in 45.3s (127 significant genes)
-```
 
 To watch logs in real time:
 
 ```bash
 tail -f ~/.okn_wobd/mcp_server.log
-```
-
-To enable DEBUG level (includes poll requests):
-
-```bash
-export OKN_MCP_LOG_LEVEL=DEBUG
 ```
 
 ## Tests

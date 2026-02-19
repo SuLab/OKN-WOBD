@@ -3,11 +3,21 @@ OKN-WOBD MCP Server.
 
 Exposes biomedical analysis tools (gene-disease paths, gene neighborhood,
 drug-disease opposing expression, ChatGEO differential expression) over
-the Model Context Protocol (MCP) stdio transport.
+the Model Context Protocol (MCP).
+
+Supports three transports (set via ``OKN_MCP_TRANSPORT``):
+
+* ``stdio`` (default) — local, launched by the client as a subprocess.
+* ``streamable-http`` — remote, listens on HTTP (recommended for remote).
+* ``sse`` — remote, Server-Sent Events (legacy).
+
+For remote transports, set ``OKN_MCP_API_KEY`` to require Bearer-token
+authentication.
 
 Usage:
-    python -m okn_wobd.mcp_server
-    okn-wobd-mcp
+    python -m okn_wobd.mcp_server                          # stdio (default)
+    OKN_MCP_TRANSPORT=streamable-http okn-wobd-mcp          # HTTP on :8000
+    OKN_MCP_TRANSPORT=sse OKN_MCP_PORT=9000 okn-wobd-mcp    # SSE on :9000
 """
 
 import contextlib
@@ -159,6 +169,48 @@ def _register_chatgeo_tools():
 
 
 # ---------------------------------------------------------------------------
+# API-key auth middleware (for remote transports)
+# ---------------------------------------------------------------------------
+
+def _wrap_with_api_key_auth(app):
+    """Wrap a Starlette app with Bearer-token API-key checking.
+
+    Only active when ``OKN_MCP_API_KEY`` is set.  Requests must include
+    ``Authorization: Bearer <key>``.  The MCP health/readiness probes and
+    CORS preflight are allowed through without auth.
+    """
+    from starlette.middleware import Middleware
+    from starlette.requests import Request
+    from starlette.responses import JSONResponse
+
+    api_key = os.environ.get("OKN_MCP_API_KEY", "")
+    if not api_key:
+        return app  # no auth configured
+
+    logger = logging.getLogger("okn_wobd.mcp_server")
+    logger.info("API-key authentication enabled for remote transport")
+
+    from starlette.middleware.base import BaseHTTPMiddleware
+
+    class APIKeyMiddleware(BaseHTTPMiddleware):
+        async def dispatch(self, request: Request, call_next):
+            # Allow CORS preflight
+            if request.method == "OPTIONS":
+                return await call_next(request)
+            auth = request.headers.get("Authorization", "")
+            if auth == f"Bearer {api_key}":
+                return await call_next(request)
+            return JSONResponse(
+                {"error": "Unauthorized"},
+                status_code=401,
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+    app.add_middleware(APIKeyMiddleware)
+    return app
+
+
+# ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
@@ -167,4 +219,39 @@ def main():
     _setup_demo_imports()
     _register_analysis_tools()
     _register_chatgeo_tools()
-    mcp.run(transport="stdio")
+
+    transport = os.environ.get("OKN_MCP_TRANSPORT", "stdio").lower()
+    host = os.environ.get("OKN_MCP_HOST", "0.0.0.0")
+    port = int(os.environ.get("OKN_MCP_PORT", "8000"))
+
+    logger = logging.getLogger("okn_wobd.mcp_server")
+
+    if transport == "stdio":
+        logger.info("Starting with stdio transport")
+        mcp.run(transport="stdio")
+
+    elif transport in ("streamable-http", "sse"):
+        logger.info("Starting with %s transport on %s:%d", transport, host, port)
+
+        # Update FastMCP settings for host/port
+        mcp.settings.host = host
+        mcp.settings.port = port
+
+        # Build the Starlette ASGI app so we can add auth middleware
+        if transport == "streamable-http":
+            app = mcp.streamable_http_app()
+        else:
+            app = mcp.sse_app()
+
+        app = _wrap_with_api_key_auth(app)
+
+        # Run with uvicorn directly so middleware is included
+        import uvicorn
+        print(f"OKN-WOBD MCP server listening on http://{host}:{port}", file=sys.stderr)
+        uvicorn.run(app, host=host, port=port, log_level="info")
+
+    else:
+        print(f"Unknown transport: {transport!r}. "
+              f"Use 'stdio', 'streamable-http', or 'sse'.",
+              file=sys.stderr)
+        sys.exit(1)
