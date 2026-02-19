@@ -57,6 +57,8 @@ export default function TemplatePage() {
     if (runningRef.current) return;
     runningRef.current = true;
     setResultsError(null);
+    setResults(null);
+    setFilteredEmptyHint(null);
     setLoading(true);
     abortRef.current = new AbortController();
     const signal = abortRef.current.signal;
@@ -70,7 +72,13 @@ export default function TemplatePage() {
       });
       if (signal.aborted) return;
       if (err) {
-        setResultsError(err);
+        const timeoutLike =
+          /timed out|took too long|operation was aborted|request was aborted/i.test(err);
+        setResultsError(
+          timeoutLike
+            ? "Query timed out. Gene expression across experiments can take up to 2 minutes; try again or reduce the number of experiments."
+            : err
+        );
         setResults(null);
         setFilteredEmptyHint(null);
         return;
@@ -79,8 +87,10 @@ export default function TemplatePage() {
       setFilteredEmptyHint(hint ?? null);
     } catch (e: unknown) {
       if (signal.aborted) return;
-      const isAbort = e instanceof Error && e.name === "AbortError";
-      setResultsError(isAbort ? "Query was cancelled." : (e instanceof Error ? e.message : "Unknown error"));
+      const isAbort =
+        (e instanceof Error && e.name === "AbortError") ||
+        (typeof (e as { name?: string })?.name === "string" && (e as { name: string }).name === "AbortError");
+      setResultsError(isAbort ? "Query was cancelled." : (e instanceof Error ? e.message : String((e as Error)?.message ?? "Unknown error")));
       setResults(null);
     } finally {
       setLoading(false);

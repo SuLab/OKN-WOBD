@@ -1311,10 +1311,11 @@ const SLOT_LABELS: Record<string, { label: string; placeholder: string }> = {
   tissue_uberon_ids_ols: { label: "Tissue (UBERON)", placeholder: "e.g. heart or UBERON:0000948" },
   factor_terms: { label: "Factor terms", placeholder: "e.g. disease, treatment" },
   disease_efo_ids: { label: "Disease (EFO IDs)", placeholder: "e.g. EFO:0000408 or diabetes" },
+  min_experiments: { label: "Min experiments", placeholder: "e.g. 2 or 3 (genes must appear in this many experiments)" },
   min_abs_log2fc: { label: "Min |log2FC|", placeholder: "e.g. 1 or 1.5" },
   max_adj_p_value: { label: "Max adj. p-value", placeholder: "e.g. 0.05" },
-  limit: { label: "Limit", placeholder: "e.g. 100" },
-  direction: { label: "Direction", placeholder: "e.g. up or down" },
+  limit: { label: "Limit", placeholder: "e.g. 50 or 100" },
+  direction: { label: "Direction", placeholder: "up or down" },
   only_gene_expression: { label: "Only show datasets with gene expression data", placeholder: "" },
   max_results: { label: "Maximum results", placeholder: "Default 500" },
 };
@@ -1521,6 +1522,35 @@ export function SlotForm({ template, values, onChange, disabled }: SlotFormProps
           >
             {options.map((opt) => (
               <option key={opt.value || "default"} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      );
+    }
+    if (slotName === "direction") {
+      const rawStr = Array.isArray(raw) ? raw[0] : raw;
+      const value = typeof rawStr === "string" ? rawStr.trim().toLowerCase() : "";
+      const options = [
+        { value: "", label: "Either (up or down)" },
+        { value: "up", label: "Up (upregulated)" },
+        { value: "down", label: "Down (downregulated)" },
+      ];
+      return (
+        <div key={slotName} className="space-y-1">
+          <label htmlFor={`slot-${template.id}-${slotName}`} className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+            {label}
+          </label>
+          <select
+            id={`slot-${template.id}-${slotName}`}
+            value={value === "up" || value === "down" ? value : ""}
+            onChange={(e) => updateSlot(slotName, e.target.value)}
+            disabled={disabled}
+            className="block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-sm focus:border-niaid-header focus:ring-1 focus:ring-niaid-header sm:text-sm"
+          >
+            {options.map((opt) => (
+              <option key={opt.value || "either"} value={opt.value}>
                 {opt.label}
               </option>
             ))}

@@ -57,11 +57,15 @@ export async function executeSPARQL(
     };
   } catch (error: any) {
     const latency_ms = Date.now() - startTime;
+    const isAbort = error?.name === "AbortError" || /aborted|abort/i.test(String(error?.message ?? ""));
+    const errorMessage = isAbort
+      ? "Query timed out. The endpoint took too long to respond; try again or simplify the query."
+      : (error?.message || "Unknown error executing SPARQL query");
     return {
       result: { head: { vars: [] }, results: { bindings: [] } },
       latency_ms,
       row_count: 0,
-      error: error.message || "Unknown error executing SPARQL query",
+      error: errorMessage,
     };
   }
 }
