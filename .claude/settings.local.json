@@ -62,7 +62,9 @@
       "WebFetch(domain:api.data.niaid.nih.gov)",
       "WebFetch(domain:data.niaid.nih.gov)",
       "WebFetch(domain:arxiv.org)",
-      "WebFetch(domain:docs.biothings.io)"
+      "WebFetch(domain:docs.biothings.io)",
+      "Bash(OKN_MCP_TRANSPORT=streamable-http OKN_MCP_PORT=18765 timeout 5 python3.11:*)",
+      "Bash(OKN_MCP_TRANSPORT=streamable-http OKN_MCP_PORT=18765 python3.11:*)"
     ],
     "deny": [],
     "ask": []
