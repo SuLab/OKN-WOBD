@@ -31,6 +31,8 @@ okn-wobd convert --resource ImmPort
 
 # Run ChatGEO differential expression analysis (from scripts/demos/)
 cd scripts/demos && python -m chatgeo.cli "psoriasis in skin tissue" --verbose
+cd scripts/demos && python -m chatgeo.cli "psoriasis in skin tissue" --mode study-matched --verbose
+cd scripts/demos && python -m chatgeo.cli "psoriasis in skin tissue" --mode pooled --verbose
 
 # Run biological question investigations (from scripts/demos/)
 cd scripts/demos && python -m questions.run_all --list          # List all questions
@@ -154,7 +156,7 @@ External URIs are preferred over internal URIs:
 
 ### Demo Scripts Environment
 Copy `scripts/demos/.env.example` to `.env` and configure:
-- `ARCHS4_DATA_DIR` - Directory containing ARCHS4 HDF5 files (~15GB each, required for ARCHS4/ChatGEO)
+- `ARCHS4_DATA_DIR` - Directory containing ARCHS4 HDF5 files (~58GB each, required for ARCHS4/ChatGEO)
 - `ANTHROPIC_API_KEY` - Required for LLM summaries in go_disease_analysis and ChatGEO interpretation
 
 Demo scripts must be run from `scripts/demos/` so Python resolves package imports (clients, frink, analysis, chatgeo, questions, etc.).

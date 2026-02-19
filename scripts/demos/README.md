@@ -80,7 +80,35 @@ from clients import SPARQLClient, NIAIDClient, ARCHS4Client, CellxGeneClient
 | `sparql.py` | Wikidata, FRINK, Ubergraph | SPARQL client with named endpoints |
 | `niaid.py` | NIAID Discovery Portal | Dataset search with ontology annotations |
 | `archs4.py` | ARCHS4 (local HDF5) | Bulk RNA-seq expression from GEO |
+| `archs4_index.py` | ARCHS4 (SQLite) | Metadata index for fast lookups (see below) |
 | `cellxgene.py` | CellxGene Census | Single-cell RNA-seq expression |
+| `ontology.py` | Ubergraph / NDE | Disease ontology resolution (MONDO) |
+| `nde_geo.py` | NIAID NDE | GEO study discovery via NDE SPARQL/REST |
+
+#### ARCHS4 SQLite Metadata Index
+
+`archs4_index.py` provides `ARCHS4MetadataIndex`, which builds a one-time SQLite index of all sample metadata from the ARCHS4 HDF5 file. The index is stored as `*.metadata.db` alongside the HDF5 file and is automatically built on first use (~15s for 1.05M samples, ~1.4GB). It is rebuilt when the HDF5 file changes (mtime/size) or the schema version is bumped.
+
+`ARCHS4Client` uses the index transparently — metadata methods (`has_series`, `get_series_sample_ids`, `search_metadata`, etc.) are routed through SQLite with automatic fallback to archs4py on any error. Expression data methods are unaffected (still read from HDF5).
+
+| Operation | Without Index | With Index | Speedup |
+|-----------|--------------|------------|---------|
+| `has_series(gse_id)` | ~600ms | <0.01ms | ~60,000x |
+| `get_series_sample_ids(gse_id)` | ~600ms | 0.13ms | ~4,600x |
+| 272-study batch classify | ~170s | <1ms | ~170,000x |
+| `search_metadata` (FTS5) | ~5-15s | 33ms | ~300x |
+| Full ontology pipeline | 173s | 11s | 16x |
+
+To disable the index: `ARCHS4Client(use_index=False)`.
+
+To build the index manually:
+
+```python
+from clients.archs4_index import ARCHS4MetadataIndex
+from pathlib import Path
+idx = ARCHS4MetadataIndex(Path("/path/to/human_gene_v2.latest.h5"))
+idx.build()
+```
 
 ### analysis_tools/
 
@@ -124,7 +152,7 @@ Required variables:
 
 | Variable | Required For | Description |
 |----------|-------------|-------------|
-| `ARCHS4_DATA_DIR` | ARCHS4/ChatGEO | Path to ARCHS4 HDF5 files (~15GB each) |
+| `ARCHS4_DATA_DIR` | ARCHS4/ChatGEO | Path to ARCHS4 HDF5 files (~58GB each) |
 | `ANTHROPIC_API_KEY` | LLM summaries | Anthropic API key |
 | `DATA_DIR` | Caching | Directory for intermediate result caching |
 

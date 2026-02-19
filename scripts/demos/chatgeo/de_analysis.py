@@ -80,16 +80,19 @@ class GeneFilterConfig:
 class DEConfig:
     """Configuration for differential expression analysis.
 
-    The default method is DESeq2, which handles normalization internally
-    using the median-of-ratios method and models counts with a negative
-    binomial distribution. Raw integer counts should be passed directly.
+    The default method is Mann-Whitney U, a non-parametric rank-based test
+    that is robust to the distributional properties of ARCHS4 pseudocounts.
+    It uses log2(CPM+1) normalization.
 
-    Legacy methods (mann_whitney_u, welch_t) are available as fallbacks
-    and use log2(CPM+1) normalization.
+    DESeq2 is available but assumes raw counts from a negative binomial
+    distribution. ARCHS4 provides rounded Kallisto pseudocounts without
+    the tximport offset matrix, which violates DESeq2's assumptions
+    (see README for details). Welch t-test is also available as an
+    alternative parametric method.
     """
 
-    # DE method: "deseq2" (recommended), "mann_whitney_u", or "welch_t"
-    method: DEMethod = "deseq2"
+    # DE method: "mann_whitney_u" (recommended for ARCHS4), "deseq2", or "welch_t"
+    method: DEMethod = "mann_whitney_u"
 
     # Significance thresholds
     fdr_threshold: float = 0.01

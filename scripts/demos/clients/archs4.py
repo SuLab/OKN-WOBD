@@ -14,7 +14,7 @@ convenient interface for:
 Data Requirements:
     ARCHS4 stores data in large HDF5 files that must be downloaded first.
     Available files:
-    - human_gene_v2.latest.h5 (human gene counts, ~15GB)
+    - human_gene_v2.latest.h5 (human gene counts, ~58GB)
     - mouse_gene_v2.latest.h5 (mouse gene counts, ~23GB)
     - human_transcript_v2.latest.h5 (human transcript counts)
     - mouse_transcript_v2.latest.h5 (mouse transcript counts)
@@ -38,10 +38,13 @@ References:
     - archs4py: https://github.com/MaayanLab/archs4py
 """
 
+import logging
 import os
 from pathlib import Path
 from typing import List, Dict, Optional, Union, Literal
 from dataclasses import dataclass
+
+logger = logging.getLogger(__name__)
 
 try:
     import pandas as pd
@@ -126,6 +129,7 @@ class ARCHS4Client:
         data_dir: Optional[Union[str, Path]] = None,
         h5_path: Optional[Union[str, Path]] = None,
         auto_download: bool = False,
+        use_index: bool = True,
     ):
         """
         Initialize the ARCHS4 client.
@@ -136,6 +140,7 @@ class ARCHS4Client:
             data_dir: Directory containing ARCHS4 H5 files. If None, uses current dir.
             h5_path: Direct path to H5 file (overrides organism/data_type/data_dir)
             auto_download: If True, automatically download data file if missing
+            use_index: If True, use SQLite metadata index for fast lookups (default True)
 
         Raises:
             ImportError: If archs4py or pandas not installed
@@ -152,6 +157,8 @@ class ARCHS4Client:
 
         self.organism = organism
         self.data_type = data_type
+        self._use_index = use_index
+        self._index = None  # lazy-initialized
 
         # Resolve H5 file path
         if h5_path:
@@ -176,6 +183,22 @@ class ARCHS4Client:
                     f"Download with: client.download_data() or set auto_download=True\n"
                     f"Or download manually from: https://maayanlab.cloud/archs4/download.html"
                 )
+
+    def _get_index(self):
+        """Lazy-initialize and return the SQLite metadata index, or None."""
+        if not self._use_index:
+            return None
+        if self._index is None:
+            try:
+                from clients.archs4_index import ARCHS4MetadataIndex
+                self._index = ARCHS4MetadataIndex(self.h5_path)
+                self._index.ensure_built()
+                logger.debug("ARCHS4 metadata index ready: %s", self._index.db_path)
+            except Exception as e:
+                logger.warning("Could not initialize metadata index: %s", e)
+                self._use_index = False
+                return None
+        return self._index
 
     # =========================================================================
     # Data Download
@@ -400,6 +423,13 @@ class ARCHS4Client:
             DataFrame with samples as rows, metadata fields as columns
         """
         fields = fields or DEFAULT_META_FIELDS
+        idx = self._get_index()
+        if idx is not None:
+            try:
+                return idx.get_metadata_by_series(geo_accession, fields)
+            except Exception as e:
+                logger.debug("Index get_metadata_by_series failed, falling back: %s", e)
+
         samples = a4.meta.series(str(self.h5_path), geo_accession)
 
         if not samples:
@@ -423,6 +453,13 @@ class ARCHS4Client:
             DataFrame with samples as rows, metadata fields as columns
         """
         fields = fields or DEFAULT_META_FIELDS
+        idx = self._get_index()
+        if idx is not None:
+            try:
+                return idx.get_metadata_by_samples(sample_ids, fields)
+            except Exception as e:
+                logger.debug("Index get_metadata_by_samples failed, falling back: %s", e)
+
         return a4.meta.samples(str(self.h5_path), sample_ids, fields)
 
     def search_metadata(
@@ -441,6 +478,13 @@ class ARCHS4Client:
             DataFrame with matching samples' metadata
         """
         fields = fields or DEFAULT_META_FIELDS
+        idx = self._get_index()
+        if idx is not None:
+            try:
+                return idx.search_metadata(search_term, fields)
+            except Exception as e:
+                logger.debug("Index search_metadata failed, falling back: %s", e)
+
         return a4.meta.meta(str(self.h5_path), search_term, meta_fields=fields)
 
     def get_all_field_values(self, field: str) -> List[str]:
@@ -473,6 +517,13 @@ class ARCHS4Client:
         Returns:
             True if series has samples in ARCHS4, False otherwise
         """
+        idx = self._get_index()
+        if idx is not None:
+            try:
+                return idx.has_series(geo_accession)
+            except Exception as e:
+                logger.debug("Index has_series failed, falling back: %s", e)
+
         try:
             samples = a4.meta.series(str(self.h5_path), geo_accession)
             if isinstance(samples, pd.DataFrame):
@@ -491,6 +542,13 @@ class ARCHS4Client:
         Returns:
             List of sample GEO accession IDs
         """
+        idx = self._get_index()
+        if idx is not None:
+            try:
+                return idx.get_samples_by_series(geo_accession)
+            except Exception as e:
+                logger.debug("Index get_samples_by_series failed, falling back: %s", e)
+
         samples = a4.meta.series(str(self.h5_path), geo_accession)
         if isinstance(samples, pd.DataFrame):
             if samples.empty:

@@ -134,6 +134,7 @@ class SPARQLClient:
         "ubergraph": "https://frink.apps.renci.org/ubergraph/sparql",
         "spoke": "https://frink.apps.renci.org/spoke/sparql",
         "frink_wikidata": "https://frink.apps.renci.org/wikidata/sparql",
+        "nde": "https://frink.apps.renci.org/nde/sparql",
     }
 
     # Public SPARQL endpoints

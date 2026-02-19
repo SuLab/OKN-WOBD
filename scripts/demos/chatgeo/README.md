@@ -12,13 +12,13 @@ ChatGEO takes a plain-text disease query (e.g., "psoriasis in skin tissue"), fin
 numpy
 pandas
 scipy
-pydeseq2          # DESeq2 statistical model (default method)
+pydeseq2          # DESeq2 statistical model (optional alternative)
 gprofiler-official  # optional, for gene set enrichment analysis
 anthropic         # optional, for AI interpretation
 python-dotenv     # optional, for .env file support
 ```
 
-**ARCHS4 HDF5 data files** (~15 GB each):
+**ARCHS4 HDF5 data files** (~58 GB each):
 
 Download from [ARCHS4](https://maayanlab.cloud/archs4/download.html) and place in a local directory:
 
@@ -65,7 +65,7 @@ python -m chatgeo.cli QUERY [OPTIONS]
 | `--tissue TISSUE` | (parsed from query) | Override or specify tissue constraint |
 | `--species {human,mouse,both}` | `human` | Species to analyze |
 | `--mode {pooled,study_matched,auto}` | `pooled` | Analysis mode |
-| `--method {deseq2,mann-whitney,welch-t}` | `deseq2` | Statistical method for DE |
+| `--method {mann-whitney,welch-t,deseq2}` | `mann-whitney` | Statistical method for DE |
 | `--fdr FLOAT` | `0.05` | FDR significance threshold |
 | `--log2fc FLOAT` | `1.0` | Minimum absolute log2 fold change |
 | `--max-test INT` | `500` | Maximum test (disease) samples |
@@ -278,13 +278,66 @@ ORDER BY DESC(?log2fc_a)
 
 5. **Pre-processing** -- Samples with low library sizes (< 1M reads by default) are removed. Genes are filtered to protein-coding biotypes, duplicate gene symbols are collapsed, and low-count genes (< 10 total reads across all samples) are removed. Mitochondrial (MT-) and ribosomal (RPS/RPL) genes are optionally excluded.
 
-6. **DE testing (DESeq2)** -- By default, the combined count matrix is analyzed using PyDESeq2, which applies median-of-ratios normalization, estimates per-gene dispersions via a negative binomial model, performs Wald tests for differential expression, and applies Benjamini-Hochberg FDR correction. Legacy Mann-Whitney U and Welch t-test methods are available as fallbacks.
+6. **DE testing (Mann-Whitney U)** -- By default, a non-parametric Mann-Whitney U rank test is applied per gene across disease vs. control samples on log2(CPM+1) values. P-values are corrected with Benjamini-Hochberg FDR. DESeq2 and Welch t-test are available as alternatives via `--method` (see [Why Mann-Whitney is the default](#why-mann-whitney-is-the-default) below).
 
 7. **Enrichment analysis** -- Significant upregulated and downregulated gene lists are submitted to g:Profiler for Gene Ontology (BP, CC, MF), KEGG, and Reactome enrichment analysis.
 
 8. **AI interpretation** -- An LLM summarizes the biological significance of the DE and enrichment results.
 
 9. **RDF export** (opt-in) -- Results are converted to Biolink Model RDF for integration into knowledge graphs.
+
+## Why Mann-Whitney Is the Default
+
+ChatGEO uses the [ARCHS4](https://maayanlab.cloud/archs4/) compendium as its expression data source. ARCHS4 processes raw GEO submissions through Kallisto pseudoalignment, rounds the resulting pseudocounts to integers for compression, and stores them as gene-level estimated counts. This preprocessing has important implications for statistical method choice.
+
+### The problem with DESeq2 on ARCHS4 data
+
+DESeq2 is the gold standard for differential expression -- **when given proper input**. The standard pipeline is raw FASTQ -> STAR/Kallisto -> [tximport](https://bioconductor.org/packages/tximport/) -> DESeq2. The tximport step creates a gene-level offset matrix that corrects for transcript length bias, and DESeq2 then fits a negative binomial model assuming the input follows that distribution.
+
+ARCHS4 short-circuits this pipeline by providing pre-processed, rounded Kallisto pseudocounts without the tximport offset matrix. Feeding these directly into DESeq2 violates its distributional assumptions in three ways:
+
+1. **Pseudocounts are estimates, not true counts** -- they carry estimation uncertainty that the negative binomial model does not account for.
+2. **Without tximport's length offset**, changes in isoform usage across conditions appear as expression changes.
+3. **Rounding introduces artifacts** in the variance structure that DESeq2's dispersion estimation relies on.
+
+On top of this, ChatGEO pools samples across GEO studies, introducing batch effects that further confuse the parametric model.
+
+### Why Mann-Whitney is robust here
+
+Mann-Whitney U is a non-parametric rank-based test: it only asks "is gene X higher in disease than controls?" without modeling the count distribution. Even if counts are pseudocounts, rounded, or have unusual distributional properties, the **rank order is largely preserved**. This makes it much more robust to both the ARCHS4 data format and cross-study batch effects.
+
+### When to use DESeq2
+
+DESeq2 remains available via `--method deseq2` and is appropriate when:
+
+- You are analyzing samples from a **single GEO study** (minimal batch effects)
+- You have reprocessed raw FASTQ files through the full tximport pipeline
+- You need the specific statistical properties of the negative binomial model (e.g., for very small sample sizes where rank tests lose power)
+
+### References
+
+- [ARCHS4 platform](https://maayanlab.cloud/archs4/) and [Nature Communications paper](https://doi.org/10.1038/s41467-018-03751-6)
+- [DESeq2 vignette](https://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html)
+- [tximport documentation](https://bioconductor.org/packages/tximport/)
+
+## Performance: SQLite Metadata Index
+
+ARCHS4's HDF5 file contains ~1.05M samples across ~36K studies. The `archs4py` library has no indexing, so every metadata lookup loads the entire series_id array and does a linear scan. The ontology-enhanced pipeline calls `get_series_sample_ids()` for each of ~272 NDE-discovered studies, resulting in 272 redundant full scans.
+
+`ARCHS4Client` now automatically builds and uses a SQLite metadata index (`*.metadata.db` alongside the HDF5 file). The index is built on first use (~15s) and provides indexed lookups, FTS5 full-text search, and REGEXP fallback.
+
+| Operation | Without Index | With Index | Speedup |
+|-----------|--------------|------------|---------|
+| `has_series(gse_id)` | ~600ms | <0.01ms | ~60,000x |
+| 272-study batch classify | ~170s | <1ms | ~170,000x |
+| `search_metadata` (FTS5) | ~5-15s | 33ms | ~300x |
+| Full ontology pipeline (osteoarthritis) | 173s | 11s | **16x** |
+
+The index is transparent — all existing code benefits without changes. To disable it:
+
+```python
+client = ARCHS4Client(use_index=False)
+```
 
 ## Module Structure
 

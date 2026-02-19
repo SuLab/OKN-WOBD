@@ -1,0 +1,13 @@
+{
+  "_comment": "Local stdio config for Claude Code. Edit paths to match your checkout.",
+  "mcpServers": {
+    "okn-wobd": {
+      "command": "python3.11",
+      "args": ["-m", "okn_wobd.mcp_server"],
+      "cwd": "/path/to/OKN-WOBD",
+      "env": {
+        "PYTHONPATH": "/path/to/OKN-WOBD/src"
+      }
+    }
+  }
+}
