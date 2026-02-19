@@ -1,8 +1,9 @@
 {
+  "_comment": "Remote HTTP config for Claude Code. Replace host and port to match your server.",
   "mcpServers": {
     "okn-wobd": {
       "type": "url",
-      "url": "http://localhost:8000/mcp"
+      "url": "https://your-server-host:port/mcp"
     }
   }
 }

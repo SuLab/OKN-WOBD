@@ -103,7 +103,7 @@ The server supports three transports, selected via the `OKN_MCP_TRANSPORT` envir
 
 ### Claude Code
 
-Add the server to your Claude Code MCP configuration. The repo includes a ready-made config at `config/mcp-dev.json`:
+Add the server to your Claude Code MCP configuration. The repo includes a template at `config/mcp-dev.json`:
 
 ```json
 {
@@ -121,12 +121,12 @@ Add the server to your Claude Code MCP configuration. The repo includes a ready-
 ```
 
 1. Copy `config/mcp-dev.json` to your project-level `.mcp.json` (or merge into your existing Claude Code settings).
-2. Edit the paths to match your local checkout.
+2. Replace `/path/to/OKN-WOBD` with the absolute path to your checkout (both `cwd` and `PYTHONPATH`).
 3. Restart Claude Code. Verify with: `> Use the health_check tool`
 
 ### Biomni
 
-[Biomni](https://github.com/lhallee/Biomni) discovers MCP servers from YAML config files. The repo includes `config/biomni.yaml`:
+[Biomni](https://github.com/lhallee/Biomni) discovers MCP servers from YAML config files. The repo includes a template at `config/biomni.yaml`:
 
 ```yaml
 name: okn-wobd
@@ -139,15 +139,16 @@ command: python3.11
 args:
   - "-m"
   - okn_wobd.mcp_server
+cwd: /path/to/OKN-WOBD
 env:
-  PYTHONPATH: src
+  PYTHONPATH: /path/to/OKN-WOBD/src
 ```
 
 1. Copy or symlink the config into Biomni's server directory:
    ```bash
    cp config/biomni.yaml /path/to/biomni/servers/okn-wobd.yaml
    ```
-2. If running Biomni from a different directory, use absolute paths in the YAML.
+2. Replace `/path/to/OKN-WOBD` with the absolute path to your checkout (both `cwd` and `PYTHONPATH`).
 3. Start Biomni. The OKN-WOBD tools will be registered automatically.
 
 ## Usage: Remote (HTTP)
@@ -175,20 +176,20 @@ OKN_MCP_API_KEY=my-secret-key OKN_MCP_TRANSPORT=streamable-http okn-wobd-mcp
 
 ### Connecting from Claude Code
 
-Any MCP client can connect by URL. The repo includes `config/mcp-remote.json`:
+Any MCP client can connect by URL. The repo includes a template at `config/mcp-remote.json`:
 
 ```json
 {
   "mcpServers": {
     "okn-wobd": {
       "type": "url",
-      "url": "https://your-server:8000/mcp"
+      "url": "https://your-server-host:port/mcp"
     }
   }
 }
 ```
 
-Replace `your-server` with the hostname/IP. That's it — no tokens or extra configuration needed.
+Replace `your-server-host` and `port` to match your deployment (e.g. `https://mcp.example.com:8000/mcp`). The port must match the `OKN_MCP_PORT` value the server was started with (default 8000).
 
 If the server was started with `OKN_MCP_API_KEY`, add the auth header:
 
@@ -197,7 +198,7 @@ If the server was started with `OKN_MCP_API_KEY`, add the auth header:
   "mcpServers": {
     "okn-wobd": {
       "type": "url",
-      "url": "https://your-server:8000/mcp",
+      "url": "https://your-server-host:port/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_API_KEY_HERE"
       }

@@ -1,5 +1,8 @@
 # Biomni MCP server configuration for OKN-WOBD
 # See: https://github.com/anthropics/biomni
+#
+# Edit the paths below to match your checkout before use.
+# Both `cwd` and `PYTHONPATH` must be absolute paths.
 name: okn-wobd
 description: >
   Biomedical analysis tools for gene-disease path finding, gene neighborhood
@@ -10,5 +13,6 @@ command: python3.11
 args:
   - "-m"
   - okn_wobd.mcp_server
+cwd: /path/to/OKN-WOBD
 env:
-  PYTHONPATH: src
+  PYTHONPATH: /path/to/OKN-WOBD/src
