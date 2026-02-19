@@ -12,10 +12,21 @@ export interface WikidataSearchResult {
     aliases?: string[];
 }
 
-// Use FRINK's federated endpoint with the Wikidata graph
+// Use FRINK's federated endpoint with the Wikidata graph (for drug→disease queries in the pipeline)
 const FRINK_FEDERATION_ENDPOINT =
     process.env.NEXT_PUBLIC_FRINK_FEDERATION_URL ||
     "https://frink.apps.renci.org/federation/sparql";
+
+// Public Wikidata Query Service — used for drug search (autocomplete + resolution) for reliability
+const PUBLIC_WIKIDATA_SPARQL =
+    "https://query.wikidata.org/sparql";
+
+/** User-Agent for public Wikidata (required by their policy). */
+const WIKIDATA_USER_AGENT =
+    "OKN-WOBD/1.0 (drug autocomplete; https://github.com/SuLab/OKN-WOBD)";
+
+/** Timeout per SPARQL request (ms). Public Wikidata is typically fast. */
+const WIKIDATA_SEARCH_TIMEOUT_MS = 15000;
 
 /**
  * Search Wikidata for drugs/medications by name
@@ -29,11 +40,15 @@ export async function searchWikidataDrugs(
     const results: WikidataSearchResult[] = [];
 
     try {
-        // Strategy 1: Exact label match
-        const exactResults = await searchWikidataExact(searchTerm);
+        // Run brand and exact in parallel; brand is fast and finds Lipitor/Synthroid
+        const [brandResults, exactResults] = await Promise.all([
+            searchWikidataBrands(searchTerm),
+            searchWikidataExact(searchTerm),
+        ]);
         results.push(...exactResults);
+        results.push(...brandResults);
 
-        // Strategy 2: Case-insensitive label/alias match (if no exact matches)
+        // If still no results, try alias (label/alias substring match)
         if (results.length === 0) {
             const aliasResults = await searchWikidataAliases(searchTerm);
             results.push(...aliasResults);
@@ -74,18 +89,11 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX schema: <http://schema.org/>
 
 SELECT DISTINCT ?item ?itemLabel ?itemDescription
-FROM <https://purl.org/okn/frink/kg/wikidata>
 WHERE {
-  # Match label exactly (case-insensitive) - do this first to filter early
   ?item rdfs:label ?itemLabel .
   FILTER(LANG(?itemLabel) = "en")
   FILTER(LCASE(STR(?itemLabel)) = LCASE("${escapeSPARQL(searchTerm)}"))
-  
-  # Filter to drug/medication-related entities - simplified without transitive closure
-  # Just check if it has a medical use indicator (most drugs will have P2175)
   ?item wdt:P2175 ?condition .
-  
-  # Get description if available
   OPTIONAL {
     ?item schema:description ?itemDescription .
     FILTER(LANG(?itemDescription) = "en")
@@ -94,22 +102,20 @@ WHERE {
 LIMIT 10
   `.trim();
 
-    console.log(`[Wikidata] Executing exact search query for "${searchTerm}"`);
-    console.log(`[Wikidata] Query:\n${query}`);
+    console.log(`[Wikidata] Executing exact search (public) for "${searchTerm}"`);
 
     try {
-        // Use POST with timeout like the SPARQL executor
-        const timeout = 30000; // 30 second timeout (increased from 15s due to graph size)
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), timeout);
+        const timeoutId = setTimeout(() => controller.abort(), WIKIDATA_SEARCH_TIMEOUT_MS);
 
-        const response = await fetch(FRINK_FEDERATION_ENDPOINT, {
+        const response = await fetch(PUBLIC_WIKIDATA_SPARQL, {
             method: "POST",
             headers: {
-                "Content-Type": "application/sparql-query",
+                "Content-Type": "application/x-www-form-urlencoded",
                 Accept: "application/sparql-results+json",
+                "User-Agent": WIKIDATA_USER_AGENT,
             },
-            body: query,
+            body: new URLSearchParams({ query }).toString(),
             signal: controller.signal,
         });
 
@@ -145,7 +151,7 @@ LIMIT 10
         });
     } catch (error: any) {
         if (error.name === "AbortError") {
-            console.error("[Wikidata] Exact search timed out after 30 seconds");
+            console.error("[Wikidata] Exact search timed out");
         } else {
             console.error("[Wikidata] Exact search error:", error.message || error);
         }
@@ -167,9 +173,7 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX schema: <http://schema.org/>
 
 SELECT DISTINCT ?item ?itemLabel ?itemDescription ?alias
-FROM <https://purl.org/okn/frink/kg/wikidata>
 WHERE {
-  # Filter to drug/medication-related entities first - check medical condition treated property
   ?item wdt:P2175 ?condition .
   
   # Match label or alias (case-insensitive)
@@ -198,21 +202,20 @@ WHERE {
 LIMIT 20
   `.trim();
 
-    console.log(`[Wikidata] Executing alias search query for "${searchTerm}"`);
+    console.log(`[Wikidata] Executing alias search (public) for "${searchTerm}"`);
 
     try {
-        // Use POST with timeout like the SPARQL executor
-        const timeout = 30000; // 30 second timeout (increased from 15s due to graph size)
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), timeout);
+        const timeoutId = setTimeout(() => controller.abort(), WIKIDATA_SEARCH_TIMEOUT_MS);
 
-        const response = await fetch(FRINK_FEDERATION_ENDPOINT, {
+        const response = await fetch(PUBLIC_WIKIDATA_SPARQL, {
             method: "POST",
             headers: {
-                "Content-Type": "application/sparql-query",
+                "Content-Type": "application/x-www-form-urlencoded",
                 Accept: "application/sparql-results+json",
+                "User-Agent": WIKIDATA_USER_AGENT,
             },
-            body: query,
+            body: new URLSearchParams({ query }).toString(),
             signal: controller.signal,
         });
 
@@ -290,9 +293,117 @@ LIMIT 20
         });
     } catch (error: any) {
         if (error.name === "AbortError") {
-            console.error("[Wikidata] Alias search timed out after 30 seconds");
+            console.error("[Wikidata] Alias search timed out");
         } else {
             console.error("[Wikidata] Alias search error:", error.message || error);
+        }
+        return [];
+    }
+}
+
+/**
+ * Search for brand names (pharmaceutical products): items with P3781 (has active ingredient)
+ * pointing to an ingredient that has P2175 (medical condition treated).
+ * Returns the ingredient so the pipeline resolves to a drug with "diseases treated";
+ * label is the brand name so autocomplete shows e.g. "Lipitor".
+ */
+async function searchWikidataBrands(
+    searchTerm: string
+): Promise<WikidataSearchResult[]> {
+    const escaped = escapeSPARQL(searchTerm);
+    const unionQuery = `
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT DISTINCT ?product ?productLabel ?ingredient ?ingredientLabel
+WHERE {
+  ?product wdt:P3781 ?ingredient .
+  ?ingredient wdt:P2175 ?cond .
+  ?ingredient rdfs:label ?ingredientLabel .
+  FILTER(LANG(?ingredientLabel) = "en")
+  {
+    ?product rdfs:label ?productLabel .
+    FILTER(LANG(?productLabel) = "en")
+    FILTER(CONTAINS(LCASE(STR(?productLabel)), LCASE("${escaped}")))
+  }
+  UNION
+  {
+    ?product skos:altLabel ?altLabel .
+    FILTER(LANG(?altLabel) = "en")
+    FILTER(CONTAINS(LCASE(STR(?altLabel)), LCASE("${escaped}")))
+    ?product rdfs:label ?productLabel .
+    FILTER(LANG(?productLabel) = "en")
+  }
+}
+LIMIT 10
+  `.trim();
+
+    console.log(`[Wikidata] Executing brand search (public) for "${searchTerm}"`);
+
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), WIKIDATA_SEARCH_TIMEOUT_MS);
+
+        const response = await fetch(PUBLIC_WIKIDATA_SPARQL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Accept: "application/sparql-results+json",
+                "User-Agent": WIKIDATA_USER_AGENT,
+            },
+            body: new URLSearchParams({ query: unionQuery }).toString(),
+            signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+            const errorText = await response.text().catch(() => "");
+            console.warn(
+                `[Wikidata] Brand search failed: ${response.status} ${response.statusText}`,
+                errorText.substring(0, 200)
+            );
+            return [];
+        }
+
+        const data = await response.json();
+        const bindings = data?.results?.bindings || [];
+
+        const seen = new Set<string>();
+        return bindings
+            .map((binding: any) => {
+                const ingredientIri = binding.ingredient?.value || "";
+                const ingredientId = ingredientIri.replace(
+                    "http://www.wikidata.org/entity/",
+                    ""
+                );
+                if (seen.has(ingredientId)) return null;
+                seen.add(ingredientId);
+                const productLabel = binding.productLabel?.value || searchTerm;
+                const ingredientLabel =
+                    binding.ingredientLabel?.value || "";
+                return {
+                    wikidata_id: ingredientId,
+                    wikidata_iri: ingredientIri,
+                    label: productLabel,
+                    description: ingredientLabel
+                        ? `brand of ${ingredientLabel}`
+                        : undefined,
+                    matchScore: 3,
+                    matchType: "brand",
+                    matchedText: productLabel,
+                };
+            })
+            .filter(Boolean) as WikidataSearchResult[];
+    } catch (error: any) {
+        if (error.name === "AbortError") {
+            console.error("[Wikidata] Brand search timed out");
+        } else {
+            console.error(
+                "[Wikidata] Brand search error:",
+                error.message || error
+            );
         }
         return [];
     }

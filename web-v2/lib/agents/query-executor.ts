@@ -1,11 +1,17 @@
 import type { QueryPlan, QueryStep, ExecutionEvent, StepResultContext, Intent, SPARQLResult } from "@/types";
 import type { ContextPack } from "@/lib/context-packs/types";
 import { generateSPARQLFromIntent } from "@/lib/templates/generator";
-import { resolveEntity, entityResolutionToContext } from "./entity-resolver";
+import { resolveEntity, entityResolutionToContext, type EntityResolutionResult } from "./entity-resolver";
+
+export interface ExecuteQueryPlanOptions {
+    /** When set (e.g. from server-side API route), SPARQL execute is called at this origin. Omit for client-side (relative URL). */
+    baseUrl?: string;
+}
 
 export async function* executeQueryPlan(
     plan: QueryPlan,
-    contextPack: ContextPack
+    contextPack: ContextPack,
+    options?: ExecuteQueryPlanOptions
 ): AsyncGenerator<ExecutionEvent> {
     yield { type: "plan_generated", plan };
 
@@ -61,47 +67,77 @@ export async function* executeQueryPlan(
                 if (step.intent.task === "entity_resolution") {
                     console.log(`[Executor] Detected entity_resolution step: ${step.id}`);
                     const entityType = step.intent.slots.entity_type as string;
-                    const entityName = step.intent.slots.entity_name as string;
+                    const entityNamesRaw = step.intent.slots.entity_names as string[] | undefined;
+                    const entityNameSingle = step.intent.slots.entity_name as string | undefined;
                     const targetOntology = step.intent.slots.target_ontology as string;
 
-                    if (!entityType || !entityName || !targetOntology) {
+                    const namesToResolve =
+                        Array.isArray(entityNamesRaw) && entityNamesRaw.length > 0
+                            ? entityNamesRaw.filter((n) => typeof n === "string" && n.trim() !== "")
+                            : entityNameSingle?.trim()
+                                ? [entityNameSingle.trim()]
+                                : [];
+
+                    if (!entityType || namesToResolve.length === 0 || !targetOntology) {
                         throw new Error(
-                            `Entity resolution step ${step.id} missing required slots: entity_type, entity_name, target_ontology`
+                            `Entity resolution step ${step.id} missing required slots: entity_type, entity_name/entity_names, target_ontology`
                         );
                     }
 
-                    console.log(
-                        `[Executor] Executing entity resolution for ${entityType} "${entityName}" → ${targetOntology}`
-                    );
+                    const mergedEntityIris: string[] = [];
+                    const mergedDrugIris: string[] = [];
+                    const mergedEntityLabels: string[] = [];
+                    const failedNames: string[] = [];
 
-                    const resolutionResult = await resolveEntity(entityType, entityName, targetOntology);
-                    console.log(`[Executor] Entity resolution result:`, JSON.stringify(resolutionResult, null, 2));
+                    for (const entityName of namesToResolve) {
+                        console.log(
+                            `[Executor] Executing entity resolution for ${entityType} "${entityName}" → ${targetOntology}`
+                        );
+                        const oneResult = await resolveEntity(entityType, entityName, targetOntology);
+                        if (oneResult.entity_iris?.length) {
+                            mergedEntityIris.push(...oneResult.entity_iris);
+                            if (oneResult.drug_iris) mergedDrugIris.push(...oneResult.drug_iris);
+                            mergedEntityLabels.push(
+                                oneResult.entity_labels?.[0] ?? entityName
+                            );
+                        } else {
+                            failedNames.push(entityName);
+                        }
+                    }
 
-                    // Check if resolution was successful
-                    if (!resolutionResult.entity_iris || resolutionResult.entity_iris.length === 0) {
+                    if (mergedEntityIris.length === 0) {
                         throw new Error(
-                            `Failed to resolve ${entityType} "${entityName}" to ${targetOntology}. No matching entities found.`
+                            `Failed to resolve ${entityType} to ${targetOntology}. No matching entities found.${failedNames.length ? ` Failed for: ${failedNames.join(", ")}` : ""}`
                         );
                     }
 
-                    // Convert resolution result to step results format
+                    const resolutionResult: EntityResolutionResult = {
+                        entity_iris: [...new Set(mergedEntityIris)],
+                        drug_iris:
+                            mergedDrugIris.length > 0
+                                ? [...new Set(mergedDrugIris)]
+                                : [...new Set(mergedEntityIris)],
+                        entity_labels: mergedEntityLabels,
+                    };
+
+                    console.log(`[Executor] Entity resolution result (merged):`, JSON.stringify(resolutionResult, null, 2));
+
                     step.results = {
                         head: { vars: ["entity_iri", "entity_label"] },
                         results: {
-                            bindings: resolutionResult.entity_iris.map(iri => ({
+                            bindings: resolutionResult.entity_iris.map((iri, i) => ({
                                 entity_iri: { type: "uri", value: iri },
                                 entity_label: {
                                     type: "literal",
-                                    value: resolutionResult.entity_labels?.[0] || entityName,
+                                    value: resolutionResult.entity_labels?.[i] ?? iri,
                                 },
                             })),
                         },
                     };
 
-                    step.sparql = `# Entity Resolution: ${entityType} "${entityName}" → ${targetOntology}\n# Resolved to: ${resolutionResult.entity_iris.join(", ")}`;
-                    step.latency_ms = 0; // Entity resolution is fast, no need to track latency separately
+                    step.sparql = `# Entity Resolution: ${entityType} (${namesToResolve.length} name(s)) → ${targetOntology}\n# Resolved to: ${resolutionResult.entity_iris.join(", ")}`;
+                    step.latency_ms = 0;
 
-                    // Extract context from resolution result
                     const context = entityResolutionToContext(step.id, resolutionResult);
                     console.log(`[Executor] Entity resolution context:`, JSON.stringify(context, null, 2));
                     contexts.set(step.id, context);
@@ -110,7 +146,7 @@ export async function* executeQueryPlan(
                     step.status = "complete";
 
                     yield { type: "step_completed", step, context };
-                    continue; // Skip to next step - don't execute SPARQL
+                    continue;
                 }
 
                 // Also replace templates in raw SPARQL if present
@@ -120,7 +156,7 @@ export async function* executeQueryPlan(
                 }
 
                 // Execute step
-                const result = await executeStep(step, contextPack);
+                const result = await executeStep(step, contextPack, options?.baseUrl);
 
                 step.results = result.sparql_results;
                 step.sparql = result.sparql;
@@ -398,7 +434,8 @@ function replaceSPARQLTemplates(sparql: string, contexts: Map<string, StepResult
 
 async function executeStep(
     step: QueryStep,
-    contextPack: ContextPack
+    contextPack: ContextPack,
+    baseUrl?: string
 ): Promise<{ sparql_results: SPARQLResult; sparql: string; latency_ms: number }> {
     const startTime = Date.now();
 
@@ -433,8 +470,8 @@ async function executeStep(
 
     console.log(`[Executor] Generated SPARQL for ${step.id}:`, sparql.substring(0, 200));
 
-    // Execute SPARQL
-    const response = await fetch("/api/tools/sparql/execute", {
+    const executeUrl = baseUrl ? `${baseUrl.replace(/\/$/, "")}/api/tools/sparql/execute` : "/api/tools/sparql/execute";
+    const response = await fetch(executeUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

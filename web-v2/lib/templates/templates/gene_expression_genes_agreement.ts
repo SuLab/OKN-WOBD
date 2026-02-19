@@ -1,5 +1,6 @@
 import type { ContextPack, TemplateDefinition } from "@/lib/context-packs/types";
 import type { Intent } from "@/types";
+import { resolveTissueToUberonIds } from "@/lib/ontology";
 import { buildGXAGenesAgreementQuery } from "@/lib/ontology/templates";
 
 export const GENE_EXPRESSION_GENES_AGREEMENT_TEMPLATE_ID =
@@ -16,8 +17,13 @@ export async function buildGeneExpressionGenesAgreementQuery(
   intent: Intent,
   pack: ContextPack
 ): Promise<string> {
+  const minExperimentsRaw = intent.slots?.min_experiments;
   const minExperiments =
-    (intent.slots?.min_experiments as number) ?? 2;
+    typeof minExperimentsRaw === "number"
+      ? minExperimentsRaw
+      : typeof minExperimentsRaw === "string" && minExperimentsRaw.trim() !== ""
+        ? Math.max(1, parseInt(minExperimentsRaw.trim(), 10) || 2)
+        : 2;
   const direction = (intent.slots?.direction as string | undefined)?.toLowerCase();
   const dir =
     direction === "up" || direction === "upregulated"
@@ -26,19 +32,21 @@ export async function buildGeneExpressionGenesAgreementQuery(
         ? ("down" as const)
         : undefined;
 
+  const limitRaw = intent.slots?.limit;
   const limit =
-    ((intent.slots?.limit as number) || pack.guardrails?.max_limit) ?? 50;
+    typeof limitRaw === "number"
+      ? limitRaw
+      : typeof limitRaw === "string" && limitRaw.trim() !== ""
+        ? parseInt(limitRaw.trim(), 10) || (pack.guardrails?.max_limit ?? 50)
+        : (pack.guardrails?.max_limit ?? 50);
   const capped = Math.min(limit, pack.guardrails?.max_limit ?? 200);
 
   const organismTaxonIds = parseStringArray(intent.slots?.organism_taxon_ids ?? intent.slots?.species);
-  const rawTissue = parseStringArray(intent.slots?.tissue_uberon_ids ?? intent.slots?.tissue_iris);
-  const tissueUberonIds = rawTissue
-    .map((t) => {
-      const fromIri = t.match(/UBERON_([\d]+)$/i)?.[1];
-      const fromCurie = t.match(/UBERON[_\s:]*([\d]+)/i)?.[1];
-      return fromIri ?? fromCurie ?? t.replace(/^UBERON[_\s:]*/i, "").replace(/^http:\/\/purl\.obolibrary\.org\/obo\/UBERON_/i, "");
-    })
-    .filter(Boolean);
+  const rawTissue = [
+    ...parseStringArray(intent.slots?.tissue_uberon_ids ?? intent.slots?.tissue_iris),
+    ...parseStringArray(intent.slots?.tissue_uberon_ids_ols),
+  ];
+  const tissueUberonIds = await resolveTissueToUberonIds(rawTissue);
   const factorTerms = parseStringArray(intent.slots?.factor_terms ?? intent.slots?.perturbation);
 
   return buildGXAGenesAgreementQuery(

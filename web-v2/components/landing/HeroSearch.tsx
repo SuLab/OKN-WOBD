@@ -11,9 +11,9 @@ export function HeroSearch() {
     e.preventDefault();
     const q = value.trim();
     if (!q) return;
-    sessionStorage.setItem("wobd_pending_query", q);
-    const searchParams = new URLSearchParams({ q });
-    router.push(`/chat?${searchParams.toString()}`);
+    const searchParams = new URLSearchParams();
+    if (q) searchParams.set("q", q);
+    router.push(searchParams.toString() ? `/?${searchParams.toString()}` : "/");
   }
 
   return (
