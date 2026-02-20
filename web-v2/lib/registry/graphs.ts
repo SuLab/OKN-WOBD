@@ -1,7 +1,7 @@
 // Registry graph data - auto-updated from OKN Registry
 // This file is automatically updated when registry fetch succeeds
-// Last updated: 2026-01-28T03:33:20.489Z
-// Source: /Users/whetzel/git/SuLab/OKN-WOBD/web-v2/data/registry-graphs.json
+// Last updated: 2026-02-19T20:13:41.104Z
+// Source: /home/ubuntu/OKN-WOBD/web-v2/data/registry-graphs.json
 
 import type { GraphInfo } from "@/types";
 
@@ -46,6 +46,11 @@ export const GRAPHS_DATA: RegistryGraphInfo[] = [
     shortname: "biohealth", 
     label: "Bio-Health KG",    description: "Bio-Health KG is a dynamically-updated open knowledge network for health, integrating biomedical insights with social determinants of health.",
     endpoint: "https://frink.apps.renci.org/biohealth/sparql",
+  },
+  { 
+    shortname: "biomarkerkg", 
+    label: "BiomarkerKB KG",    description: "The BiomarkerKB knowledge graph is a structured network that connects biomarkers to diseases, drugs, biological entities, and evidence from the scientific literature.",
+    endpoint: "https://frink.apps.renci.org/biomarkerkg/sparql",
   },
   { 
     shortname: "climatemodelskg", 
@@ -98,9 +103,24 @@ export const GRAPHS_DATA: RegistryGraphInfo[] = [
     endpoint: "https://frink.apps.renci.org/nikg/sparql",
   },
   { 
+    shortname: "oard-kg", 
+    label: "Open Annotations for Rare Diseases (OARD) Knowledge Graph",    description: "Clinical associations between rare diseases and phenotypes derived from electronic health records",
+    endpoint: "https://frink.apps.renci.org/oard-kg/sparql",
+  },
+  { 
+    shortname: "okn-void", 
+    label: "OKN VoID graph descriptions",    description: "Collected VoID (Vocabulary of Interlinked Datasets) metadata for all OKN graphs",
+    endpoint: "https://frink.apps.renci.org/okn-void/sparql",
+  },
+  { 
     shortname: "prokn", 
     label: "Protein Knowledge Network",    description: "The Protein Knowledge Network (ProKN) integrates protein-centric data with the genomic-centric datasets of the Common Fund Data Ecosystem (CFDE), spanning heterogeneous biological data types across multiple domains to foster CFDE re-use and collaboration through enhanced connectivity and data integration, enabling new capabilities for functional genomics and systems-level understanding of disease mechanisms.",
     endpoint: "https://frink.apps.renci.org/prokn/sparql",
+  },
+  { 
+    shortname: "rdkg", 
+    label: "Rare Disease Knowledge Graph",    description: "RDKG is an open knowledge graph for rare diseases that integrates standardized disease identifiers and cross-references to support discovery and evidence synthesis.",
+    endpoint: "https://frink.apps.renci.org/rdkg/sparql",
   },
   { 
     shortname: "ruralkg", 
