@@ -14,10 +14,12 @@ dependencies = [
     "rdflib>=7.0,<8",
     "PyYAML>=6.0.1",
     "pandas>=2.0",
+    "mcp>=1.6.0",
 ]
 
 [project.scripts]
 okn-wobd = "okn_wobd.cli:main"
+okn-wobd-mcp = "okn_wobd.mcp_server.server:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -1,0 +1,111 @@
+======================================================================
+DIFFERENTIAL EXPRESSION ANALYSIS RESULTS
+======================================================================
+
+QUERY
+  Disease: psoriasis
+  Tissue: skin
+  Timestamp: 2026-02-09T14:37:54.273588
+
+SAMPLES
+  Test: 100 samples from 8 studies
+  Control: 100 samples from 54 studies
+  Organisms: human
+
+METHODS
+  Normalization: mann_whitney_u
+  Statistical test: mann_whitney_u
+  FDR correction: fdr_bh
+
+THRESHOLDS
+  FDR: 0.01
+  Log2 FC: 2.0
+
+----------------------------------------------------------------------
+SUMMARY
+----------------------------------------------------------------------
+  Genes tested: 18,415
+  Genes significant: 42
+  Upregulated: 31
+  Downregulated: 11
+
+----------------------------------------------------------------------
+TOP 20 UPREGULATED GENES
+----------------------------------------------------------------------
+  Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
+  ----------------------------------------------------------
+  S100A7             5.36     1.57e-03         6.82         1.45
+  S100A8             5.21     3.90e-03         7.24         2.03
+  S100A9             4.86     9.15e-03         7.36         2.51
+  SPRR2B             4.52     2.89e-03         5.11         0.60
+  SPRR2E             4.49     9.04e-03         6.55         2.06
+  SPRR2A             4.49     3.82e-03         5.40         0.91
+  PI3                4.36     4.04e-03         5.65         1.29
+  CALML5             4.35     3.82e-03         6.86         2.51
+  SERPINB4           4.24     6.10e-03         5.08         0.84
+  S100A7A            4.22     6.15e-03         4.81         0.60
+  KRT2               4.21     7.44e-03         7.02         2.81
+  PCSK5              4.11     3.82e-03         8.48         4.38
+  SPRR2D             3.94     9.15e-03         5.37         1.43
+  CST7               3.86     1.57e-03         5.22         1.35
+  TIGIT              3.61     2.89e-03         4.83         1.21
+  KLK8               3.35     5.19e-03         5.08         1.74
+  CCDC141            3.30     3.82e-03         4.95         1.65
+  PSTPIP1            3.24     5.19e-03         4.77         1.54
+  GNLY               3.23     1.57e-03         4.29         1.05
+  DSC1               3.23     7.43e-03         5.66         2.42
+
+----------------------------------------------------------------------
+TOP 11 DOWNREGULATED GENES
+----------------------------------------------------------------------
+  Gene             Log2FC        P-adj    Mean Test    Mean Ctrl
+  ----------------------------------------------------------
+  SERPINH1          -2.99     9.88e-03         3.60         6.59
+  RCN1              -2.94     5.77e-03         3.26         6.20
+  SLC2A3            -2.66     6.10e-03         3.58         6.24
+  P4HA1             -2.60     6.48e-03         3.36         5.96
+  TMEM263           -2.55     3.90e-03         2.43         4.98
+  LASP1             -2.54     7.48e-03         4.13         6.66
+  ITGB1             -2.51     4.04e-03         6.82         9.33
+  PTTG1IP           -2.42     7.61e-03         4.60         7.02
+  SMARCA1           -2.40     6.28e-03         2.39         4.79
+  VIM               -2.33     5.48e-03         8.19        10.52
+  HEBP1             -2.00     8.21e-03         2.60         4.60
+
+======================================================================
+
+----------------------------------------------------------------------
+ENRICHMENT ANALYSIS
+----------------------------------------------------------------------
+  Backend: gprofiler
+  Organism: hsapiens
+  Sources: GO:BP, GO:CC, GO:MF, KEGG, REAC
+  Threshold: 0.05
+
+  Total significant terms: 40
+  Upregulated: 38 terms
+  Downregulated: 2 terms
+
+----------------------------------------------------------------------
+TOP 10 ENRICHED TERMS (UPREGULATED GENES)
+----------------------------------------------------------------------
+  Source   Term ID             P-adj  Genes  Term Name
+  ------------------------------------------------------------------
+  GO:CC    GO:0001533       2.09e-12      8  cornified envelope
+  REAC     REAC:R-HSA-6809371   1.99e-09      9  Formation of the cornified envelope
+  REAC     REAC:R-HSA-6799990   1.12e-07      4  Metal sequestration by antimicrobia...
+  REAC     REAC:R-HSA-6805567   2.06e-07      9  Keratinization
+  REAC     REAC:R-HSA-6803157   2.11e-05      6  Antimicrobial peptides
+  GO:MF    GO:0050786       9.48e-05      3  RAGE receptor binding
+  GO:BP    GO:0031424       1.34e-04      5  keratinization
+  GO:BP    GO:0006955       1.40e-04     14  immune response
+  GO:BP    GO:0030216       1.88e-04      6  keratinocyte differentiation
+  GO:BP    GO:0006952       3.38e-04     13  defense response
+
+----------------------------------------------------------------------
+TOP 2 ENRICHED TERMS (DOWNREGULATED GENES)
+----------------------------------------------------------------------
+  Source   Term ID             P-adj  Genes  Term Name
+  ------------------------------------------------------------------
+  GO:BP    GO:0032963       1.60e-02      3  collagen metabolic process
+  GO:CC    GO:0005788       4.56e-02      3  endoplasmic reticulum lumen
