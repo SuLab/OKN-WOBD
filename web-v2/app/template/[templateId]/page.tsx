@@ -9,8 +9,9 @@ import { SlotForm, isSlotFilled, getSlotMeta } from "@/components/dashboard/Slot
 import { NDEResultCards } from "@/components/dashboard/NDEResultCards";
 import { ResultsTable } from "@/components/chat/ResultsTable";
 import { getTemplateMeta } from "@/lib/landing/template-meta";
-import { runTemplateQuery, isNDEShape, PACK_ID } from "@/lib/dashboard/run-query";
-import { Info } from "lucide-react";
+import { runTemplateQuery, isNDEShape, PACK_ID, type ExecutedQueryItem } from "@/lib/dashboard/run-query";
+import { SparqlEditor } from "@/components/chat/SparqlEditor";
+import { Info, ChevronDown, ChevronRight, Copy, Check } from "lucide-react";
 
 export default function TemplatePage() {
   const params = useParams();
@@ -22,6 +23,9 @@ export default function TemplatePage() {
   const [results, setResults] = useState<SPARQLResult | null>(null);
   const [resultsError, setResultsError] = useState<string | null>(null);
   const [filteredEmptyHint, setFilteredEmptyHint] = useState<string | null>(null);
+  const [executedQueries, setExecutedQueries] = useState<ExecutedQueryItem[]>([]);
+  const [showQueriesOpen, setShowQueriesOpen] = useState(false);
+  const [copiedQueryIndex, setCopiedQueryIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const runningRef = useRef(false);
@@ -59,12 +63,13 @@ export default function TemplatePage() {
     setResultsError(null);
     setResults(null);
     setFilteredEmptyHint(null);
+    setExecutedQueries([]);
     setLoading(true);
     abortRef.current = new AbortController();
     const signal = abortRef.current.signal;
 
     try {
-      const { results: res, error: err, filteredEmptyHint: hint } = await runTemplateQuery({
+      const { results: res, error: err, filteredEmptyHint: hint, executedQueries: queries } = await runTemplateQuery({
         templateId,
         slots: slotValues,
         pack,
@@ -81,10 +86,12 @@ export default function TemplatePage() {
         );
         setResults(null);
         setFilteredEmptyHint(null);
+        setExecutedQueries(queries ?? []);
         return;
       }
       setResults(res);
       setFilteredEmptyHint(hint ?? null);
+      setExecutedQueries(queries ?? []);
     } catch (e: unknown) {
       if (signal.aborted) return;
       const isAbort =
@@ -101,6 +108,16 @@ export default function TemplatePage() {
 
   const handleSlotChange = useCallback((values: Record<string, string | string[]>) => {
     setSlotValues(values);
+  }, []);
+
+  const handleCopyQuery = useCallback((query: string, index: number) => {
+    navigator.clipboard.writeText(query).then(
+      () => {
+        setCopiedQueryIndex(index);
+        setTimeout(() => setCopiedQueryIndex(null), 2000);
+      },
+      () => {}
+    );
   }, []);
 
   const required = template?.required_slots ?? [];
@@ -215,6 +232,69 @@ export default function TemplatePage() {
             )}
           </div>
         </div>
+
+        {(results || resultsError) && executedQueries.length > 0 && (
+          <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowQueriesOpen((open) => !open)}
+              className="w-full flex items-center gap-2 px-4 py-3 text-left text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+            >
+              {showQueriesOpen ? (
+                <ChevronDown className="w-4 h-4 flex-shrink-0" aria-hidden />
+              ) : (
+                <ChevronRight className="w-4 h-4 flex-shrink-0" aria-hidden />
+              )}
+              <span>{showQueriesOpen ? "Hide Queries" : "Show Queries"}</span>
+            </button>
+            {showQueriesOpen && (
+              <div className="border-t border-slate-200 dark:border-slate-700 p-4 space-y-4">
+                {executedQueries.map((item, index) => {
+                  const lineCount = (item.query.match(/\n/g)?.length ?? 0) + 1;
+                  const isShortBlock = lineCount <= 4;
+                  const editorHeight = isShortBlock ? "100px" : "280px";
+                  return (
+                    <div key={index} className="space-y-1">
+                      {(item.label || item.graph) && (
+                        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                          {item.label ?? `Graph: ${item.graph}`}
+                        </p>
+                      )}
+                      <div className="relative rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        <div className="absolute top-2 right-2 z-10">
+                          <button
+                            type="button"
+                            onClick={() => handleCopyQuery(item.query, index)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-md transition-colors shadow-sm border border-slate-200 dark:border-slate-700"
+                            title="Copy query to use in FRINK"
+                          >
+                            {copiedQueryIndex === index ? (
+                              <>
+                                <Check className="w-4 h-4 text-green-500 dark:text-green-400" aria-hidden />
+                                <span className="text-green-500 dark:text-green-400">Copied!</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-4 h-4" aria-hidden />
+                                <span>Copy</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        <SparqlEditor
+                          value={item.query}
+                          readOnly
+                          height={editorHeight}
+                          className="[&_.monaco-editor]:cursor-default"
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
         {(results || resultsError) && (
           <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-4">

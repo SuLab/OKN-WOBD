@@ -1328,14 +1328,13 @@ export function buildNDEDiseaseAndOrganismQuery(
       diseaseFilter = `FILTER((${diseaseIRIFilters}) || (${nameFilters}))`;
     }
 
+    // Required block when disease IRIs are provided: only return datasets that have one of these diseases
     diseasePattern = `
-  # Match by disease/health condition
-  OPTIONAL {
-    ?dataset schema:healthCondition ?disease .
-    ?disease schema:name ?diseaseName .
-    ${diseaseFilter}
-  }`;
-    selectVars += " ?diseaseName";
+  # Match by disease/health condition (required when disease IRIs provided)
+  ?dataset schema:healthCondition ?disease .
+  ?disease schema:name ?diseaseName .
+  ${diseaseFilter}`;
+    // diseaseName is aggregated per dataset (GROUP_CONCAT) so we get one row per dataset
   }
 
   // Build organism pattern if we have organism IRIs
@@ -1351,21 +1350,20 @@ export function buildNDEDiseaseAndOrganismQuery(
       organismFilter = `FILTER((${organismIRIFilters}) || (${nameFilters}))`;
     }
 
+    // Required block when organism IRIs are provided: only return datasets that have one of these organisms
     organismPattern = `
-  # Match by infectious agent or species
-  OPTIONAL {
-    {
-      ?dataset schema:infectiousAgent ?organism .
-      ?organism schema:name ?organismName .
-    }
-    UNION
-    {
-      ?dataset schema:species ?organism .
-      ?organism schema:name ?organismName .
-    }
-    ${organismFilter}
-  }`;
-    selectVars += " ?organismName";
+  # Match by infectious agent or species (required when organism IRIs provided)
+  {
+    ?dataset schema:infectiousAgent ?organism .
+    ?organism schema:name ?organismName .
+  }
+  UNION
+  {
+    ?dataset schema:species ?organism .
+    ?organism schema:name ?organismName .
+  }
+  ${organismFilter}`;
+    // organismName is aggregated per dataset (GROUP_CONCAT) so we get one row per dataset
   }
 
   // Require at least one match: disease OR organism OR keyword in name/description
@@ -1396,9 +1394,9 @@ export function buildNDEDiseaseAndOrganismQuery(
       diseaseIRIs.length > 0 || organismIRIs.length > 0
         ? `FILTER(BOUND(?disease) || BOUND(?organism) || (${keywordClause}))`
         : `FILTER(${keywordClause})`;
-  } else if (diseaseIRIs.length > 0 && organismIRIs.length > 0) {
-    requireMatch = "FILTER(BOUND(?disease) || BOUND(?organism))";
   }
+  // When disease/organism IRIs are provided, their blocks are now required (not OPTIONAL),
+  // so no need for FILTER(BOUND(?disease) || BOUND(?organism)) here.
 
   // Restrict to NCBI GEO datasets when geoOnly: identifier GSE\\d+ or url/sameAs containing geo/ncbi
   const geoFilter = geoOnly
@@ -1411,8 +1409,17 @@ export function buildNDEDiseaseAndOrganismQuery(
   )`
     : "";
 
-  // Group by all non-aggregated vars so we can aggregate url/sameAs (GEO links often in url or sameAs)
+  // One row per dataset: group by base vars only; aggregate url/sameAs and disease/organism names
   const groupByVars = selectVars.trim().split(/\s+/).filter(Boolean).join(" ");
+  const diseaseAggregate =
+    diseaseIRIs.length > 0
+      ? `  (GROUP_CONCAT(DISTINCT ?diseaseName; SEPARATOR="; ") AS ?diseaseNames)`
+      : "";
+  const organismAggregate =
+    organismIRIs.length > 0
+      ? `  (GROUP_CONCAT(DISTINCT ?organismName; SEPARATOR="; ") AS ?organismNames)`
+      : "";
+  const aggregates = [diseaseAggregate, organismAggregate].filter(Boolean).join("\n");
   return `PREFIX schema: <http://schema.org/>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 
@@ -1420,6 +1427,7 @@ SELECT ${selectVars}
   (GROUP_CONCAT(DISTINCT STR(?url); SEPARATOR=" ") AS ?urls)
   (GROUP_CONCAT(DISTINCT STR(?sameAs); SEPARATOR=" ") AS ?sameAsList)
   (GROUP_CONCAT(DISTINCT STR(?owlSameAs); SEPARATOR=" ") AS ?owlSameAsList)
+${aggregates}
 FROM <https://purl.org/okn/frink/kg/nde>
 WHERE {
   ?dataset a schema:Dataset ;

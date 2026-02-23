@@ -52,11 +52,20 @@ export interface RunQueryParams {
   signal?: AbortSignal;
 }
 
+export interface ExecutedQueryItem {
+  graph?: string;
+  query: string;
+  /** Optional step label (e.g. for drug_datasets multi-step: "Resolve drug to Wikidata IRI"). */
+  label?: string;
+}
+
 export interface RunQueryResult {
   results: SPARQLResult | null;
   error: string | null;
   /** When "only gene expression" filter returns no rows but unfiltered had results (drug_datasets). */
   filteredEmptyHint?: string;
+  /** Executed SPARQL query(s) for display in "Show Queries" (one per template run or one per step for drug_datasets). */
+  executedQueries?: ExecutedQueryItem[];
 }
 
 const DRUG_DATASETS_TEMPLATE_ID = "drug_datasets";
@@ -104,6 +113,7 @@ export async function runTemplateQuery({
       results: data.results,
       error: null,
       filteredEmptyHint: data.filtered_empty_hint ?? undefined,
+      executedQueries: data.executed_queries ?? [],
     };
   }
 
@@ -153,8 +163,13 @@ export async function runTemplateQuery({
   const head = execData.head ?? execData.result?.head;
   const vars = Array.isArray(head?.vars) ? head.vars : (bindings[0] ? Object.keys(bindings[0]) : []);
 
+  const executedQueries = execData.executed_query
+    ? [{ query: execData.executed_query as string }]
+    : [];
+
   return {
     results: { head: { vars }, results: { bindings } },
     error: null,
+    executedQueries,
   };
 }
