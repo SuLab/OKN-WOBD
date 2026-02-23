@@ -89,10 +89,15 @@ function gseToEGeod(value: string): string | null {
 /** Map binding var names to NDE-style metadata labels and tag color classes. */
 const METADATA_LABELS: Record<string, { label: string; tagClass: string }> = {
   diseaseName: { label: "Health Condition", tagClass: "bg-niaid-tagHealthCondition text-gray-800" },
+  diseaseNames: { label: "Health Condition", tagClass: "bg-niaid-tagHealthCondition text-gray-800" },
   speciesName: { label: "Species", tagClass: "bg-niaid-tagSpecies text-gray-800" },
+  organismNames: { label: "Species", tagClass: "bg-niaid-tagSpecies text-gray-800" },
   drugName: { label: "Drug", tagClass: "bg-niaid-tagFunding text-gray-800" },
   name: { label: "Name", tagClass: "bg-niaid-tagTopic text-gray-700" },
 };
+
+/** Vars whose value is a semicolon-separated list; each item is shown as its own tag. */
+const MULTI_VALUE_METADATA_VARS = ["diseaseNames", "organismNames"];
 
 const DEFAULT_TAG_CLASS = "bg-niaid-tagTopic text-gray-700";
 
@@ -264,6 +269,25 @@ export function NDEResultCards({
                       label: v,
                       tagClass: DEFAULT_TAG_CLASS,
                     };
+                    // Semicolon-separated list: render one tag per value (e.g. diseaseNames, organismNames)
+                    if (MULTI_VALUE_METADATA_VARS.includes(v)) {
+                      const items = val
+                        .split(";")
+                        .map((s) => s.trim())
+                        .filter(Boolean);
+                      return (
+                        <React.Fragment key={v}>
+                          {items.map((item, i) => (
+                            <span
+                              key={`${v}-${i}`}
+                              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${tagClass}`}
+                            >
+                              {label}: {item}
+                            </span>
+                          ))}
+                        </React.Fragment>
+                      );
+                    }
                     return (
                       <span
                         key={v}

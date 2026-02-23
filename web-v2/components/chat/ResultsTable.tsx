@@ -110,7 +110,7 @@ export function ResultsTable({ results, onDownload }: ResultsTableProps) {
     const bindings = results?.results?.bindings || [];
     const hasDatasetColumn = vars.includes("dataset");
     const entityColumns = vars.filter(v =>
-        v === "diseaseName" || v === "speciesName" || v === "drugName" ||
+        v === "diseaseName" || v === "diseaseNames" || v === "speciesName" || v === "organismNames" || v === "drugName" ||
         (v.endsWith("Name") && v !== "name" && v !== "datasetName")
     );
     const gxaExperimentIdColumns = vars.filter(v => GXA_EXPERIMENT_ID_COLUMNS.includes(v));

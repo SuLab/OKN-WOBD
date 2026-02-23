@@ -77,6 +77,7 @@ export async function POST(request: Request) {
     });
     let lastError: string | null = null;
     let finalResults: SPARQLResult | null = null;
+    let executedQueries: { graph?: string; query: string; label?: string }[] = [];
 
     // Server-side fetch needs an absolute URL; use request origin so step 2/3 can call SPARQL execute
     const baseUrl = request.headers.get("x-forwarded-host")
@@ -88,6 +89,13 @@ export async function POST(request: Request) {
         lastError = event.step.error ?? event.error ?? "Step failed";
       }
       if (event.type === "plan_completed") {
+        executedQueries = (event.results ?? [])
+          .filter((s) => s.sparql)
+          .map((s) => ({
+            graph: s.target_graphs?.[0],
+            query: s.sparql!,
+            label: s.description,
+          }));
         const finalStepId = plan.steps[plan.steps.length - 1].id;
         const finalStep = event.results.find((s) => s.id === finalStepId);
         if (finalStep?.results && finalStep.intent?.task !== "entity_resolution") {
@@ -232,6 +240,7 @@ export async function POST(request: Request) {
       results: finalResults,
       error: null,
       filtered_empty_hint: filteredEmptyHint ?? undefined,
+      executed_queries: executedQueries,
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Unknown error";

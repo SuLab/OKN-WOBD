@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useImperativeHandle, forwardRef, useRef } from "react";
 import dynamic from "next/dynamic";
+import { useTheme } from "@/lib/theme/ThemeProvider";
 
 // Dynamically import Monaco editor to avoid SSR issues
 const Editor = dynamic(() => import("@monaco-editor/react").then(mod => mod.Editor), {
@@ -21,6 +22,8 @@ interface SparqlEditorProps {
     height?: string;
     className?: string;
     autoFocus?: boolean;
+    /** Monaco theme: "vs" (light) or "vs-dark". When omitted, follows app theme from useTheme().resolvedTheme. */
+    theme?: "vs" | "vs-dark";
 }
 
 export interface SparqlEditorRef {
@@ -35,7 +38,10 @@ export const SparqlEditor = forwardRef<SparqlEditorRef, SparqlEditorProps>(({
     height = "400px",
     className = "",
     autoFocus = false,
+    theme: themeProp,
 }, ref) => {
+    const { resolvedTheme } = useTheme();
+    const monacoTheme = themeProp ?? (resolvedTheme === "dark" ? "vs-dark" : "vs");
     const [editorValue, setEditorValue] = useState(value);
     const editorInstanceRef = useRef<any>(null);
 
@@ -84,7 +90,7 @@ export const SparqlEditor = forwardRef<SparqlEditorRef, SparqlEditorProps>(({
                 value={editorValue}
                 onChange={handleEditorChange}
                 onMount={handleEditorDidMount}
-                theme="vs-dark"
+                theme={monacoTheme}
                 options={{
                     readOnly,
                     minimap: { enabled: false },
