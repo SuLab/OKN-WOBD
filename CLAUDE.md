@@ -212,7 +212,7 @@ Long-running tools (`differential_expression`, `find_samples`, `get_sample_metad
 - **pooled**: All samples in one comparison. Fast but susceptible to batch effects.
 
 ### Demo Scripts Environment
-Copy `scripts/demos/.env.example` to `.env` and configure:
+Copy `.env.example` to `.env` in the project root and configure:
 - `ARCHS4_DATA_DIR` - Directory containing ARCHS4 HDF5 files (~58GB each, required for ARCHS4/ChatGEO)
 - `ANTHROPIC_API_KEY` - Required for LLM summaries in go_disease_analysis and ChatGEO interpretation
 

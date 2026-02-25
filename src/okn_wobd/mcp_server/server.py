@@ -78,10 +78,10 @@ def _setup_demo_imports():
     if demos_str not in sys.path:
         sys.path.insert(0, demos_str)
 
-    # Load .env (matches chatgeo/cli.py pattern)
+    # Load .env (walks up from this file to find project root .env)
     try:
         from dotenv import load_dotenv
-        load_dotenv(demos_dir / ".env")
+        load_dotenv()
     except ImportError:
         pass
 
