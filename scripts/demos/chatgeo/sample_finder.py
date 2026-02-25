@@ -9,6 +9,7 @@ Two modes of operation:
    → Use for multiple within-study DE analyses with meta-analysis
 """
 
+import json
 import logging
 import os
 import re
@@ -233,13 +234,18 @@ class OntologyDiscoveryStats:
     studies_with_classifiable_samples: int
     ontology_test_samples: int
     ontology_control_samples: int
-    keyword_test_samples: int
-    keyword_control_samples: int
-    merged_test_samples: int
-    merged_control_samples: int
+    # LLM classification tracking (replaces keyword_test/control_samples)
+    classification_method: str = "regex"  # "llm" or "regex_fallback"
+    classification_stats: Optional[dict] = None
+    tissue_control_samples: int = 0
+    merged_test_samples: int = 0
+    merged_control_samples: int = 0
+    # Legacy fields kept for backward compatibility
+    keyword_test_samples: int = 0
+    keyword_control_samples: int = 0
 
     def to_dict(self) -> dict:
-        return {
+        d = {
             "mondo_ids_resolved": self.mondo_ids_resolved,
             "mondo_labels": self.mondo_labels,
             "resolution_confidence": self.resolution_confidence,
@@ -250,11 +256,14 @@ class OntologyDiscoveryStats:
             "studies_with_classifiable_samples": self.studies_with_classifiable_samples,
             "ontology_test_samples": self.ontology_test_samples,
             "ontology_control_samples": self.ontology_control_samples,
-            "keyword_test_samples": self.keyword_test_samples,
-            "keyword_control_samples": self.keyword_control_samples,
+            "classification_method": self.classification_method,
+            "tissue_control_samples": self.tissue_control_samples,
             "merged_test_samples": self.merged_test_samples,
             "merged_control_samples": self.merged_control_samples,
         }
+        if self.classification_stats:
+            d["classification_stats"] = self.classification_stats
+        return d
 
 
 @dataclass
@@ -660,19 +669,18 @@ class SampleFinder:
         max_test_samples: int = 500,
         max_control_samples: int = 500,
         query_spec: Optional[QuerySpec] = None,
-        keyword_fallback: bool = True,
+        keyword_fallback: bool = False,
     ) -> Optional[PooledPair]:
-        """Find samples using ontology-based study discovery.
+        """Find samples using ontology-based study discovery + LLM classification.
 
         Pipeline:
         1. Resolve disease_term → MONDO IDs via DiseaseOntologyClient
         2. Expand MONDO IDs via Ubergraph hierarchy
         3. Discover GSE IDs via NDEGeoDiscovery (NDE is indexed by ontology)
-        4. Fetch all samples from NDE-discovered studies — these are test
-           candidates by default since NDE already validated the study is
-           about the disease. Only the control regex separates controls.
-        5. Optionally merge with keyword-only search results
-        6. Apply tissue filters and size limits
+        4. Classify samples via LLM (falls back to regex if no API key)
+        5. Apply tissue filters
+        6. If insufficient controls, search ARCHS4 for tissue-matched controls
+        7. Apply size limits
 
         Returns None if ontology resolution fails entirely, signalling the
         caller to use keyword-only search.
@@ -709,8 +717,6 @@ class SampleFinder:
             all_mondo_ids = list(resolution.mondo_ids)
 
         # 3. Discover GSE IDs via NDE (SPARQL preferred, REST API fallback)
-        # Skip ARCHS4 filtering here — _classify_studies_batch handles it
-        # by looking up sample IDs per study (studies not in ARCHS4 return nothing).
         query_mondo_ids = all_mondo_ids[:20]
         logger.info("Querying NDE for %d/%d MONDO IDs", len(query_mondo_ids), len(all_mondo_ids))
         try:
@@ -723,78 +729,73 @@ class SampleFinder:
             logger.info("NDE found 0 ARCHS4-available studies for MONDO IDs")
             return None
 
-        # 4. Split NDE-discovered study samples into test vs control.
-        # NDE already validated these studies are about the disease (via MONDO
-        # annotations), so we do NOT re-verify with a disease regex. Instead,
-        # all samples are test candidates unless they match the control regex
-        # (e.g., "healthy", "control", "normal").
-        control_regex = query_spec.control_regex if query_spec else "healthy|control|normal"
-        disease_regex = query_spec.disease_regex if query_spec else re.escape(disease_term)
-
+        # 4. Classify samples via LLM (with regex fallback)
         gse_ids = [s.gse_id for s in discovery.studies]
-        ont_test, ont_control, studies_with_samples = self._split_nde_studies(
-            gse_ids, control_regex
+        disease_regex = query_spec.disease_regex if query_spec else re.escape(disease_term)
+        control_regex = query_spec.control_regex if query_spec else "healthy|control|normal"
+
+        ont_test, ont_control, studies_with_samples, llm_stats = (
+            self._classify_nde_samples_llm(gse_ids, disease_term, tissue)
         )
 
-        # 5. Optionally merge with keyword search
-        kw_test = pd.DataFrame()
-        kw_control = pd.DataFrame()
-        if keyword_fallback:
-            try:
-                kw_pooled = self.find_pooled_samples(
-                    disease_term=disease_term,
-                    tissue=tissue,
-                    max_test_samples=0,  # no limit yet
-                    max_control_samples=0,
-                    query_spec=query_spec,
-                )
-                kw_test = kw_pooled.test_samples
-                kw_control = kw_pooled.control_samples
-            except Exception as e:
-                logger.warning("Keyword fallback failed: %s", e)
-
-        merged_test, merged_control = self._merge_sample_sources(
-            ont_test, ont_control, kw_test, kw_control
-        )
-
-        # 6. Apply tissue filters
+        # 5. Apply tissue filters
+        test_stats = {}
+        control_stats = {}
         if query_spec:
-            merged_test, test_stats = self._apply_tissue_filters(
-                merged_test,
+            ont_test, test_stats = self._apply_tissue_filters(
+                ont_test,
                 include_regex=query_spec.tissue_include_regex,
                 exclude_regex=query_spec.tissue_exclude_regex,
             )
-            merged_control, control_stats = self._apply_tissue_filters(
-                merged_control,
+            ont_control, control_stats = self._apply_tissue_filters(
+                ont_control,
                 include_regex=query_spec.tissue_include_regex,
                 exclude_regex=query_spec.tissue_exclude_regex,
             )
-            # Fallback for controls
-            if merged_control.empty and not kw_control.empty and query_spec.tissue_include_regex:
-                merged_control = kw_control.copy()
-                merged_control, control_stats = self._apply_tissue_filters(
-                    merged_control,
-                    include_regex="",
-                    exclude_regex=query_spec.tissue_exclude_regex,
-                )
-                control_stats["fallback"] = "exclude_only"
 
-        # Remove overlap
+        # Remove overlap (test takes priority)
         overlap_removed = 0
-        if not merged_test.empty and not merged_control.empty:
-            test_ids = set(merged_test["geo_accession"])
-            original_count = len(merged_control)
-            merged_control = merged_control[~merged_control["geo_accession"].isin(test_ids)]
-            overlap_removed = original_count - len(merged_control)
+        if not ont_test.empty and not ont_control.empty:
+            test_ids_set = set(ont_test["geo_accession"])
+            original_count = len(ont_control)
+            ont_control = ont_control[~ont_control["geo_accession"].isin(test_ids_set)]
+            overlap_removed = original_count - len(ont_control)
 
-        total_test = len(merged_test)
-        total_control = len(merged_control)
+        # 6. If insufficient controls, search for tissue-matched controls
+        tissue_control_count = 0
+        min_controls_needed = max(10, len(ont_test) // 3)
+        if tissue and len(ont_control) < min_controls_needed:
+            logger.info(
+                "Only %d within-study controls (need ~%d) — searching for "
+                "tissue-matched controls",
+                len(ont_control), min_controls_needed,
+            )
+            assigned_ids = set()
+            if not ont_test.empty:
+                assigned_ids.update(ont_test["geo_accession"])
+            if not ont_control.empty:
+                assigned_ids.update(ont_control["geo_accession"])
 
-        # Apply size limits
-        if max_test_samples > 0 and len(merged_test) > max_test_samples:
-            merged_test = merged_test.sample(n=max_test_samples, random_state=42)
-        if max_control_samples > 0 and len(merged_control) > max_control_samples:
-            merged_control = merged_control.sample(n=max_control_samples, random_state=42)
+            tissue_controls = self._find_tissue_controls(
+                tissue=tissue,
+                exclude_ids=assigned_ids,
+                max_samples=max_control_samples,
+                query_spec=query_spec,
+            )
+            if not tissue_controls.empty:
+                tissue_control_count = len(tissue_controls)
+                ont_control = pd.concat(
+                    [ont_control, tissue_controls], ignore_index=True
+                )
+
+        total_test = len(ont_test)
+        total_control = len(ont_control)
+
+        # 7. Apply size limits
+        if max_test_samples > 0 and len(ont_test) > max_test_samples:
+            ont_test = ont_test.sample(n=max_test_samples, random_state=42)
+        if max_control_samples > 0 and len(ont_control) > max_control_samples:
+            ont_control = ont_control.sample(n=max_control_samples, random_state=42)
 
         # Build stats
         ont_stats = OntologyDiscoveryStats(
@@ -806,10 +807,11 @@ class SampleFinder:
             gse_studies_discovered=discovery.n_studies,
             gse_studies_in_archs4=discovery.n_studies,
             studies_with_classifiable_samples=studies_with_samples,
-            ontology_test_samples=len(ont_test),
-            ontology_control_samples=len(ont_control),
-            keyword_test_samples=len(kw_test),
-            keyword_control_samples=len(kw_control),
+            ontology_test_samples=llm_stats.get("total_test", len(ont_test)),
+            ontology_control_samples=llm_stats.get("total_control", len(ont_control)),
+            classification_method=llm_stats.get("method", "unknown"),
+            classification_stats=llm_stats,
+            tissue_control_samples=tissue_control_count,
             merged_test_samples=total_test,
             merged_control_samples=total_control,
         )
@@ -823,8 +825,8 @@ class SampleFinder:
             filtering_stats["control_tissue"] = control_stats
 
         return PooledPair(
-            test_samples=merged_test,
-            control_samples=merged_control,
+            test_samples=ont_test,
+            control_samples=ont_control,
             test_query=disease_regex,
             control_query=control_regex,
             total_test_found=total_test,
@@ -1053,6 +1055,304 @@ class SampleFinder:
             studies_with_samples = all_metadata["series_id"].nunique()
 
         return test_df, control_df, studies_with_samples
+
+    # ------------------------------------------------------------------
+    # LLM-based sample classification
+    # ------------------------------------------------------------------
+
+    _CLASSIFY_SYSTEM_PROMPT = """\
+You are a biomedical sample classifier for GEO gene expression studies.
+
+You will receive metadata for samples from one or more GEO studies that are \
+known (via ontology annotation) to be about a specific disease. Your task is \
+to classify each sample as "test" (disease/condition) or "control" \
+(healthy/unaffected) based on the sample metadata.
+
+Key rules:
+- These studies ARE about the disease (confirmed by ontology). Samples don't \
+need to explicitly mention the disease name to be test samples.
+- Samples described as "patient", "case", "affected", "disease", or with the \
+disease name/abbreviation are TEST.
+- Samples described as "healthy", "control", "normal", "unaffected", \
+"untreated" (in a disease context) are CONTROL.
+- When in doubt, classify as TEST (since the study is about the disease).
+- Treatment/drug samples from disease patients are still TEST.
+- Time-course samples from disease patients are still TEST.
+
+Return ONLY valid JSON with this structure:
+{
+  "studies": {
+    "GSE_ID": {
+      "test_samples": ["GSM_ID1", "GSM_ID2", ...],
+      "control_samples": ["GSM_ID3", ...],
+      "reasoning": "brief explanation"
+    }
+  }
+}"""
+
+    def _classify_nde_samples_llm(
+        self,
+        gse_ids: List[str],
+        disease_term: str,
+        tissue: Optional[str] = None,
+    ) -> Tuple[pd.DataFrame, pd.DataFrame, int, dict]:
+        """Classify NDE-discovered study samples using an LLM.
+
+        Makes one LLM call with metadata from all studies. Falls back to
+        regex-based _split_nde_studies if LLM is unavailable.
+
+        Args:
+            gse_ids: GEO series accessions discovered via NDE
+            disease_term: Disease name for context
+            tissue: Optional tissue for context
+
+        Returns:
+            Tuple of (test_df, control_df, n_studies_with_samples, llm_stats)
+            where llm_stats tracks classification provenance.
+        """
+        llm_stats = {"method": "regex_fallback", "studies_classified": 0}
+
+        # Collect metadata for all studies
+        study_metadata: Dict[str, pd.DataFrame] = {}
+        for gse_id in gse_ids:
+            try:
+                sample_ids = self.client.get_series_sample_ids(gse_id)
+                if sample_ids:
+                    meta = self.client.get_metadata_by_samples(sample_ids)
+                    if meta is not None and not meta.empty:
+                        study_metadata[gse_id] = meta
+            except Exception as e:
+                logger.debug("Could not get metadata for %s: %s", gse_id, e)
+
+        if not study_metadata:
+            return pd.DataFrame(), pd.DataFrame(), 0, llm_stats
+
+        # Try LLM classification
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if not api_key:
+            logger.info("No ANTHROPIC_API_KEY — falling back to regex classification")
+            return self._classify_nde_samples_llm_fallback(
+                study_metadata, llm_stats
+            )
+
+        try:
+            import anthropic
+        except ImportError:
+            logger.info("anthropic package not available — falling back to regex")
+            return self._classify_nde_samples_llm_fallback(
+                study_metadata, llm_stats
+            )
+
+        # Build the prompt with study metadata summaries
+        prompt = self._build_llm_classification_prompt(
+            study_metadata, disease_term, tissue
+        )
+
+        try:
+            model = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6")
+            client = anthropic.Anthropic(api_key=api_key)
+            message = client.messages.create(
+                model=model,
+                max_tokens=4096,
+                system=self._CLASSIFY_SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            raw = message.content[0].text.strip()
+            # Strip markdown code fences if present
+            if raw.startswith("```"):
+                raw = re.sub(r"^```(?:json)?\s*", "", raw)
+                raw = re.sub(r"\s*```$", "", raw)
+
+            classification = json.loads(raw)
+        except Exception as e:
+            logger.warning("LLM classification failed: %s — falling back to regex", e)
+            return self._classify_nde_samples_llm_fallback(
+                study_metadata, llm_stats
+            )
+
+        # Map LLM classifications back to DataFrames
+        test_dfs = []
+        control_dfs = []
+        studies_classified = 0
+
+        studies_result = classification.get("studies", {})
+        for gse_id, meta_df in study_metadata.items():
+            study_class = studies_result.get(gse_id, {})
+            test_ids = set(study_class.get("test_samples", []))
+            control_ids = set(study_class.get("control_samples", []))
+
+            if test_ids or control_ids:
+                studies_classified += 1
+
+            if test_ids:
+                test_mask = meta_df["geo_accession"].isin(test_ids)
+                test_dfs.append(meta_df[test_mask])
+
+            if control_ids:
+                control_mask = meta_df["geo_accession"].isin(control_ids)
+                control_dfs.append(meta_df[control_mask])
+
+        test_df = pd.concat(test_dfs, ignore_index=True) if test_dfs else pd.DataFrame()
+        control_df = pd.concat(control_dfs, ignore_index=True) if control_dfs else pd.DataFrame()
+
+        llm_stats = {
+            "method": "llm",
+            "model": model,
+            "studies_classified": studies_classified,
+            "total_test": len(test_df),
+            "total_control": len(control_df),
+            "per_study": {
+                gse_id: {
+                    "test": len(studies_result.get(gse_id, {}).get("test_samples", [])),
+                    "control": len(studies_result.get(gse_id, {}).get("control_samples", [])),
+                    "reasoning": studies_result.get(gse_id, {}).get("reasoning", ""),
+                }
+                for gse_id in study_metadata
+            },
+        }
+
+        logger.info(
+            "LLM classified %d studies: %d test, %d control samples",
+            studies_classified, len(test_df), len(control_df),
+        )
+
+        return test_df, control_df, studies_classified, llm_stats
+
+    def _build_llm_classification_prompt(
+        self,
+        study_metadata: Dict[str, pd.DataFrame],
+        disease_term: str,
+        tissue: Optional[str] = None,
+    ) -> str:
+        """Build a classification prompt from study metadata.
+
+        For each study, shows sample IDs with their distinguishing metadata
+        (title, source_name_ch1). Groups identical metadata to keep the prompt
+        compact.
+        """
+        tissue_str = f" in {tissue} tissue" if tissue else ""
+        parts = [
+            f"Disease: {disease_term}{tissue_str}\n",
+            f"Classify the samples from these {len(study_metadata)} NDE-discovered "
+            f"studies about {disease_term}.\n",
+        ]
+
+        for gse_id, meta_df in study_metadata.items():
+            parts.append(f"\n## {gse_id} ({len(meta_df)} samples)")
+
+            # Group samples by their metadata to keep prompt compact
+            groups: Dict[str, List[str]] = {}
+            for _, row in meta_df.iterrows():
+                title = str(row.get("title", "")).strip()
+                source = str(row.get("source_name_ch1", "")).strip()
+                key = f"title='{title}'"
+                if source:
+                    key += f", source='{source}'"
+                gsm = row["geo_accession"]
+                groups.setdefault(key, []).append(gsm)
+
+            for desc, gsm_ids in groups.items():
+                ids_str = ", ".join(gsm_ids[:5])
+                if len(gsm_ids) > 5:
+                    ids_str += f", ... ({len(gsm_ids)} total)"
+                parts.append(f"  [{ids_str}]: {desc}")
+
+        return "\n".join(parts)
+
+    def _classify_nde_samples_llm_fallback(
+        self,
+        study_metadata: Dict[str, pd.DataFrame],
+        llm_stats: dict,
+    ) -> Tuple[pd.DataFrame, pd.DataFrame, int, dict]:
+        """Regex fallback when LLM is unavailable."""
+        control_regex = "healthy|control|normal|\\bctrl\\b|unaffected|untreated"
+        test_dfs = []
+        control_dfs = []
+        studies_with = 0
+
+        for gse_id, meta_df in study_metadata.items():
+            text = self._combine_text_fields(meta_df)
+            control_mask = text.str.contains(
+                control_regex, case=False, regex=True, na=False
+            )
+            test_part = meta_df[~control_mask]
+            control_part = meta_df[control_mask]
+
+            if not test_part.empty or not control_part.empty:
+                studies_with += 1
+            if not test_part.empty:
+                test_dfs.append(test_part)
+            if not control_part.empty:
+                control_dfs.append(control_part)
+
+        test_df = pd.concat(test_dfs, ignore_index=True) if test_dfs else pd.DataFrame()
+        control_df = pd.concat(control_dfs, ignore_index=True) if control_dfs else pd.DataFrame()
+
+        llm_stats["method"] = "regex_fallback"
+        llm_stats["studies_classified"] = studies_with
+        return test_df, control_df, studies_with, llm_stats
+
+    def _find_tissue_controls(
+        self,
+        tissue: str,
+        exclude_ids: Set[str],
+        max_samples: int = 200,
+        query_spec: Optional[QuerySpec] = None,
+    ) -> pd.DataFrame:
+        """Search ARCHS4 for tissue-matched control samples.
+
+        Used as a fallback when NDE-discovered studies have insufficient
+        within-study controls.
+
+        Args:
+            tissue: Tissue name to search for
+            exclude_ids: Sample IDs already assigned (test or control)
+            max_samples: Maximum control samples to return
+            query_spec: Optional QuerySpec for tissue filtering
+
+        Returns:
+            DataFrame of control samples from the tissue
+        """
+        control_regex = "healthy|control|normal|\\bctrl\\b|unaffected"
+        tissue_terms = tissue
+
+        # Use query_spec tissue terms if available
+        if query_spec and query_spec.tissue_include:
+            tissue_terms = "|".join(query_spec.tissue_include)
+
+        # Search ARCHS4 for tissue + control samples
+        search_pattern = f"({tissue_terms}).*({control_regex})"
+        try:
+            results = self.client.search_metadata(
+                search_pattern, max_results=max_samples * 3
+            )
+        except Exception as e:
+            logger.warning("Tissue control search failed: %s", e)
+            return pd.DataFrame()
+
+        if results is None or results.empty:
+            return pd.DataFrame()
+
+        # Exclude samples already assigned
+        results = results[~results["geo_accession"].isin(exclude_ids)]
+
+        # Apply tissue exclude filter if available
+        if query_spec and query_spec.tissue_exclude_regex:
+            text = self._combine_text_fields(results)
+            exclude_mask = text.str.contains(
+                query_spec.tissue_exclude_regex, case=False, regex=True, na=False
+            )
+            results = results[~exclude_mask]
+
+        # Limit
+        if len(results) > max_samples:
+            results = results.sample(n=max_samples, random_state=42)
+
+        logger.info(
+            "Found %d tissue-matched control samples for '%s'",
+            len(results), tissue,
+        )
+        return results
 
     @staticmethod
     def _merge_sample_sources(
@@ -1456,10 +1756,10 @@ class SampleFinder:
         min_control_per_study: int = 3,
         query_spec: Optional[QuerySpec] = None,
     ) -> Optional[StudyMatchedResult]:
-        """Find study-matched samples using ontology-based discovery.
+        """Find study-matched samples using ontology + LLM classification.
 
         Uses the MONDO→NDE→ARCHS4 pipeline to discover studies, then
-        classifies samples within each study and groups into StudyPairs.
+        classifies samples via LLM and groups into StudyPairs.
 
         Returns None if ontology resolution fails.
         """
@@ -1501,22 +1801,53 @@ class SampleFinder:
         if not discovery.studies:
             return None
 
-        # Build regex — only control regex is needed for NDE-discovered studies
-        control_regex = query_spec.control_regex if query_spec else "healthy|control|normal"
         disease_regex = query_spec.disease_regex if query_spec else re.escape(disease_term)
+        control_regex = query_spec.control_regex if query_spec else "healthy|control|normal"
 
-        # Split samples per study (NDE already validated disease relevance)
+        # Classify all studies via LLM (single API call)
         gse_ids = [s.gse_id for s in discovery.studies]
+        _, _, _, llm_stats = self._classify_nde_samples_llm(
+            gse_ids, disease_term, tissue
+        )
+
+        # Use per-study classification from LLM stats to build study pairs
+        per_study = llm_stats.get("per_study", {})
         study_pairs = []
         studies_test_only = 0
         studies_control_only = 0
         total_test = 0
         total_control = 0
 
+        # Re-fetch metadata per study and apply LLM classification
         for gse_id in gse_ids:
-            test_df, control_df = self._split_nde_study_samples(
-                gse_id, control_regex
-            )
+            try:
+                sample_ids = self.client.get_series_sample_ids(gse_id)
+                if not sample_ids:
+                    continue
+                meta = self.client.get_metadata_by_samples(sample_ids)
+                if meta is None or meta.empty:
+                    continue
+            except Exception:
+                continue
+
+            study_class = per_study.get(gse_id, {})
+            test_ids = set(study_class.get("test_samples", []))  if "test_samples" in study_class else set()
+            control_ids = set(study_class.get("control_samples", [])) if "control_samples" in study_class else set()
+
+            # If LLM didn't classify this study (e.g., regex fallback
+            # which doesn't populate per_study with sample lists), use
+            # the regex fallback classification
+            if not test_ids and not control_ids:
+                fallback_regex = "healthy|control|normal|\\bctrl\\b|unaffected"
+                text = self._combine_text_fields(meta)
+                control_mask = text.str.contains(
+                    fallback_regex, case=False, regex=True, na=False
+                )
+                test_df = meta[~control_mask]
+                control_df = meta[control_mask]
+            else:
+                test_df = meta[meta["geo_accession"].isin(test_ids)]
+                control_df = meta[meta["geo_accession"].isin(control_ids)]
 
             # Apply tissue filters
             if query_spec:

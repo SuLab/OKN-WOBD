@@ -184,7 +184,7 @@ def _run_get_sample_metadata_background(
                         tissue=tissue,
                         max_test_samples=max_samples,
                         max_control_samples=max_samples,
-                        keyword_fallback=True,
+                        keyword_fallback=False,
                     )
                 except Exception:
                     pooled = None
@@ -276,7 +276,7 @@ def _run_find_samples_background(
                         tissue=tissue,
                         max_test_samples=max_test_samples,
                         max_control_samples=max_control_samples,
-                        keyword_fallback=True,
+                        keyword_fallback=False,
                     )
                 except Exception as e:
                     logger.warning("Ontology search failed: %s — falling back to keyword", e)

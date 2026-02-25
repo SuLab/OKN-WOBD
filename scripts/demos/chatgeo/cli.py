@@ -673,7 +673,7 @@ def _find_pooled_samples(
                 max_test_samples=max_test,
                 max_control_samples=max_control,
                 query_spec=query_spec,
-                keyword_fallback=True,
+                keyword_fallback=False,
             )
             if pooled is not None and pooled.n_test == 0:
                 pooled = None
