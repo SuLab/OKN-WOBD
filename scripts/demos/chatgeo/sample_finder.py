@@ -662,13 +662,15 @@ class SampleFinder:
         query_spec: Optional[QuerySpec] = None,
         keyword_fallback: bool = True,
     ) -> Optional[PooledPair]:
-        """Find samples using ontology-based study discovery + keyword classification.
+        """Find samples using ontology-based study discovery.
 
         Pipeline:
         1. Resolve disease_term → MONDO IDs via DiseaseOntologyClient
         2. Expand MONDO IDs via Ubergraph hierarchy
-        3. Discover GSE IDs via NDEGeoDiscovery
-        4. For each ARCHS4-available study: classify samples via keyword matching
+        3. Discover GSE IDs via NDEGeoDiscovery (NDE is indexed by ontology)
+        4. Fetch all samples from NDE-discovered studies — these are test
+           candidates by default since NDE already validated the study is
+           about the disease. Only the control regex separates controls.
         5. Optionally merge with keyword-only search results
         6. Apply tissue filters and size limits
 
@@ -694,6 +696,7 @@ class SampleFinder:
 
         # 2. Expand via hierarchy (single SPARQL VALUES query)
         all_mondo_ids = []
+        expansions = {}
         top_ids = resolution.mondo_ids[:3]
         try:
             expansions = ont_client.expand_mondo_ids_batch(top_ids, max_terms=50)
@@ -720,18 +723,17 @@ class SampleFinder:
             logger.info("NDE found 0 ARCHS4-available studies for MONDO IDs")
             return None
 
-        # 4. Classify samples within each study (batch metadata fetch)
-        # Build disease/control regex from query_spec or disease_term
-        if query_spec:
-            disease_regex = query_spec.disease_regex
-            control_regex = query_spec.control_regex
-        else:
-            disease_regex = re.escape(disease_term)
-            control_regex = "healthy|control|normal"
+        # 4. Split NDE-discovered study samples into test vs control.
+        # NDE already validated these studies are about the disease (via MONDO
+        # annotations), so we do NOT re-verify with a disease regex. Instead,
+        # all samples are test candidates unless they match the control regex
+        # (e.g., "healthy", "control", "normal").
+        control_regex = query_spec.control_regex if query_spec else "healthy|control|normal"
+        disease_regex = query_spec.disease_regex if query_spec else re.escape(disease_term)
 
         gse_ids = [s.gse_id for s in discovery.studies]
-        ont_test, ont_control, studies_with_samples = self._classify_studies_batch(
-            gse_ids, disease_regex, control_regex
+        ont_test, ont_control, studies_with_samples = self._split_nde_studies(
+            gse_ids, control_regex
         )
 
         # 5. Optionally merge with keyword search
@@ -868,6 +870,40 @@ class SampleFinder:
 
         return test_df, control_df
 
+    def _split_nde_study_samples(
+        self,
+        study_id: str,
+        control_regex: str,
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """Split samples from an NDE-discovered study into test vs control.
+
+        All samples are test candidates (NDE validated disease relevance).
+        Only the control_regex separates controls from test.
+
+        Args:
+            study_id: GEO series accession (e.g. "GSE12345")
+            control_regex: Regex pattern for control samples
+
+        Returns:
+            Tuple of (test_df, control_df)
+        """
+        try:
+            metadata = self.client.get_metadata_by_series(study_id)
+        except Exception as e:
+            logger.debug("Could not get metadata for %s: %s", study_id, e)
+            return pd.DataFrame(), pd.DataFrame()
+
+        if metadata is None or metadata.empty:
+            return pd.DataFrame(), pd.DataFrame()
+
+        text = self._combine_text_fields(metadata)
+        control_mask = text.str.contains(control_regex, case=False, regex=True, na=False)
+
+        test_df = metadata[~control_mask]
+        control_df = metadata[control_mask]
+
+        return test_df, control_df
+
     def _classify_studies_batch(
         self,
         gse_ids: List[str],
@@ -951,6 +987,72 @@ class SampleFinder:
         ont_test = pd.concat(ont_test_dfs, ignore_index=True) if ont_test_dfs else pd.DataFrame()
         ont_control = pd.concat(ont_control_dfs, ignore_index=True) if ont_control_dfs else pd.DataFrame()
         return ont_test, ont_control, studies_with_samples
+
+    def _split_nde_studies(
+        self,
+        gse_ids: List[str],
+        control_regex: str,
+    ) -> Tuple[pd.DataFrame, pd.DataFrame, int]:
+        """Split NDE-discovered study samples into test vs control.
+
+        Unlike _classify_studies_batch which requires a disease regex match,
+        this method trusts the NDE ontology annotations: all samples from
+        NDE-discovered studies are test candidates. Only the control_regex
+        is used to identify control/healthy samples within those studies.
+
+        This avoids the problem where disease terms in GEO metadata don't
+        match the regex (e.g., "MDD" vs "depression"), which would cause
+        0 test samples despite NDE confirming the study is disease-relevant.
+
+        Args:
+            gse_ids: GEO series accessions discovered via NDE
+            control_regex: Regex pattern for control samples
+                (e.g., "healthy|control|normal")
+
+        Returns:
+            Tuple of (test_df, control_df, n_studies_with_samples)
+        """
+        # Collect all sample IDs across studies
+        all_sample_ids: List[str] = []
+        for gse_id in gse_ids:
+            try:
+                sample_ids = self.client.get_series_sample_ids(gse_id)
+                all_sample_ids.extend(sample_ids)
+            except Exception as e:
+                logger.debug("Could not get sample IDs for %s: %s", gse_id, e)
+
+        if not all_sample_ids:
+            return pd.DataFrame(), pd.DataFrame(), 0
+
+        # Single batch metadata fetch
+        try:
+            all_metadata = self.client.get_metadata_by_samples(all_sample_ids)
+        except Exception as e:
+            logger.warning("Batch metadata fetch failed for NDE studies: %s", e)
+            return pd.DataFrame(), pd.DataFrame(), 0
+
+        if all_metadata is None or all_metadata.empty:
+            return pd.DataFrame(), pd.DataFrame(), 0
+
+        # Split: control samples match control_regex, everything else is test
+        text = self._combine_text_fields(all_metadata)
+        control_mask = text.str.contains(control_regex, case=False, regex=True, na=False)
+
+        test_df = all_metadata[~control_mask]
+        control_df = all_metadata[control_mask]
+
+        logger.info(
+            "NDE study split: %d total samples → %d test, %d control "
+            "(from %d studies)",
+            len(all_metadata), len(test_df), len(control_df), len(gse_ids),
+        )
+
+        # Count studies with samples
+        studies_with_samples = 0
+        if "series_id" in all_metadata.columns:
+            studies_with_samples = all_metadata["series_id"].nunique()
+
+        return test_df, control_df, studies_with_samples
 
     @staticmethod
     def _merge_sample_sources(
@@ -1399,15 +1501,11 @@ class SampleFinder:
         if not discovery.studies:
             return None
 
-        # Build regex
-        if query_spec:
-            disease_regex = query_spec.disease_regex
-            control_regex = query_spec.control_regex
-        else:
-            disease_regex = re.escape(disease_term)
-            control_regex = "healthy|control|normal"
+        # Build regex — only control regex is needed for NDE-discovered studies
+        control_regex = query_spec.control_regex if query_spec else "healthy|control|normal"
+        disease_regex = query_spec.disease_regex if query_spec else re.escape(disease_term)
 
-        # Classify samples per study
+        # Split samples per study (NDE already validated disease relevance)
         gse_ids = [s.gse_id for s in discovery.studies]
         study_pairs = []
         studies_test_only = 0
@@ -1416,8 +1514,8 @@ class SampleFinder:
         total_control = 0
 
         for gse_id in gse_ids:
-            test_df, control_df = self._classify_study_samples(
-                gse_id, disease_regex, control_regex
+            test_df, control_df = self._split_nde_study_samples(
+                gse_id, control_regex
             )
 
             # Apply tissue filters

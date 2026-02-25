@@ -333,3 +333,122 @@ class TestFindPooledSamplesOntology:
         # Should contain samples from both ontology and keyword
         all_ids = set(result.test_ids) | set(result.control_ids)
         assert len(all_ids) >= 2
+
+    def test_nde_samples_without_disease_keyword_are_test(self):
+        """NDE-discovered studies don't need disease regex matches.
+
+        This is the key improvement: NDE already validated the study is about
+        the disease (via MONDO annotations). Samples that use different
+        vocabulary (e.g., 'MDD' instead of 'depression') should still be
+        classified as test samples.
+        """
+        study_meta = {
+            "GSE100": _make_metadata(
+                ["GSM1", "GSM2", "GSM3", "GSM4"],
+                series_id="GSE100",
+                # None of these titles contain "depression" — but NDE says
+                # this study IS about depression
+                titles=[
+                    "MDD patient prefrontal cortex",
+                    "major depressive disorder subject",
+                    "unaffected subject prefrontal cortex",
+                    "healthy control brain",
+                ],
+            ),
+        }
+        finder = _make_finder(
+            archs4_meta_by_series=study_meta,
+            archs4_search=pd.DataFrame(),
+        )
+        self._setup_mocks(finder)
+
+        result = finder.find_pooled_samples_ontology(
+            disease_term="depression",
+            keyword_fallback=False,
+        )
+
+        assert result is not None
+        # GSM1, GSM2, GSM3 should be test (no control keywords)
+        # GSM4 should be control (matches "healthy|control")
+        assert result.n_test == 3
+        assert result.n_control == 1
+        assert "GSM4" in result.control_ids
+
+
+# ---------------------------------------------------------------------------
+# _split_nde_studies
+# ---------------------------------------------------------------------------
+
+class TestSplitNdeStudies:
+    """Tests for the NDE-trust-based sample splitting."""
+
+    def test_all_non_control_samples_are_test(self):
+        """Every sample from an NDE study is test unless it matches control regex."""
+        meta = _make_metadata(
+            ["GSM1", "GSM2", "GSM3", "GSM4", "GSM5"],
+            titles=[
+                "patient sample A",          # test (no control keyword)
+                "disease biopsy",             # test
+                "treated specimen",           # test
+                "healthy control",            # control
+                "normal tissue",              # control
+            ],
+        )
+        finder = _make_finder(archs4_meta_by_series={"GSE1": meta})
+
+        test_df, control_df, n_studies = finder._split_nde_studies(
+            ["GSE1"], "healthy|control|normal"
+        )
+
+        assert set(test_df["geo_accession"]) == {"GSM1", "GSM2", "GSM3"}
+        assert set(control_df["geo_accession"]) == {"GSM4", "GSM5"}
+        assert n_studies == 1
+
+    def test_empty_when_no_archs4_data(self):
+        finder = _make_finder(archs4_meta_by_series={})
+
+        test_df, control_df, n_studies = finder._split_nde_studies(
+            ["GSE_MISSING"], "healthy|control"
+        )
+
+        assert test_df.empty
+        assert control_df.empty
+        assert n_studies == 0
+
+    def test_multiple_studies_combined(self):
+        study_meta = {
+            "GSE100": _make_metadata(
+                ["GSM1", "GSM2"],
+                series_id="GSE100",
+                titles=["patient biopsy", "healthy control"],
+            ),
+            "GSE200": _make_metadata(
+                ["GSM3", "GSM4"],
+                series_id="GSE200",
+                titles=["disease tissue", "normal tissue"],
+            ),
+        }
+        finder = _make_finder(archs4_meta_by_series=study_meta)
+
+        test_df, control_df, n_studies = finder._split_nde_studies(
+            ["GSE100", "GSE200"], "healthy|control|normal"
+        )
+
+        assert set(test_df["geo_accession"]) == {"GSM1", "GSM3"}
+        assert set(control_df["geo_accession"]) == {"GSM2", "GSM4"}
+        assert n_studies == 2
+
+    def test_no_control_samples_in_study(self):
+        """If a study has no control samples, all are test."""
+        meta = _make_metadata(
+            ["GSM1", "GSM2", "GSM3"],
+            titles=["patient A", "patient B", "patient C"],
+        )
+        finder = _make_finder(archs4_meta_by_series={"GSE1": meta})
+
+        test_df, control_df, _ = finder._split_nde_studies(
+            ["GSE1"], "healthy|control|normal"
+        )
+
+        assert len(test_df) == 3
+        assert control_df.empty
