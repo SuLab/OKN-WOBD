@@ -160,7 +160,7 @@ explicitly. Keep the total response under 800 words."""
 def interpret_results(
     de_result: DEResult,
     enrichment_result: Optional[EnrichmentResult] = None,
-    model: str = "claude-sonnet-4-20250514",
+    model: str = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6"),
     max_tokens: int = 2048,
 ) -> str:
     """

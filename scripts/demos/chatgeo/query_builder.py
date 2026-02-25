@@ -118,7 +118,7 @@ def _term_to_regex(term: str) -> str:
 def build_query_spec(
     disease: str,
     tissue: Optional[str] = None,
-    model: str = "claude-3-5-haiku-20241022",
+    model: str = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6"),
 ) -> QuerySpec:
     """
     Use an LLM to parse a disease/tissue query into structured search criteria.
