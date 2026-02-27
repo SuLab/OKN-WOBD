@@ -1158,12 +1158,28 @@ Return ONLY valid JSON with this structure:
                 messages=[{"role": "user", "content": prompt}],
             )
             raw = message.content[0].text.strip()
-            # Strip markdown code fences if present
-            if raw.startswith("```"):
-                raw = re.sub(r"^```(?:json)?\s*", "", raw)
-                raw = re.sub(r"\s*```$", "", raw)
+            # Extract JSON object from response, handling code fences
+            # and any surrounding text
+            brace_start = raw.find("{")
+            brace_end = raw.rfind("}")
+            if brace_start != -1 and brace_end > brace_start:
+                raw = raw[brace_start : brace_end + 1]
+            else:
+                logger.warning(
+                    "LLM response contains no JSON object — falling back to regex"
+                )
+                logger.debug("LLM response (first 500 chars): %s", raw[:500])
+                return self._classify_nde_samples_llm_fallback(
+                    study_metadata, llm_stats
+                )
 
             classification = json.loads(raw)
+        except json.JSONDecodeError as e:
+            logger.warning("LLM response not valid JSON: %s — falling back to regex", e)
+            logger.debug("Raw text (first 500 chars): %s", raw[:500] if raw else "(empty)")
+            return self._classify_nde_samples_llm_fallback(
+                study_metadata, llm_stats
+            )
         except Exception as e:
             logger.warning("LLM classification failed: %s — falling back to regex", e)
             return self._classify_nde_samples_llm_fallback(
