@@ -176,3 +176,6 @@ dist/
 
 # Claude Code local settings
 **/.claude/settings.local.json
+.certs/localhost.pem
+.certs/localhost-key.pem
+.certs/https_proxy.py
