@@ -159,7 +159,7 @@ OUTPUT: Return ONLY valid SPARQL. No markdown, no explanations.
     def __init__(
         self,
         context: FrinkContext,
-        model: str = "claude-sonnet-4-20250514",
+        model: str = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6"),
         provider: str = "anthropic",
     ):
         """
@@ -699,7 +699,7 @@ class FrinkNL2SPARQL:
     def __init__(
         self,
         context_path: Optional[str] = None,
-        model: str = "claude-sonnet-4-20250514",
+        model: str = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6"),
         provider: str = "anthropic",
     ):
         """
@@ -894,8 +894,8 @@ def main():
     )
     parser.add_argument(
         "--model", "-m",
-        default="claude-sonnet-4-20250514",
-        help="LLM model to use (default: claude-sonnet-4-20250514)",
+        default=os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6"),
+        help="LLM model to use (default: claude-sonnet-4-6 or ANTHROPIC_MODEL env var)",
     )
     parser.add_argument(
         "--provider", "-p",

@@ -115,7 +115,7 @@ except ImportError:
 
 try:
     from dotenv import load_dotenv
-    load_dotenv(Path(__file__).parent.parent / ".env")
+    load_dotenv()
 except ImportError:
     pass
 
@@ -892,7 +892,7 @@ Provide a scientific summary (3-4 paragraphs) covering:
     try:
         client = anthropic.Anthropic(api_key=api_key)
         response = client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model=os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6"),
             max_tokens=1500,
             messages=[{"role": "user", "content": prompt}]
         )

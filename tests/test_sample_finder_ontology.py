@@ -1,5 +1,6 @@
 """Unit tests for ontology-enhanced sample discovery in SampleFinder."""
 
+import json
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock, PropertyMock, patch
@@ -191,14 +192,33 @@ class TestOntologyDiscoveryStats:
             studies_with_classifiable_samples=6,
             ontology_test_samples=40,
             ontology_control_samples=30,
-            keyword_test_samples=20,
-            keyword_control_samples=25,
+            classification_method="llm",
+            tissue_control_samples=15,
             merged_test_samples=55,
             merged_control_samples=50,
         )
         d = stats.to_dict()
         assert d["mondo_ids_resolved"] == ["0005311"]
         assert d["nde_records_found"] == 50
+        assert d["classification_method"] == "llm"
+        assert d["tissue_control_samples"] == 15
+
+    def test_defaults(self):
+        stats = OntologyDiscoveryStats(
+            mondo_ids_resolved=["0005311"],
+            mondo_labels={},
+            resolution_confidence="exact",
+            expanded_mondo_ids=["0005311"],
+            nde_records_found=10,
+            gse_studies_discovered=5,
+            gse_studies_in_archs4=3,
+            studies_with_classifiable_samples=2,
+            ontology_test_samples=20,
+            ontology_control_samples=10,
+        )
+        assert stats.classification_method == "regex"
+        assert stats.tissue_control_samples == 0
+        assert stats.keyword_test_samples == 0
 
 
 # ---------------------------------------------------------------------------
@@ -234,8 +254,8 @@ class TestFindPooledSamplesOntology:
         finder._nde_discovery = mock_nde
         return mock_ont, mock_nde
 
-    def test_full_pipeline(self):
-        # Set up study metadata
+    def test_full_pipeline_regex_fallback(self):
+        """Test the full pipeline without LLM (regex fallback)."""
         study_meta = {
             "GSE100": _make_metadata(
                 ["GSM1", "GSM2", "GSM3"],
@@ -250,14 +270,18 @@ class TestFindPooledSamplesOntology:
         }
         finder = _make_finder(
             archs4_meta_by_series=study_meta,
-            archs4_search=pd.DataFrame(),  # empty keyword search
+            archs4_search=pd.DataFrame(),
         )
         self._setup_mocks(finder)
 
-        result = finder.find_pooled_samples_ontology(
-            disease_term="atherosclerosis",
-            keyword_fallback=True,
-        )
+        # No ANTHROPIC_API_KEY → regex fallback
+        with patch.dict("os.environ", {}, clear=False):
+            env = dict(**{k: v for k, v in __import__("os").environ.items()
+                        if k != "ANTHROPIC_API_KEY"})
+            with patch.dict("os.environ", env, clear=True):
+                result = finder.find_pooled_samples_ontology(
+                    disease_term="atherosclerosis",
+                )
 
         assert result is not None
         assert result.n_test >= 3  # GSM1, GSM2, GSM4
@@ -303,33 +327,355 @@ class TestFindPooledSamplesOntology:
         result = finder.find_pooled_samples_ontology("atherosclerosis")
         assert result is None
 
-    def test_keyword_fallback_merges_samples(self):
-        """Keyword fallback should add to ontology results."""
+    def test_nde_samples_without_disease_keyword_are_test(self):
+        """NDE-discovered studies don't need disease regex matches.
+
+        The LLM (or regex fallback) classifies samples without requiring
+        the disease name to appear in the metadata.
+        """
         study_meta = {
             "GSE100": _make_metadata(
-                ["GSM1", "GSM2"],
-                titles=["atherosclerosis", "healthy control"],
+                ["GSM1", "GSM2", "GSM3", "GSM4"],
+                series_id="GSE100",
+                titles=[
+                    "MDD patient prefrontal cortex",
+                    "major depressive disorder subject",
+                    "unaffected subject prefrontal cortex",
+                    "healthy control brain",
+                ],
             ),
         }
-        # Keyword search returns additional samples
-        kw_search = _make_metadata(
-            ["GSM10", "GSM11"],
+        finder = _make_finder(
+            archs4_meta_by_series=study_meta,
+            archs4_search=pd.DataFrame(),
+        )
+        self._setup_mocks(finder)
+
+        # Patch out ANTHROPIC_API_KEY to force regex fallback
+        with patch.dict("os.environ", {}, clear=False):
+            env = {k: v for k, v in __import__("os").environ.items()
+                   if k != "ANTHROPIC_API_KEY"}
+            with patch.dict("os.environ", env, clear=True):
+                result = finder.find_pooled_samples_ontology(
+                    disease_term="depression",
+                )
+
+        assert result is not None
+        # Regex fallback: "unaffected" matches control regex, "healthy control" matches
+        # GSM1, GSM2 should be test; GSM3 (unaffected), GSM4 (healthy control) → control
+        assert result.n_test >= 2
+        assert result.n_control >= 1
+        assert "GSM4" in result.control_ids
+
+    def test_tissue_control_search(self):
+        """If within-study controls are insufficient, search ARCHS4 for tissue controls."""
+        study_meta = {
+            "GSE100": _make_metadata(
+                ["GSM1", "GSM2", "GSM3"],
+                series_id="GSE100",
+                titles=[
+                    "depression patient brain",
+                    "depression patient brain",
+                    "depression patient brain",
+                ],
+            ),
+        }
+        # ARCHS4 search for tissue controls returns some
+        tissue_controls = _make_metadata(
+            ["GSM90", "GSM91", "GSM92"],
             series_id="GSE999",
-            titles=["atherosclerosis bulk", "healthy tissue"],
+            titles=["healthy brain tissue", "normal brain control", "healthy brain"],
+            sources=["brain", "brain", "brain"],
         )
 
         finder = _make_finder(
             archs4_meta_by_series=study_meta,
-            archs4_search=kw_search,
+            archs4_search=tissue_controls,
         )
         self._setup_mocks(finder)
 
-        result = finder.find_pooled_samples_ontology(
-            disease_term="atherosclerosis",
-            keyword_fallback=True,
-        )
+        with patch.dict("os.environ", {}, clear=False):
+            env = {k: v for k, v in __import__("os").environ.items()
+                   if k != "ANTHROPIC_API_KEY"}
+            with patch.dict("os.environ", env, clear=True):
+                result = finder.find_pooled_samples_ontology(
+                    disease_term="depression",
+                    tissue="brain",
+                )
 
         assert result is not None
-        # Should contain samples from both ontology and keyword
-        all_ids = set(result.test_ids) | set(result.control_ids)
-        assert len(all_ids) >= 2
+        # All 3 NDE samples are test (no control keywords)
+        assert result.n_test == 3
+        # Tissue search should have found controls
+        assert result.n_control >= 1
+
+
+# ---------------------------------------------------------------------------
+# LLM Classification
+# ---------------------------------------------------------------------------
+
+class TestClassifyNdeSamplesLlm:
+
+    def _setup_finder_and_mocks(self):
+        study_meta = {
+            "GSE100": _make_metadata(
+                ["GSM1", "GSM2", "GSM3", "GSM4"],
+                series_id="GSE100",
+                titles=[
+                    "MDD patient prefrontal cortex",
+                    "MDD patient hippocampus",
+                    "healthy control prefrontal cortex",
+                    "healthy control hippocampus",
+                ],
+            ),
+        }
+        finder = _make_finder(archs4_meta_by_series=study_meta)
+        return finder, study_meta
+
+    def test_regex_fallback_when_no_api_key(self):
+        """Without ANTHROPIC_API_KEY, falls back to regex."""
+        finder, _ = self._setup_finder_and_mocks()
+
+        with patch.dict("os.environ", {}, clear=False):
+            env = {k: v for k, v in __import__("os").environ.items()
+                   if k != "ANTHROPIC_API_KEY"}
+            with patch.dict("os.environ", env, clear=True):
+                test_df, control_df, n_studies, stats = (
+                    finder._classify_nde_samples_llm(["GSE100"], "depression")
+                )
+
+        assert stats["method"] == "regex_fallback"
+        assert len(test_df) == 2  # MDD samples
+        assert len(control_df) == 2  # healthy control samples
+        assert n_studies == 1
+
+    def test_llm_classification_success(self):
+        """LLM classification parses JSON response correctly."""
+        finder, _ = self._setup_finder_and_mocks()
+
+        llm_response = json.dumps({
+            "studies": {
+                "GSE100": {
+                    "test_samples": ["GSM1", "GSM2"],
+                    "control_samples": ["GSM3", "GSM4"],
+                    "reasoning": "MDD patients vs healthy controls",
+                }
+            }
+        })
+
+        mock_message = MagicMock()
+        mock_message.content = [MagicMock(text=llm_response)]
+
+        mock_anthropic_client = MagicMock()
+        mock_anthropic_client.messages.create.return_value = mock_message
+
+        mock_anthropic_module = MagicMock()
+        mock_anthropic_module.Anthropic.return_value = mock_anthropic_client
+
+        with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
+            with patch.dict("sys.modules", {"anthropic": mock_anthropic_module}):
+                test_df, control_df, n_studies, stats = (
+                    finder._classify_nde_samples_llm(["GSE100"], "depression")
+                )
+
+        assert stats["method"] == "llm"
+        assert set(test_df["geo_accession"]) == {"GSM1", "GSM2"}
+        assert set(control_df["geo_accession"]) == {"GSM3", "GSM4"}
+        assert n_studies == 1
+        assert stats["per_study"]["GSE100"]["reasoning"] == "MDD patients vs healthy controls"
+
+    def test_llm_failure_falls_back_to_regex(self):
+        """If LLM call fails, falls back to regex classification."""
+        finder, _ = self._setup_finder_and_mocks()
+
+        mock_anthropic_module = MagicMock()
+        mock_anthropic_module.Anthropic.return_value.messages.create.side_effect = (
+            Exception("API error")
+        )
+
+        with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
+            with patch.dict("sys.modules", {"anthropic": mock_anthropic_module}):
+                test_df, control_df, n_studies, stats = (
+                    finder._classify_nde_samples_llm(["GSE100"], "depression")
+                )
+
+        assert stats["method"] == "regex_fallback"
+        assert not test_df.empty
+        assert not control_df.empty
+
+    def test_empty_studies(self):
+        finder = _make_finder(archs4_meta_by_series={})
+        test_df, control_df, n_studies, stats = (
+            finder._classify_nde_samples_llm(["GSE_MISSING"], "depression")
+        )
+
+        assert test_df.empty
+        assert control_df.empty
+        assert n_studies == 0
+
+
+# ---------------------------------------------------------------------------
+# _build_llm_classification_prompt
+# ---------------------------------------------------------------------------
+
+class TestBuildLlmClassificationPrompt:
+
+    def test_prompt_contains_study_info(self):
+        meta = _make_metadata(
+            ["GSM1", "GSM2"],
+            series_id="GSE100",
+            titles=["patient sample", "control sample"],
+        )
+        finder = _make_finder(archs4_meta_by_series={"GSE100": meta})
+
+        prompt = finder._build_llm_classification_prompt(
+            {"GSE100": meta}, "depression", "brain"
+        )
+
+        assert "GSE100" in prompt
+        assert "depression" in prompt
+        assert "brain" in prompt
+        assert "GSM1" in prompt
+        assert "patient sample" in prompt
+
+    def test_prompt_groups_identical_metadata(self):
+        meta = _make_metadata(
+            ["GSM1", "GSM2", "GSM3"],
+            titles=["patient brain", "patient brain", "control brain"],
+        )
+        finder = _make_finder()
+
+        prompt = finder._build_llm_classification_prompt(
+            {"GSE100": meta}, "depression"
+        )
+
+        # GSM1 and GSM2 should be grouped since they have identical titles
+        assert "GSM1, GSM2" in prompt
+
+
+# ---------------------------------------------------------------------------
+# _find_tissue_controls
+# ---------------------------------------------------------------------------
+
+class TestFindTissueControls:
+
+    def test_finds_tissue_matched_controls(self):
+        controls = _make_metadata(
+            ["GSM90", "GSM91"],
+            titles=["healthy brain tissue", "normal brain control"],
+            sources=["brain", "brain"],
+        )
+        finder = _make_finder(archs4_search=controls)
+
+        result = finder._find_tissue_controls(
+            tissue="brain",
+            exclude_ids={"GSM1", "GSM2"},
+            max_samples=100,
+        )
+
+        assert not result.empty
+        assert "GSM90" in result["geo_accession"].values
+
+    def test_excludes_already_assigned(self):
+        controls = _make_metadata(
+            ["GSM1", "GSM90"],
+            titles=["healthy brain", "normal brain"],
+        )
+        finder = _make_finder(archs4_search=controls)
+
+        result = finder._find_tissue_controls(
+            tissue="brain",
+            exclude_ids={"GSM1"},
+            max_samples=100,
+        )
+
+        assert "GSM1" not in result["geo_accession"].values
+
+    def test_empty_when_no_results(self):
+        finder = _make_finder(archs4_search=pd.DataFrame())
+
+        result = finder._find_tissue_controls(
+            tissue="brain",
+            exclude_ids=set(),
+        )
+
+        assert result.empty
+
+
+# ---------------------------------------------------------------------------
+# _split_nde_studies (legacy regex method, still used as part of fallback)
+# ---------------------------------------------------------------------------
+
+class TestSplitNdeStudies:
+    """Tests for the NDE-trust-based sample splitting."""
+
+    def test_all_non_control_samples_are_test(self):
+        """Every sample from an NDE study is test unless it matches control regex."""
+        meta = _make_metadata(
+            ["GSM1", "GSM2", "GSM3", "GSM4", "GSM5"],
+            titles=[
+                "patient sample A",          # test (no control keyword)
+                "disease biopsy",             # test
+                "treated specimen",           # test
+                "healthy control",            # control
+                "normal tissue",              # control
+            ],
+        )
+        finder = _make_finder(archs4_meta_by_series={"GSE1": meta})
+
+        test_df, control_df, n_studies = finder._split_nde_studies(
+            ["GSE1"], "healthy|control|normal"
+        )
+
+        assert set(test_df["geo_accession"]) == {"GSM1", "GSM2", "GSM3"}
+        assert set(control_df["geo_accession"]) == {"GSM4", "GSM5"}
+        assert n_studies == 1
+
+    def test_empty_when_no_archs4_data(self):
+        finder = _make_finder(archs4_meta_by_series={})
+
+        test_df, control_df, n_studies = finder._split_nde_studies(
+            ["GSE_MISSING"], "healthy|control"
+        )
+
+        assert test_df.empty
+        assert control_df.empty
+        assert n_studies == 0
+
+    def test_multiple_studies_combined(self):
+        study_meta = {
+            "GSE100": _make_metadata(
+                ["GSM1", "GSM2"],
+                series_id="GSE100",
+                titles=["patient biopsy", "healthy control"],
+            ),
+            "GSE200": _make_metadata(
+                ["GSM3", "GSM4"],
+                series_id="GSE200",
+                titles=["disease tissue", "normal tissue"],
+            ),
+        }
+        finder = _make_finder(archs4_meta_by_series=study_meta)
+
+        test_df, control_df, n_studies = finder._split_nde_studies(
+            ["GSE100", "GSE200"], "healthy|control|normal"
+        )
+
+        assert set(test_df["geo_accession"]) == {"GSM1", "GSM3"}
+        assert set(control_df["geo_accession"]) == {"GSM2", "GSM4"}
+        assert n_studies == 2
+
+    def test_no_control_samples_in_study(self):
+        """If a study has no control samples, all are test."""
+        meta = _make_metadata(
+            ["GSM1", "GSM2", "GSM3"],
+            titles=["patient A", "patient B", "patient C"],
+        )
+        finder = _make_finder(archs4_meta_by_series={"GSE1": meta})
+
+        test_df, control_df, _ = finder._split_nde_studies(
+            ["GSE1"], "healthy|control|normal"
+        )
+
+        assert len(test_df) == 3
+        assert control_df.empty

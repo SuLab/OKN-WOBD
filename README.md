@@ -2,6 +2,24 @@
 
 Extract data from the [NIAID Data Ecosystem Discovery Portal](https://data.niaid.nih.gov/) and convert for loading into [ProtoOKN](https://www.proto-okn.net/).
 
+## Environment Configuration
+
+Copy the example environment file and fill in your values:
+
+```bash
+cp .env.example .env
+```
+
+Key variables:
+
+| Variable | Purpose |
+|----------|---------|
+| `ANTHROPIC_API_KEY` | LLM features (ChatGEO interpretation, NL-to-SPARQL, GO disease summaries) |
+| `ARCHS4_DATA_DIR` | Path to ARCHS4 HDF5 files (~58 GB each, required for ChatGEO / DE analysis) |
+| `OKN_MCP_TRANSPORT` | MCP server transport: `stdio` (default), `streamable-http`, or `sse` |
+
+See `.env.example` for the full list of options. The `.env` file is gitignored.
+
 ## Python Environment Setup
 
 Use `pyenv` to install the Python version needed, then create an isolated `venv` in the repository:

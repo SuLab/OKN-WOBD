@@ -19,10 +19,10 @@ from typing import Any, Dict, Literal, Optional, Tuple
 # Add parent directory for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-# Load .env from demos directory
+# Load .env (walks up from this file to find project root .env)
 try:
     from dotenv import load_dotenv
-    load_dotenv(Path(__file__).parent.parent / ".env")
+    load_dotenv()
 except ImportError:
     pass
 
@@ -673,7 +673,7 @@ def _find_pooled_samples(
                 max_test_samples=max_test,
                 max_control_samples=max_control,
                 query_spec=query_spec,
-                keyword_fallback=True,
+                keyword_fallback=False,
             )
             if pooled is not None and pooled.n_test == 0:
                 pooled = None

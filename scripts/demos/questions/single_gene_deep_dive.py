@@ -22,7 +22,7 @@ from typing import Any, Dict, List
 
 try:
     from dotenv import load_dotenv
-    load_dotenv(Path(__file__).parent.parent / ".env")
+    load_dotenv()
 except ImportError:
     pass
 

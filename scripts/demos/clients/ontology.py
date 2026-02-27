@@ -116,49 +116,159 @@ class DiseaseOntologyClient:
     def _resolve_via_ubergraph(
         self, disease_name: str, max_results: int
     ) -> MondoResolution:
-        """Search Ubergraph labels filtered to MONDO namespace."""
+        """Search Ubergraph labels and synonyms filtered to MONDO namespace.
+
+        Uses a two-phase strategy:
+        1. Exact text matches on labels and synonyms (fast, precise)
+        2. CONTAINS matches for broader recall
+
+        Results are ranked by match quality:
+            0 = exact label match
+            1 = exact synonym match
+            2 = label starts with query
+            3 = synonym starts with query
+            4 = label contains query
+            5 = broad/related/narrow synonym contains query
+        """
         escaped = disease_name.replace('"', '\\"')
-        query = f'''
+        obo = "http://www.geneontology.org/formats/oboInOwl#"
+
+        # Phase 1: Exact text matches on label and all synonym types.
+        # This is fast and ensures we never miss an exact match due to
+        # LIMIT truncation from many partial matches.
+        # NOTE: Blazegraph (Ubergraph's backend) has issues with BIND
+        # inside UNION branches combined with LCASE filters. We use
+        # separate simple queries instead.
+        exact_label_q = f'''
         SELECT DISTINCT ?uri ?label WHERE {{
             ?uri rdfs:label ?label .
             FILTER(STRSTARTS(STR(?uri), "{MONDO_URI_PREFIX}"))
-            FILTER(CONTAINS(LCASE(?label), LCASE("{escaped}")))
-        }} LIMIT {max_results * 3}
+            FILTER(LCASE(?label) = LCASE("{escaped}"))
+        }} LIMIT {max_results}
         '''
-        results = self.sparql.query_simple(query, endpoint="ubergraph")
+        exact_syn_q = f'''
+        SELECT DISTINCT ?uri ?label ?match ?matchType WHERE {{
+            ?uri rdfs:label ?label .
+            FILTER(STRSTARTS(STR(?uri), "{MONDO_URI_PREFIX}"))
+            {{
+                ?uri <{obo}hasExactSynonym> ?match .
+                BIND("exact_synonym" AS ?matchType)
+                FILTER(LCASE(?match) = LCASE("{escaped}"))
+            }} UNION {{
+                ?uri <{obo}hasBroadSynonym> ?match .
+                BIND("broad_synonym" AS ?matchType)
+                FILTER(LCASE(?match) = LCASE("{escaped}"))
+            }} UNION {{
+                ?uri <{obo}hasRelatedSynonym> ?match .
+                BIND("related_synonym" AS ?matchType)
+                FILTER(LCASE(?match) = LCASE("{escaped}"))
+            }} UNION {{
+                ?uri <{obo}hasNarrowSynonym> ?match .
+                BIND("narrow_synonym" AS ?matchType)
+                FILTER(LCASE(?match) = LCASE("{escaped}"))
+            }}
+        }} LIMIT {max_results * 5}
+        '''
+
+        # Collect exact label matches with synthetic matchType
+        results = []
+        for r in self.sparql.query_simple(exact_label_q, endpoint="ubergraph"):
+            r["match"] = r["label"]
+            r["matchType"] = "label"
+            results.append(r)
+
+        results.extend(
+            self.sparql.query_simple(exact_syn_q, endpoint="ubergraph")
+        )
+
+        # Phase 2: CONTAINS matches for broader recall.
+        contains_query = f'''
+        SELECT DISTINCT ?uri ?label ?match ?matchType WHERE {{
+            ?uri rdfs:label ?label .
+            FILTER(STRSTARTS(STR(?uri), "{MONDO_URI_PREFIX}"))
+            {{
+                ?uri <{obo}hasExactSynonym> ?match .
+                BIND("exact_synonym" AS ?matchType)
+                FILTER(CONTAINS(LCASE(?match), LCASE("{escaped}")))
+            }} UNION {{
+                ?uri <{obo}hasBroadSynonym> ?match .
+                BIND("broad_synonym" AS ?matchType)
+                FILTER(CONTAINS(LCASE(?match), LCASE("{escaped}")))
+            }} UNION {{
+                ?uri <{obo}hasRelatedSynonym> ?match .
+                BIND("related_synonym" AS ?matchType)
+                FILTER(CONTAINS(LCASE(?match), LCASE("{escaped}")))
+            }} UNION {{
+                ?uri <{obo}hasNarrowSynonym> ?match .
+                BIND("narrow_synonym" AS ?matchType)
+                FILTER(CONTAINS(LCASE(?match), LCASE("{escaped}")))
+            }}
+        }} LIMIT {max_results * 10}
+        '''
+        results.extend(
+            self.sparql.query_simple(contains_query, endpoint="ubergraph")
+        )
 
         if not results:
             return MondoResolution(
                 query=disease_name, mondo_ids=[], labels={}, confidence="none"
             )
 
-        # Extract MONDO IDs and rank
-        candidates: List[Tuple[str, str, int]] = []
+        # Extract MONDO IDs and track the best rank per entity.
+        # SPARQL DISTINCT can collapse label and synonym rows when the
+        # text is identical, so we also check the preferred label directly.
+        best_rank: Dict[str, int] = {}  # mondo_id -> best rank seen
+        label_for: Dict[str, str] = {}  # mondo_id -> preferred label
+        query_lower = disease_name.lower()
+
         for r in results:
             uri = r.get("uri", "")
-            label = r.get("label", "")
+            label = r.get("label", "")  # always the preferred label
+            match_text = r.get("match", "")
+            match_type = r.get("matchType", "label")
             if not uri.startswith(MONDO_URI_PREFIX):
                 continue
             mondo_id = uri[len(MONDO_URI_PREFIX):]
-            rank = self._rank_match(disease_name.lower(), label.lower())
-            candidates.append((mondo_id, label, rank))
+            label_for[mondo_id] = label
 
+            rank = self._rank_synonym_match(
+                query_lower, match_text.lower(), match_type
+            )
+            if mondo_id not in best_rank or rank < best_rank[mondo_id]:
+                best_rank[mondo_id] = rank
+
+        # Ensure label-based ranking is considered even if the label
+        # UNION branch was deduplicated away by SPARQL DISTINCT.
+        for mondo_id, label in label_for.items():
+            label_rank = self._rank_synonym_match(
+                query_lower, label.lower(), "label"
+            )
+            if label_rank < best_rank.get(mondo_id, 999):
+                best_rank[mondo_id] = label_rank
+
+        # Build sorted candidate list
+        candidates: List[Tuple[str, str, int]] = [
+            (mid, label_for[mid], best_rank[mid])
+            for mid in best_rank
+        ]
         # Sort by rank (lower is better), then by label length (prefer concise)
         candidates.sort(key=lambda x: (x[2], len(x[1])))
 
         mondo_ids = []
         labels = {}
         seen = set()
-        for mondo_id, label, _ in candidates[:max_results]:
+        for mondo_id, label, _ in candidates:
             if mondo_id not in seen:
                 mondo_ids.append(mondo_id)
                 labels[mondo_id] = label
                 seen.add(mondo_id)
+            if len(mondo_ids) >= max_results:
+                break
 
         confidence = "none"
         if candidates:
             best_rank = candidates[0][2]
-            if best_rank == 0:
+            if best_rank <= 1:
                 confidence = "exact"
             else:
                 confidence = "partial"
@@ -219,6 +329,41 @@ class DiseaseOntologyClient:
         if label.startswith(query):
             return 1
         return 2
+
+    @staticmethod
+    def _rank_synonym_match(query: str, match_text: str, match_type: str) -> int:
+        """Rank a match considering both match quality and source.
+
+        Returns:
+            0 = exact label match
+            1 = exact synonym match
+            2 = label starts with query
+            3 = synonym starts with query
+            4 = label contains query
+            5 = broad/related/narrow synonym contains query
+        """
+        is_exact_text = query == match_text
+        is_starts = match_text.startswith(query)
+
+        if match_type == "label":
+            if is_exact_text:
+                return 0
+            if is_starts:
+                return 2
+            return 4
+        elif match_type == "exact_synonym":
+            if is_exact_text:
+                return 1
+            if is_starts:
+                return 3
+            return 4  # exact synonym containing query ≈ label containing
+        else:
+            # broad, related, narrow synonyms
+            if is_exact_text:
+                return 1
+            if is_starts:
+                return 3
+            return 5
 
     def expand_mondo_id(
         self,

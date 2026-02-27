@@ -65,11 +65,11 @@ pip install -e .
 # 2. The demos directory (scripts/demos/) must exist in the repo —
 #    the server adds it to sys.path automatically.
 
-# 3. Copy and configure the demos .env file
-cp scripts/demos/.env.example scripts/demos/.env
+# 3. Copy and configure the .env file
+cp .env.example .env
 ```
 
-Edit `scripts/demos/.env`:
+Edit `.env`:
 
 | Variable | Required for | Description |
 |----------|-------------|-------------|
@@ -265,7 +265,7 @@ Other optional hardening:
 
 The ChatGEO tools (`differential_expression`, `find_samples`, `get_sample_metadata`) require local access to ARCHS4 HDF5 files (~58 GB each). The server machine must have:
 - Sufficient disk space for the HDF5 files
-- `ARCHS4_DATA_DIR` set in the environment or in `scripts/demos/.env`
+- `ARCHS4_DATA_DIR` set in the environment or in `.env`
 
 The SPARQL-based tools and `enrichment_analysis` work without local data and only make outbound HTTP requests.
 

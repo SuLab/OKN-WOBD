@@ -124,8 +124,12 @@ class TestResolveDisease:
         r2 = client.resolve_disease("atherosclerosis")
 
         assert r1.mondo_ids == r2.mondo_ids
-        # Should only have called SPARQL once
-        assert client.sparql.query_simple.call_count == 1
+        # First resolve makes 3 SPARQL calls (exact labels, exact synonyms,
+        # CONTAINS synonyms). Second resolve should hit cache — no new calls.
+        first_call_count = client.sparql.query_simple.call_count
+        assert first_call_count == 3
+        client.resolve_disease("atherosclerosis")  # third call, should be cached
+        assert client.sparql.query_simple.call_count == first_call_count
 
     def test_ubergraph_failure_falls_back_to_nde(self):
         client = _make_client()

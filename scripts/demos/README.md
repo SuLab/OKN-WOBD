@@ -61,8 +61,7 @@ scripts/demos/
 │   ├── reference_queries/     # SPARQL query examples
 │   └── output/                # Generated HTML reports (gitignored)
 ├── tests/            # Tests
-├── config.py         # Shared configuration (.env loading)
-└── .env.example      # Environment variable template
+└── config.py         # Shared configuration (.env loading)
 ```
 
 ## Packages
@@ -145,10 +144,10 @@ python -m chatgeo.cli "psoriasis in skin tissue" --verbose
 ## Environment Setup
 
 ```bash
-cp .env.example .env
+cp ../../.env.example ../../.env
 ```
 
-Required variables:
+Or if already configured at the project root, no action needed. Required variables:
 
 | Variable | Required For | Description |
 |----------|-------------|-------------|

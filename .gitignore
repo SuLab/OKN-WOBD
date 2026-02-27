@@ -174,9 +174,8 @@ build/
 dist/
 
 
-.claude/settings.local.json
-scripts/.claude/settings.local.json
-scripts/demos/.claude/settings.local.json
-.claude/settings.local.json
-.claude/settings.local.json
-.claude/settings.local.json
+# Claude Code local settings
+**/.claude/settings.local.json
+.certs/localhost.pem
+.certs/localhost-key.pem
+.certs/https_proxy.py

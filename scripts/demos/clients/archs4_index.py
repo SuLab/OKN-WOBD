@@ -371,6 +371,7 @@ class ARCHS4MetadataIndex:
         self,
         pattern: str,
         fields: Optional[List[str]] = None,
+        max_results: Optional[int] = None,
     ) -> "pd.DataFrame":
         """Search metadata by text pattern. ~0.1-0.5s.
 
@@ -379,8 +380,12 @@ class ARCHS4MetadataIndex:
         """
         fts_query = _pattern_to_fts5(pattern)
         if fts_query is not None:
-            return self._search_fts5(fts_query, fields)
-        return self._search_regexp(pattern, fields)
+            df = self._search_fts5(fts_query, fields)
+        else:
+            df = self._search_regexp(pattern, fields)
+        if max_results is not None and len(df) > max_results:
+            df = df.head(max_results)
+        return df
 
     def _search_fts5(
         self,

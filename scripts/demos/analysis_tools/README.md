@@ -133,7 +133,7 @@ pip install anthropic                # LLM summaries (go_disease_analysis)
 
 ## Environment Variables
 
-Set in `scripts/demos/.env`:
+Set in `.env` at the project root:
 
 | Variable | Required By | Description |
 |----------|------------|-------------|
