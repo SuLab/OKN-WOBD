@@ -9,11 +9,14 @@ Two modes of operation:
    → Use for multiple within-study DE analyses with meta-analysis
 """
 
+import hashlib
 import json
 import logging
 import os
 import re
+import sqlite3
 import sys
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
@@ -1090,6 +1093,124 @@ Return ONLY valid JSON with this structure:
   }
 }"""
 
+    _PROMPT_VERSION = hashlib.sha256(
+        _CLASSIFY_SYSTEM_PROMPT.encode()
+    ).hexdigest()[:12]
+
+    class _ClassificationCache:
+        """Per-study SQLite cache for LLM sample classifications."""
+
+        _CREATE_SQL = """
+            CREATE TABLE IF NOT EXISTS classifications (
+                gse_id TEXT,
+                disease_term TEXT,
+                tissue TEXT,
+                model TEXT,
+                prompt_version TEXT,
+                classification TEXT,
+                created_at REAL,
+                PRIMARY KEY (gse_id, disease_term, tissue)
+            )
+        """
+
+        def __init__(self, db_path: str, prompt_version: str):
+            self._db_path = db_path
+            self._prompt_version = prompt_version
+            self._conn: Optional[sqlite3.Connection] = None
+
+        def _connect(self) -> sqlite3.Connection:
+            if self._conn is None:
+                self._conn = sqlite3.connect(self._db_path, timeout=10)
+                self._conn.execute(self._CREATE_SQL)
+                self._conn.commit()
+            return self._conn
+
+        def get_many(
+            self, keys: List[Tuple[str, str, str]]
+        ) -> Dict[str, dict]:
+            """Fetch cached classifications for multiple (gse_id, disease, tissue) keys.
+
+            Returns dict mapping gse_id → classification dict for cache hits.
+            Only returns entries matching the current prompt_version.
+            """
+            if not keys:
+                return {}
+            conn = self._connect()
+            results: Dict[str, dict] = {}
+            # Query in batches to stay within SQLite variable limits
+            for i in range(0, len(keys), 500):
+                batch = keys[i : i + 500]
+                placeholders = ",".join(["(?,?,?)"] * len(batch))
+                params: list = []
+                for gse_id, disease, tissue in batch:
+                    params.extend([gse_id, disease, tissue])
+                sql = (
+                    f"SELECT gse_id, classification FROM classifications "
+                    f"WHERE (gse_id, disease_term, tissue) IN ({placeholders}) "
+                    f"AND prompt_version = ?"
+                )
+                params.append(self._prompt_version)
+                for row in conn.execute(sql, params):
+                    try:
+                        results[row[0]] = json.loads(row[1])
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+            return results
+
+        def put_many(
+            self,
+            entries: Dict[str, dict],
+            disease_term: str,
+            tissue: str,
+            model: str,
+        ) -> None:
+            """Store classifications for multiple studies."""
+            if not entries:
+                return
+            conn = self._connect()
+            now = time.time()
+            rows = [
+                (
+                    gse_id,
+                    disease_term,
+                    tissue,
+                    model,
+                    self._prompt_version,
+                    json.dumps(classification),
+                    now,
+                )
+                for gse_id, classification in entries.items()
+            ]
+            conn.executemany(
+                "INSERT OR REPLACE INTO classifications "
+                "(gse_id, disease_term, tissue, model, prompt_version, "
+                "classification, created_at) VALUES (?,?,?,?,?,?,?)",
+                rows,
+            )
+            conn.commit()
+
+        def close(self) -> None:
+            if self._conn is not None:
+                self._conn.close()
+                self._conn = None
+
+    def _get_classification_cache(self) -> Optional["SampleFinder._ClassificationCache"]:
+        """Get or create the LLM classification cache.
+
+        Returns None if no data_dir is configured.
+        """
+        if not self.data_dir:
+            return None
+        cache_attr = "_classification_cache"
+        if not hasattr(self, cache_attr) or getattr(self, cache_attr) is None:
+            db_path = os.path.join(self.data_dir, ".llm_classification_cache.db")
+            setattr(
+                self,
+                cache_attr,
+                self._ClassificationCache(db_path, self._PROMPT_VERSION),
+            )
+        return getattr(self, cache_attr)
+
     def _classify_nde_samples_llm(
         self,
         gse_ids: List[str],
@@ -1100,6 +1221,9 @@ Return ONLY valid JSON with this structure:
 
         Makes one LLM call with metadata from all studies. Falls back to
         regex-based _split_nde_studies if LLM is unavailable.
+
+        Uses a per-study SQLite cache so repeated queries for the same
+        disease/tissue skip the LLM for already-classified studies.
 
         Args:
             gse_ids: GEO series accessions discovered via NDE
@@ -1143,55 +1267,94 @@ Return ONLY valid JSON with this structure:
                 study_metadata, llm_stats
             )
 
-        # Build the prompt with study metadata summaries
-        prompt = self._build_llm_classification_prompt(
-            study_metadata, disease_term, tissue
+        # Check cache for already-classified studies
+        tissue_key = tissue or ""
+        cache = self._get_classification_cache()
+        cached_results: Dict[str, dict] = {}
+        if cache is not None:
+            try:
+                cache_keys = [
+                    (gse_id, disease_term, tissue_key)
+                    for gse_id in study_metadata
+                ]
+                cached_results = cache.get_many(cache_keys)
+            except Exception as e:
+                logger.debug("Cache lookup failed: %s", e)
+
+        uncached_metadata = {
+            gse_id: meta
+            for gse_id, meta in study_metadata.items()
+            if gse_id not in cached_results
+        }
+
+        n_cached = len(cached_results)
+        n_uncached = len(uncached_metadata)
+        logger.info(
+            "LLM cache: %d cached, %d to classify", n_cached, n_uncached
         )
 
-        try:
-            model = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6")
-            client = anthropic.Anthropic(api_key=api_key)
-            message = client.messages.create(
-                model=model,
-                max_tokens=4096,
-                system=self._CLASSIFY_SYSTEM_PROMPT,
-                messages=[{"role": "user", "content": prompt}],
+        # Call LLM only for uncached studies
+        fresh_results: Dict[str, dict] = {}
+        model = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6")
+
+        if uncached_metadata:
+            prompt = self._build_llm_classification_prompt(
+                uncached_metadata, disease_term, tissue
             )
-            raw = message.content[0].text.strip()
-            # Extract JSON object from response, handling code fences
-            # and any surrounding text
-            brace_start = raw.find("{")
-            brace_end = raw.rfind("}")
-            if brace_start != -1 and brace_end > brace_start:
-                raw = raw[brace_start : brace_end + 1]
-            else:
-                logger.warning(
-                    "LLM response contains no JSON object — falling back to regex"
+
+            try:
+                client = anthropic.Anthropic(api_key=api_key)
+                message = client.messages.create(
+                    model=model,
+                    max_tokens=4096,
+                    system=self._CLASSIFY_SYSTEM_PROMPT,
+                    messages=[{"role": "user", "content": prompt}],
                 )
-                logger.debug("LLM response (first 500 chars): %s", raw[:500])
+                raw = message.content[0].text.strip()
+                brace_start = raw.find("{")
+                brace_end = raw.rfind("}")
+                if brace_start != -1 and brace_end > brace_start:
+                    raw = raw[brace_start : brace_end + 1]
+                else:
+                    logger.warning(
+                        "LLM response contains no JSON object — falling back to regex"
+                    )
+                    logger.debug("LLM response (first 500 chars): %s", raw[:500])
+                    return self._classify_nde_samples_llm_fallback(
+                        study_metadata, llm_stats
+                    )
+
+                classification = json.loads(raw)
+                fresh_results = classification.get("studies", {})
+            except json.JSONDecodeError as e:
+                logger.warning("LLM response not valid JSON: %s — falling back to regex", e)
+                logger.debug("Raw text (first 500 chars): %s", raw[:500] if raw else "(empty)")
+                return self._classify_nde_samples_llm_fallback(
+                    study_metadata, llm_stats
+                )
+            except Exception as e:
+                logger.warning("LLM classification failed: %s — falling back to regex", e)
                 return self._classify_nde_samples_llm_fallback(
                     study_metadata, llm_stats
                 )
 
-            classification = json.loads(raw)
-        except json.JSONDecodeError as e:
-            logger.warning("LLM response not valid JSON: %s — falling back to regex", e)
-            logger.debug("Raw text (first 500 chars): %s", raw[:500] if raw else "(empty)")
-            return self._classify_nde_samples_llm_fallback(
-                study_metadata, llm_stats
-            )
-        except Exception as e:
-            logger.warning("LLM classification failed: %s — falling back to regex", e)
-            return self._classify_nde_samples_llm_fallback(
-                study_metadata, llm_stats
-            )
+            # Store fresh results in cache
+            if cache is not None and fresh_results:
+                try:
+                    cache.put_many(fresh_results, disease_term, tissue_key, model)
+                except Exception as e:
+                    logger.debug("Cache write failed: %s", e)
 
-        # Map LLM classifications back to DataFrames
+        # Merge cached + fresh results into a unified studies_result
+        studies_result: Dict[str, dict] = {}
+        studies_result.update(cached_results)
+        studies_result.update(fresh_results)
+
+        # Map classifications back to DataFrames
         test_dfs = []
         control_dfs = []
         studies_classified = 0
 
-        studies_result = classification.get("studies", {})
         for gse_id, meta_df in study_metadata.items():
             study_class = studies_result.get(gse_id, {})
             test_ids = set(study_class.get("test_samples", []))
@@ -1215,6 +1378,8 @@ Return ONLY valid JSON with this structure:
             "method": "llm",
             "model": model,
             "studies_classified": studies_classified,
+            "cache_hits": n_cached,
+            "cache_misses": n_uncached,
             "total_test": len(test_df),
             "total_control": len(control_df),
             "per_study": {
@@ -1222,14 +1387,15 @@ Return ONLY valid JSON with this structure:
                     "test": len(studies_result.get(gse_id, {}).get("test_samples", [])),
                     "control": len(studies_result.get(gse_id, {}).get("control_samples", [])),
                     "reasoning": studies_result.get(gse_id, {}).get("reasoning", ""),
+                    "cached": gse_id in cached_results,
                 }
                 for gse_id in study_metadata
             },
         }
 
         logger.info(
-            "LLM classified %d studies: %d test, %d control samples",
-            studies_classified, len(test_df), len(control_df),
+            "LLM classified %d studies (%d cached, %d fresh): %d test, %d control samples",
+            studies_classified, n_cached, n_uncached, len(test_df), len(control_df),
         )
 
         return test_df, control_df, studies_classified, llm_stats
