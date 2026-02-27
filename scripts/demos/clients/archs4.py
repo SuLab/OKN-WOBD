@@ -466,6 +466,7 @@ class ARCHS4Client:
         self,
         search_term: str,
         fields: Optional[List[str]] = None,
+        max_results: Optional[int] = None,
     ) -> pd.DataFrame:
         """
         Search for samples by metadata and return their metadata.
@@ -473,6 +474,7 @@ class ARCHS4Client:
         Args:
             search_term: Search query (supports regex)
             fields: Metadata fields to retrieve (default: common fields)
+            max_results: Maximum number of results to return (default: all)
 
         Returns:
             DataFrame with matching samples' metadata
@@ -481,11 +483,15 @@ class ARCHS4Client:
         idx = self._get_index()
         if idx is not None:
             try:
-                return idx.search_metadata(search_term, fields)
+                df = idx.search_metadata(search_term, fields, max_results=max_results)
+                return df
             except Exception as e:
                 logger.debug("Index search_metadata failed, falling back: %s", e)
 
-        return a4.meta.meta(str(self.h5_path), search_term, meta_fields=fields)
+        df = a4.meta.meta(str(self.h5_path), search_term, meta_fields=fields)
+        if max_results is not None and len(df) > max_results:
+            df = df.head(max_results)
+        return df
 
     def get_all_field_values(self, field: str) -> List[str]:
         """
