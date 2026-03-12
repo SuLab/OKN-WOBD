@@ -81,7 +81,6 @@ def process_gxa_experiment(
     experiment_dir: Union[str, Path],
     p_value_threshold: float = 0.01,
     log2fc_threshold: float = 1.0,
-    max_terms_per_type: int = 20,
     include_gsea: bool = True,
 ) -> GXAPipelineResult:
     """
@@ -91,7 +90,6 @@ def process_gxa_experiment(
         experiment_dir: Path to experiment directory
         p_value_threshold: Adjusted p-value threshold for filtering
         log2fc_threshold: Minimum |log2 fold change| for DE gene inclusion
-        max_terms_per_type: Max enriched terms per type per contrast
         include_gsea: Whether to include GSEA/pathway enrichment data
 
     Returns:
@@ -222,7 +220,7 @@ def process_gxa_experiment(
     if include_gsea:
         print("Extracting GSEA/pathway enrichment data...")
         gsea_results = extract_gsea_results(
-            experiment, p_value_threshold, max_terms_per_type
+            experiment, p_value_threshold
         )
         result.gsea_results = gsea_results
 
@@ -241,7 +239,6 @@ def run_gxa_rdf_pipeline(
     experiment: Optional[str] = None,
     p_value_threshold: float = 0.01,
     log2fc_threshold: float = 1.0,
-    max_terms_per_type: int = 20,
     include_gsea: bool = True,
 ) -> None:
     """
@@ -256,7 +253,6 @@ def run_gxa_rdf_pipeline(
         experiment: Single experiment accession to process (optional)
         p_value_threshold: P-value threshold for DE/GSEA filtering
         log2fc_threshold: Minimum |log2 fold change| for DE gene inclusion
-        max_terms_per_type: Max GSEA terms per type per contrast
         include_gsea: Whether to include GSEA data
     """
     data_path = Path(data_dir)
@@ -326,7 +322,6 @@ def run_gxa_rdf_pipeline(
                 exp_dir,
                 p_value_threshold=p_value_threshold,
                 log2fc_threshold=log2fc_threshold,
-                max_terms_per_type=max_terms_per_type,
                 include_gsea=include_gsea,
             )
 

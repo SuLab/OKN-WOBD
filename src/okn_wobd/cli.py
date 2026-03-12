@@ -1558,13 +1558,6 @@ def gxa_group() -> None:
     help="Minimum |log2 fold change| for DE gene inclusion.",
 )
 @click.option(
-    "--max-terms",
-    type=int,
-    default=20,
-    show_default=True,
-    help="Maximum enriched terms per type per contrast.",
-)
-@click.option(
     "--no-gsea",
     is_flag=True,
     help="Skip GSEA/pathway enrichment extraction.",
@@ -1575,7 +1568,6 @@ def gxa_convert(
     experiment: Optional[str],
     p_value: float,
     log2fc: float,
-    max_terms: int,
     no_gsea: bool,
 ) -> None:
     """Convert GXA experiment data to RDF Turtle files."""
@@ -1587,7 +1579,6 @@ def gxa_convert(
         experiment=experiment,
         p_value_threshold=p_value,
         log2fc_threshold=log2fc,
-        max_terms_per_type=max_terms,
         include_gsea=not no_gsea,
     )
 
