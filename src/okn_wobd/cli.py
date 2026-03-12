@@ -1551,11 +1551,11 @@ def gxa_group() -> None:
     help="P-value threshold for DE and GSEA filtering.",
 )
 @click.option(
-    "--max-genes",
-    type=int,
-    default=200,
+    "--log2fc",
+    type=float,
+    default=1.0,
     show_default=True,
-    help="Maximum DE genes per assay.",
+    help="Minimum |log2 fold change| for DE gene inclusion.",
 )
 @click.option(
     "--max-terms",
@@ -1574,7 +1574,7 @@ def gxa_convert(
     output_dir: Path,
     experiment: Optional[str],
     p_value: float,
-    max_genes: int,
+    log2fc: float,
     max_terms: int,
     no_gsea: bool,
 ) -> None:
@@ -1586,7 +1586,7 @@ def gxa_convert(
         output_dir=output_dir,
         experiment=experiment,
         p_value_threshold=p_value,
-        max_genes_per_assay=max_genes,
+        log2fc_threshold=log2fc,
         max_terms_per_type=max_terms,
         include_gsea=not no_gsea,
     )
@@ -1602,9 +1602,9 @@ def gxa_convert(
 @click.option(
     "--prefix",
     type=str,
-    default="E-GEOD",
+    default="",
     show_default=True,
-    help="Experiment prefix filter for FTP listing.",
+    help="Experiment prefix filter for FTP listing (e.g., 'E-GEOD'). Empty = all experiments.",
 )
 @click.option(
     "--experiment",
@@ -1643,7 +1643,7 @@ def gxa_fetch(
 
     click.echo(f"GXA Downloader")
     click.echo(f"  Data directory: {data_dir}")
-    click.echo(f"  Prefix: {prefix}")
+    click.echo(f"  Prefix: {prefix or '(all experiments)'}")
     click.echo(f"  Max file size: {max_size} MB")
     if dry_run:
         click.echo("  Mode: DRY RUN")
@@ -1674,9 +1674,9 @@ def gxa_fetch(
 @click.option(
     "--prefix",
     type=str,
-    default="E-GEOD",
+    default="",
     show_default=True,
-    help="Experiment prefix filter for FTP download.",
+    help="Experiment prefix filter for FTP download (e.g., 'E-GEOD'). Empty = all experiments.",
 )
 @click.option(
     "--experiment",
@@ -1692,11 +1692,11 @@ def gxa_fetch(
     help="P-value threshold.",
 )
 @click.option(
-    "--max-genes",
-    type=int,
-    default=200,
+    "--log2fc",
+    type=float,
+    default=1.0,
     show_default=True,
-    help="Maximum DE genes per assay.",
+    help="Minimum |log2 fold change| for DE gene inclusion.",
 )
 @click.option(
     "--no-gsea",
@@ -1709,7 +1709,7 @@ def gxa_run(
     prefix: str,
     experiment: Optional[str],
     p_value: float,
-    max_genes: int,
+    log2fc: float,
     no_gsea: bool,
 ) -> None:
     """Fetch + convert in one step."""
@@ -1731,7 +1731,7 @@ def gxa_run(
         output_dir=output_dir,
         experiment=experiment,
         p_value_threshold=p_value,
-        max_genes_per_assay=max_genes,
+        log2fc_threshold=log2fc,
         include_gsea=not no_gsea,
     )
 

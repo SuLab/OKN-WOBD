@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 # FTP server configuration
 FTP_HOST = "ftp.ebi.ac.uk"
 FTP_PATH = "/pub/databases/microarray/data/atlas/experiments"
-DEFAULT_PREFIX = "E-GEOD"
+DEFAULT_PREFIX = ""
 DEFAULT_MAX_SIZE_MB = 10.0
 
 # File extensions to skip
@@ -118,7 +118,10 @@ class GXADownloader:
         if not self.ftp:
             raise RuntimeError("Not connected to FTP server")
 
-        logger.info(f"Listing experiments with prefix '{self.prefix}'...")
+        if self.prefix:
+            logger.info(f"Listing experiments with prefix '{self.prefix}'...")
+        else:
+            logger.info("Listing all experiments...")
         experiments = []
         lines: List[str] = []
         self.ftp.dir(lines.append)
@@ -128,11 +131,11 @@ class GXADownloader:
             if not parts:
                 continue
             name = parts[-1]
-            if line.startswith("d") and name.startswith(self.prefix):
+            if line.startswith("d") and (not self.prefix or name.startswith(self.prefix)):
                 experiments.append(name)
 
         experiments.sort()
-        logger.info(f"Found {len(experiments)} experiments matching '{self.prefix}'")
+        logger.info(f"Found {len(experiments)} experiments")
         return experiments
 
     def list_files(self, experiment: str) -> List[Dict[str, Any]]:

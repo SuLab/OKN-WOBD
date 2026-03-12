@@ -91,7 +91,7 @@ def create_mgene_nodes(experiment: GEAExperiment) -> pd.DataFrame:
 def extract_differential_expression(
     experiment: GEAExperiment,
     p_value_threshold: float = 0.01,
-    max_genes_per_assay: int = 200,
+    log2fc_threshold: float = 1.0,
 ) -> pd.DataFrame:
     """
     Extract differential expression data for creating Assay-Gene relationships.
@@ -99,7 +99,7 @@ def extract_differential_expression(
     Args:
         experiment: Parsed GEAExperiment object
         p_value_threshold: Adjusted p-value threshold for significance
-        max_genes_per_assay: Maximum number of DE genes to include per assay
+        log2fc_threshold: Minimum |log2 fold change| for inclusion
 
     Returns:
         DataFrame with columns: from, to, log2fc, adj_p_value
@@ -136,11 +136,11 @@ def extract_differential_expression(
 
             de_data = de_data[de_data["p_value"].notna()]
             de_data = de_data[de_data["p_value"] <= p_value_threshold]
+            if log2fc_threshold > 0:
+                de_data = de_data[de_data["log2fc"].abs() >= log2fc_threshold]
 
             if de_data.empty:
                 continue
-
-            de_data = de_data.sort_values("p_value").head(max_genes_per_assay)
 
             assay_id = f"{experiment.accession}-{contrast_id}"
             de_data["assay_id"] = assay_id

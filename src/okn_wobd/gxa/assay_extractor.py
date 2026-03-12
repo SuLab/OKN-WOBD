@@ -18,6 +18,24 @@ def generate_assay_id(experiment_accession: str, contrast_id: str) -> str:
     return f"{experiment_accession}-{contrast_id}"
 
 
+def _infer_technology(experiment_type: str) -> str:
+    """Infer technology from IDF Comment[AEExperimentType] value.
+
+    Common GXA experiment types:
+      - "transcription profiling by array" → DNA microarray
+      - "RNA-seq of coding RNA" → RNA-seq
+      - "RNA-seq of non coding RNA" → RNA-seq
+    """
+    et = experiment_type.lower()
+    if "array" in et:
+        return "DNA microarray"
+    if "rna-seq" in et or "rnaseq" in et:
+        return "RNA-seq"
+    if experiment_type:
+        return experiment_type
+    return "unknown"
+
+
 def extract_assay_nodes(experiment: GEAExperiment) -> pd.DataFrame:
     """
     Extract Assay nodes from a GXA experiment.
@@ -25,6 +43,7 @@ def extract_assay_nodes(experiment: GEAExperiment) -> pd.DataFrame:
     Each contrast in the experiment becomes an Assay node.
     """
     assays = []
+    technology = _infer_technology(experiment.experiment_type)
 
     for contrast in experiment.contrasts:
         ref_group = experiment.assay_groups.get(contrast.reference_group_id)
@@ -41,7 +60,7 @@ def extract_assay_nodes(experiment: GEAExperiment) -> pd.DataFrame:
             "name": contrast.name,
             "study_id": experiment.accession,
             "contrast_id": contrast.id,
-            "technology": "DNA microarray",
+            "technology": technology,
             "measurement": "transcription profiling",
             "array_design": contrast.array_design,
             "reference_group_id": contrast.reference_group_id,

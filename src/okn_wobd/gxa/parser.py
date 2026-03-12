@@ -52,6 +52,9 @@ class GEAExperiment:
     organism: str = ""
     taxonomy_id: str = ""
 
+    # Experiment type from IDF (e.g. "transcription profiling by array", "RNA-seq of coding RNA")
+    experiment_type: str = ""
+
     # Submitter information
     submitter_name: str = ""
     submitter_email: str = ""
@@ -106,6 +109,7 @@ def parse_idf_file(idf_path: str) -> Dict[str, Any]:
         "pubmed_id": "",
         "publication_title": "",
         "release_date": "",
+        "experiment_type": "",
     }
 
     with open(idf_path, "r", encoding="utf-8") as f:
@@ -139,6 +143,8 @@ def parse_idf_file(idf_path: str) -> Dict[str, Any]:
                 metadata["publication_title"] = values[0] if values else ""
             elif key == "Public Release Date":
                 metadata["release_date"] = values[0] if values else ""
+            elif key == "Comment[AEExperimentType]":
+                metadata["experiment_type"] = values[0] if values else ""
 
     return metadata
 
@@ -469,6 +475,7 @@ def load_gea_experiment(experiment_dir: str) -> GEAExperiment:
         experiment.submitter_name = f"{idf_data['submitter_first_name']} {idf_data['submitter_last_name']}".strip()
         experiment.submitter_email = idf_data["submitter_email"]
         experiment.submitter_affiliation = idf_data["submitter_affiliation"]
+        experiment.experiment_type = idf_data["experiment_type"]
         experiment.experimental_factors = idf_data["experimental_factors"]
         experiment.secondary_accessions = idf_data["secondary_accessions"]
         experiment.pubmed_id = idf_data["pubmed_id"]
