@@ -15,8 +15,7 @@ Supports **local** (stdio) and **remote** (Streamable HTTP, SSE) transports. Rem
                                                    │  ├─ health_check        │
                                                    │  ├─ tools_analysis.py   │
                                                    │  │   ├─ gene_disease_paths
-                                                   │  │   ├─ gene_neighborhood
-                                                   │  │   └─ drug_disease_opposing_expression
+                                                   │  │   └─ gene_neighborhood
                                                    │  └─ tools_chatgeo.py    │
                                                    │      ├─ differential_expression
                                                    │      ├─ get_analysis_result
@@ -34,7 +33,7 @@ Supports **local** (stdio) and **remote** (Streamable HTTP, SSE) transports. Rem
 
 The server wraps two packages that live in `scripts/demos/`:
 
-- **analysis_tools** — SPARQL queries against FRINK knowledge graphs (SPOKE-OKN, Wikidata, Ubergraph, GXA).
+- **analysis_tools** — SPARQL queries against FRINK knowledge graphs (SPOKE-OKN, Wikidata, Ubergraph).
 - **chatgeo** — Differential expression analysis using local ARCHS4 HDF5 files, with g:Profiler enrichment.
 
 ## Tools
@@ -44,7 +43,6 @@ The server wraps two packages that live in `scripts/demos/`:
 | `health_check` | instant | — | no |
 | `gene_disease_paths` | 5-30 s | SPOKE, Wikidata, Ubergraph SPARQL | no |
 | `gene_neighborhood` | 5-20 s | FRINK graphs (parallel) | no |
-| `drug_disease_opposing_expression` | 15-45 s | GXA in FRINK | no |
 | `differential_expression` | 30 s - 5 min | ARCHS4 + g:Profiler | **yes** |
 | `get_analysis_result` | instant | polls background job | no |
 | `find_samples` | 30-120 s | ARCHS4 metadata + NDE SPARQL | **yes** |
@@ -81,7 +79,7 @@ Edit `.env`:
 | `ARCHS4_DATA_DIR` | ChatGEO tools | Path to directory with ARCHS4 HDF5 files (~58 GB each) |
 | `ANTHROPIC_API_KEY` | LLM interpretation | Anthropic API key (optional — interpretation is off by default in MCP) |
 
-The SPARQL-based analysis tools (`gene_disease_paths`, `gene_neighborhood`, `drug_disease_opposing_expression`), `resolve_disease_ontology`, and `enrichment_analysis` work without ARCHS4 data — they only need SPARQLWrapper and outbound HTTPS access.
+The SPARQL-based analysis tools (`gene_disease_paths`, `gene_neighborhood`), `resolve_disease_ontology`, and `enrichment_analysis` work without ARCHS4 data — they only need SPARQLWrapper and outbound HTTPS access.
 
 ## Tool Reference
 
@@ -111,22 +109,6 @@ Query the immediate neighborhood of a gene across FRINK knowledge graphs (SPOKE-
 | `timeout` | int | `30` | Per-graph SPARQL timeout (seconds) |
 
 At least one of `gene_symbol` or `ncbi_gene_id` is required. Returns: `gene_symbol`, `gene_iri`, `graphs` (per-graph entity lists).
-
-### `drug_disease_opposing_expression`
-
-Find genes with opposing expression between drug treatment and disease in GXA data.
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `drug_direction` | str | `"down"` | Direction of drug effect (`"up"` or `"down"`) |
-| `disease_direction` | str | `"up"` | Direction of disease effect (`"up"` or `"down"`) |
-| `drug_fc_threshold` | float | `2.0` | Absolute log2 FC threshold for drug |
-| `disease_fc_threshold` | float | `1.5` | Absolute log2 FC threshold for disease |
-| `pvalue_threshold` | float | `0.05` | Adjusted p-value threshold |
-| `limit` | int | `500` | Max drug-gene pairs from SPARQL |
-| `max_results` | int | `50` | Max results returned (sorted by disease FC) |
-
-Returns: `results` list (gene, drug/disease study details, fold changes), `summary` (unique genes/diseases/drugs).
 
 ### `differential_expression`
 
@@ -252,22 +234,7 @@ User: Find genes differentially expressed in psoriasis skin tissue
   Deeper enrichment on the top DE genes
 ```
 
-### Workflow 3: Drug repurposing candidates
-
-```
-User: Find drugs that might counteract gene expression changes in disease
-
-→ drug_disease_opposing_expression(
-      drug_direction="down",
-      disease_direction="up"
-  )
-  Returns genes where drugs suppress pathologically elevated expression
-
-→ gene_disease_paths(gene_symbol="<top hit gene>")
-  Investigate the disease connections of promising targets
-```
-
-### Workflow 4: Ontology-driven sample discovery
+### Workflow 3: Ontology-driven sample discovery
 
 ```
 User: What MONDO terms map to atherosclerosis?
