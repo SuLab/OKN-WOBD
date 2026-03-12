@@ -6,6 +6,10 @@
 
 ---
 
+## Initial prompt (reverse engineered)
+
+I want to investigate whether replacement PFAS chemicals like GenX are actually safer than legacy compounds like PFOS and PFOA. Check environmental monitoring data to see how widespread these replacements already are in U.S. water systems. Then dig into the molecular biology — do they act through the same mechanisms, especially PPARalpha activation and liver toxicity pathways? Search for experimental studies that directly compare GenX potency against legacy PFAS, and look for transcriptomic datasets that confirm or contradict the mechanism. I want to understand whether regulating PFAS one compound at a time makes sense, or if the evidence supports treating them as a class.
+
 ## Key Concepts
 
 **PFAS (per- and polyfluoroalkyl substances)** are a family of thousands of synthetic chemicals characterized by carbon-fluorine bonds -- among the strongest in organic chemistry. This bond makes them extraordinarily resistant to environmental degradation, earning them the name "forever chemicals." Since the 1950s, PFAS have been used in non-stick coatings, waterproof textiles, firefighting foams, and food packaging. As evidence of health effects from early compounds like PFOS and PFOA mounted, manufacturers introduced replacement compounds such as GenX (HFPO-DA) and ADONA, marketed as safer alternatives. Whether they are actually safer is the central question of this analysis.
