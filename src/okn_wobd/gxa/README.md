@@ -71,7 +71,6 @@ okn-wobd gxa convert --data-dir /path/to/gxa_data --output-dir data/gxa_rdf --no
 | `--experiment` | none | Process a single experiment by accession |
 | `--p-value` | `0.01` | Adjusted p-value threshold for DE genes and GSEA terms |
 | `--log2fc` | `1.0` | Minimum \|log2 fold change\| for DE gene inclusion |
-| `--max-terms` | `20` | Maximum enriched terms per type (GO/Reactome/InterPro) per contrast |
 | `--no-gsea` | off | Skip GSEA/pathway enrichment extraction |
 
 Output: one `{accession}.ttl` per experiment. Already-processed experiments (existing `.ttl` files) are skipped on re-runs.
@@ -94,7 +93,8 @@ DE genes are included when **both** conditions are met:
 GSEA enrichment terms are included when:
 
 1. Adjusted p-value <= `--p-value` (default: 0.01)
-2. Top `--max-terms` per enrichment type per contrast (default: 20)
+
+All significant terms are included — there is no cap on the number of enrichment terms per contrast.
 
 Gene nodes are emitted **only** for genes that appear in at least one DE association. Genes that were measured but not differentially expressed are excluded from the RDF output. This reduces per-experiment file size by 10-80x compared to emitting all measured genes.
 
