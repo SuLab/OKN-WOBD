@@ -47,7 +47,7 @@ The server wraps two packages that live in `scripts/demos/`:
 | `drug_disease_opposing_expression` | 15-45 s | GXA in FRINK | no |
 | `differential_expression` | 30 s - 5 min | ARCHS4 + g:Profiler | **yes** |
 | `get_analysis_result` | instant | polls background job | no |
-| `find_samples` | 5-10 s | ARCHS4 metadata | **yes** |
+| `find_samples` | 30-120 s | ARCHS4 metadata + NDE SPARQL | **yes** |
 | `get_sample_metadata` | 30-120 s | ARCHS4 metadata | **yes** |
 | `resolve_disease_ontology` | 2-5 s | Ubergraph SPARQL | no |
 | `enrichment_analysis` | 2-5 s | g:Profiler REST | no |
@@ -59,13 +59,18 @@ The server wraps two packages that live in `scripts/demos/`:
 ## Prerequisites
 
 ```bash
-# 1. Install the package (from repo root)
+# 1. Install the core package (from repo root, requires Python >= 3.11)
 pip install -e .
 
-# 2. The demos directory (scripts/demos/) must exist in the repo —
+# 2. Install demo script dependencies (analysis_tools, chatgeo, clients packages)
+pip install SPARQLWrapper h5py scipy numpy            # SPARQL + ARCHS4 tools
+pip install pydeseq2 gprofiler-official               # DE analysis + enrichment
+pip install anthropic                                  # Optional: LLM interpretation
+
+# 3. The demos directory (scripts/demos/) must exist in the repo —
 #    the server adds it to sys.path automatically.
 
-# 3. Copy and configure the .env file
+# 4. Copy and configure the .env file
 cp .env.example .env
 ```
 
@@ -76,7 +81,203 @@ Edit `.env`:
 | `ARCHS4_DATA_DIR` | ChatGEO tools | Path to directory with ARCHS4 HDF5 files (~58 GB each) |
 | `ANTHROPIC_API_KEY` | LLM interpretation | Anthropic API key (optional — interpretation is off by default in MCP) |
 
-The SPARQL-based analysis tools (`gene_disease_paths`, `gene_neighborhood`, `drug_disease_opposing_expression`), `resolve_disease_ontology`, and `enrichment_analysis` work without ARCHS4 data.
+The SPARQL-based analysis tools (`gene_disease_paths`, `gene_neighborhood`, `drug_disease_opposing_expression`), `resolve_disease_ontology`, and `enrichment_analysis` work without ARCHS4 data — they only need SPARQLWrapper and outbound HTTPS access.
+
+## Tool Reference
+
+### `health_check`
+
+Returns server status and capability flags (analysis_tools, chatgeo, archs4_data, anthropic_api_key). No parameters.
+
+### `gene_disease_paths`
+
+Find connections between a gene and diseases across SPOKE-OKN, Wikidata, and Ubergraph.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `gene_symbol` | str | *(required)* | Gene symbol (e.g. `"SFRP2"`, `"BRCA1"`, `"TP53"`) |
+
+Returns: `gene`, `total_connections`, `connections` list (each with `disease_name`, `path_type`, `source`), `summary` (counts by source and path type).
+
+### `gene_neighborhood`
+
+Query the immediate neighborhood of a gene across FRINK knowledge graphs (SPOKE-OKN, SPOKE-GeneLab, Wikidata, NDE, BioBricks-AOPWiki).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `gene_symbol` | str | `None` | Gene symbol (e.g. `"CD19"`) |
+| `ncbi_gene_id` | str | `None` | NCBI Gene ID (e.g. `"930"`) |
+| `limit` | int | `10` | Max entities per graph |
+| `timeout` | int | `30` | Per-graph SPARQL timeout (seconds) |
+
+At least one of `gene_symbol` or `ncbi_gene_id` is required. Returns: `gene_symbol`, `gene_iri`, `graphs` (per-graph entity lists).
+
+### `drug_disease_opposing_expression`
+
+Find genes with opposing expression between drug treatment and disease in GXA data.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `drug_direction` | str | `"down"` | Direction of drug effect (`"up"` or `"down"`) |
+| `disease_direction` | str | `"up"` | Direction of disease effect (`"up"` or `"down"`) |
+| `drug_fc_threshold` | float | `2.0` | Absolute log2 FC threshold for drug |
+| `disease_fc_threshold` | float | `1.5` | Absolute log2 FC threshold for disease |
+| `pvalue_threshold` | float | `0.05` | Adjusted p-value threshold |
+| `limit` | int | `500` | Max drug-gene pairs from SPARQL |
+| `max_results` | int | `50` | Max results returned (sorted by disease FC) |
+
+Returns: `results` list (gene, drug/disease study details, fold changes), `summary` (unique genes/diseases/drugs).
+
+### `differential_expression`
+
+Run differential expression analysis for a disease condition using ARCHS4 bulk RNA-seq. **Background job** — returns `job_id` immediately.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `query` | str | *(required)* | Natural language query (e.g. `"psoriasis in skin tissue"`) |
+| `disease` | str | `None` | Override parsed disease term |
+| `tissue` | str | `None` | Override/specify tissue constraint |
+| `species` | str | `"human"` | `"human"`, `"mouse"`, or `"both"` |
+| `method` | str | `"mann-whitney"` | `"mann-whitney"`, `"welch-t"`, or `"deseq2"` |
+| `fdr_threshold` | float | `0.01` | FDR significance threshold |
+| `log2fc_threshold` | float | `2.0` | Log2 fold-change threshold |
+| `max_test_samples` | int | `100` | Max test samples |
+| `max_control_samples` | int | `100` | Max control samples |
+| `mode` | str | `"auto"` | `"auto"`, `"pooled"`, or `"study-matched"` |
+| `meta_method` | str | `"stouffer"` | Meta-analysis method: `"stouffer"` or `"fisher"` |
+| `min_studies` | int | `3` | Min matched studies for study-matched mode |
+
+Analysis modes:
+- **auto** (default): Tries study-matched meta-analysis first, falls back to study-prioritized pooling, then basic pooling.
+- **study-matched**: Per-study DE + Stouffer/Fisher meta-analysis. Best for eliminating batch effects.
+- **pooled**: Cross-study pooling. Fast but susceptible to batch effects.
+
+Result (via `get_analysis_result`): `sample_discovery`, `de_results` (with `significant_genes` list), `enrichment`, `provenance`.
+
+### `get_analysis_result`
+
+Poll for the result of a background job.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `job_id` | str | *(required)* | Job ID from `differential_expression`, `find_samples`, or `get_sample_metadata` |
+
+Returns: `status` (`"running"`, `"completed"`, or `"error"`), `result` (when completed), `elapsed_seconds` (when running).
+
+### `find_samples`
+
+Find ARCHS4 test and control samples for a disease condition. **Background job** — returns `job_id` immediately.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `disease_term` | str | *(required)* | Disease or condition (e.g. `"psoriasis"`) |
+| `tissue` | str | `None` | Tissue constraint (e.g. `"skin"`) |
+| `max_test_samples` | int | `100` | Max test samples |
+| `max_control_samples` | int | `100` | Max control samples |
+| `use_ontology` | bool | `True` | Use MONDO ontology-enhanced search via NDE |
+
+Result (via `get_analysis_result`): sample counts, study lists, `study_breakdown` (per-study counts, platform distribution, mode recommendation), `ontology_discovery` details.
+
+### `get_sample_metadata`
+
+Get study-level sample metadata for planning DE analysis. **Background job** — returns `job_id` immediately. Use this **before** `differential_expression` to check data availability.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `disease_term` | str | *(required)* | Disease or condition (e.g. `"psoriasis"`) |
+| `tissue` | str | `None` | Tissue constraint (e.g. `"skin"`) |
+| `max_samples` | int | `500` | Max samples to consider |
+| `use_ontology` | bool | `True` | Use ontology-enhanced search |
+
+Result (via `get_analysis_result`): sample counts, `study_breakdown`, `recommendation` (`"study-matched"` or `"pooled"`), `recommendation_reason`.
+
+### `resolve_disease_ontology`
+
+Resolve a disease name to MONDO IDs and expand via ontology hierarchy. Does **not** require ARCHS4.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `disease_name` | str | *(required)* | Disease name (e.g. `"atherosclerosis"`) |
+| `expand` | bool | `True` | Expand via ontology hierarchy |
+| `max_terms` | int | `50` | Max terms in expansion |
+
+Returns: `mondo_ids`, `labels`, `confidence`, `expansion` (with `expanded_ids` and `labels`).
+
+### `enrichment_analysis`
+
+Run gene-set enrichment via g:Profiler (GO, KEGG, Reactome). Does **not** require ARCHS4.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `gene_list` | list[str] | *(required)* | Gene symbols (e.g. `["TP53", "BRCA1", "MYC"]`) |
+| `organism` | str | `"hsapiens"` | Organism identifier |
+| `sources` | list[str] | `["GO:BP", "GO:CC", "GO:MF", "KEGG", "REAC"]` | Enrichment databases |
+| `threshold` | float | `0.05` | P-value significance threshold |
+
+Returns: `input_genes`, `genes_mapped`, `total_terms`, `by_source` (term lists per database with `term_id`, `term_name`, `p_value`, `genes`).
+
+## Example Workflows
+
+### Workflow 1: Explore a gene's disease connections
+
+```
+User: What diseases are connected to SFRP2?
+
+→ gene_disease_paths(gene_symbol="SFRP2")
+  Returns connections from SPOKE, Wikidata, Ubergraph
+
+→ gene_neighborhood(gene_symbol="SFRP2")
+  Returns related entities across all FRINK graphs
+```
+
+### Workflow 2: Differential expression analysis
+
+```
+User: Find genes differentially expressed in psoriasis skin tissue
+
+→ get_sample_metadata(disease_term="psoriasis", tissue="skin")
+  Returns job_id, poll with get_analysis_result
+  Result: 45 test samples, 120 controls, 8 studies with both
+  Recommendation: "study-matched"
+
+→ differential_expression(
+      query="psoriasis in skin tissue",
+      mode="study-matched",
+      method="mann-whitney"
+  )
+  Returns job_id, poll with get_analysis_result (30-60s)
+  Result: 200 significant genes, enrichment in immune pathways
+
+→ enrichment_analysis(gene_list=["IL17A", "IL22", "S100A7", ...])
+  Deeper enrichment on the top DE genes
+```
+
+### Workflow 3: Drug repurposing candidates
+
+```
+User: Find drugs that might counteract gene expression changes in disease
+
+→ drug_disease_opposing_expression(
+      drug_direction="down",
+      disease_direction="up"
+  )
+  Returns genes where drugs suppress pathologically elevated expression
+
+→ gene_disease_paths(gene_symbol="<top hit gene>")
+  Investigate the disease connections of promising targets
+```
+
+### Workflow 4: Ontology-driven sample discovery
+
+```
+User: What MONDO terms map to atherosclerosis?
+
+→ resolve_disease_ontology(disease_name="atherosclerosis")
+  Returns MONDO IDs, subtypes (coronary, peripheral, etc.)
+
+→ find_samples(disease_term="atherosclerosis", tissue="artery")
+  Discovers samples via both keyword matching and MONDO annotations in NDE
+```
 
 ## Transports
 
