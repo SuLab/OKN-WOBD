@@ -33,7 +33,7 @@ from typing import List, Dict, Any, Optional, Union
 from dataclasses import dataclass
 
 import requests
-from clients.http_utils import create_session
+from .http_utils import create_session
 
 try:
     from SPARQLWrapper import SPARQLWrapper, JSON, XML, CSV, TSV

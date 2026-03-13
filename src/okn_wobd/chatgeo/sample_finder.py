@@ -23,7 +23,7 @@ from typing import Dict, List, Optional, Set, Tuple
 
 import pandas as pd
 
-from clients.archs4 import ARCHS4Client
+from okn_wobd.clients.archs4 import ARCHS4Client
 
 from .query_builder import QueryBuilder, QueryExpansion, QuerySpec, TextQueryStrategy
 
@@ -646,7 +646,7 @@ class SampleFinder:
         """Lazy initialization of DiseaseOntologyClient."""
         if self._ontology_client is None:
             try:
-                from clients.ontology import DiseaseOntologyClient
+                from okn_wobd.clients.ontology import DiseaseOntologyClient
                 self._ontology_client = DiseaseOntologyClient()
             except Exception as e:
                 logger.warning("DiseaseOntologyClient unavailable: %s", e)
@@ -658,7 +658,7 @@ class SampleFinder:
         """Lazy initialization of NDEGeoDiscovery."""
         if self._nde_discovery is None:
             try:
-                from clients.nde_geo import NDEGeoDiscovery
+                from okn_wobd.clients.nde_geo import NDEGeoDiscovery
                 self._nde_discovery = NDEGeoDiscovery()
             except Exception as e:
                 logger.warning("NDEGeoDiscovery unavailable: %s", e)

@@ -190,7 +190,7 @@ class ARCHS4Client:
             return None
         if self._index is None:
             try:
-                from clients.archs4_index import ARCHS4MetadataIndex
+                from .archs4_index import ARCHS4MetadataIndex
                 self._index = ARCHS4MetadataIndex(self.h5_path)
                 self._index.ensure_built()
                 logger.debug("ARCHS4 metadata index ready: %s", self._index.db_path)

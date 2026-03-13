@@ -32,7 +32,7 @@ def run(output_dir: str = "questions/output"):
 
     # Import analysis function
     try:
-        from analysis_tools.drug_disease import find_drug_disease_genes, print_results
+        from okn_wobd.analysis.drug_disease import find_drug_disease_genes, print_results
     except ImportError:
         report.add_step(
             "Import drug-disease analysis",
@@ -103,7 +103,7 @@ def run(output_dir: str = "questions/output"):
 
     # --- Visualization ---
     try:
-        from analysis_tools.visualization import PlotlyVisualizer
+        from okn_wobd.analysis.visualization import PlotlyVisualizer
         viz = PlotlyVisualizer()
 
         if results1 or results2:

@@ -80,8 +80,7 @@ class GXAPipelineResult:
 def process_gxa_experiment(
     experiment_dir: Union[str, Path],
     p_value_threshold: float = 0.01,
-    max_genes_per_assay: int = 200,
-    max_terms_per_type: int = 20,
+    log2fc_threshold: float = 1.0,
     include_gsea: bool = True,
 ) -> GXAPipelineResult:
     """
@@ -90,8 +89,7 @@ def process_gxa_experiment(
     Args:
         experiment_dir: Path to experiment directory
         p_value_threshold: Adjusted p-value threshold for filtering
-        max_genes_per_assay: Max DE genes per assay
-        max_terms_per_type: Max enriched terms per type per contrast
+        log2fc_threshold: Minimum |log2 fold change| for DE gene inclusion
         include_gsea: Whether to include GSEA/pathway enrichment data
 
     Returns:
@@ -201,25 +199,28 @@ def process_gxa_experiment(
         ),
     )
 
-    # Extract gene nodes
-    print("Extracting gene nodes...")
-    mgene_nodes = create_mgene_nodes(experiment)
-    result.add_nodes("MGene", mgene_nodes)
-
-    # Extract differential expression
+    # Extract differential expression first (to know which genes to include)
     print("Extracting differential expression data...")
     de_rels = extract_differential_expression(
-        experiment, p_value_threshold, max_genes_per_assay
+        experiment, p_value_threshold, log2fc_threshold
     )
     result.add_relationships(
         "Assay-MEASURED_DIFFERENTIAL_EXPRESSION_ASmMG-MGene", de_rels
     )
 
+    # Extract gene nodes only for genes referenced in DE results
+    print("Extracting gene nodes (DE-significant only)...")
+    mgene_nodes = create_mgene_nodes(experiment)
+    if not de_rels.empty and not mgene_nodes.empty:
+        de_gene_ids = set(de_rels["to"].unique())
+        mgene_nodes = mgene_nodes[mgene_nodes["identifier"].isin(de_gene_ids)]
+    result.add_nodes("MGene", mgene_nodes)
+
     # Extract GSEA
     if include_gsea:
         print("Extracting GSEA/pathway enrichment data...")
         gsea_results = extract_gsea_results(
-            experiment, p_value_threshold, max_terms_per_type
+            experiment, p_value_threshold
         )
         result.gsea_results = gsea_results
 
@@ -237,8 +238,7 @@ def run_gxa_rdf_pipeline(
     output_dir: Union[str, Path],
     experiment: Optional[str] = None,
     p_value_threshold: float = 0.01,
-    max_genes_per_assay: int = 200,
-    max_terms_per_type: int = 20,
+    log2fc_threshold: float = 1.0,
     include_gsea: bool = True,
 ) -> None:
     """
@@ -252,8 +252,7 @@ def run_gxa_rdf_pipeline(
         output_dir: Output directory for .ttl files
         experiment: Single experiment accession to process (optional)
         p_value_threshold: P-value threshold for DE/GSEA filtering
-        max_genes_per_assay: Max DE genes per assay
-        max_terms_per_type: Max GSEA terms per type per contrast
+        log2fc_threshold: Minimum |log2 fold change| for DE gene inclusion
         include_gsea: Whether to include GSEA data
     """
     data_path = Path(data_dir)
@@ -322,8 +321,7 @@ def run_gxa_rdf_pipeline(
             exp_result = process_gxa_experiment(
                 exp_dir,
                 p_value_threshold=p_value_threshold,
-                max_genes_per_assay=max_genes_per_assay,
-                max_terms_per_type=max_terms_per_type,
+                log2fc_threshold=log2fc_threshold,
                 include_gsea=include_gsea,
             )
 

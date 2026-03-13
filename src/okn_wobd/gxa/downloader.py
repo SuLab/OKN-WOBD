@@ -18,8 +18,9 @@ logger = logging.getLogger(__name__)
 # FTP server configuration
 FTP_HOST = "ftp.ebi.ac.uk"
 FTP_PATH = "/pub/databases/microarray/data/atlas/experiments"
-DEFAULT_PREFIX = "E-GEOD"
+DEFAULT_PREFIX = ""
 DEFAULT_MAX_SIZE_MB = 10.0
+FTP_TIMEOUT = 60  # seconds
 
 # File extensions to skip
 SKIP_EXTENSIONS = {
@@ -40,6 +41,9 @@ WANTED_PATTERNS = [
     r"\.interpro\.gsea\.tsv$",
     r"normalized-expressions\.tsv$",
 ]
+
+# Save state every N experiments instead of every one
+STATE_SAVE_INTERVAL = 10
 
 
 @dataclass
@@ -98,10 +102,11 @@ class GXADownloader:
         self.ftp: Optional[ftplib.FTP] = None
         self.state = DownloadState.load(self.state_file)
         self._wanted_regex = [re.compile(p, re.IGNORECASE) for p in WANTED_PATTERNS]
+        self._unsaved_count = 0
 
     def connect(self) -> None:
         logger.info(f"Connecting to {FTP_HOST}...")
-        self.ftp = ftplib.FTP(FTP_HOST)
+        self.ftp = ftplib.FTP(FTP_HOST, timeout=FTP_TIMEOUT)
         self.ftp.login()
         self.ftp.cwd(FTP_PATH)
         logger.info("Connected successfully.")
@@ -114,11 +119,26 @@ class GXADownloader:
                 pass
             self.ftp = None
 
+    def _ensure_connected(self) -> None:
+        """Reconnect if the FTP connection has gone stale."""
+        if not self.ftp:
+            self.connect()
+            return
+        try:
+            self.ftp.voidcmd("NOOP")
+        except Exception:
+            logger.info("FTP connection stale, reconnecting...")
+            self.disconnect()
+            self.connect()
+
     def list_experiments(self) -> List[str]:
         if not self.ftp:
             raise RuntimeError("Not connected to FTP server")
 
-        logger.info(f"Listing experiments with prefix '{self.prefix}'...")
+        if self.prefix:
+            logger.info(f"Listing experiments with prefix '{self.prefix}'...")
+        else:
+            logger.info("Listing all experiments...")
         experiments = []
         lines: List[str] = []
         self.ftp.dir(lines.append)
@@ -128,41 +148,12 @@ class GXADownloader:
             if not parts:
                 continue
             name = parts[-1]
-            if line.startswith("d") and name.startswith(self.prefix):
+            if line.startswith("d") and (not self.prefix or name.startswith(self.prefix)):
                 experiments.append(name)
 
         experiments.sort()
-        logger.info(f"Found {len(experiments)} experiments matching '{self.prefix}'")
+        logger.info(f"Found {len(experiments)} experiments")
         return experiments
-
-    def list_files(self, experiment: str) -> List[Dict[str, Any]]:
-        if not self.ftp:
-            raise RuntimeError("Not connected to FTP server")
-
-        files: List[Dict[str, Any]] = []
-        try:
-            self.ftp.cwd(f"{FTP_PATH}/{experiment}")
-            try:
-                for name, facts in self.ftp.mlsd():
-                    if facts.get("type") == "file":
-                        size = int(facts.get("size", 0))
-                        files.append({"name": name, "size": size})
-            except ftplib.error_perm:
-                lines: List[str] = []
-                self.ftp.dir(lines.append)
-                for line in lines:
-                    parts = line.split()
-                    if len(parts) >= 5 and not line.startswith("d"):
-                        try:
-                            size = int(parts[4])
-                            name = parts[-1]
-                            files.append({"name": name, "size": size})
-                        except (ValueError, IndexError):
-                            continue
-        except ftplib.error_perm as e:
-            logger.warning(f"Could not list files in {experiment}: {e}")
-
-        return files
 
     def should_download(self, filename: str, size: int) -> bool:
         filename_lower = filename.lower()
@@ -181,96 +172,116 @@ class GXADownloader:
                 return True
         return False
 
-    def download_file(self, experiment: str, filename: str, size: int) -> bool:
-        if not self.ftp:
-            raise RuntimeError("Not connected to FTP server")
-
-        local_dir_name = f"{experiment}-gea" if not experiment.endswith("-gea") else experiment
-        local_dir = self.data_dir / local_dir_name
-        local_dir.mkdir(parents=True, exist_ok=True)
-        local_path = local_dir / filename
-        file_key = f"{experiment}/{filename}"
-
-        if file_key in self.state.completed_files:
-            return True
-
-        if local_path.exists():
-            local_size = local_path.stat().st_size
-            if local_size == size:
-                self.state.completed_files.add(file_key)
-                return True
-            elif local_size < size:
-                mode = "ab"
-                rest = local_size
-            else:
-                mode = "wb"
-                rest = None
-        else:
-            mode = "wb"
-            rest = None
-
-        if self.dry_run:
-            logger.info(f"[DRY-RUN] Would download: {file_key} ({size:,} bytes)")
-            return True
-
-        try:
-            self.ftp.cwd(f"{FTP_PATH}/{experiment}")
-            with open(local_path, mode) as f:
-                if rest:
-                    self.ftp.retrbinary(f"RETR {filename}", f.write, rest=rest)
-                else:
-                    self.ftp.retrbinary(f"RETR {filename}", f.write)
-
-            if local_path.stat().st_size == size:
-                self.state.completed_files.add(file_key)
-                logger.info(f"Downloaded: {file_key}")
-                return True
-            else:
-                logger.warning(f"Size mismatch after download: {file_key}")
-                return False
-
-        except ftplib.error_perm as e:
-            logger.error(f"FTP error downloading {file_key}: {e}")
-            self.state.failed_files.add(file_key)
-            return False
-        except Exception as e:
-            logger.error(f"Error downloading {file_key}: {e}")
-            self.state.failed_files.add(file_key)
-            return False
-
     def download_experiment(self, accession: str) -> tuple:
         """Download all needed files for a single experiment.
+
+        Stays in the experiment directory for all file downloads to minimize
+        FTP round trips (one cwd + one dir + N retrbinary, instead of
+        N × cwd + N × retrbinary).
 
         Returns:
             Tuple of (success, files_downloaded)
         """
         if accession in self.state.completed_experiments:
-            local_dir = self.data_dir / f"{accession}-gea"
-            existing_files = len(list(local_dir.glob("*"))) if local_dir.exists() else 0
-            return True, existing_files
+            return True, 0
 
-        self.state.in_progress = accession
-        self.state.save(self.state_file)
+        self._ensure_connected()
 
-        files = self.list_files(accession)
+        # cwd into experiment directory and list files (one dir call)
+        try:
+            self.ftp.cwd(f"{FTP_PATH}/{accession}")
+        except ftplib.error_perm as e:
+            logger.warning(f"Could not enter {accession}: {e}")
+            return False, 0
+
+        # Parse dir listing to get filenames and sizes
+        files: List[Dict[str, Any]] = []
+        try:
+            lines: List[str] = []
+            self.ftp.dir(lines.append)
+            for line in lines:
+                parts = line.split()
+                if len(parts) >= 5 and not line.startswith("d"):
+                    try:
+                        size = int(parts[4])
+                        name = parts[-1]
+                        if self.should_download(name, size):
+                            files.append({"name": name, "size": size})
+                    except (ValueError, IndexError):
+                        continue
+        except ftplib.error_perm as e:
+            logger.warning(f"Could not list files in {accession}: {e}")
+            return False, 0
+
+        # Download each wanted file (already in the right directory)
+        local_dir_name = f"{accession}-gea"
+        local_dir = self.data_dir / local_dir_name
+        local_dir.mkdir(parents=True, exist_ok=True)
+
         downloaded = 0
         failed = 0
 
         for file_info in files:
             filename = file_info["name"]
             size = file_info["size"]
+            file_key = f"{accession}/{filename}"
+            local_path = local_dir / filename
 
-            if self.should_download(filename, size):
-                if self.download_file(accession, filename, size):
+            # Skip already completed
+            if file_key in self.state.completed_files:
+                downloaded += 1
+                continue
+
+            # Check local file
+            if local_path.exists():
+                local_size = local_path.stat().st_size
+                if local_size == size:
+                    self.state.completed_files.add(file_key)
+                    downloaded += 1
+                    continue
+                mode = "ab" if local_size < size else "wb"
+                rest = local_size if mode == "ab" else None
+            else:
+                mode = "wb"
+                rest = None
+
+            if self.dry_run:
+                logger.info(f"[DRY-RUN] Would download: {file_key} ({size:,} bytes)")
+                downloaded += 1
+                continue
+
+            try:
+                with open(local_path, mode) as f:
+                    if rest:
+                        self.ftp.retrbinary(f"RETR {filename}", f.write, rest=rest)
+                    else:
+                        self.ftp.retrbinary(f"RETR {filename}", f.write)
+
+                if local_path.stat().st_size == size:
+                    self.state.completed_files.add(file_key)
                     downloaded += 1
                 else:
+                    logger.warning(f"Size mismatch after download: {file_key}")
                     failed += 1
+
+            except ftplib.error_perm as e:
+                logger.error(f"FTP error downloading {file_key}: {e}")
+                self.state.failed_files.add(file_key)
+                failed += 1
+            except Exception as e:
+                logger.error(f"Error downloading {file_key}: {e}")
+                self.state.failed_files.add(file_key)
+                failed += 1
 
         if failed == 0:
             self.state.completed_experiments.add(accession)
-            self.state.in_progress = None
 
-        self.state.save(self.state_file)
+        # Batch state saves
+        self._unsaved_count += 1
+        if self._unsaved_count >= STATE_SAVE_INTERVAL:
+            self.state.save(self.state_file)
+            self._unsaved_count = 0
+
         return failed == 0, downloaded
 
     def run(self, single_experiment: Optional[str] = None) -> int:
@@ -314,6 +325,8 @@ class GXADownloader:
                         pass
 
         finally:
+            # Always save state on exit
+            self.state.save(self.state_file)
             self.disconnect()
 
         return processed

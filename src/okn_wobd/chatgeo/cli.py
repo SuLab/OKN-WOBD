@@ -123,7 +123,7 @@ def run_analysis(
         platform_filter: Platform filtering — "none" or "majority"
     """
     # Import here to defer ARCHS4 initialization
-    from clients.archs4 import ARCHS4Client
+    from okn_wobd.clients.archs4 import ARCHS4Client
 
     from .de_analysis import DEConfig, DifferentialExpressionAnalyzer, GeneFilterConfig
     from .de_result import DEProvenance

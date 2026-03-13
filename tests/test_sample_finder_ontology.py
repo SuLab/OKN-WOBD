@@ -1,20 +1,13 @@
 """Unit tests for ontology-enhanced sample discovery in SampleFinder."""
 
 import json
-import sys
-from pathlib import Path
 from unittest.mock import MagicMock, PropertyMock, patch
 
 import pandas as pd
 import pytest
 
-# Ensure demos dir is on sys.path
-_demos = str(Path(__file__).resolve().parents[1] / "scripts" / "demos")
-if _demos not in sys.path:
-    sys.path.insert(0, _demos)
-
-from chatgeo.query_builder import QueryBuilder, TextQueryStrategy
-from chatgeo.sample_finder import OntologyDiscoveryStats, PooledPair, SampleFinder
+from okn_wobd.chatgeo.query_builder import QueryBuilder, TextQueryStrategy
+from okn_wobd.chatgeo.sample_finder import OntologyDiscoveryStats, PooledPair, SampleFinder
 
 
 # ---------------------------------------------------------------------------
@@ -104,7 +97,7 @@ class TestClassifyStudySamples:
             "GSE1", "psoriasis", "healthy|control|normal"
         )
 
-        # GSM1 matches both disease and control — should be test
+        # GSM1 matches both disease and control -- should be test
         assert "GSM1" in test_df["geo_accession"].values
         assert "GSM1" not in control_df["geo_accession"].values
 
@@ -153,7 +146,7 @@ class TestMergeSampleSources:
         assert set(merged_ctrl["geo_accession"]) == {"GSM4", "GSM5"}
 
     def test_conflict_resolved_to_test(self):
-        """If a sample is test in one source and control in another → test."""
+        """If a sample is test in one source and control in another -> test."""
         ont_test = _make_metadata(["GSM1"])
         kw_test = pd.DataFrame()
         ont_ctrl = pd.DataFrame()
@@ -274,7 +267,7 @@ class TestFindPooledSamplesOntology:
         )
         self._setup_mocks(finder)
 
-        # No ANTHROPIC_API_KEY → regex fallback
+        # No ANTHROPIC_API_KEY -> regex fallback
         with patch.dict("os.environ", {}, clear=False):
             env = dict(**{k: v for k, v in __import__("os").environ.items()
                         if k != "ANTHROPIC_API_KEY"})
@@ -362,7 +355,7 @@ class TestFindPooledSamplesOntology:
 
         assert result is not None
         # Regex fallback: "unaffected" matches control regex, "healthy control" matches
-        # GSM1, GSM2 should be test; GSM3 (unaffected), GSM4 (healthy control) → control
+        # GSM1, GSM2 should be test; GSM3 (unaffected), GSM4 (healthy control) -> control
         assert result.n_test >= 2
         assert result.n_control >= 1
         assert "GSM4" in result.control_ids

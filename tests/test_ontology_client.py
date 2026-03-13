@@ -1,17 +1,10 @@
-"""Unit tests for clients.ontology — Disease ontology resolution & expansion."""
+"""Unit tests for clients.ontology -- Disease ontology resolution & expansion."""
 
-import sys
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-# Ensure demos dir is on sys.path
-_demos = str(Path(__file__).resolve().parents[1] / "scripts" / "demos")
-if _demos not in sys.path:
-    sys.path.insert(0, _demos)
-
-from clients.ontology import (
+from okn_wobd.clients.ontology import (
     MONDO_URI_PREFIX,
     DiseaseOntologyClient,
     MondoResolution,
@@ -125,7 +118,7 @@ class TestResolveDisease:
 
         assert r1.mondo_ids == r2.mondo_ids
         # First resolve makes 3 SPARQL calls (exact labels, exact synonyms,
-        # CONTAINS synonyms). Second resolve should hit cache — no new calls.
+        # CONTAINS synonyms). Second resolve should hit cache -- no new calls.
         first_call_count = client.sparql.query_simple.call_count
         assert first_call_count == 3
         client.resolve_disease("atherosclerosis")  # third call, should be cached
@@ -135,7 +128,7 @@ class TestResolveDisease:
         client = _make_client()
         client.sparql.query_simple.side_effect = Exception("timeout")
 
-        # The _resolve_via_nde method does: from clients.niaid import NIAIDClient
+        # The _resolve_via_nde method does: from okn_wobd.clients.niaid import NIAIDClient
         # We need to mock the NIAIDClient class at its source module.
         mock_nde_instance = MagicMock()
         mock_nde_instance.search_by_disease.return_value = MagicMock(hits=[{
@@ -148,7 +141,7 @@ class TestResolveDisease:
                 "healthCondition": hit.get("healthCondition", [])
             }
 
-        with patch("clients.niaid.NIAIDClient", return_value=mock_nde_instance) as mock_cls:
+        with patch("okn_wobd.clients.niaid.NIAIDClient", return_value=mock_nde_instance) as mock_cls:
             mock_cls.extract_ontology_annotations = mock_extract
             result = client.resolve_disease("atherosclerosis")
 
@@ -284,7 +277,7 @@ class TestExpandMondoIdsBatch:
 
         # First call
         client.expand_mondo_ids_batch(["0005311"])
-        # Second call — should use cache
+        # Second call -- should use cache
         results = client.expand_mondo_ids_batch(["0005311"])
 
         assert client.sparql.query_simple.call_count == 1

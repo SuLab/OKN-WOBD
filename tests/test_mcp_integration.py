@@ -9,19 +9,8 @@ Usage:
 """
 
 import os
-import sys
-from pathlib import Path
 
 import pytest
-
-# Ensure demos dir is on sys.path
-_demos = str(Path(__file__).resolve().parents[1] / "scripts" / "demos")
-if _demos not in sys.path:
-    sys.path.insert(0, _demos)
-
-from okn_wobd.mcp_server.server import _setup_demo_imports
-
-_setup_demo_imports()
 
 _skip = pytest.mark.skipif(
     os.environ.get("RUN_INTEGRATION_TESTS") != "1",

@@ -32,7 +32,7 @@ BIOLINK_NODE_CLASSES = {
     "BiologicalProcess": BIOLINK.BiologicalProcess,
     "MolecularActivity": BIOLINK.MolecularActivity,
     "CellularComponent": BIOLINK.CellularComponent,
-    "GOTerm": BIOLINK.BiologicalProcess,
+    "GOTerm": BIOLINK.OntologyClass,
     # Pathways
     "Pathway": BIOLINK.Pathway,
     "KEGGPathway": BIOLINK.Pathway,

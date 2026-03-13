@@ -1,7 +1,7 @@
 """ChatGEO / ARCHS4-based tools exposed as MCP tools.
 
-Wraps ``chatgeo.cli.run_analysis``, ``chatgeo.sample_finder.SampleFinder``,
-and ``chatgeo.enrichment_analyzer.GProfilerBackend`` from ``scripts/demos/``.
+Wraps ``okn_wobd.chatgeo.cli.run_analysis``, ``okn_wobd.chatgeo.sample_finder.SampleFinder``,
+and ``okn_wobd.chatgeo.enrichment_analyzer.GProfilerBackend``.
 
 All analyses are dispatched to a background thread and polled via the
 ``get_analysis_result`` tool, keeping individual MCP tool calls within
@@ -58,7 +58,7 @@ def _run_de_background(job_id: str, kwargs: dict) -> None:
     start = time.time()
     try:
         with redirect_prints():
-            from chatgeo.cli import run_analysis
+            from okn_wobd.chatgeo.cli import run_analysis
 
             result = run_analysis(**kwargs)
     except SystemExit as e:
@@ -168,8 +168,8 @@ def _run_get_sample_metadata_background(
     start = time.time()
     try:
         with redirect_prints():
-            from chatgeo.query_builder import PatternQueryStrategy, QueryBuilder
-            from chatgeo.sample_finder import SampleFinder
+            from okn_wobd.chatgeo.query_builder import PatternQueryStrategy, QueryBuilder
+            from okn_wobd.chatgeo.sample_finder import SampleFinder
 
             data_dir = os.environ["ARCHS4_DATA_DIR"]
             query_builder = QueryBuilder(strategy=PatternQueryStrategy())
@@ -261,8 +261,8 @@ def _run_find_samples_background(
     start = time.time()
     try:
         with redirect_prints():
-            from chatgeo.query_builder import PatternQueryStrategy, QueryBuilder
-            from chatgeo.sample_finder import SampleFinder
+            from okn_wobd.chatgeo.query_builder import PatternQueryStrategy, QueryBuilder
+            from okn_wobd.chatgeo.sample_finder import SampleFinder
 
             data_dir = os.environ["ARCHS4_DATA_DIR"]
             query_builder = QueryBuilder(strategy=PatternQueryStrategy())
@@ -437,7 +437,7 @@ def register_tools(mcp: FastMCP) -> None:
         # Parse query
         try:
             with redirect_prints():
-                from chatgeo.cli import parse_query
+                from okn_wobd.chatgeo.cli import parse_query
                 parsed_disease, parsed_tissue = parse_query(query)
         except Exception as e:
             logger.error("Query parse failed: %s", e)
@@ -701,7 +701,7 @@ def register_tools(mcp: FastMCP) -> None:
         logger.info("resolve_disease_ontology called: disease_name=%r", disease_name)
         try:
             with redirect_prints():
-                from clients.ontology import DiseaseOntologyClient
+                from okn_wobd.clients.ontology import DiseaseOntologyClient
 
                 client = DiseaseOntologyClient()
                 resolution = client.resolve_disease(disease_name)
@@ -762,7 +762,7 @@ def register_tools(mcp: FastMCP) -> None:
 
         try:
             with redirect_prints():
-                from chatgeo.enrichment_analyzer import GProfilerBackend
+                from okn_wobd.chatgeo.enrichment_analyzer import GProfilerBackend
 
                 backend = GProfilerBackend()
                 terms, n_mapped = backend.analyze(

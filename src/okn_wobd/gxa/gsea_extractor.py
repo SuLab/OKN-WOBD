@@ -21,7 +21,6 @@ from .parser import (
 def extract_gsea_results(
     experiment: GEAExperiment,
     p_value_threshold: float = 0.01,
-    max_terms_per_type: int = 20,
 ) -> pd.DataFrame:
     """
     Extract all GSEA enrichment results from a GXA experiment.
@@ -32,7 +31,6 @@ def extract_gsea_results(
     Args:
         experiment: Parsed GEAExperiment object
         p_value_threshold: Adjusted p-value threshold for significance
-        max_terms_per_type: Maximum enriched terms per type per contrast
 
     Returns:
         DataFrame with columns: term_id, term_name, enrichment_type,
@@ -58,7 +56,6 @@ def extract_gsea_results(
 
             if "adj_p_value" in df.columns:
                 df = df[df["adj_p_value"] <= p_value_threshold]
-                df = df.sort_values("adj_p_value").head(max_terms_per_type)
 
             if not df.empty:
                 all_results.append(df)

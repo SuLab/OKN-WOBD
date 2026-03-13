@@ -2,7 +2,7 @@
 
 Focused on the 'depression' disease query, which has been problematic
 in deployed versions. Tests the full pipeline through the MCP tool
-layer: find_samples → get_sample_metadata → differential_expression,
+layer: find_samples -> get_sample_metadata -> differential_expression,
 hitting real ARCHS4 data and ontology services.
 
 Skipped unless RUN_INTEGRATION_TESTS=1 is set.
@@ -13,20 +13,10 @@ Usage:
 """
 
 import os
-import sys
 import time
 from pathlib import Path
 
 import pytest
-
-# Ensure demos dir is on sys.path
-_demos = str(Path(__file__).resolve().parents[1] / "scripts" / "demos")
-if _demos not in sys.path:
-    sys.path.insert(0, _demos)
-
-from okn_wobd.mcp_server.server import _setup_demo_imports
-
-_setup_demo_imports()
 
 _skip = pytest.mark.skipif(
     os.environ.get("RUN_INTEGRATION_TESTS") != "1",
@@ -116,7 +106,7 @@ class TestDepressionOntologyResolution:
 
 
 # ---------------------------------------------------------------------------
-# find_samples — the suspected problem area
+# find_samples -- the suspected problem area
 # ---------------------------------------------------------------------------
 
 
@@ -124,7 +114,7 @@ class TestDepressionOntologyResolution:
 @_skip_no_archs4
 @slow
 class TestFindSamplesDepression:
-    """Test sample discovery for depression — the suspected failure point."""
+    """Test sample discovery for depression -- the suspected failure point."""
 
     def test_find_samples_keyword_only(self):
         """Keyword-only search should find some depression samples."""
@@ -245,7 +235,7 @@ class TestFindSamplesDepression:
 
 
 # ---------------------------------------------------------------------------
-# get_sample_metadata — study breakdown for depression
+# get_sample_metadata -- study breakdown for depression
 # ---------------------------------------------------------------------------
 
 
@@ -288,7 +278,7 @@ class TestSampleMetadataDepression:
 
 
 # ---------------------------------------------------------------------------
-# differential_expression — full pipeline
+# differential_expression -- full pipeline
 # ---------------------------------------------------------------------------
 
 
@@ -335,7 +325,7 @@ class TestDifferentialExpressionDepression:
                       f"padj={g.get('padj', '?')}")
 
     def test_de_depression_auto_mode(self):
-        """Run auto mode — should try study-matched then fall back."""
+        """Run auto mode -- should try study-matched then fall back."""
         fn = _get_tool_fn("differential_expression")
         result = fn(
             query="depression",
@@ -360,7 +350,7 @@ class TestDifferentialExpressionDepression:
         print(f"    Fallback reason: {r.get('provenance', {}).get('mode_fallback_reason', 'none')}")
 
     def test_de_depression_with_tissue(self):
-        """Depression in brain tissue — more specific query."""
+        """Depression in brain tissue -- more specific query."""
         fn = _get_tool_fn("differential_expression")
         result = fn(
             query="depression in brain tissue",
@@ -381,7 +371,7 @@ class TestDifferentialExpressionDepression:
         if final["status"] == "error":
             print(f"    Error: {r.get('error', 'unknown')}")
             # This may legitimately fail if no brain samples exist
-            # — log but don't hard-fail the test
+            # -- log but don't hard-fail the test
             pytest.skip(f"Depression+brain DE failed: {r.get('error')}")
         else:
             print(f"    Significant genes: {r.get('n_significant', '?')}")

@@ -1,21 +1,10 @@
 """Unit tests for ChatGEO MCP tools (mocked ARCHS4 / g:Profiler)."""
 
 import os
-import sys
 import time
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-
-# Ensure demos dir is on sys.path
-_demos = str(Path(__file__).resolve().parents[1] / "scripts" / "demos")
-if _demos not in sys.path:
-    sys.path.insert(0, _demos)
-
-from okn_wobd.mcp_server.server import _setup_demo_imports
-
-_setup_demo_imports()
 
 # Pre-import so patches work
 import okn_wobd.mcp_server.tools_chatgeo  # noqa: F401
@@ -76,7 +65,7 @@ class TestDifferentialExpressionTool:
             assert "error" in result
             assert "ARCHS4_DATA_DIR" in result["error"]
 
-    @patch("chatgeo.cli.run_analysis")
+    @patch("okn_wobd.chatgeo.cli.run_analysis")
     def test_wraps_run_analysis(self, mock_run):
         """All methods dispatch to background and return job_id."""
         mock_run.return_value = {
@@ -110,7 +99,7 @@ class TestDifferentialExpressionTool:
         call_kwargs = mock_run.call_args[1]
         assert call_kwargs["interpret"] is False
 
-    @patch("chatgeo.cli.run_analysis")
+    @patch("okn_wobd.chatgeo.cli.run_analysis")
     def test_catches_system_exit(self, mock_run):
         """SystemExit in background thread is caught and reported as error."""
         mock_run.side_effect = SystemExit(1)
@@ -133,7 +122,7 @@ class TestDifferentialExpressionTool:
         assert poll["status"] == "error"
         assert "exit code" in poll["result"]["error"].lower()
 
-    @patch("chatgeo.cli.run_analysis")
+    @patch("okn_wobd.chatgeo.cli.run_analysis")
     def test_catches_exceptions(self, mock_run):
         """Exceptions in background thread are caught and reported as error."""
         mock_run.side_effect = RuntimeError("HDF5 file corrupted")
@@ -156,7 +145,7 @@ class TestDifferentialExpressionTool:
         assert poll["status"] == "error"
         assert "HDF5" in poll["result"]["error"]
 
-    @patch("chatgeo.cli.run_analysis")
+    @patch("okn_wobd.chatgeo.cli.run_analysis")
     def test_disease_tissue_override(self, mock_run):
         """Disease/tissue overrides are passed to run_analysis in background."""
         mock_run.return_value = {
@@ -210,7 +199,7 @@ class TestFindSamplesTool:
         assert result["status"] == "running"
         assert "get_analysis_result" in result["message"]
 
-    @patch("chatgeo.sample_finder.SampleFinder")
+    @patch("okn_wobd.chatgeo.sample_finder.SampleFinder")
     def test_returns_sample_info_via_polling(self, MockFinder):
         import pandas as pd
 
@@ -268,9 +257,9 @@ class TestEnrichmentAnalysisTool:
         assert "error" in result
         assert "empty" in result["error"]
 
-    @patch("chatgeo.enrichment_analyzer.GProfilerBackend")
+    @patch("okn_wobd.chatgeo.enrichment_analyzer.GProfilerBackend")
     def test_returns_enrichment(self, MockBackend):
-        from chatgeo.de_result import EnrichedTerm
+        from okn_wobd.chatgeo.de_result import EnrichedTerm
 
         mock_term = EnrichedTerm(
             term_id="GO:0006915",
@@ -297,7 +286,7 @@ class TestEnrichmentAnalysisTool:
         assert "GO:BP" in result["by_source"]
         assert result["by_source"]["GO:BP"][0]["term_name"] == "apoptotic process"
 
-    @patch("chatgeo.enrichment_analyzer.GProfilerBackend")
+    @patch("okn_wobd.chatgeo.enrichment_analyzer.GProfilerBackend")
     def test_handles_import_error(self, MockBackend):
         instance = MockBackend.return_value
         instance.analyze.side_effect = ImportError("No module named 'gprofiler'")
@@ -308,7 +297,7 @@ class TestEnrichmentAnalysisTool:
         assert "error" in result
         assert "gprofiler" in result["error"].lower()
 
-    @patch("chatgeo.enrichment_analyzer.GProfilerBackend")
+    @patch("okn_wobd.chatgeo.enrichment_analyzer.GProfilerBackend")
     def test_no_results(self, MockBackend):
         instance = MockBackend.return_value
         instance.analyze.return_value = ([], 3)
@@ -326,7 +315,7 @@ class TestEnrichmentAnalysisTool:
 
 class TestDifferentialExpressionMode:
 
-    @patch("chatgeo.cli.run_analysis")
+    @patch("okn_wobd.chatgeo.cli.run_analysis")
     def test_mode_param_passed_through(self, mock_run):
         """mode parameter should be forwarded to run_analysis."""
         mock_run.return_value = {
@@ -355,7 +344,7 @@ class TestDifferentialExpressionMode:
         assert call_kwargs["mode"] == "study-matched"
         assert call_kwargs["meta_method"] == "fisher"
 
-    @patch("chatgeo.cli.run_analysis")
+    @patch("okn_wobd.chatgeo.cli.run_analysis")
     def test_default_mode_is_auto(self, mock_run):
         """Default mode should be 'auto'."""
         mock_run.return_value = {
@@ -402,7 +391,7 @@ class TestGetSampleMetadata:
         assert "job_id" in result
         assert result["status"] == "running"
 
-    @patch("chatgeo.sample_finder.SampleFinder")
+    @patch("okn_wobd.chatgeo.sample_finder.SampleFinder")
     def test_returns_study_breakdown(self, MockFinder):
         import pandas as pd
 
@@ -458,7 +447,7 @@ class TestGetSampleMetadata:
 
 class TestFindSamplesStudyBreakdown:
 
-    @patch("chatgeo.sample_finder.SampleFinder")
+    @patch("okn_wobd.chatgeo.sample_finder.SampleFinder")
     def test_study_breakdown_in_result(self, MockFinder):
         import pandas as pd
 

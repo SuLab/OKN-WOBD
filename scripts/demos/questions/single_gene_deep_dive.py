@@ -50,7 +50,7 @@ def run(
 
     # --- Step 1: Gene context from Wikidata ---
     print(f"Step 1: Gene information for {gene}...")
-    from clients import SPARQLClient
+    from okn_wobd.clients import SPARQLClient
     sparql = SPARQLClient()
 
     try:
@@ -85,7 +85,7 @@ def run(
     # --- Step 2: Single-cell expression ---
     print(f"Step 2: CellxGene expression for {gene} in {tissue}...")
     try:
-        from clients import CellxGeneClient
+        from okn_wobd.clients import CellxGeneClient
         with CellxGeneClient() as cellxgene:
             comparison = cellxgene.compare_conditions(
                 gene, tissue=tissue,
@@ -147,7 +147,7 @@ def run(
 
     # --- Step 3: NIAID study discovery ---
     print(f"Step 3: Searching NIAID for {tissue} {disease} studies...")
-    from clients import NIAIDClient
+    from okn_wobd.clients import NIAIDClient
     niaid = NIAIDClient()
     geo_accessions = []
 
@@ -183,7 +183,7 @@ def run(
     # --- Step 4: ARCHS4 bulk expression ---
     print(f"Step 4: Checking ARCHS4 for {gene} expression...")
     try:
-        from clients import ARCHS4Client
+        from okn_wobd.clients import ARCHS4Client
         data_dir = os.environ.get("ARCHS4_DATA_DIR")
         h5_file = Path(data_dir) / "human_gene_v2.latest.h5" if data_dir else None
 

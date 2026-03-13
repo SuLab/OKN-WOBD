@@ -61,7 +61,7 @@ from dataclasses import dataclass, field
 from typing import Optional, List, Dict, Any, Iterator
 
 import requests
-from clients.http_utils import create_session
+from .http_utils import create_session
 
 
 # Common ontology identifiers for reference

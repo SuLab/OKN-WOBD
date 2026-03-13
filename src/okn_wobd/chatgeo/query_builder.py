@@ -394,7 +394,7 @@ class OntologyQueryStrategy(QueryStrategy):
     def ontology_client(self):
         if self._ontology_client is None:
             try:
-                from clients.ontology import DiseaseOntologyClient
+                from okn_wobd.clients.ontology import DiseaseOntologyClient
                 self._ontology_client = DiseaseOntologyClient()
             except Exception:
                 self._ontology_client = False  # sentinel

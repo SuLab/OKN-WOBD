@@ -121,7 +121,7 @@ def test_gene_nodes_exist(graph):
         SELECT (COUNT(?g) AS ?cnt) WHERE { ?g a biolink:Gene }
     """)
     count = int(rows[0]["cnt"])
-    assert count > 1000, f"Expected >1000 genes, got {count}"
+    assert count > 50, f"Expected >50 DE-significant genes, got {count}"
 
 
 @skip_if_no_ttl
@@ -258,10 +258,10 @@ def test_enrichment_has_properties(graph):
 
 @skip_if_no_ttl
 def test_go_term_nodes_exist(graph):
-    """There should be BiologicalProcess (GO) nodes."""
+    """There should be OntologyClass (GO) nodes."""
     rows = _query(graph, """
         PREFIX biolink: <https://w3id.org/biolink/vocab/>
-        SELECT (COUNT(?t) AS ?cnt) WHERE { ?t a biolink:BiologicalProcess }
+        SELECT (COUNT(?t) AS ?cnt) WHERE { ?t a biolink:OntologyClass }
     """)
     count = int(rows[0]["cnt"])
     assert count > 0, "No GO term nodes found"

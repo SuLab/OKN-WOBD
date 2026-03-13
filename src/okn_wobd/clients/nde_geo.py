@@ -18,7 +18,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set
 
-from clients.niaid import NIAIDClient
+from .niaid import NIAIDClient
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +83,7 @@ class NDEGeoDiscovery:
         """Lazy ARCHS4 client — only initialized if filtering is requested."""
         if self._archs4_client is None:
             try:
-                from clients.archs4 import ARCHS4Client
+                from .archs4 import ARCHS4Client
 
                 data_dir = os.environ.get("ARCHS4_DATA_DIR")
                 self._archs4_client = ARCHS4Client(data_dir=data_dir)
@@ -97,7 +97,7 @@ class NDEGeoDiscovery:
         """Lazy SPARQLClient for the FRINK-hosted NDE endpoint."""
         if self._sparql_client is None:
             try:
-                from clients.sparql import SPARQLClient
+                from .sparql import SPARQLClient
 
                 self._sparql_client = SPARQLClient()
             except Exception as e:

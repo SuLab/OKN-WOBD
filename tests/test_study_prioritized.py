@@ -1,18 +1,11 @@
 """Unit tests for study-prioritized pooled controls and platform filtering."""
 
-import sys
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
 import pytest
 
-# Ensure demos dir is on sys.path
-_demos = str(Path(__file__).resolve().parents[1] / "scripts" / "demos")
-if _demos not in sys.path:
-    sys.path.insert(0, _demos)
-
-from chatgeo.sample_finder import PooledPair, SampleFinder
+from okn_wobd.chatgeo.sample_finder import PooledPair, SampleFinder
 
 
 def _make_sample_df(geo_ids, series_ids, platform_ids=None, source_names=None):

@@ -23,7 +23,7 @@ from dataclasses import dataclass, field, asdict
 from urllib.parse import urljoin
 
 import requests
-from clients.http_utils import create_session
+from okn_wobd.clients.http_utils import create_session
 
 try:
     from bs4 import BeautifulSoup

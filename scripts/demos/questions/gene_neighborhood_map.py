@@ -24,7 +24,7 @@ GENE = "CD19"
 
 def run(gene: str = GENE, output_dir: str = "questions/output"):
     """Run the investigation and produce an HTML report."""
-    from analysis_tools import GeneNeighborhoodQuery, PlotlyVisualizer
+    from okn_wobd.analysis import GeneNeighborhoodQuery, PlotlyVisualizer
     from questions._report import QuestionReport, results_table, summary_stats
 
     question = QUESTION.format(gene=gene)
