@@ -323,4 +323,71 @@ Skipped characteristics: `individual`, `age`, `organism` (organism is captured v
 
 ## Run Statistics
 
-_To be appended after each pipeline run._
+**Full corpus run — 2026-03-13**
+
+Thresholds: adjusted p-value <= 0.01, |log2FC| >= 1.0, no cap on genes or enrichment terms.
+
+### Corpus Summary
+
+| Metric | Value |
+|--------|-------|
+| Experiments (TTL files) | 4,673 |
+| Total triples | ~103.7 million |
+| Total size on disk | 4.34 GB |
+| Conversion failures | 6 (99.87% success) |
+
+### Per-Experiment Triples
+
+| Stat | Value |
+|------|-------|
+| Mean | 22,199 |
+| Median | 4,890 |
+| Min | 5 |
+| Max | 1,443,085 |
+
+### Unique Entities (corpus-wide)
+
+| Entity Type | Count |
+|-------------|-------|
+| Studies | 4,673 |
+| Assays (contrasts) | 15,003 |
+| Genes (Ensembl + NCBI) | 284,509 |
+| Diseases (MONDO + fallback) | 285 |
+| Organisms (NCBITaxon) | 9 |
+| Anatomical entities (UBERON + fallback) | 414 |
+| Cell types (CL) | 272 |
+| GO terms | 5,090 |
+| Reactome pathways | 4,862 |
+| InterPro domains | 3,367 |
+
+### Differential Expression
+
+| Metric | Value |
+|--------|-------|
+| Total DE associations | 8,828,954 |
+| Experiments with DE results | 3,798 / 4,673 (81%) |
+| Avg DE associations per experiment (when present) | 2,324 |
+| Avg DE genes per experiment (when present) | 1,965 |
+| Max DE genes in one experiment | 56,748 |
+
+### Pathway/GO Enrichment
+
+| Metric | Value |
+|--------|-------|
+| Total enrichment associations | 287,615 |
+| Experiments with enrichment | 3,185 / 4,673 (68%) |
+| Avg enrichment terms per experiment (when present) | 90 |
+
+### Organisms
+
+| Taxon | Species |
+|-------|---------|
+| NCBITaxon:9606 | Human |
+| NCBITaxon:10090 | Mouse |
+| NCBITaxon:10116 | Rat |
+| NCBITaxon:7955 | Zebrafish |
+| NCBITaxon:7227 | *Drosophila melanogaster* |
+| NCBITaxon:6239 | *Caenorhabditis elegans* |
+| NCBITaxon:4932 | *Saccharomyces cerevisiae* |
+| NCBITaxon:3702 | *Arabidopsis thaliana* |
+| NCBITaxon:11623 | *Aspergillus nidulans* |
