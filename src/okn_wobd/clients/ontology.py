@@ -13,7 +13,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
-from clients.sparql import SPARQLClient
+from .sparql import SPARQLClient
 
 logger = logging.getLogger(__name__)
 
@@ -285,7 +285,7 @@ class DiseaseOntologyClient:
     ) -> MondoResolution:
         """Fallback: search NDE by disease name, extract MONDO IDs from annotations."""
         try:
-            from clients.niaid import NIAIDClient
+            from .niaid import NIAIDClient
         except ImportError:
             return MondoResolution(
                 query=disease_name, mondo_ids=[], labels={}, confidence="none"

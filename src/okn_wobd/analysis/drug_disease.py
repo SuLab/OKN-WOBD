@@ -19,7 +19,7 @@ Usage:
     python -m analysis_tools.drug_disease
 """
 
-from clients.sparql import SPARQLClient, GXAQueries, GXA_PREFIXES
+from okn_wobd.clients.sparql import SPARQLClient, GXAQueries, GXA_PREFIXES
 
 
 def find_drug_disease_genes(

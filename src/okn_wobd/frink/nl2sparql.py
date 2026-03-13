@@ -40,8 +40,8 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from pathlib import Path
 
-from frink.context import FrinkContext
-from clients.sparql import SPARQLClient
+from .context import FrinkContext
+from okn_wobd.clients.sparql import SPARQLClient
 
 # Try to import LLM clients
 try:

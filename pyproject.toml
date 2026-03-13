@@ -16,6 +16,25 @@ dependencies = [
     "pandas>=2.0",
     "mcp>=1.6.0",
     "anthropic>=0.39",
+    "SPARQLWrapper>=2.0",
+]
+
+[project.optional-dependencies]
+chatgeo = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "pydeseq2>=0.4",
+    "gprofiler-official>=1.0",
+    "h5py>=3.8",
+]
+cellxgene = [
+    "cellxgene-census>=1.0",
+]
+viz = [
+    "plotly>=5.0",
+]
+all = [
+    "okn-wobd[chatgeo,cellxgene,viz]",
 ]
 
 [project.scripts]

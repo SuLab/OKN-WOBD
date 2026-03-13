@@ -70,15 +70,8 @@ def _configure_logging() -> None:
 # Path / env setup
 # ---------------------------------------------------------------------------
 
-def _setup_demo_imports():
-    """Add ``scripts/demos/`` to sys.path so analysis_tools, chatgeo, clients,
-    frink are importable.  Also load ``.env`` from that directory."""
-    demos_dir = Path(__file__).resolve().parents[3] / "scripts" / "demos"
-    demos_str = str(demos_dir)
-    if demos_str not in sys.path:
-        sys.path.insert(0, demos_str)
-
-    # Load .env (walks up from this file to find project root .env)
+def _load_dotenv():
+    """Load ``.env`` from the project root if python-dotenv is installed."""
     try:
         from dotenv import load_dotenv
         load_dotenv()
@@ -124,14 +117,14 @@ def health_check() -> dict:
 
     # analysis_tools (SPARQL-based)
     try:
-        import analysis_tools  # noqa: F401
+        import okn_wobd.analysis  # noqa: F401
         status["capabilities"]["analysis_tools"] = True
     except ImportError:
         status["capabilities"]["analysis_tools"] = False
 
     # chatgeo
     try:
-        import chatgeo  # noqa: F401
+        import okn_wobd.chatgeo  # noqa: F401
         status["capabilities"]["chatgeo"] = True
     except ImportError:
         status["capabilities"]["chatgeo"] = False
@@ -216,7 +209,7 @@ def _wrap_with_api_key_auth(app):
 
 def main():
     _configure_logging()
-    _setup_demo_imports()
+    _load_dotenv()
     _register_analysis_tools()
     _register_chatgeo_tools()
 

@@ -1,19 +1,8 @@
 """Unit tests for SPARQL-based MCP analysis tools (mocked SPARQL)."""
 
-import sys
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-
-# Ensure demos dir is on sys.path
-_demos = str(Path(__file__).resolve().parents[1] / "scripts" / "demos")
-if _demos not in sys.path:
-    sys.path.insert(0, _demos)
-
-from okn_wobd.mcp_server.server import _setup_demo_imports
-
-_setup_demo_imports()
 
 # Pre-import the tool module so patches target the right namespace
 import okn_wobd.mcp_server.tools_analysis  # noqa: F401
@@ -38,9 +27,9 @@ def _get_tool_fn(name: str):
 
 class TestGeneDiseasePathsTool:
 
-    @patch("analysis_tools.GeneDiseasePathFinder")
+    @patch("okn_wobd.analysis.GeneDiseasePathFinder")
     def test_returns_connections(self, MockFinder):
-        from analysis_tools.gene_paths import GeneDiseaseConnection
+        from okn_wobd.analysis.gene_paths import GeneDiseaseConnection
 
         mock_conn = GeneDiseaseConnection(
             gene_symbol="SFRP2",
@@ -60,7 +49,7 @@ class TestGeneDiseasePathsTool:
         assert result["connections"][0]["disease_name"] == "diabetes mellitus"
         assert result["summary"]["by_source"]["SPOKE-OKN"] == 1
 
-    @patch("analysis_tools.GeneDiseasePathFinder")
+    @patch("okn_wobd.analysis.GeneDiseasePathFinder")
     def test_empty_results(self, MockFinder):
         instance = MockFinder.return_value
         instance.find_all_connections.return_value = []
@@ -71,7 +60,7 @@ class TestGeneDiseasePathsTool:
         assert result["total_connections"] == 0
         assert result["connections"] == []
 
-    @patch("analysis_tools.GeneDiseasePathFinder")
+    @patch("okn_wobd.analysis.GeneDiseasePathFinder")
     def test_error_handling(self, MockFinder):
         instance = MockFinder.return_value
         instance.find_all_connections.side_effect = RuntimeError("SPARQL timeout")
@@ -95,9 +84,9 @@ class TestGeneNeighborhoodTool:
         assert "error" in result
         assert "gene_symbol" in result["error"]
 
-    @patch("analysis_tools.GeneNeighborhoodQuery")
+    @patch("okn_wobd.analysis.GeneNeighborhoodQuery")
     def test_returns_neighborhood(self, MockQuery):
-        from analysis_tools.gene_neighborhood import GeneNeighborhood, GraphResult
+        from okn_wobd.analysis.gene_neighborhood import GeneNeighborhood, GraphResult
 
         mock_neighborhood = GeneNeighborhood(
             gene_symbol="CD19",
@@ -121,7 +110,7 @@ class TestGeneNeighborhoodTool:
         assert result["gene_symbol"] == "CD19"
         assert len(result["graphs"]) == 1
 
-    @patch("analysis_tools.GeneNeighborhoodQuery")
+    @patch("okn_wobd.analysis.GeneNeighborhoodQuery")
     def test_handles_system_exit(self, MockQuery):
         """Gene resolution failure triggers sys.exit(1) — tool catches it."""
         instance = MockQuery.return_value
@@ -132,9 +121,9 @@ class TestGeneNeighborhoodTool:
         assert "error" in result
         assert "not found" in result["error"].lower()
 
-    @patch("analysis_tools.GeneNeighborhoodQuery")
+    @patch("okn_wobd.analysis.GeneNeighborhoodQuery")
     def test_ncbi_id_input(self, MockQuery):
-        from analysis_tools.gene_neighborhood import GeneNeighborhood
+        from okn_wobd.analysis.gene_neighborhood import GeneNeighborhood
 
         mock_neighborhood = GeneNeighborhood(
             gene_symbol="CD19",
@@ -149,5 +138,3 @@ class TestGeneNeighborhoodTool:
         fn = _get_tool_fn("gene_neighborhood")
         result = fn(ncbi_gene_id="930")
         assert result["ncbi_gene_id"] == "930"
-
-

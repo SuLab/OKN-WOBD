@@ -104,7 +104,7 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
 from collections import defaultdict
 
-from clients import SPARQLClient
+from okn_wobd.clients import SPARQLClient
 
 # Optional imports with graceful degradation
 try:

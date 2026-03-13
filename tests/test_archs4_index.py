@@ -11,10 +11,7 @@ import pytest
 h5py = pytest.importorskip("h5py")
 pd = pytest.importorskip("pandas")
 
-import sys
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts" / "demos"))
-
-from clients.archs4_index import ARCHS4MetadataIndex, _pattern_to_fts5
+from okn_wobd.clients.archs4_index import ARCHS4MetadataIndex, _pattern_to_fts5
 
 
 # ---------------------------------------------------------------------------

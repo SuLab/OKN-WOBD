@@ -41,7 +41,7 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from clients.sparql import SPARQLClient
+from okn_wobd.clients.sparql import SPARQLClient
 
 
 @dataclass
@@ -872,7 +872,7 @@ Examples:
     # Generate interactive visualization
     if args.html:
         try:
-            from analysis_tools.visualization import PlotlyVisualizer
+            from .visualization import PlotlyVisualizer
             viz = PlotlyVisualizer()
             html_content = viz.neighborhood_network(neighborhood)
             with open(args.html, "w") as f:

@@ -725,7 +725,7 @@ import argparse
 from datetime import datetime, timezone
 from dataclasses import asdict
 
-from frink.registry import (
+from .registry import (
     FrinkRegistryClient,
     KnowledgeGraph,
     GraphSchema,

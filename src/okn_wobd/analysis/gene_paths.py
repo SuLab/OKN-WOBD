@@ -31,7 +31,7 @@ from typing import Dict, List, Any, Optional, Set
 from dataclasses import dataclass, field
 from collections import defaultdict
 
-from clients.sparql import SPARQLClient
+from okn_wobd.clients.sparql import SPARQLClient
 
 
 # SPOKE-OKN endpoint
@@ -577,7 +577,7 @@ def main():
     # Generate interactive visualization
     if args.html:
         try:
-            from analysis_tools.visualization import PlotlyVisualizer
+            from .visualization import PlotlyVisualizer
 
             viz = PlotlyVisualizer()
             conn_dicts = [c.to_dict() for c in connections]

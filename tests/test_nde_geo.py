@@ -1,17 +1,10 @@
-"""Unit tests for clients.nde_geo — NDE-to-GEO study discovery."""
+"""Unit tests for clients.nde_geo -- NDE-to-GEO study discovery."""
 
-import sys
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-# Ensure demos dir is on sys.path
-_demos = str(Path(__file__).resolve().parents[1] / "scripts" / "demos")
-if _demos not in sys.path:
-    sys.path.insert(0, _demos)
-
-from clients.nde_geo import (
+from okn_wobd.clients.nde_geo import (
     MONDO_URI_PREFIX,
     GEOStudyMatch,
     NDEGeoDiscovery,

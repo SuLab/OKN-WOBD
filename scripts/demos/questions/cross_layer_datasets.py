@@ -56,7 +56,7 @@ def run(
     output_dir: str = "questions/output",
 ):
     """Run the investigation and produce an HTML report."""
-    from clients import SPARQLClient, NIAIDClient
+    from okn_wobd.clients import SPARQLClient, NIAIDClient
     from questions._report import QuestionReport, results_table, summary_stats
 
     question = QUESTION.format(go_label=go_label, search_term=search_term)
@@ -124,7 +124,7 @@ def run(
     selected_gse = None
 
     try:
-        from clients import ARCHS4Client
+        from okn_wobd.clients import ARCHS4Client
         data_dir = os.environ.get("ARCHS4_DATA_DIR")
         h5_file = Path(data_dir) / "human_gene_v2.latest.h5" if data_dir else None
 

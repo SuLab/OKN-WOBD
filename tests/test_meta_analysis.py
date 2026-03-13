@@ -1,26 +1,19 @@
 """Unit tests for the MetaAnalyzer engine."""
 
-import sys
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pandas as pd
 import pytest
 
-# Ensure demos dir is on sys.path
-_demos = str(Path(__file__).resolve().parents[1] / "scripts" / "demos")
-if _demos not in sys.path:
-    sys.path.insert(0, _demos)
-
-from chatgeo.de_result import (
+from okn_wobd.chatgeo.de_result import (
     DEProvenance,
     GeneResult,
     MetaAnalysisResult,
     StudyDEResult,
 )
-from chatgeo.meta_analysis import MetaAnalyzer
-from chatgeo.sample_finder import StudyMatchedResult, StudyPair
+from okn_wobd.chatgeo.meta_analysis import MetaAnalyzer
+from okn_wobd.chatgeo.sample_finder import StudyMatchedResult, StudyPair
 
 
 def _make_provenance(**overrides):

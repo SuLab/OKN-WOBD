@@ -33,7 +33,7 @@ def run(
     output_dir: str = "questions/output",
 ):
     """Run the investigation and produce an HTML report."""
-    from analysis_tools.go_disease_analysis import run_analysis
+    from okn_wobd.analysis.go_disease_analysis import run_analysis
     from questions._report import QuestionReport, results_table, summary_stats
 
     question = QUESTION.format(go_label=go_label, disease=disease)

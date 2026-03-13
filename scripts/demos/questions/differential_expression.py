@@ -35,7 +35,7 @@ def run(query: str = QUERY, output_dir: str = "questions/output"):
 
     # Import ChatGEO components
     try:
-        from chatgeo.cli import parse_query, run_analysis as chatgeo_run
+        from okn_wobd.chatgeo.cli import parse_query, run_analysis as chatgeo_run
     except ImportError:
         report.add_step(
             "Import ChatGEO pipeline",

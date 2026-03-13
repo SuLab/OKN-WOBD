@@ -1,16 +1,9 @@
 """Tests for the MCP server skeleton: module imports and health_check."""
 
-import sys
-from pathlib import Path
+import os
 from unittest.mock import patch
 
 import pytest
-
-
-# Ensure demos dir is on sys.path for analysis_tools / chatgeo imports
-_demos = str(Path(__file__).resolve().parents[1] / "scripts" / "demos")
-if _demos not in sys.path:
-    sys.path.insert(0, _demos)
 
 
 def test_server_module_imports():
@@ -20,9 +13,8 @@ def test_server_module_imports():
 
 def test_health_check_returns_dict():
     """health_check returns a dict with required keys."""
-    from okn_wobd.mcp_server.server import _setup_demo_imports, health_check
+    from okn_wobd.mcp_server.server import health_check
 
-    _setup_demo_imports()
     result = health_check()
 
     assert isinstance(result, dict)
@@ -38,19 +30,17 @@ def test_health_check_returns_dict():
 
 
 def test_health_check_analysis_tools_available():
-    """With demos on sys.path, analysis_tools should be importable."""
-    from okn_wobd.mcp_server.server import _setup_demo_imports, health_check
+    """analysis_tools should be importable as okn_wobd.analysis."""
+    from okn_wobd.mcp_server.server import health_check
 
-    _setup_demo_imports()
     result = health_check()
     assert result["capabilities"]["analysis_tools"] is True
 
 
 def test_health_check_archs4_missing():
     """When ARCHS4_DATA_DIR is unset, archs4_data should be False."""
-    from okn_wobd.mcp_server.server import _setup_demo_imports, health_check
+    from okn_wobd.mcp_server.server import health_check
 
-    _setup_demo_imports()
     with patch.dict("os.environ", {}, clear=False):
         # Remove the key if it exists
         env = dict(os.environ)
@@ -72,7 +62,3 @@ def test_redirect_prints(capsys):
     assert "redirected message" not in captured.out
     # It should be on stderr
     assert "redirected message" in captured.err
-
-
-# Need os for the mock
-import os  # noqa: E402

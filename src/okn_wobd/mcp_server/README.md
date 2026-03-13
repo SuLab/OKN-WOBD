@@ -31,10 +31,10 @@ Supports **local** (stdio) and **remote** (Streamable HTTP, SSE) transports. Rem
                         FRINK SPARQL      SPARQL                HDF5 files       REST API
 ```
 
-The server wraps two packages that live in `scripts/demos/`:
+The server wraps two sibling packages within `okn_wobd`:
 
-- **analysis_tools** — SPARQL queries against FRINK knowledge graphs (SPOKE-OKN, Wikidata, Ubergraph).
-- **chatgeo** — Differential expression analysis using local ARCHS4 HDF5 files, with g:Profiler enrichment.
+- **okn_wobd.analysis** — SPARQL queries against FRINK knowledge graphs (SPOKE-OKN, Wikidata, Ubergraph).
+- **okn_wobd.chatgeo** — Differential expression analysis using local ARCHS4 HDF5 files, with g:Profiler enrichment.
 
 ## Tools
 
@@ -57,18 +57,14 @@ The server wraps two packages that live in `scripts/demos/`:
 ## Prerequisites
 
 ```bash
-# 1. Install the core package (from repo root, requires Python >= 3.11)
-pip install -e .
+# 1. Install the package with all dependencies (from repo root, requires Python >= 3.11)
+pip install -e ".[all]"
 
-# 2. Install demo script dependencies (analysis_tools, chatgeo, clients packages)
-pip install SPARQLWrapper h5py scipy numpy            # SPARQL + ARCHS4 tools
-pip install pydeseq2 gprofiler-official               # DE analysis + enrichment
-pip install anthropic                                  # Optional: LLM interpretation
+# Or install only what you need:
+pip install -e ".[analysis]"     # SPARQL-based tools only
+pip install -e ".[chatgeo]"      # DE analysis + enrichment
 
-# 3. The demos directory (scripts/demos/) must exist in the repo —
-#    the server adds it to sys.path automatically.
-
-# 4. Copy and configure the .env file
+# 2. Copy and configure the .env file
 cp .env.example .env
 ```
 
@@ -279,17 +275,14 @@ Add the server to your Claude Code MCP configuration. The repo includes a templa
     "okn-wobd": {
       "command": "python3.11",
       "args": ["-m", "okn_wobd.mcp_server"],
-      "cwd": "/path/to/OKN-WOBD",
-      "env": {
-        "PYTHONPATH": "/path/to/OKN-WOBD/src"
-      }
+      "cwd": "/path/to/OKN-WOBD"
     }
   }
 }
 ```
 
 1. Copy `config/mcp-dev.json` to your project-level `.mcp.json` (or merge into your existing Claude Code settings).
-2. Replace `/path/to/OKN-WOBD` with the absolute path to your checkout (both `cwd` and `PYTHONPATH`).
+2. Replace `/path/to/OKN-WOBD` with the absolute path to your checkout.
 3. Restart Claude Code. Verify with: `> Use the health_check tool`
 
 ### Biomni
@@ -300,23 +293,20 @@ Add the server to your Claude Code MCP configuration. The repo includes a templa
 name: okn-wobd
 description: >
   Biomedical analysis tools for gene-disease path finding, gene neighborhood
-  queries, drug-disease opposing expression patterns, and differential
-  expression analysis via ARCHS4.
+  queries, and differential expression analysis via ARCHS4.
 transport: stdio
 command: python3.11
 args:
   - "-m"
   - okn_wobd.mcp_server
 cwd: /path/to/OKN-WOBD
-env:
-  PYTHONPATH: /path/to/OKN-WOBD/src
 ```
 
 1. Copy or symlink the config into Biomni's server directory:
    ```bash
    cp config/biomni.yaml /path/to/biomni/servers/okn-wobd.yaml
    ```
-2. Replace `/path/to/OKN-WOBD` with the absolute path to your checkout (both `cwd` and `PYTHONPATH`).
+2. Replace `/path/to/OKN-WOBD` with the absolute path to your checkout.
 3. Start Biomni. The OKN-WOBD tools will be registered automatically.
 
 ## Usage: Remote (HTTP)

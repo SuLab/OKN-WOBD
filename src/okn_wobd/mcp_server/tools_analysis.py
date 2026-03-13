@@ -1,7 +1,6 @@
 """SPARQL-based analysis tools exposed as MCP tools.
 
-Wraps ``analysis_tools.gene_paths``, ``analysis_tools.gene_neighborhood``,
-and ``analysis_tools.drug_disease`` from ``scripts/demos/``.
+Wraps ``okn_wobd.analysis.gene_paths`` and ``okn_wobd.analysis.gene_neighborhood``.
 """
 
 from __future__ import annotations
@@ -40,7 +39,7 @@ def register_tools(mcp: FastMCP) -> None:
         logger.info("gene_disease_paths called: gene=%s", gene_symbol)
         try:
             with redirect_prints():
-                from analysis_tools import GeneDiseasePathFinder
+                from okn_wobd.analysis import GeneDiseasePathFinder
 
                 finder = GeneDiseasePathFinder(verbose=False)
                 connections = finder.find_all_connections(gene_symbol.upper())
@@ -102,7 +101,7 @@ def register_tools(mcp: FastMCP) -> None:
                      gene_symbol, ncbi_gene_id)
         try:
             with redirect_prints():
-                from analysis_tools import GeneNeighborhoodQuery
+                from okn_wobd.analysis import GeneNeighborhoodQuery
 
                 querier = GeneNeighborhoodQuery(timeout=timeout)
                 neighborhood = querier.query_all(
