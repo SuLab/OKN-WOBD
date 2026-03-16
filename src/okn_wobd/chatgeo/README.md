@@ -2,21 +2,20 @@
 
 Natural language differential expression analysis using ARCHS4 bulk RNA-seq data.
 
-ChatGEO takes a plain-text disease query (e.g., "psoriasis in skin tissue"), finds matching disease and control samples in the ARCHS4 compendium, and runs a statistical differential expression analysis.
+ChatGEO takes a plain-text disease query (e.g., "psoriasis in skin tissue"), finds matching disease and control samples in the ARCHS4 compendium, runs statistical differential expression analysis, and optionally performs gene set enrichment analysis and AI-powered interpretation.
 
 ## Prerequisites
 
-**Python dependencies** (beyond the core `okn-wobd` package):
+**Install with chatgeo extras:**
 
+```bash
+pip install -e ".[chatgeo]"
 ```
-numpy
-pandas
-scipy
-pydeseq2          # DESeq2 statistical model (optional alternative)
-gprofiler-official  # optional, for gene set enrichment analysis
-anthropic         # optional, for AI interpretation
-python-dotenv     # optional, for .env file support
-```
+
+This pulls in the required dependencies: `numpy`, `scipy`, `pydeseq2`, `gprofiler-official`, and `h5py`.
+
+Optional dependencies (not installed automatically):
+- `anthropic` + `python-dotenv` — for AI interpretation of results (`ANTHROPIC_API_KEY` in `.env`)
 
 **ARCHS4 HDF5 data files** (~58 GB each):
 
@@ -38,17 +37,16 @@ export ARCHS4_DATA_DIR=/path/to/archs4
 
 ## Running
 
-**Important**: Run from the `scripts/demos/` directory so that Python can find the `chatgeo` and `archs4_client` packages:
+ChatGEO is an installed package. Run it with:
 
 ```bash
-cd scripts/demos
-python -m chatgeo.cli "psoriasis in skin tissue" --verbose
+python -m okn_wobd.chatgeo.cli "psoriasis in skin tissue" --verbose
 ```
 
 ## Command Line Usage
 
 ```
-python -m chatgeo.cli QUERY [OPTIONS]
+python -m okn_wobd.chatgeo.cli QUERY [OPTIONS]
 ```
 
 ### Positional Argument
@@ -64,10 +62,13 @@ python -m chatgeo.cli QUERY [OPTIONS]
 | `--disease DISEASE` | (parsed from query) | Override the disease term from query parsing |
 | `--tissue TISSUE` | (parsed from query) | Override or specify tissue constraint |
 | `--species {human,mouse,both}` | `human` | Species to analyze |
-| `--mode {pooled,study_matched,auto}` | `pooled` | Analysis mode |
+| `--mode {auto,pooled,study-matched}` | `auto` | Analysis mode (see Analysis Modes below) |
 | `--method {mann-whitney,welch-t,deseq2}` | `mann-whitney` | Statistical method for DE |
-| `--fdr FLOAT` | `0.05` | FDR significance threshold |
-| `--log2fc FLOAT` | `1.0` | Minimum absolute log2 fold change |
+| `--meta-method {stouffer,fisher}` | `stouffer` | Meta-analysis p-value combination method |
+| `--min-studies INT` | `3` | Minimum matched studies for study-matched mode |
+| `--platform-filter {none,majority}` | `none` | Filter controls to match dominant test platform |
+| `--fdr FLOAT` | `0.01` | FDR significance threshold |
+| `--log2fc FLOAT` | `2.0` | Minimum absolute log2 fold change |
 | `--max-test INT` | `500` | Maximum test (disease) samples |
 | `--max-control INT` | `500` | Maximum control (healthy) samples |
 | `--gene-filter {protein_coding,all}` | `protein_coding` | Gene biotype filter |
@@ -99,39 +100,38 @@ Use `--tissue` to override or supply a tissue when query parsing does not detect
 ## Examples
 
 ```bash
-# Basic psoriasis analysis with output directory
-python -m chatgeo.cli "psoriasis in skin tissue" \
-    --output chatgeo/examples/01_psoriasis --verbose
+# Basic psoriasis analysis
+python -m okn_wobd.chatgeo.cli "psoriasis in skin tissue" \
+    --output results/psoriasis --verbose
 
 # Lung fibrosis with explicit tissue and stricter thresholds
-python -m chatgeo.cli "lung fibrosis" \
+python -m okn_wobd.chatgeo.cli "lung fibrosis" \
     --tissue lung \
-    --fdr 0.01 --log2fc 2.0 \
-    --output chatgeo/examples/02_fibrosis
+    --fdr 0.001 --log2fc 3.0 \
+    --output results/fibrosis
 
-# With RDF export and limited sample sizes
-python -m chatgeo.cli "rheumatoid arthritis" \
+# Study-matched meta-analysis (explicit mode)
+python -m okn_wobd.chatgeo.cli "rheumatoid arthritis" \
     --tissue synovial \
+    --mode study-matched --meta-method stouffer \
+    --output results/arthritis --verbose
+
+# Pooled mode with RDF export
+python -m okn_wobd.chatgeo.cli "rheumatoid arthritis" \
+    --tissue synovial \
+    --mode pooled \
     --max-test 200 --max-control 200 \
-    --fdr 0.01 --log2fc 2.0 \
-    --output chatgeo/examples/03_arthritis \
+    --output results/arthritis_pooled \
     --rdf --verbose
 
 # Mitochondrial myopathy, include MT genes (relevant to disease)
-python -m chatgeo.cli "mitochondrial myopathy" \
+python -m okn_wobd.chatgeo.cli "mitochondrial myopathy" \
     --tissue muscle \
     --include-mt-genes \
-    --output chatgeo/examples/04_mitochondrial --rdf
+    --output results/mitochondrial --rdf
 
 # Quick summary to stdout (no file output)
-python -m chatgeo.cli "alzheimer disease" --tissue brain
-```
-
-Pre-built examples with saved results are in `examples/`. Run them all with:
-
-```bash
-cd scripts/demos/chatgeo/examples
-python run_all_examples.py
+python -m okn_wobd.chatgeo.cli "alzheimer disease" --tissue brain
 ```
 
 ## Output Files
@@ -146,6 +146,112 @@ When using `--output <dir>`, ChatGEO writes:
 | `summary.txt` | Text summary of the analysis |
 | `interpretation.md` | AI-generated biological interpretation |
 | `results.ttl` | Biolink RDF export (only with `--rdf`) |
+
+## How It Works
+
+### 1. Query parsing
+
+The natural language query is split into disease and tissue terms using pattern matching. When a tissue is specified, an LLM-based query builder generates expanded search terms with include/exclude patterns for precise tissue matching; a pattern-based fallback is used if the LLM is unavailable.
+
+### 2. Query expansion
+
+Tissue and disease synonyms are added (e.g., "skin" expands to skin|dermal|cutaneous|epidermal) to broaden the ARCHS4 metadata search.
+
+### 3. Sample discovery
+
+ChatGEO finds test (disease) and control (healthy) samples through two complementary strategies:
+
+- **Keyword search** — Searches ARCHS4 sample metadata for disease/tissue terms. Test samples match the disease term; control samples match the tissue plus control keywords (healthy, control, normal). Overlap between groups is removed.
+- **Ontology-enhanced search** — Maps the disease to MONDO via Ubergraph, expands to include subtypes, finds associated GEO datasets via the NDE SPARQL endpoint, then classifies their ARCHS4 samples. This path discovers samples that keyword matching would miss (e.g., "osteoarthritis" finds studies annotated only with "degenerative joint disease"). Enabled by default; disable with `CHATGEO_ONTOLOGY_SEARCH=0`.
+
+The two strategies are merged, with ontology-discovered samples supplementing keyword results.
+
+### 4. Analysis modes
+
+The `--mode` flag controls how samples are grouped for statistical testing:
+
+- **`auto`** (default) — Tries study-matched meta-analysis first. If fewer than `--min-studies` matched studies are found, falls back to study-prioritized pooling, then basic pooling.
+- **`study-matched`** — Runs independent DE within each GEO study that has both disease and control samples, then combines per-study results via meta-analysis (Stouffer's weighted Z or Fisher's method). This eliminates batch effects because each comparison is within a single study.
+- **`pooled`** — Pools all test and control samples into a single comparison. Fast but susceptible to batch effects from mixing GEO studies.
+
+### 5. Expression retrieval
+
+Raw gene expression counts are loaded from the ARCHS4 HDF5 file for both sample groups.
+
+### 6. Pre-processing
+
+Samples with low library sizes (< 1M reads by default) are removed. Genes are filtered to protein-coding biotypes, duplicate gene symbols are collapsed, and low-count genes (< 10 total reads across all samples) are removed. Mitochondrial (MT-) and ribosomal (RPS/RPL) genes are optionally excluded.
+
+### 7. DE testing
+
+By default, a non-parametric Mann-Whitney U rank test is applied per gene across disease vs. control samples on log2(CPM+1) values. P-values are corrected with Benjamini-Hochberg FDR. DESeq2 and Welch t-test are available as alternatives via `--method` (see [Why Mann-Whitney is the default](#why-mann-whitney-is-the-default) below).
+
+In study-matched mode, DE is run independently within each study, and per-gene p-values are combined across studies using Stouffer's weighted Z method (weights by sqrt(n_samples)) or Fisher's method. The combined p-values are then FDR-corrected.
+
+### 8. Enrichment analysis
+
+Significant upregulated and downregulated gene lists are submitted to g:Profiler for Gene Ontology (BP, CC, MF), KEGG, and Reactome enrichment analysis.
+
+### 9. AI interpretation
+
+An LLM summarizes the biological significance of the DE and enrichment results (requires `ANTHROPIC_API_KEY`). Skip with `--no-interpret`.
+
+### 10. RDF export (opt-in)
+
+Results are converted to Biolink Model RDF for integration into knowledge graphs. See the RDF Export section below.
+
+## Why Mann-Whitney Is the Default
+
+ChatGEO uses the [ARCHS4](https://maayanlab.cloud/archs4/) compendium as its expression data source. ARCHS4 processes raw GEO submissions through Kallisto pseudoalignment, rounds the resulting pseudocounts to integers for compression, and stores them as gene-level estimated counts. This preprocessing has important implications for statistical method choice.
+
+### The problem with DESeq2 on ARCHS4 data
+
+DESeq2 is the gold standard for differential expression -- **when given proper input**. The standard pipeline is raw FASTQ -> STAR/Kallisto -> [tximport](https://bioconductor.org/packages/tximport/) -> DESeq2. The tximport step creates a gene-level offset matrix that corrects for transcript length bias, and DESeq2 then fits a negative binomial model assuming the input follows that distribution.
+
+ARCHS4 short-circuits this pipeline by providing pre-processed, rounded Kallisto pseudocounts without the tximport offset matrix. Feeding these directly into DESeq2 violates its distributional assumptions in three ways:
+
+1. **Pseudocounts are estimates, not true counts** -- they carry estimation uncertainty that the negative binomial model does not account for.
+2. **Without tximport's length offset**, changes in isoform usage across conditions appear as expression changes.
+3. **Rounding introduces artifacts** in the variance structure that DESeq2's dispersion estimation relies on.
+
+On top of this, ChatGEO (in pooled mode) pools samples across GEO studies, introducing batch effects that further confuse the parametric model. Study-matched mode eliminates this particular problem.
+
+### Why Mann-Whitney is robust here
+
+Mann-Whitney U is a non-parametric rank-based test: it only asks "is gene X higher in disease than controls?" without modeling the count distribution. Even if counts are pseudocounts, rounded, or have unusual distributional properties, the **rank order is largely preserved**. This makes it much more robust to both the ARCHS4 data format and cross-study batch effects.
+
+### When to use DESeq2
+
+DESeq2 remains available via `--method deseq2` and is appropriate when:
+
+- You are analyzing samples from a **single GEO study** (minimal batch effects)
+- You have reprocessed raw FASTQ files through the full tximport pipeline
+- You need the specific statistical properties of the negative binomial model (e.g., for very small sample sizes where rank tests lose power)
+
+### References
+
+- [ARCHS4 platform](https://maayanlab.cloud/archs4/) and [Nature Communications paper](https://doi.org/10.1038/s41467-018-03751-6)
+- [DESeq2 vignette](https://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html)
+- [tximport documentation](https://bioconductor.org/packages/tximport/)
+
+## Performance: SQLite Metadata Index
+
+ARCHS4's HDF5 file contains ~1.05M samples across ~36K studies. The `archs4py` library has no indexing, so every metadata lookup loads the entire series_id array and does a linear scan. The ontology-enhanced pipeline calls `get_series_sample_ids()` for each of ~272 NDE-discovered studies, resulting in 272 redundant full scans.
+
+`ARCHS4Client` now automatically builds and uses a SQLite metadata index (`*.metadata.db` alongside the HDF5 file). The index is built on first use (~15s) and provides indexed lookups, FTS5 full-text search, and REGEXP fallback.
+
+| Operation | Without Index | With Index | Speedup |
+|-----------|--------------|------------|---------|
+| `has_series(gse_id)` | ~600ms | <0.01ms | ~60,000x |
+| 272-study batch classify | ~170s | <1ms | ~170,000x |
+| `search_metadata` (FTS5) | ~5-15s | 33ms | ~300x |
+| Full ontology pipeline (osteoarthritis) | 173s | 11s | **16x** |
+
+The index is transparent — all existing code benefits without changes. To disable it:
+
+```python
+client = ARCHS4Client(use_index=False)
+```
 
 ## RDF Export
 
@@ -266,88 +372,37 @@ WHERE {
 ORDER BY DESC(?log2fc_a)
 ```
 
-## How It Works
+## Analysis Modes
 
-1. **Query parsing** -- The natural language query is split into disease and tissue terms.
+### Auto (default)
 
-2. **Query expansion** -- Tissue/disease synonyms are added (e.g., "skin" expands to skin|dermal|cutaneous|epidermal) to broaden the ARCHS4 metadata search.
+The `auto` mode implements a tiered fallback strategy:
 
-3. **Sample discovery** -- ARCHS4 metadata is searched for test samples matching the disease term, and control samples matching the tissue + control keywords (healthy, control, normal). Overlap between groups is removed.
+1. **Study-matched meta-analysis** — Finds GEO studies with both disease and control samples, runs DE independently within each, then combines via Stouffer's Z or Fisher's method. Requires at least `--min-studies` matched studies (default: 3).
+2. **Study-prioritized pooling** — If not enough matched studies, pools samples but prioritizes within-study pairs to reduce batch effects.
+3. **Basic pooling** — Falls back to simple pooled comparison if the above fail.
 
-4. **Expression retrieval** -- Raw gene expression counts are loaded from the ARCHS4 HDF5 file for both sample groups.
+### Study-matched meta-analysis
 
-5. **Pre-processing** -- Samples with low library sizes (< 1M reads by default) are removed. Genes are filtered to protein-coding biotypes, duplicate gene symbols are collapsed, and low-count genes (< 10 total reads across all samples) are removed. Mitochondrial (MT-) and ribosomal (RPS/RPL) genes are optionally excluded.
+The most statistically rigorous mode. By running DE within each study, batch effects are eliminated entirely. Results are combined using:
 
-6. **DE testing (Mann-Whitney U)** -- By default, a non-parametric Mann-Whitney U rank test is applied per gene across disease vs. control samples on log2(CPM+1) values. P-values are corrected with Benjamini-Hochberg FDR. DESeq2 and Welch t-test are available as alternatives via `--method` (see [Why Mann-Whitney is the default](#why-mann-whitney-is-the-default) below).
+- **Stouffer's weighted Z** (default) — Converts per-study p-values to Z-scores signed by log2FC direction, weights by sqrt(n_samples). Preserves effect direction.
+- **Fisher's method** — Combines p-values without regard to direction. More powerful when effects are consistently in the same direction across studies.
 
-7. **Enrichment analysis** -- Significant upregulated and downregulated gene lists are submitted to g:Profiler for Gene Ontology (BP, CC, MF), KEGG, and Reactome enrichment analysis.
+### Pooled
 
-8. **AI interpretation** -- An LLM summarizes the biological significance of the DE and enrichment results.
-
-9. **RDF export** (opt-in) -- Results are converted to Biolink Model RDF for integration into knowledge graphs.
-
-## Why Mann-Whitney Is the Default
-
-ChatGEO uses the [ARCHS4](https://maayanlab.cloud/archs4/) compendium as its expression data source. ARCHS4 processes raw GEO submissions through Kallisto pseudoalignment, rounds the resulting pseudocounts to integers for compression, and stores them as gene-level estimated counts. This preprocessing has important implications for statistical method choice.
-
-### The problem with DESeq2 on ARCHS4 data
-
-DESeq2 is the gold standard for differential expression -- **when given proper input**. The standard pipeline is raw FASTQ -> STAR/Kallisto -> [tximport](https://bioconductor.org/packages/tximport/) -> DESeq2. The tximport step creates a gene-level offset matrix that corrects for transcript length bias, and DESeq2 then fits a negative binomial model assuming the input follows that distribution.
-
-ARCHS4 short-circuits this pipeline by providing pre-processed, rounded Kallisto pseudocounts without the tximport offset matrix. Feeding these directly into DESeq2 violates its distributional assumptions in three ways:
-
-1. **Pseudocounts are estimates, not true counts** -- they carry estimation uncertainty that the negative binomial model does not account for.
-2. **Without tximport's length offset**, changes in isoform usage across conditions appear as expression changes.
-3. **Rounding introduces artifacts** in the variance structure that DESeq2's dispersion estimation relies on.
-
-On top of this, ChatGEO pools samples across GEO studies, introducing batch effects that further confuse the parametric model.
-
-### Why Mann-Whitney is robust here
-
-Mann-Whitney U is a non-parametric rank-based test: it only asks "is gene X higher in disease than controls?" without modeling the count distribution. Even if counts are pseudocounts, rounded, or have unusual distributional properties, the **rank order is largely preserved**. This makes it much more robust to both the ARCHS4 data format and cross-study batch effects.
-
-### When to use DESeq2
-
-DESeq2 remains available via `--method deseq2` and is appropriate when:
-
-- You are analyzing samples from a **single GEO study** (minimal batch effects)
-- You have reprocessed raw FASTQ files through the full tximport pipeline
-- You need the specific statistical properties of the negative binomial model (e.g., for very small sample sizes where rank tests lose power)
-
-### References
-
-- [ARCHS4 platform](https://maayanlab.cloud/archs4/) and [Nature Communications paper](https://doi.org/10.1038/s41467-018-03751-6)
-- [DESeq2 vignette](https://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html)
-- [tximport documentation](https://bioconductor.org/packages/tximport/)
-
-## Performance: SQLite Metadata Index
-
-ARCHS4's HDF5 file contains ~1.05M samples across ~36K studies. The `archs4py` library has no indexing, so every metadata lookup loads the entire series_id array and does a linear scan. The ontology-enhanced pipeline calls `get_series_sample_ids()` for each of ~272 NDE-discovered studies, resulting in 272 redundant full scans.
-
-`ARCHS4Client` now automatically builds and uses a SQLite metadata index (`*.metadata.db` alongside the HDF5 file). The index is built on first use (~15s) and provides indexed lookups, FTS5 full-text search, and REGEXP fallback.
-
-| Operation | Without Index | With Index | Speedup |
-|-----------|--------------|------------|---------|
-| `has_series(gse_id)` | ~600ms | <0.01ms | ~60,000x |
-| 272-study batch classify | ~170s | <1ms | ~170,000x |
-| `search_metadata` (FTS5) | ~5-15s | 33ms | ~300x |
-| Full ontology pipeline (osteoarthritis) | 173s | 11s | **16x** |
-
-The index is transparent — all existing code benefits without changes. To disable it:
-
-```python
-client = ARCHS4Client(use_index=False)
-```
+All test and control samples are combined into a single comparison. This maximizes statistical power (largest possible sample sizes) but is susceptible to batch effects from mixing samples processed in different GEO studies.
 
 ## Module Structure
 
 ```
 chatgeo/
   cli.py                  # Entry point and argument parsing
-  sample_finder.py        # ARCHS4 sample search (pooled and study-matched modes)
-  query_builder.py        # Query expansion strategies (pattern-based, ontology placeholder)
+  sample_finder.py        # ARCHS4 sample search (pooled, study-matched, ontology-enhanced)
+  query_builder.py        # Query expansion strategies (pattern-based, LLM, ontology)
   de_analysis.py          # Normalization, statistical testing, FDR correction
-  de_result.py            # Result dataclasses with provenance
+  de_result.py            # Result dataclasses with provenance tracking
+  meta_analysis.py        # Per-study DE + Stouffer/Fisher meta-analysis combination
   enrichment_analyzer.py  # Gene set enrichment via g:Profiler
   interpretation.py       # LLM-based biological interpretation
   rdf_export.py           # ChatGEO → Biolink RDF adapter
