@@ -6,11 +6,21 @@ in the configuration.xml file. Also extracts characteristic and factor
 nodes from SDRF sample metadata.
 """
 
+import urllib.parse
 from typing import Dict, List, Set
 
 import pandas as pd
 
 from .parser import GEAExperiment, AssayGroup, Contrast
+
+
+def _make_characteristic_uri(node_type: str, value: str) -> str:
+    """Create a valid URI for a characteristic value without an external URI."""
+    safe_value = urllib.parse.quote(
+        value.replace(" ", "_").replace("'", ""),
+        safe="",  # encode everything except unreserved chars
+    )
+    return f"http://purl.org/okn/wobd/{node_type}/{safe_value}"
 
 
 def generate_assay_id(experiment_accession: str, contrast_id: str) -> str:
@@ -275,8 +285,7 @@ def create_characteristic_nodes(
                 "uri": uri,
             })
         else:
-            safe_value = value.replace(" ", "_").replace("'", "")
-            identifier = f"http://purl.org/okn/wobd/{node_type}/{safe_value}"
+            identifier = _make_characteristic_uri(node_type, value)
             nodes.append({
                 "identifier": identifier,
                 "name": value,
@@ -340,8 +349,7 @@ def create_study_characteristic_relationships(
         elif uri:
             relationships.append({"from": study_id, "to": uri})
         else:
-            safe_value = value.replace(" ", "_").replace("'", "")
-            to_id = f"http://purl.org/okn/wobd/{node_type}/{safe_value}"
+            to_id = _make_characteristic_uri(node_type, value)
             relationships.append({"from": study_id, "to": to_id})
 
     if relationships:
@@ -399,8 +407,7 @@ def create_assay_factor_relationships(
                 elif uri:
                     relationships.append({"from": assay_id, "to": uri})
                 else:
-                    safe_value = value.replace(" ", "_").replace("'", "")
-                    to_id = f"http://purl.org/okn/wobd/{node_type}/{safe_value}"
+                    to_id = _make_characteristic_uri(node_type, value)
                     relationships.append({"from": assay_id, "to": to_id})
 
     if relationships:
@@ -438,8 +445,7 @@ def create_assay_characteristic_relationships(
                 elif uri:
                     relationships.append({"from": assay_id, "to": uri})
                 else:
-                    safe_value = value.replace(" ", "_").replace("'", "")
-                    to_id = f"http://purl.org/okn/wobd/{node_type}/{safe_value}"
+                    to_id = _make_characteristic_uri(node_type, value)
                     relationships.append({"from": assay_id, "to": to_id})
 
     if relationships:
