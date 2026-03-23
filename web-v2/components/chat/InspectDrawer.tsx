@@ -339,7 +339,7 @@ export function InspectDrawer({ message }: InspectDrawerProps) {
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto p-4">
         {activeTab === "results" && (
-          <div>
+          <div className="space-y-6">
             {message.results && message.results.results && message.results.results.bindings ? (
               <ResultsTable
                 results={message.results}
@@ -353,6 +353,27 @@ export function InspectDrawer({ message }: InspectDrawerProps) {
                     {JSON.stringify(message.results, null, 2).substring(0, 500)}
                   </pre>
                 )}
+              </div>
+            )}
+            {message.relatedResults?.nde_disease_coverage &&
+             message.relatedResults.nde_disease_coverage.results?.bindings?.length > 0 && (
+              <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  Diseases in this set with NDE data
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mb-2">
+                  These diseases (from the same MONDO set) have at least one dataset in the NIAID Data Ecosystem.
+                </p>
+                <ResultsTable results={message.relatedResults.nde_disease_coverage} />
+              </div>
+            )}
+            {message.relatedResults?.nde_disease_coverage &&
+             (!message.relatedResults.nde_disease_coverage.results?.bindings?.length) && (
+              <div className="pt-4 border-t border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-400">
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Diseases in this set with NDE data
+                </h3>
+                <p>None of these diseases have NDE datasets.</p>
               </div>
             )}
           </div>

@@ -8,16 +8,22 @@ export interface QueryExecutionResult {
     runId?: string;
 }
 
+export interface ExecuteTemplateOptions {
+    slotOverrides?: Record<string, unknown>;
+}
+
 export async function executeTemplateQuery(
     text: string,
     packId: string = "wobd",
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    options?: ExecuteTemplateOptions
 ): Promise<QueryExecutionResult> {
+    const overrides = options?.slotOverrides ? { slots: options.slotOverrides } : undefined;
     // Step 1: Classify intent
     const intentResponse = await fetch("/api/tools/nl/intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, pack_id: packId }),
+        body: JSON.stringify({ text, pack_id: packId, overrides }),
         signal,
     });
 
@@ -41,10 +47,44 @@ export async function executeTemplateQuery(
         throw new Error(error.error || "SPARQL generation failed");
     }
 
-    const { query: sparql } = await sparqlResponse.json();
+    const sparqlPayload = await sparqlResponse.json();
+    const sparql = sparqlPayload.query as string;
+    const relatedQueries = sparqlPayload.relatedQueries as { nde_disease_coverage?: string } | undefined;
 
-    // Step 3: Execute SPARQL
-    return executeSPARQLQuery(sparql, intent, packId, "template", signal);
+    // Step 3: Execute main SPARQL
+    const result = await executeSPARQLQuery(sparql, intent, packId, "template", signal);
+
+    // Step 4: If template returned a related NDE disease-coverage query, run it and attach to message
+    if (relatedQueries?.nde_disease_coverage && result.message && !result.message.error) {
+      try {
+        const ndeResponse = await fetch("/api/tools/sparql/execute", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: relatedQueries.nde_disease_coverage,
+            pack_id: packId,
+            mode: "federated",
+            graphs: ["nde"],
+            attempt_repair: false,
+            run_preflight: false,
+          }),
+          signal,
+        });
+        const ndeResult = await ndeResponse.json();
+        if (!ndeResult.error && ndeResult.bindings) {
+          result.message.relatedResults = {
+            nde_disease_coverage: {
+              head: ndeResult.head ?? { vars: [] },
+              results: { bindings: ndeResult.bindings },
+            },
+          };
+        }
+      } catch (ndeErr) {
+        console.warn("[QueryExecutor] NDE disease coverage query failed:", ndeErr);
+      }
+    }
+
+    return result;
 }
 
 export async function executeOpenQuery(

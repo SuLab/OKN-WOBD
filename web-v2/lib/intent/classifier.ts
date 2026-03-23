@@ -77,6 +77,13 @@ export function classifyIntentDeterministic(
     confidence = 0.7;
     notes += " | Classified as gene_expression_gene_cross_dataset_summary";
   } else if (
+    // genes_agreement + disease/descendants: "across MONDO descendants of X", "genes consistently upregulated in [disease] and its subtypes"
+    (lowered.includes("across") && lowered.includes("descendants") && lowered.includes("of")) ||
+    (lowered.includes("consistently") && (lowered.includes("upregulated") || lowered.includes("downregulated")) && (lowered.includes("disease") || lowered.includes("subtypes") || lowered.includes("descendants"))) {
+    task = "gene_expression_genes_agreement";
+    confidence = 0.85;
+    notes += " | Classified as gene_expression_genes_agreement (disease/descendants)";
+  } else if (
     // genes_agreement: "genes upregulated in multiple experiments", "genes that agree"
     (lowered.includes("agree") || lowered.includes("same direction") || lowered.includes("multiple experiments")) &&
     (lowered.includes("gene") || lowered.includes("upregulated") || lowered.includes("downregulated"))

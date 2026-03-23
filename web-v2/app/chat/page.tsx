@@ -92,9 +92,11 @@ function ChatPage() {
   async function handleMessage({
     text,
     lane,
+    slotsOverride,
   }: {
     text: string;
     lane: "template" | "open" | "raw";
+    slotsOverride?: Record<string, unknown>;
   }) {
     // Check for @graph, @suggest, or @diagram commands
     const trimmedText = text.trim();
@@ -152,7 +154,9 @@ function ChatPage() {
       } else if (lane === "open") {
         result = await executeOpenQuery(text, "wobd", true, abortController.signal);
       } else {
-        result = await executeTemplateQuery(text, "wobd", abortController.signal);
+        result = await executeTemplateQuery(text, "wobd", abortController.signal, {
+          slotOverrides: slotsOverride,
+        });
       }
 
       // Check if query was aborted

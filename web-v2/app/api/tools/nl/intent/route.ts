@@ -94,8 +94,11 @@ export async function POST(request: Request) {
     }
 
     // 4.5) Check for ontology-grounded workflow
-    // Only run for dataset_search tasks
-    if (intent.task === "dataset_search" && detectOntologyIntent(text, intent)) {
+    // Run for dataset_search and gene_expression_genes_agreement (disease + optional descendants)
+    if (
+      (intent.task === "dataset_search" || intent.task === "gene_expression_genes_agreement") &&
+      detectOntologyIntent(text, intent)
+    ) {
       try {
         const llmUrl = new URL(
           "/api/tools/llm/complete",
@@ -252,6 +255,11 @@ export async function POST(request: Request) {
           },
         };
       }
+    }
+
+    // 4.6) Merge client slot overrides (e.g. expand_mondo_descendants from checkbox)
+    if (overrides && typeof overrides === "object" && overrides.slots && typeof overrides.slots === "object") {
+      intent.slots = { ...intent.slots, ...overrides.slots };
     }
 
     // 5) Routing decision (template vs open) based on confidence/threshold

@@ -6,6 +6,7 @@ export interface TemplateGenerationResult {
   ok: boolean;
   query?: string;
   error?: string;
+  relatedQueries?: { nde_disease_coverage?: string };
 }
 
 export async function generateSPARQLFromIntent(intent: Intent, pack: ContextPack): Promise<TemplateGenerationResult> {
@@ -31,6 +32,18 @@ export async function generateSPARQLFromIntent(intent: Intent, pack: ContextPack
     }
   }
 
+  // gene_expression_genes_agreement: when ontology_workflow supplies disease (health_conditions), no extra required slots
+  if (template.id === "gene_expression_genes_agreement" && intent.ontology_workflow) {
+    const healthConditions = slots.health_conditions;
+    const ontologyState = slots.ontology_state as { grounded_mondo_terms?: unknown[] } | undefined;
+    const hasDisease =
+      (Array.isArray(healthConditions) && healthConditions.length > 0) ||
+      (ontologyState?.grounded_mondo_terms?.length ?? 0) > 0;
+    if (hasDisease) {
+      requiredSlots = []; // template has required_slots: [] already; ensure we don't require anything else
+    }
+  }
+
   for (const slot of requiredSlots) {
     if (slots[slot] === undefined || slots[slot] === null || slots[slot] === "") {
       return {
@@ -41,8 +54,15 @@ export async function generateSPARQLFromIntent(intent: Intent, pack: ContextPack
   }
 
   try {
-    const query = await template.generate(intent, pack);
-    return { ok: true, query };
+    const result = await template.generate(intent, pack);
+    if (typeof result === "object" && result !== null && "query" in result) {
+      return {
+        ok: true,
+        query: result.query,
+        relatedQueries: result.relatedQueries,
+      };
+    }
+    return { ok: true, query: result as string };
   } catch (error: any) {
     return {
       ok: false,

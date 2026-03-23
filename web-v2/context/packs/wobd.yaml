@@ -71,8 +71,8 @@ templates:
     optional_slots: ["organism_taxon_ids", "tissue_uberon_ids_ols", "factor_terms"]
   - id: gene_expression_genes_agreement
     description: "Find genes DE in the same direction across multiple experiments"
-    required_slots: []
-    optional_slots: ["min_experiments", "direction", "limit", "organism_taxon_ids", "tissue_uberon_ids_ols", "factor_terms"]
+    required_slots: ["organism_taxon_ids"]
+    optional_slots: ["min_experiments", "direction", "limit", "tissue_uberon_ids_ols", "factor_terms", "health_conditions", "expand_mondo_descendants"]
   - id: gene_expression_genes_discordance
     description: "Find genes DE in opposite directions across contrasts"
     required_slots: []

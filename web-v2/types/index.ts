@@ -165,6 +165,8 @@ export interface ChatMessage {
   step_id?: string;
   query_plan?: QueryPlan;
   is_plan_preview?: boolean;
+  /** Optional related query results (e.g. NDE disease coverage for ontology-driven genes-agreement) */
+  relatedResults?: { nde_disease_coverage?: SPARQLResult };
 }
 
 // Graph metadata

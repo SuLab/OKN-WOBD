@@ -7,7 +7,7 @@ type Lane = "template" | "open" | "raw";
 
 interface ChatComposerProps {
   initialValue?: string;
-  onMessage?: (message: { text: string; lane: Lane }) => void;
+  onMessage?: (message: { text: string; lane: Lane; slotsOverride?: Record<string, unknown> }) => void;
 }
 
 export function ChatComposer({ initialValue = "", onMessage }: ChatComposerProps) {
@@ -19,6 +19,7 @@ export function ChatComposer({ initialValue = "", onMessage }: ChatComposerProps
   const [showModifyInput, setShowModifyInput] = useState(false);
   const [modifyInstruction, setModifyInstruction] = useState("");
   const [isModifying, setIsModifying] = useState(false);
+  const [expandMondoDescendants, setExpandMondoDescendants] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const sparqlEditorRef = useRef<SparqlEditorRef>(null);
   const lastCommandRef = useRef<string | null>(null);
@@ -143,7 +144,11 @@ export function ChatComposer({ initialValue = "", onMessage }: ChatComposerProps
     try {
       // Call onMessage callback if provided
       if (onMessage) {
-        onMessage({ text: query, lane });
+        const slotsOverride =
+          lane === "template" && expandMondoDescendants
+            ? { expand_mondo_descendants: true }
+            : undefined;
+        onMessage({ text: query, lane, slotsOverride });
         // Clear input after submission
         if (lane === "raw") {
           setSparqlValue("");
@@ -362,6 +367,19 @@ export function ChatComposer({ initialValue = "", onMessage }: ChatComposerProps
           </span>
         )}
       </div>
+
+      {/* Include MONDO descendants checkbox (template mode) */}
+      {lane === "template" && (
+        <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={expandMondoDescendants}
+            onChange={(e) => setExpandMondoDescendants(e.target.checked)}
+            className="rounded border-slate-300 dark:border-slate-600 text-accent focus:ring-accent"
+          />
+          <span>Include MONDO descendants (run query across disease subtypes)</span>
+        </label>
+      )}
 
       {/* Input area - textarea for Text mode, SPARQL editor for SPARQL mode */}
       {lane === "raw" ? (

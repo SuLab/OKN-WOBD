@@ -40,7 +40,10 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({ query: result.query });
+    return NextResponse.json({
+      query: result.query,
+      ...(result.relatedQueries && { relatedQueries: result.relatedQueries }),
+    });
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || "SPARQL generation failed" },

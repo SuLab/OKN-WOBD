@@ -57,7 +57,10 @@ export type TemplateId =
   | typeof GENE_EXPRESSION_GENES_AGREEMENT_TEMPLATE_ID
   | typeof GENE_EXPRESSION_GENES_DISCORDANCE_TEMPLATE_ID;
 
-type TemplateGenerator = (intent: Intent, pack: ContextPack) => string | Promise<string>;
+type TemplateGenerator = (
+  intent: Intent,
+  pack: ContextPack
+) => string | Promise<string | { query: string; relatedQueries?: { nde_disease_coverage?: string } }>;
 
 interface RegisteredTemplate {
   id: TemplateId;

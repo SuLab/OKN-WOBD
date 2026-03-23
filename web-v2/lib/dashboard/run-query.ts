@@ -28,11 +28,14 @@ export function buildIntent(
       ? ["nde"]
       : pack.graphs.default_shortnames;
 
+  const useSingleGraph =
+    GXA_TASKS.includes(templateId as (typeof GXA_TASKS)[number]);
+
   return {
     lane: "template",
     task: templateId,
     context_pack: pack.id,
-    graph_mode: "federated",
+    graph_mode: useSingleGraph ? "single_graph" : "federated",
     graphs,
     slots: { ...slots },
     confidence: 0.9,

@@ -74,13 +74,13 @@ export async function POST(request: Request) {
     // NDE-intent queries (e.g. dataset_search) use the federated endpoint with FROM clauses
     // (already injected above); they are no longer routed to the NDE direct endpoint.
 
-    // GXA direct endpoint can take 1–2 minutes; NDE (direct or via federation) can be slow for keyword search. Use longer timeouts.
+    // GXA direct endpoint can take 1–2+ minutes for agreement queries; NDE (direct or via federation) can be slow for keyword search. Use longer timeouts.
     const baseTimeout = options?.timeout_s ?? pack?.guardrails?.timeout_seconds ?? 25;
     const isGXA = queryTargetsGXA && endpoint?.includes("gene-expression-atlas-okn");
     const endpointIsNDE = !queryTargetsGXA && endpoint?.includes("nde");
     const federatedIncludesNDE = mode === "federated" && Array.isArray(graphs) && graphs.includes("nde");
     const timeout = isGXA
-      ? Math.max(baseTimeout, 120)
+      ? Math.max(baseTimeout, 180)
       : endpointIsNDE || federatedIncludesNDE
         ? Math.max(baseTimeout, 60)
         : baseTimeout;
