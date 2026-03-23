@@ -1,6 +1,6 @@
 // Registry graph data - auto-updated from OKN Registry
 // This file is automatically updated when registry fetch succeeds
-// Last updated: 2026-02-23T16:29:23.061Z
+// Last updated: 2026-03-23T18:16:19.223Z
 // Source: /Users/whetzel/git/SuLab/OKN-WOBD/web-v2/data/registry-graphs.json
 
 import type { GraphInfo } from "@/types";
@@ -88,9 +88,19 @@ export const GRAPHS_DATA: RegistryGraphInfo[] = [
     endpoint: "https://frink.apps.renci.org/identifier-mappings/sparql",
   },
   { 
+    shortname: "maudekg", 
+    label: "FDA MAUDE Adverse Event Knowledge Graph",    description: "Knowledge graph constructed from FDA MAUDE adverse event reports using standardized FDA product codes.",
+    endpoint: "https://frink.apps.renci.org/maudekg/sparql",
+  },
+  { 
     shortname: "nasa-gesdisc-kg", 
     label: "NASA-GESDISC-KG",    description: "The NASA Knowledge Graph Dataset is an expansive graph-based dataset designed to integrate and interconnect information about satellite datasets, scientific publications, instruments, platforms, projects, data centers, and science keywords. This knowledge graph is particularly focused on datasets managed by NASA's Distributed Active Archive Centers (DAACs), which are NASA's data repositories responsible for archiving and distributing scientific data. In addition to NASA DAACs, the graph includes datasets from 184 data providers worldwide, including various government agencies and academic institutions.",
     endpoint: "https://frink.apps.renci.org/nasa-gesdisc-kg/sparql",
+  },
+  { 
+    shortname: "ncipidkg", 
+    label: "NCI-PID 2.0 KG",    description: "The NCI-PID 2.0 Knowledge Graph converts NCI Pathway Interaction Database version 2.0 networks into RDF, capturing protein interactions, signaling pathways, and post-translational modifications enriched with INDRA evidence metadata.",
+    endpoint: "https://frink.apps.renci.org/ncipidkg/sparql",
   },
   { 
     shortname: "nde", 

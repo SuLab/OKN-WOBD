@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import { TEMPLATE_META } from "@/lib/landing/template-meta";
 

@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
   /* NIAID Data Discovery Portal palette (dashboard and result cards) */
   --niaid-header: #20558A;
   --niaid-link: #0071bc;
@@ -25,7 +25,7 @@
 }
 
 body {
-  @apply bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100 antialiased;
+  @apply bg-white text-gray-900 antialiased;
 }
 
 /* Custom scrollbar styling */
@@ -39,13 +39,13 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-400 dark:bg-slate-700 rounded-full;
+  @apply bg-slate-400 rounded-full;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-500 dark:bg-slate-600;
+  @apply bg-slate-500;
 }
 
 /* Firefox scrollbar styling */
@@ -53,18 +53,6 @@ body {
   scrollbar-width: thin;
   scrollbar-color: rgb(148 163 184) transparent;
   /* slate-400 */
-}
-
-@media (prefers-color-scheme: dark) {
-  * {
-    scrollbar-color: rgb(51 65 85) transparent;
-    /* slate-700 */
-  }
-}
-
-.dark * {
-  scrollbar-color: rgb(51 65 85) transparent;
-  /* slate-700 */
 }
 
 /* Custom tooltip styles */
@@ -107,16 +95,4 @@ body {
   border: 4px solid transparent;
   border-top-color: rgb(15 23 42);
   /* slate-900 */
-}
-
-.dark .tooltip {
-  background-color: rgb(241 245 249);
-  /* slate-100 */
-  color: rgb(15 23 42);
-  /* slate-900 */
-}
-
-.dark .tooltip::after {
-  border-top-color: rgb(241 245 249);
-  /* slate-100 */
 }
