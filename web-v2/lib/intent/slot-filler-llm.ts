@@ -11,6 +11,7 @@ const GXA_TASKS = [
   "gene_expression_genes_in_experiment",
   "gene_expression_experiments_for_gene",
   "gene_expression_gene_cross_dataset_summary",
+  "gene_expression_gene_level_de_per_contrast",
   "gene_expression_genes_agreement",
   "gene_expression_genes_discordance",
 ] as const;
@@ -222,7 +223,11 @@ function getGxaSlotsSchema(task: string): string {
   if (task === "gene_expression_genes_in_experiment") {
     return base + "\nRequired: experiment_id";
   }
-  if (task === "gene_expression_experiments_for_gene" || task === "gene_expression_gene_cross_dataset_summary") {
+  if (
+    task === "gene_expression_experiments_for_gene" ||
+    task === "gene_expression_gene_cross_dataset_summary" ||
+    task === "gene_expression_gene_level_de_per_contrast"
+  ) {
     return base + "\nRequired: gene_symbol or gene_symbols";
   }
   return base;

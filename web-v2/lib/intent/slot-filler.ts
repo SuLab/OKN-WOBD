@@ -8,6 +8,7 @@ const GXA_TASKS = [
   "gene_expression_genes_in_experiment",
   "gene_expression_experiments_for_gene",
   "gene_expression_gene_cross_dataset_summary",
+  "gene_expression_gene_level_de_per_contrast",
   "gene_expression_genes_agreement",
   "gene_expression_genes_discordance",
 ] as const;
@@ -113,7 +114,8 @@ export function fillSlots(intent: Intent, text: string): Intent {
     const geneSymbols = extractGeneSymbols(text);
     if (geneSymbols.length > 0) {
       if (
-        intent.task === "gene_expression_experiments_for_gene" &&
+        (intent.task === "gene_expression_experiments_for_gene" ||
+          intent.task === "gene_expression_gene_level_de_per_contrast") &&
         !slots.gene_symbols
       ) {
         slots.gene_symbols = geneSymbols;

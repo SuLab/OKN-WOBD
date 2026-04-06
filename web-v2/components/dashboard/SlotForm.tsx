@@ -1303,7 +1303,7 @@ const SLOT_LABELS: Record<string, { label: string; placeholder: string }> = {
   species: { label: "Species", placeholder: "e.g. Homo sapiens or 9606" },
   drugs: { label: "Drugs", placeholder: "e.g. doxycycline" },
   drug: { label: "Drug name(s)", placeholder: "e.g. aspirin, Lipitor, tocilizumab" },
-  gene_symbols: { label: "Gene symbol(s)", placeholder: "e.g. DUSP2, TP53" },
+  gene_symbols: { label: "Gene symbol(s)", placeholder: "e.g. DUSP2, TP53, SOCS1" },
   gene_symbol: { label: "Gene symbol", placeholder: "e.g. DUSP2" },
   experiment_id: { label: "Experiment ID", placeholder: "e.g. E-GEOD-76" },
   organism_taxon_ids: { label: "Organism / taxon IDs", placeholder: "e.g. Mus musculus or 10090" },

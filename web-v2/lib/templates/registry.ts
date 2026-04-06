@@ -36,6 +36,11 @@ import {
   buildGeneExpressionGeneCrossDatasetSummaryQuery,
 } from "./templates/gene_expression_gene_cross_dataset_summary";
 import {
+  GENE_EXPRESSION_GENE_LEVEL_DE_PER_CONTRAST_TEMPLATE_ID,
+  geneExpressionGeneLevelDePerContrastTemplate,
+  buildGeneExpressionGeneLevelDePerContrastQuery,
+} from "./templates/gene_expression_gene_level_de_per_contrast";
+import {
   GENE_EXPRESSION_GENES_AGREEMENT_TEMPLATE_ID,
   geneExpressionGenesAgreementTemplate,
   buildGeneExpressionGenesAgreementQuery,
@@ -54,6 +59,7 @@ export type TemplateId =
   | typeof GENE_EXPRESSION_GENES_IN_EXPERIMENT_TEMPLATE_ID
   | typeof GENE_EXPRESSION_EXPERIMENTS_FOR_GENE_TEMPLATE_ID
   | typeof GENE_EXPRESSION_GENE_CROSS_DATASET_SUMMARY_TEMPLATE_ID
+  | typeof GENE_EXPRESSION_GENE_LEVEL_DE_PER_CONTRAST_TEMPLATE_ID
   | typeof GENE_EXPRESSION_GENES_AGREEMENT_TEMPLATE_ID
   | typeof GENE_EXPRESSION_GENES_DISCORDANCE_TEMPLATE_ID;
 
@@ -93,6 +99,10 @@ const TEMPLATE_REGISTRY: Record<string, RegisteredTemplate> = {
     id: GENE_EXPRESSION_GENE_CROSS_DATASET_SUMMARY_TEMPLATE_ID,
     generate: buildGeneExpressionGeneCrossDatasetSummaryQuery,
   },
+  [GENE_EXPRESSION_GENE_LEVEL_DE_PER_CONTRAST_TEMPLATE_ID]: {
+    id: GENE_EXPRESSION_GENE_LEVEL_DE_PER_CONTRAST_TEMPLATE_ID,
+    generate: buildGeneExpressionGeneLevelDePerContrastQuery,
+  },
   [GENE_EXPRESSION_GENES_AGREEMENT_TEMPLATE_ID]: {
     id: GENE_EXPRESSION_GENES_AGREEMENT_TEMPLATE_ID,
     generate: buildGeneExpressionGenesAgreementQuery,
@@ -120,6 +130,7 @@ export function listTemplateDefinitionsForPack(pack: ContextPack) {
     geneExpressionGenesInExperimentTemplate,
     geneExpressionExperimentsForGeneTemplate,
     geneExpressionGeneCrossDatasetSummaryTemplate,
+    geneExpressionGeneLevelDePerContrastTemplate,
     geneExpressionGenesAgreementTemplate,
     geneExpressionGenesDiscordanceTemplate,
   ];

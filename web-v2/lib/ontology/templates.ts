@@ -882,7 +882,9 @@ LIMIT ${Math.min(limit, 500)}`;
 
 /**
  * Build SPARQL query to find GXA experiments/contrasts where given genes are DE.
- * Returns one row per (experiment, contrast, gene) with DE metrics and labels.
+ * Returns one row per (contrast, gene) with DE metrics and labels. Includes ?experimentId
+ * (GXA accession, e.g. E-GEOD-139813) for comparison with the Atlas UI; ?contrast is the
+ * canonical Assay IRI for joins.
  *
  * @param geneSymbols - Array of gene symbols to search for (e.g., ["Dusp2"])
  * @param limit - Max number of rows to return (default 100)
@@ -890,6 +892,7 @@ LIMIT ${Math.min(limit, 500)}`;
  * @param organismTaxonIds - Optional NCBITaxon IDs to filter by organism (e.g. ["10090", "9606"])
  * @param tissueUberonIds - Optional UBERON IDs to filter by tissue (e.g. ["0002082"])
  * @param factorTerms - Optional text terms to match in factors/contrast labels (e.g. ["aortic banding"])
+ * @param includeDirectionColumn - When true, SELECT includes ?direction ("up"/"down" from log2fc) like the cross-dataset summary query.
  */
 export function buildGXAExperimentsForGenesQuery(
   geneSymbols: string[],
@@ -897,7 +900,8 @@ export function buildGXAExperimentsForGenesQuery(
   upregulated?: boolean,
   organismTaxonIds?: string[],
   tissueUberonIds?: string[],
-  factorTerms?: string[]
+  factorTerms?: string[],
+  includeDirectionColumn: boolean = false
 ): string {
   if (!geneSymbols || geneSymbols.length === 0) {
     throw new Error("At least one gene symbol is required for GXA experiments-for-gene query");
@@ -964,16 +968,20 @@ export function buildGXAExperimentsForGenesQuery(
 
   const tissueInMain = useFactorSubquery ? "" : tissueFilter;
 
+  const directionSelect = includeDirectionColumn ? "\n  ?direction" : "";
+  const directionBind = includeDirectionColumn
+    ? "\n  BIND(IF(?log2fc > 0, \"up\", \"down\") AS ?direction)"
+    : "";
+
   return `PREFIX biolink:      <https://w3id.org/biolink/vocab/>
 PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
 
 SELECT DISTINCT
   ?experimentId
   ?contrast
-  ?contrastId
   ?contrastLabel
   ?gene
-  ?geneSymbol
+  ?geneSymbol${directionSelect}
   ?log2fc
   ?adjPValue
 FROM <https://purl.org/okn/frink/kg/gene-expression-atlas-okn>
@@ -986,11 +994,9 @@ WHERE {
   )${log2fcFilter}${organismFilter}${tissueInMain}${factorInMain}
 
   BIND(REPLACE(STR(?contrast), "^.*/(E-[A-Z0-9-]+)-.*$", "$1") AS ?experimentId)
-  OPTIONAL { ?contrast spokegenelab:contrast_id ?contrastIdProp . }
-  BIND(COALESCE(?contrastIdProp, REPLACE(STR(?contrast), "^.*-(g[0-9]+_g[0-9]+)$", "$1")) AS ?contrastId)
-  OPTIONAL { ?contrast biolink:name ?contrastLabel . }
+  OPTIONAL { ?contrast biolink:name ?contrastLabel . }${directionBind}
 }
-ORDER BY ?geneSymbol ?experimentId ?contrastId
+ORDER BY ?geneSymbol ?experimentId STR(?contrast)
 LIMIT ${Math.min(limit, 500)}`;
 }
 

@@ -69,6 +69,10 @@ templates:
     description: "Summarize a gene's DE evidence across experiments (per contrast)"
     required_slots: ["gene_symbol"]
     optional_slots: ["organism_taxon_ids", "tissue_uberon_ids_ols", "factor_terms"]
+  - id: gene_expression_gene_level_de_per_contrast
+    description: "Gene-level differential expression per contrast: gene(s), contrasts, direction (up/down), and metrics across GXA experiments"
+    required_slots: ["gene_symbols"]
+    optional_slots: ["direction", "limit", "organism_taxon_ids", "tissue_uberon_ids_ols", "factor_terms"]
   - id: gene_expression_genes_agreement
     description: "Find genes DE in the same direction across multiple experiments"
     required_slots: []

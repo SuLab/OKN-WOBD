@@ -4,6 +4,7 @@ import {
   List,
   Search,
   BarChart2,
+  Layers,
   GitMerge,
   ArrowLeftRight,
   Pill,
@@ -92,6 +93,17 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
     icon: BarChart2,
     iconColor: "text-emerald-600 dark:text-emerald-400",
     blurb: "Summarize a gene's differential expression evidence across experiments.",
+    buttonLabel: "Run query",
+  },
+  {
+    id: "gene_expression_gene_level_de_per_contrast",
+    titlePart1: "Gene-level differential expression",
+    titlePart2: " per contrast",
+    description:
+      "Across GXA experiments: gene(s), contrasts, direction (up/down), log2FC, and adjusted p-value in one result set",
+    icon: Layers,
+    iconColor: "text-cyan-600 dark:text-cyan-400",
+    blurb: "One query for one or more genes: experiment and contrast identifiers, optional up/down filter, and a direction column alongside log2FC and adjusted p-value.",
     buttonLabel: "Run query",
   },
   {
