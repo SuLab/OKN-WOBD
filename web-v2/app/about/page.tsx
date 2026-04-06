@@ -10,7 +10,7 @@ export default function AboutPage() {
             About the Web of Biological Data
           </h1>
           <p className="mt-3 text-slate-600 dark:text-slate-400">
-            This site is a prototype <strong>Web of Biological Data</strong> (WOBD), a
+            This is a prototype Web of Biological Data (WOBD), a
             research effort to make infectious and immune-related datasets and knowledge easier
             to find, query, reuse, and connect with other data sources in an AI-ready open
             knowledge network.
