@@ -2,7 +2,12 @@
 const nextConfig = {
   // App Router is now stable and default in Next.js 14
   // No experimental config needed
-  webpack: (config, { isServer }) => {
+  webpack: (config, { dev, isServer }) => {
+    // Disk cache under .next/cache/webpack can get corrupted if .next is partially
+    // deleted while `next dev` runs (ENOENT on *.pack.gz, then e[o] is not a function).
+    if (dev) {
+      config.cache = false;
+    }
     // Externalize Node.js built-in modules for client bundle
     // This prevents webpack from trying to bundle fs, path, etc. for the client
     if (!isServer) {
