@@ -81,10 +81,23 @@ export function injectFromClauses(query: string, graphShortnames: string[]): str
     return query;
   }
 
-  // Insert FROM clauses before WHERE
-  const fromClauses = graphShortnames.map(
-    shortname => `FROM <https://purl.org/okn/frink/kg/${shortname}>`
-  ).join("\n");
+  // Avoid duplicate FROM when the template already declares the same graph (e.g. GXA builders).
+  const existingFromIris = new Set<string>();
+  const fromIriRegex = /FROM\s+<([^>]+)>/gi;
+  let fm: RegExpExecArray | null;
+  while ((fm = fromIriRegex.exec(query)) !== null) {
+    existingFromIris.add(fm[1]);
+  }
+
+  const toInject = graphShortnames
+    .map((shortname) => `https://purl.org/okn/frink/kg/${shortname}`)
+    .filter((iri) => !existingFromIris.has(iri));
+
+  if (toInject.length === 0) {
+    return query;
+  }
+
+  const fromClauses = toInject.map((iri) => `FROM <${iri}>`).join("\n");
 
   const beforeWhere = query.substring(0, whereIndex).trim();
   const afterWhere = query.substring(whereIndex);
