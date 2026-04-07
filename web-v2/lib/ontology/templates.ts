@@ -807,6 +807,82 @@ function buildFactorContrastSubquery(
   }`;
 }
 
+/** Normalize slot / pasted values to NCBI taxonomy numeric IDs (GXA uses OBO NCBITaxon_* IRIs). */
+function normalizeGxaNcbiTaxonNumericIds(organismTaxonIds: string[]): string[] {
+  const out: string[] = [];
+  for (const raw of organismTaxonIds) {
+    const s = raw.replace(/"/g, "").trim();
+    if (!s) continue;
+    const mObo = s.match(/obo\/NCBITaxon_(\d+)/i) || s.match(/NCBITaxon[_:](\d+)/i);
+    if (mObo) {
+      out.push(mObo[1]);
+      continue;
+    }
+    if (/^\d+$/.test(s)) {
+      out.push(s);
+    }
+  }
+  return [...new Set(out)];
+}
+
+function buildGXATaxonMatchFilterExpr(taxonVar: string, numericIds: string[]): string {
+  if (numericIds.length === 0) return "";
+  const esc = (r: string) => r.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts: string[] = [];
+  for (const id of numericIds) {
+    parts.push(`${taxonVar} = <http://purl.obolibrary.org/obo/NCBITaxon_${id}>`);
+    parts.push(`REGEX(STR(${taxonVar}), "NCBITaxon[_:]${esc(id)}(?:[^0-9]|$)")`);
+  }
+  return parts.join(" || ");
+}
+
+/** SPARQL expression for GXA experiment accession from an Assay (contrast) IRI. */
+function gxaExperimentIdFromContrastExpr(contrastVar: string): string {
+  return `REPLACE(STR(${contrastVar}), "^.*/(E-[A-Z0-9-]+)-.*$", "$1")`;
+}
+
+function buildGXAOrganismStudyTaxonParts(
+  numericIds: string[],
+  experimentIdExpr: string,
+  tag: string
+): { setup: string; disjunct: string } {
+  const tOkn = `?__gxTaxOkn_${tag}`;
+  const tSp = `?__gxTaxSpoke_${tag}`;
+  const sOkn = `?__gxStudyOkn_${tag}`;
+  const sSp = `?__gxStudySpoke_${tag}`;
+  const setup = `
+    BIND(IRI(CONCAT("http://purl.org/okn/wobd/study/", ${experimentIdExpr})) AS ${sOkn})
+    OPTIONAL { ${sOkn} biolink:in_taxon ${tOkn} . }
+    BIND(IRI(CONCAT("https://spoke.ucsf.edu/genelab/", ${experimentIdExpr})) AS ${sSp})
+    OPTIONAL { ${sSp} biolink:in_taxon ${tSp} . }`;
+  const disjunct = `(BOUND(${tOkn}) && (${buildGXATaxonMatchFilterExpr(tOkn, numericIds)})) || (BOUND(${tSp}) && (${buildGXATaxonMatchFilterExpr(tSp, numericIds)}))`;
+  return { setup, disjunct };
+}
+
+/**
+ * Restrict to experiments whose Study has biolink:in_taxon matching NCBI taxon IDs (OKN-WOBD and/or
+ * SPOKE GeneLab study IRIs). Uses OPTIONAL + FILTER, not FILTER EXISTS: Virtuoso incorrectly
+ * satisfied EXISTS when the inner pattern used BIND(REPLACE(STR(?contrast), ...)), which let
+ * unrelated studies satisfy the organism constraint (e.g. mouse E-GEOD-3749 under Arabidopsis).
+ */
+function buildGXAOrganismFilterFromExprs(
+  organismTaxonIds: string[] | undefined,
+  experimentIdExprs: string[],
+  tags: string[]
+): string {
+  if (!organismTaxonIds || organismTaxonIds.length === 0 || experimentIdExprs.length === 0) {
+    return "";
+  }
+  const ids = normalizeGxaNcbiTaxonNumericIds(organismTaxonIds);
+  if (ids.length === 0) return "";
+  const parts = experimentIdExprs.map((ex, i) =>
+    buildGXAOrganismStudyTaxonParts(ids, ex, tags[i] ?? `t${i}`)
+  );
+  const setup = parts.map((p) => p.setup).join("");
+  const filterInner = parts.map((p) => `(${p.disjunct})`).join(" && ");
+  return `${setup}\n    FILTER( ${filterInner} )`;
+}
+
 /**
  * Build disease filter for GXA: Study --studies--> Disease (EFO).
  * Study IRI is constructed from experimentId (e.g. spokegenelab:E-GEOD-76).
@@ -844,17 +920,11 @@ export function buildGXAExperimentCoverageQuery(
   factorTerms?: string[],
   diseaseEfoIds?: string[]
 ): string {
-  let organismFilter = "";
-  if (organismTaxonIds && organismTaxonIds.length > 0) {
-    const safeIds = organismTaxonIds.map((id) => id.replace(/"/g, '\\"').trim()).filter(Boolean);
-    if (safeIds.length > 0) {
-      const values = safeIds.map((id) => `"${id}"`).join(" ");
-      organismFilter = `
-    ?association biolink:object ?gene .
-    ?gene biolink:in_taxon ?taxon .
-    FILTER(STR(?taxon) IN (${safeIds.map((id) => `"${id}"`).join(", ")}))`;
-    }
-  }
+  const organismFilter = buildGXAOrganismFilterFromExprs(
+    organismTaxonIds,
+    ["?experimentId"],
+    ["cov"]
+  );
 
   let tissueFilter = "";
   if (tissueUberonIds && tissueUberonIds.length > 0) {
@@ -1018,10 +1088,11 @@ export function buildGXAGenesForExperimentQuery(
     log2fcFilter += `\n    FILTER(BOUND(?adjPValue) && ?adjPValue <= ${maxAdjPValue})`;
   }
 
-  let organismFilter = "";
-  if (organismTaxonIds && organismTaxonIds.length > 0) {
-    organismFilter = `\n  # Organism filter (Phase 4)\n  ?gene biolink:in_taxon ?taxon .\n  FILTER(STR(?taxon) IN (${organismTaxonIds.map((id) => `"${id.replace(/"/g, '\\"')}"`).join(", ")}))`;
-  }
+  const organismFilter = buildGXAOrganismFilterFromExprs(
+    organismTaxonIds,
+    [gxaExperimentIdFromContrastExpr("?contrast")],
+    ["gfe"]
+  );
 
   let tissueFilter = "";
   if (tissueUberonIds && tissueUberonIds.length > 0) {
@@ -1142,10 +1213,11 @@ export function buildGXAExperimentsForGenesQuery(
     log2fcFilter = "\n    FILTER(?log2fc < 0)";
   }
 
-  let organismFilter = "";
-  if (organismTaxonIds && organismTaxonIds.length > 0) {
-    organismFilter = `\n  # Organism filter (Phase 4)\n  ?gene biolink:in_taxon ?taxon .\n  FILTER(STR(?taxon) IN (${organismTaxonIds.map((id) => `"${id.replace(/"/g, '\\"')}"`).join(", ")}))`;
-  }
+  const organismFilter = buildGXAOrganismFilterFromExprs(
+    organismTaxonIds,
+    [gxaExperimentIdFromContrastExpr("?contrast")],
+    ["gxeg"]
+  );
 
   let tissueFilter = "";
   if (tissueUberonIds && tissueUberonIds.length > 0) {
@@ -1247,10 +1319,11 @@ export function buildGXAGeneCrossDatasetSummaryQuery(
   }
   const safeSymbol = geneSymbol.trim().toLowerCase().replace(/"/g, '\\"');
 
-  let organismFilter = "";
-  if (organismTaxonIds && organismTaxonIds.length > 0) {
-    organismFilter = `\n  ?gene biolink:in_taxon ?taxon .\n  FILTER(STR(?taxon) IN (${organismTaxonIds.map((id) => `"${id.replace(/"/g, '\\"')}"`).join(", ")}))`;
-  }
+  const organismFilter = buildGXAOrganismFilterFromExprs(
+    organismTaxonIds,
+    [gxaExperimentIdFromContrastExpr("?contrast")],
+    ["gxsum"]
+  );
 
   let tissueFilter = "";
   if (tissueUberonIds && tissueUberonIds.length > 0) {
@@ -1353,10 +1426,11 @@ export function buildGXAGenesAgreementQuery(
         ? "FILTER(?log2fc < 0)"
         : "FILTER(?log2fc != 0)";
 
-  let organismFilter = "";
-  if (organismTaxonIds && organismTaxonIds.length > 0) {
-    organismFilter = `\n  ?gene biolink:in_taxon ?taxon .\n  FILTER(STR(?taxon) IN (${organismTaxonIds.map((id) => `"${id.replace(/"/g, '\\"')}"`).join(", ")}))`;
-  }
+  const organismFilter = buildGXAOrganismFilterFromExprs(
+    organismTaxonIds,
+    [gxaExperimentIdFromContrastExpr("?contrast")],
+    ["gxagr"]
+  );
 
   let tissueFilter = "";
   if (tissueUberonIds && tissueUberonIds.length > 0) {
@@ -1441,10 +1515,11 @@ export function buildGXAGenesDiscordanceQuery(
   tissueUberonIds?: string[],
   factorTerms?: string[]
 ): string {
-  let organismFilter = "";
-  if (organismTaxonIds && organismTaxonIds.length > 0) {
-    organismFilter = `\n  ?gene biolink:in_taxon ?taxon .\n  FILTER(STR(?taxon) IN (${organismTaxonIds.map((id) => `"${id.replace(/"/g, '\\"')}"`).join(", ")}))`;
-  }
+  const organismFilter = buildGXAOrganismFilterFromExprs(
+    organismTaxonIds,
+    [gxaExperimentIdFromContrastExpr("?c1"), gxaExperimentIdFromContrastExpr("?c2")],
+    ["up", "down"]
+  );
 
   let tissueFilter = "";
   if (tissueUberonIds && tissueUberonIds.length > 0) {
