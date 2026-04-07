@@ -3,6 +3,20 @@
 
 import { mondoDigitsToOboIri } from "@/lib/ontology/mondo-iri";
 
+/** FRINK GXA uses http://purl.org/okn/wobd/log2fc; legacy exports use spokegenelab:. */
+function gxaAssocLog2fcBinding(assocVar: string, log2Var: string, uniq: string): string {
+  return `  OPTIONAL { ${assocVar} wobd:log2fc ?_gxa_${uniq}_lw . }
+  OPTIONAL { ${assocVar} spokegenelab:log2fc ?_gxa_${uniq}_ls . }
+  BIND(COALESCE(?_gxa_${uniq}_lw, ?_gxa_${uniq}_ls) AS ${log2Var})
+  FILTER(BOUND(${log2Var}))`;
+}
+
+function gxaAssocAdjPBinding(assocVar: string, adjVar: string, uniq: string): string {
+  return `  OPTIONAL { ${assocVar} wobd:adj_p_value ?_gxa_${uniq}_aw . }
+  OPTIONAL { ${assocVar} spokegenelab:adj_p_value ?_gxa_${uniq}_as . }
+  BIND(COALESCE(?_gxa_${uniq}_aw, ?_gxa_${uniq}_as) AS ${adjVar})`;
+}
+
 /**
  * Build SPARQL query to ground candidate labels to MONDO terms in Ubergraph
  * Stage 2: Ground candidate labels to MONDO
@@ -1033,18 +1047,18 @@ export function buildGXAGenesForExperimentQuery(
   ${factorSubquery}
   ?assoc a biolink:GeneExpressionMixin ;
          biolink:object ?gene ;
-         biolink:subject ?contrast ;
-         spokegenelab:log2fc ?log2fc .`
+         biolink:subject ?contrast .
+${gxaAssocLog2fcBinding("?assoc", "?log2fc", "gfe")}`
     : `?assoc a biolink:GeneExpressionMixin ;
          biolink:object ?gene ;
-         biolink:subject ?contrast ;
-         spokegenelab:log2fc ?log2fc .
-  OPTIONAL { ?assoc spokegenelab:adj_p_value ?adjPValue . }
+         biolink:subject ?contrast .
+${gxaAssocLog2fcBinding("?assoc", "?log2fc", "gfe")}
+${gxaAssocAdjPBinding("?assoc", "?adjPValue", "gfea")}
   ?contrast a biolink:Assay .
   FILTER(CONTAINS(STR(?contrast), "${safeId}"))`;
 
   const contrastRest = useFactorSubquery
-    ? `OPTIONAL { ?assoc spokegenelab:adj_p_value ?adjPValue . }`
+    ? gxaAssocAdjPBinding("?assoc", "?adjPValue", "gfea")
     : "";
 
   const tissueInMain = useFactorSubquery ? "" : tissueFilter;
@@ -1065,6 +1079,7 @@ export function buildGXAGenesForExperimentQuery(
 
   return `PREFIX biolink:      <https://w3id.org/biolink/vocab/>
 PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
+PREFIX wobd:        <http://purl.org/okn/wobd/>
 
 SELECT DISTINCT
   ?experimentId
@@ -1152,12 +1167,12 @@ export function buildGXAExperimentsForGenesQuery(
   ${factorSubquery}
   ?assoc a biolink:GeneExpressionMixin ;
          biolink:object ?gene ;
-         biolink:subject ?contrast ;
-         spokegenelab:log2fc ?log2fc .`
+         biolink:subject ?contrast .
+${gxaAssocLog2fcBinding("?assoc", "?log2fc", "gxeg")}`
     : `?assoc a biolink:GeneExpressionMixin ;
          biolink:object ?gene ;
-         biolink:subject ?contrast ;
-         spokegenelab:log2fc ?log2fc .
+         biolink:subject ?contrast .
+${gxaAssocLog2fcBinding("?assoc", "?log2fc", "gxeg")}
   ?contrast a biolink:Assay .`;
 
   const factorInMain = useFactorSubquery ? "" : (() => {
@@ -1184,6 +1199,7 @@ export function buildGXAExperimentsForGenesQuery(
 
   return `PREFIX biolink:      <https://w3id.org/biolink/vocab/>
 PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
+PREFIX wobd:        <http://purl.org/okn/wobd/>
 
 SELECT DISTINCT
   ?experimentId
@@ -1196,7 +1212,7 @@ SELECT DISTINCT
 FROM <https://purl.org/okn/frink/kg/gene-expression-atlas-okn>
 WHERE {
   ${contrastSource}
-  OPTIONAL { ?assoc spokegenelab:adj_p_value ?adjPValue . }
+${gxaAssocAdjPBinding("?assoc", "?adjPValue", "gxega")}
   ?gene biolink:symbol ?geneSymbol .
   FILTER(
     ${geneFilters}
@@ -1256,12 +1272,12 @@ export function buildGXAGeneCrossDatasetSummaryQuery(
   ${factorSubquery}
   ?assoc a biolink:GeneExpressionMixin ;
          biolink:object ?gene ;
-         biolink:subject ?contrast ;
-         spokegenelab:log2fc ?log2fc .`
+         biolink:subject ?contrast .
+${gxaAssocLog2fcBinding("?assoc", "?log2fc", "gxsum")}`
     : `?assoc a biolink:GeneExpressionMixin ;
          biolink:object ?gene ;
-         biolink:subject ?contrast ;
-         spokegenelab:log2fc ?log2fc .
+         biolink:subject ?contrast .
+${gxaAssocLog2fcBinding("?assoc", "?log2fc", "gxsum")}
   ?contrast a biolink:Assay .`;
 
   const factorInMain = useFactorSubquery ? "" : (() => {
@@ -1283,6 +1299,7 @@ export function buildGXAGeneCrossDatasetSummaryQuery(
 
   return `PREFIX biolink:      <https://w3id.org/biolink/vocab/>
 PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
+PREFIX wobd:        <http://purl.org/okn/wobd/>
 
 SELECT DISTINCT
   ?geneSymbol
@@ -1295,7 +1312,7 @@ SELECT DISTINCT
 FROM <https://purl.org/okn/frink/kg/gene-expression-atlas-okn>
 WHERE {
   ${contrastSource}
-  OPTIONAL { ?assoc spokegenelab:adj_p_value ?adjPValue . }
+${gxaAssocAdjPBinding("?assoc", "?adjPValue", "gxsuma")}
   ?gene biolink:symbol ?geneSymbol .
   FILTER(LCASE(?geneSymbol) = "${safeSymbol}")
 
@@ -1361,12 +1378,12 @@ export function buildGXAGenesAgreementQuery(
   ${factorSubquery}
   ?assoc a biolink:GeneExpressionMixin ;
          biolink:object ?gene ;
-         biolink:subject ?contrast ;
-         spokegenelab:log2fc ?log2fc .`
+         biolink:subject ?contrast .
+${gxaAssocLog2fcBinding("?assoc", "?log2fc", "gxagr")}`
     : `?assoc a biolink:GeneExpressionMixin ;
          biolink:object ?gene ;
-         biolink:subject ?contrast ;
-         spokegenelab:log2fc ?log2fc .
+         biolink:subject ?contrast .
+${gxaAssocLog2fcBinding("?assoc", "?log2fc", "gxagr")}
   ?contrast a biolink:Assay .`;
 
   const factorInMain = useFactorSubquery ? "" : (() => {
@@ -1388,6 +1405,7 @@ export function buildGXAGenesAgreementQuery(
 
   return `PREFIX biolink:      <https://w3id.org/biolink/vocab/>
 PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
+PREFIX wobd:        <http://purl.org/okn/wobd/>
 
 SELECT ?geneSymbol ?direction (COUNT(DISTINCT ?experimentId) AS ?experimentCount)
   (GROUP_CONCAT(DISTINCT ?experimentId; separator=" | ") AS ?sampleExperimentIds)
@@ -1446,8 +1464,10 @@ export function buildGXAGenesDiscordanceQuery(
   const c1Source = useFactorSubquery
     ? `# Subquery: filter contrasts by factor/tissue before joining
   ${factorSubquery}
-  ?a1 a biolink:GeneExpressionMixin ; biolink:object ?gene ; biolink:subject ?c1 ; spokegenelab:log2fc ?l1 .`
-    : `?a1 a biolink:GeneExpressionMixin ; biolink:object ?gene ; biolink:subject ?c1 ; spokegenelab:log2fc ?l1 .`;
+  ?a1 a biolink:GeneExpressionMixin ; biolink:object ?gene ; biolink:subject ?c1 .
+${gxaAssocLog2fcBinding("?a1", "?l1", "d1")}`
+    : `?a1 a biolink:GeneExpressionMixin ; biolink:object ?gene ; biolink:subject ?c1 .
+${gxaAssocLog2fcBinding("?a1", "?l1", "d1")}`;
 
   const factorInMain = useFactorSubquery ? "" : (() => {
     if (!factorTerms || factorTerms.length === 0) return "";
@@ -1468,6 +1488,7 @@ export function buildGXAGenesDiscordanceQuery(
 
   return `PREFIX biolink:      <https://w3id.org/biolink/vocab/>
 PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
+PREFIX wobd:        <http://purl.org/okn/wobd/>
 
 SELECT ?gene ?geneSymbol ?experimentIdUp ?experimentIdDown ?contrastLabelUp ?contrastLabelDown
   ?log2fcUp ?log2fcDown ?adjPValueUp ?adjPValueDown
@@ -1476,12 +1497,13 @@ FROM <https://purl.org/okn/frink/kg/gene-expression-atlas-okn>
 WHERE {
   ${c1Source}
   FILTER(?l1 > 0)
-  ?a2 a biolink:GeneExpressionMixin ; biolink:object ?gene ; biolink:subject ?c2 ; spokegenelab:log2fc ?l2 .
+  ?a2 a biolink:GeneExpressionMixin ; biolink:object ?gene ; biolink:subject ?c2 .
+${gxaAssocLog2fcBinding("?a2", "?l2", "d2")}
   FILTER(?l2 < 0)
   FILTER(?a1 != ?a2)
   OPTIONAL { ?gene biolink:symbol ?geneSymbol . }
-  OPTIONAL { ?a1 spokegenelab:adj_p_value ?adjPValueUp . }
-  OPTIONAL { ?a2 spokegenelab:adj_p_value ?adjPValueDown . }
+${gxaAssocAdjPBinding("?a1", "?adjPValueUp", "d1a")}
+${gxaAssocAdjPBinding("?a2", "?adjPValueDown", "d2a")}
   OPTIONAL { ?c1 spokegenelab:array_design ?arrayDesignUp . }
   OPTIONAL { ?c1 spokegenelab:measurement ?measurementUp . }
   OPTIONAL { ?c2 spokegenelab:array_design ?arrayDesignDown . }

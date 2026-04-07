@@ -66,11 +66,10 @@ export async function POST(request: Request) {
       process.env.NEXT_PUBLIC_FRINK_FEDERATION_URL ||
       "https://frink.apps.renci.org/federation/sparql";
 
-    // Always run GXA template queries through the federated endpoint. The direct
-    // gene-expression-atlas-okn SPARQL service stores DE metrics under
-    // http://purl.org/okn/wobd/log2fc while templates use spokegenelab:log2fc; federation
-    // reconciles these, but the direct endpoint returns 0 rows. Stripping FROM for "default
-    // graph" also breaks named-graph data on that service.
+    // Always run GXA template queries through the federated endpoint. Templates bind
+    // log2fc/adj_p_value from both http://purl.org/okn/wobd/ and spokegenelab: for
+    // compatibility; the direct GXA service only has wobd: predicates after the OKN-WOBD
+    // RDF refresh. Federation remains the default path for timeouts and multi-graph queries.
     // NDE-intent queries (e.g. dataset_search) use the federated endpoint with FROM clauses
     // (already injected above); they are no longer routed to the NDE direct endpoint.
 
