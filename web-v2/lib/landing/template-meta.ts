@@ -44,7 +44,7 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
     icon: Database,
     iconColor: "text-blue-600 dark:text-blue-400",
     blurb:
-      "Search the NDE graph: use keywords (optional) and/or open Filters / Advanced for health condition (MONDO via search), pathogen species (NCBI Taxon), and host species (NCBI Taxon). Optionally limit to datasets whose metadata mentions a GEO series (GSE) or E-GEOD accession. NCBI GEO (GSE) studies are included here when keywords or metadata match—you no longer need a separate GEO-only card. You need at least one of keywords or a filter. All filled filters apply together (AND).",
+      "Search the NDE graph: use keywords (optional) and/or open Filters / Advanced for health condition, pathogen species, and host species. Optionally limit to datasets whose metadata mentions a GEO series (GSE) or E-GEOD accession. You need to enter at least one keyword or a filter. All filled filters apply together (AND).",
     buttonLabel: "Search Datasets",
   },
   {

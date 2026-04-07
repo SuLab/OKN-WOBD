@@ -63,14 +63,14 @@ export async function searchMONDOViaOLS(
       const digits = oboMatch ? oboMatch[1] : "";
       if (!digits) return null;
       const oboId = mondoDigitsToOboId(digits);
-      const local = oboId.replace(/^MONDO:/, "");
-      const shortForm = r.short_form ?? `MONDO_${local}`;
+      // Colon CURIE for UI (MONDO:0005015); OLS short_form is typically MONDO_0005015.
+      const shortForm = oboId;
       const iri = mondoDigitsToOboIri(digits);
       return {
         iri,
         shortForm,
         oboId,
-        label: r.label ?? shortForm,
+        label: r.label ?? oboId,
         matchedSynonym:
           r.matchedText && r.matchedText !== r.label ? r.matchedText : undefined,
       };

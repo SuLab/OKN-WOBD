@@ -2,8 +2,36 @@
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import type { TemplateDefinition } from "@/lib/context-packs/types";
+import {
+  type OntologyToken,
+  ONTOLOGY_ID_TO_LABEL_SLOT,
+} from "@/lib/dashboard/ui-only-slots";
 
 const SEARCH_DEBOUNCE_MS = 300;
+
+function ontologyTokensFromValues(
+  values: Record<string, string | string[]>,
+  idSlot: string
+): OntologyToken[] {
+  const labelKey = ONTOLOGY_ID_TO_LABEL_SLOT[idSlot];
+  if (!labelKey) return [];
+  const raw = values[idSlot];
+  const ids = Array.isArray(raw)
+    ? raw.map((s) => String(s).trim()).filter(Boolean)
+    : typeof raw === "string"
+      ? raw.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean)
+      : [];
+  const labelRaw = values[labelKey];
+  const labels = Array.isArray(labelRaw)
+    ? labelRaw.map((s) => String(s))
+    : typeof labelRaw === "string" && labelRaw.trim()
+      ? [labelRaw]
+      : [];
+  return ids.map((id, i) => ({
+    id,
+    label: (labels[i] && String(labels[i]).trim()) || id,
+  }));
+}
 
 interface NCBITaxonSuggestion {
   iri: string;
@@ -24,8 +52,8 @@ function OrganismAutocomplete({
 }: {
   label: string;
   placeholder: string;
-  value: string[];
-  onChange: (value: string[]) => void;
+  value: OntologyToken[];
+  onChange: (tokens: OntologyToken[]) => void;
   disabled?: boolean;
   id: string;
   required?: boolean;
@@ -73,7 +101,7 @@ function OrganismAutocomplete({
 
   const onSelect = useCallback(
     (item: NCBITaxonSuggestion) => {
-      const isDuplicate = value.includes(item.taxonId);
+      const isDuplicate = value.some((t) => t.id === item.taxonId);
       setInput("");
       setSuggestions([]);
       setOpen(false);
@@ -82,7 +110,7 @@ function OrganismAutocomplete({
         setAlreadyAddedLabel(item.label);
         return;
       }
-      onChange([...value, item.taxonId]);
+      onChange([...value, { id: item.taxonId, label: item.label }]);
     },
     [value, onChange]
   );
@@ -182,18 +210,18 @@ function OrganismAutocomplete({
         {required && <sup className="text-red-600 dark:text-red-400 ml-0.5" aria-hidden>*</sup>}
       </label>
       <div className="flex flex-wrap gap-2 items-center rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1.5 min-h-[38px] focus-within:ring-2 focus-within:ring-niaid-header focus-within:border-transparent">
-        {value.map((v, i) => (
+        {value.map((token, i) => (
           <span
-            key={`${v}-${i}`}
+            key={`${token.id}-${i}`}
             className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-600 text-slate-800 dark:text-slate-200 text-sm"
           >
-            {v}
+            {token.label}
             {!disabled && (
               <button
                 type="button"
                 onClick={() => remove(i)}
                 className="hover:text-red-600 dark:hover:text-red-400 font-medium leading-none"
-                aria-label={`Remove ${v}`}
+                aria-label={`Remove ${token.label}`}
               >
                 ×
               </button>
@@ -237,7 +265,7 @@ function OrganismAutocomplete({
               onClick={() => onSelect(item)}
             >
               <span className="font-medium">{item.label}</span>
-              <span className="text-slate-500 dark:text-slate-400 ml-1">{item.shortForm}</span>
+              <span className="text-slate-500 dark:text-slate-400 ml-1">({item.shortForm})</span>
               {item.matchedSynonym && (
                 <span className="block text-xs text-slate-500 dark:text-slate-400 truncate">
                   Synonym: {item.matchedSynonym}
@@ -280,8 +308,8 @@ function MondoAutocomplete({
 }: {
   label: string;
   placeholder: string;
-  value: string[];
-  onChange: (value: string[]) => void;
+  value: OntologyToken[];
+  onChange: (tokens: OntologyToken[]) => void;
   disabled?: boolean;
   id: string;
   required?: boolean;
@@ -329,7 +357,7 @@ function MondoAutocomplete({
 
   const onSelect = useCallback(
     (item: MondoSuggestion) => {
-      const isDuplicate = value.includes(item.oboId);
+      const isDuplicate = value.some((t) => t.id === item.oboId);
       setInput("");
       setSuggestions([]);
       setOpen(false);
@@ -338,7 +366,7 @@ function MondoAutocomplete({
         setAlreadyAddedLabel(item.label);
         return;
       }
-      onChange([...value, item.oboId]);
+      onChange([...value, { id: item.oboId, label: item.label }]);
     },
     [value, onChange]
   );
@@ -438,18 +466,18 @@ function MondoAutocomplete({
         {required && <sup className="text-red-600 dark:text-red-400 ml-0.5" aria-hidden>*</sup>}
       </label>
       <div className="flex flex-wrap gap-2 items-center rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1.5 min-h-[38px] focus-within:ring-2 focus-within:ring-niaid-header focus-within:border-transparent">
-        {value.map((v, i) => (
+        {value.map((token, i) => (
           <span
-            key={`${v}-${i}`}
+            key={`${token.id}-${i}`}
             className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-600 text-slate-800 dark:text-slate-200 text-sm"
           >
-            {v}
+            {token.label}
             {!disabled && (
               <button
                 type="button"
                 onClick={() => remove(i)}
                 className="hover:text-red-600 dark:hover:text-red-400 font-medium leading-none"
-                aria-label={`Remove ${v}`}
+                aria-label={`Remove ${token.label}`}
               >
                 ×
               </button>
@@ -493,7 +521,7 @@ function MondoAutocomplete({
               onClick={() => onSelect(item)}
             >
               <span className="font-medium">{item.label}</span>
-              <span className="text-slate-500 dark:text-slate-400 ml-1">{item.oboId}</span>
+              <span className="text-slate-500 dark:text-slate-400 ml-1">({item.shortForm})</span>
               {item.matchedSynonym && (
                 <span className="block text-xs text-slate-500 dark:text-slate-400 truncate">
                   Synonym: {item.matchedSynonym}
@@ -537,8 +565,8 @@ function TissueAutocomplete({
 }: {
   label: string;
   placeholder: string;
-  value: string[];
-  onChange: (value: string[]) => void;
+  value: OntologyToken[];
+  onChange: (tokens: OntologyToken[]) => void;
   disabled?: boolean;
   id: string;
   source?: "ubergraph" | "ols";
@@ -587,7 +615,7 @@ function TissueAutocomplete({
 
   const onSelect = useCallback(
     (item: UBERONSuggestion) => {
-      const isDuplicate = value.includes(item.shortForm);
+      const isDuplicate = value.some((t) => t.id === item.shortForm);
       setInput("");
       setSuggestions([]);
       setOpen(false);
@@ -596,7 +624,7 @@ function TissueAutocomplete({
         setAlreadyAddedLabel(item.label);
         return;
       }
-      onChange([...value, item.shortForm]);
+      onChange([...value, { id: item.shortForm, label: item.label }]);
     },
     [value, onChange]
   );
@@ -699,18 +727,18 @@ function TissueAutocomplete({
         {required && <sup className="text-red-600 dark:text-red-400 ml-0.5" aria-hidden>*</sup>}
       </label>
       <div className="flex flex-wrap gap-2 items-center rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1.5 min-h-[38px] focus-within:ring-2 focus-within:ring-niaid-header focus-within:border-transparent">
-        {value.map((v, i) => (
+        {value.map((token, i) => (
           <span
-            key={`${v}-${i}`}
+            key={`${token.id}-${i}`}
             className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-600 text-slate-800 dark:text-slate-200 text-sm"
           >
-            {v}
+            {token.label}
             {!disabled && (
               <button
                 type="button"
                 onClick={() => remove(i)}
                 className="hover:text-red-600 dark:hover:text-red-400 font-medium leading-none"
-                aria-label={`Remove ${v}`}
+                aria-label={`Remove ${token.label}`}
               >
                 ×
               </button>
@@ -754,7 +782,7 @@ function TissueAutocomplete({
               onClick={() => onSelect(item)}
             >
               <span className="font-medium">{item.label}</span>
-              <span className="text-slate-500 dark:text-slate-400 ml-1">{item.shortForm}</span>
+              <span className="text-slate-500 dark:text-slate-400 ml-1">({item.shortForm})</span>
               {item.matchedSynonym && (
                 <span className="block text-xs text-slate-500 dark:text-slate-400 truncate">
                   Synonym: {item.matchedSynonym}
@@ -797,8 +825,8 @@ function EfoAutocomplete({
 }: {
   label: string;
   placeholder: string;
-  value: string[];
-  onChange: (value: string[]) => void;
+  value: OntologyToken[];
+  onChange: (tokens: OntologyToken[]) => void;
   disabled?: boolean;
   id: string;
   required?: boolean;
@@ -846,7 +874,7 @@ function EfoAutocomplete({
 
   const onSelect = useCallback(
     (item: EFOSuggestion) => {
-      const isDuplicate = value.includes(item.shortForm);
+      const isDuplicate = value.some((t) => t.id === item.shortForm);
       setInput("");
       setSuggestions([]);
       setOpen(false);
@@ -855,7 +883,7 @@ function EfoAutocomplete({
         setAlreadyAddedLabel(item.label);
         return;
       }
-      onChange([...value, item.shortForm]);
+      onChange([...value, { id: item.shortForm, label: item.label }]);
     },
     [value, onChange]
   );
@@ -955,18 +983,18 @@ function EfoAutocomplete({
         {required && <sup className="text-red-600 dark:text-red-400 ml-0.5" aria-hidden>*</sup>}
       </label>
       <div className="flex flex-wrap gap-2 items-center rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1.5 min-h-[38px] focus-within:ring-2 focus-within:ring-niaid-header focus-within:border-transparent">
-        {value.map((v, i) => (
+        {value.map((token, i) => (
           <span
-            key={`${v}-${i}`}
+            key={`${token.id}-${i}`}
             className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-600 text-slate-800 dark:text-slate-200 text-sm"
           >
-            {v}
+            {token.label}
             {!disabled && (
               <button
                 type="button"
                 onClick={() => remove(i)}
                 className="hover:text-red-600 dark:hover:text-red-400 font-medium leading-none"
-                aria-label={`Remove ${v}`}
+                aria-label={`Remove ${token.label}`}
               >
                 ×
               </button>
@@ -1010,7 +1038,7 @@ function EfoAutocomplete({
               onClick={() => onSelect(item)}
             >
               <span className="font-medium">{item.label}</span>
-              <span className="text-slate-500 dark:text-slate-400 ml-1">{item.shortForm}</span>
+              <span className="text-slate-500 dark:text-slate-400 ml-1">({item.shortForm})</span>
               {item.matchedSynonym && (
                 <span className="block text-xs text-slate-500 dark:text-slate-400 truncate">
                   Synonym: {item.matchedSynonym}
@@ -1635,6 +1663,22 @@ export function SlotForm({
     onChange({ ...values, [key]: value });
   };
 
+  const commitOntologyTokens = (idSlot: string, tokens: OntologyToken[]) => {
+    const lk = ONTOLOGY_ID_TO_LABEL_SLOT[idSlot];
+    if (!lk) {
+      updateSlot(
+        idSlot,
+        tokens.map((t) => t.id)
+      );
+      return;
+    }
+    onChange({
+      ...values,
+      [idSlot]: tokens.map((t) => t.id),
+      [lk]: tokens.map((t) => t.label),
+    });
+  };
+
   const renderInput = (slotName: string) => {
     const { label, placeholder } = getSlotMeta(slotName);
     const isRequired = required.includes(slotName);
@@ -1644,19 +1688,15 @@ export function SlotForm({
       slotName === "health_condition" &&
       (template.id === "dataset_search" || template.id === "geo_dataset_search")
     ) {
-      const mondoValue = Array.isArray(raw)
-        ? raw
-        : typeof raw === "string"
-          ? raw.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean)
-          : [];
+      const mondoTokens = ontologyTokensFromValues(values, slotName);
       return (
         <MondoAutocomplete
           key={slotName}
           id={`slot-${template.id}-${slotName}`}
           label={label}
           placeholder={placeholder}
-          value={mondoValue}
-          onChange={(v) => updateSlot(slotName, v)}
+          value={mondoTokens}
+          onChange={(t) => commitOntologyTokens(slotName, t)}
           disabled={disabled}
           required={isRequired}
         />
@@ -1666,49 +1706,45 @@ export function SlotForm({
       (slotName === "species" || slotName === "infectious_agent") &&
       (template.id === "dataset_search" || template.id === "geo_dataset_search")
     ) {
-      const organismValue = Array.isArray(raw)
-        ? raw
-        : typeof raw === "string"
-          ? raw.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean)
-          : [];
+      const organismTokens = ontologyTokensFromValues(values, slotName);
       return (
         <OrganismAutocomplete
           key={slotName}
           id={`slot-${template.id}-${slotName}`}
           label={label}
           placeholder={placeholder}
-          value={organismValue}
-          onChange={(v) => updateSlot(slotName, v)}
+          value={organismTokens}
+          onChange={(t) => commitOntologyTokens(slotName, t)}
           disabled={disabled}
           required={isRequired}
         />
       );
     }
     if (slotName === "organism_taxon_ids") {
-      const organismValue = Array.isArray(raw) ? raw : typeof raw === "string" ? raw.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean) : [];
+      const organismTokens = ontologyTokensFromValues(values, slotName);
       return (
         <OrganismAutocomplete
           key={slotName}
           id={`slot-${template.id}-${slotName}`}
           label={label}
           placeholder={placeholder}
-          value={organismValue}
-          onChange={(v) => updateSlot(slotName, v)}
+          value={organismTokens}
+          onChange={(t) => commitOntologyTokens(slotName, t)}
           disabled={disabled}
           required={isRequired}
         />
       );
     }
     if (slotName === "tissue_uberon_ids") {
-      const tissueValue = Array.isArray(raw) ? raw : typeof raw === "string" ? raw.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean) : [];
+      const tissueTokens = ontologyTokensFromValues(values, slotName);
       return (
         <TissueAutocomplete
           key={slotName}
           id={`slot-${template.id}-${slotName}`}
           label={label}
           placeholder={placeholder}
-          value={tissueValue}
-          onChange={(v) => updateSlot(slotName, v)}
+          value={tissueTokens}
+          onChange={(t) => commitOntologyTokens(slotName, t)}
           disabled={disabled}
           source="ubergraph"
           required={isRequired}
@@ -1716,15 +1752,15 @@ export function SlotForm({
       );
     }
     if (slotName === "tissue_uberon_ids_ols") {
-      const tissueValue = Array.isArray(raw) ? raw : typeof raw === "string" ? raw.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean) : [];
+      const tissueTokens = ontologyTokensFromValues(values, slotName);
       return (
         <TissueAutocomplete
           key={slotName}
           id={`slot-${template.id}-${slotName}`}
           label={label}
           placeholder={placeholder}
-          value={tissueValue}
-          onChange={(v) => updateSlot(slotName, v)}
+          value={tissueTokens}
+          onChange={(t) => commitOntologyTokens(slotName, t)}
           disabled={disabled}
           source="ols"
           required={isRequired}
@@ -1763,15 +1799,15 @@ export function SlotForm({
       );
     }
     if (slotName === "disease_efo_ids") {
-      const diseaseValue = Array.isArray(raw) ? raw : typeof raw === "string" ? raw.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean) : [];
+      const diseaseTokens = ontologyTokensFromValues(values, slotName);
       return (
         <EfoAutocomplete
           key={slotName}
           id={`slot-${template.id}-${slotName}`}
           label={label}
           placeholder={placeholder}
-          value={diseaseValue}
-          onChange={(v) => updateSlot(slotName, v)}
+          value={diseaseTokens}
+          onChange={(t) => commitOntologyTokens(slotName, t)}
           disabled={disabled}
           required={isRequired}
         />

@@ -2,6 +2,7 @@ import type { ContextPack } from "@/lib/context-packs/types";
 import type { Intent } from "@/types";
 import type { SPARQLResult } from "@/types";
 import { ndeBindingHasGeoOrGseEvidence } from "@/lib/dashboard/nde-geo-evidence";
+import { omitUiOnlyOntologyLabelSlots } from "@/lib/dashboard/ui-only-slots";
 
 export const PACK_ID = "wobd";
 
@@ -36,7 +37,7 @@ export function buildIntent(
     context_pack: pack.id,
     graph_mode: "federated",
     graphs,
-    slots: { ...slots },
+    slots: omitUiOnlyOntologyLabelSlots(slots),
     confidence: 0.9,
     notes: "Dashboard form",
   };

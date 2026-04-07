@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import type { SPARQLResult } from "@/types";
+import { highlightTermsInText } from "@/lib/dashboard/highlight-terms-in-text";
 import { Pagination, DEFAULT_PAGE_SIZE } from "./Pagination";
 
 const NIAID_RESOURCE_BASE = "https://data.niaid.nih.gov/resources?id=";
@@ -67,49 +68,6 @@ function bindingValue(raw: { type: string; value: string } | undefined): string 
   if (!raw) return "";
   if (typeof raw === "object" && "value" in raw) return String(raw.value ?? "");
   return String(raw);
-}
-
-function escapeRegExp(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-/**
- * Wrap case-insensitive matches of any term in <mark> (longest terms first to avoid partial steals).
- */
-function highlightTermsInText(text: string, terms: string[]): React.ReactNode {
-  const cleaned = [...new Set(terms.map((t) => t.trim()).filter(Boolean))];
-  if (!text || cleaned.length === 0) return text;
-
-  const pattern = [...cleaned].sort((a, b) => b.length - a.length).map(escapeRegExp).join("|");
-  if (!pattern) return text;
-
-  const re = new RegExp(`(${pattern})`, "gi");
-  const out: React.ReactNode[] = [];
-  let last = 0;
-  let m: RegExpExecArray | null;
-  let k = 0;
-  while ((m = re.exec(text)) !== null) {
-    if (m.index > last) {
-      out.push(text.slice(last, m.index));
-    }
-    out.push(
-      <mark
-        key={`hl-${k++}`}
-        className="bg-amber-200 dark:bg-amber-900/55 text-inherit rounded px-0.5"
-      >
-        {m[0]}
-      </mark>
-    );
-    last = m.index + m[0].length;
-    if (m[0].length === 0) {
-      re.lastIndex += 1;
-    }
-  }
-  if (last < text.length) {
-    out.push(text.slice(last));
-  }
-  if (out.length === 0) return text;
-  return <>{out}</>;
 }
 
 /**

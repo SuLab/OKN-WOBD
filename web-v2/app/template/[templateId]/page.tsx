@@ -9,11 +9,27 @@ import { SlotForm, isSlotFilled, getSlotMeta } from "@/components/dashboard/Slot
 import { NDEResultCards } from "@/components/dashboard/NDEResultCards";
 import { ResultsTable } from "@/components/chat/ResultsTable";
 import { getTemplateMeta } from "@/lib/landing/template-meta";
-import { runTemplateQuery, isNDEShape, PACK_ID, type ExecutedQueryItem } from "@/lib/dashboard/run-query";
+import {
+  runTemplateQuery,
+  isNDEShape,
+  PACK_ID,
+  GXA_TASKS,
+  type ExecutedQueryItem,
+} from "@/lib/dashboard/run-query";
 import { SparqlEditor } from "@/components/chat/SparqlEditor";
 import { Info, ChevronDown, ChevronRight, Copy, Check } from "lucide-react";
 
-/** Terms to highlight in NDE cards for dataset / GEO keyword search (matches query builder slot shape). */
+function parseHighlightTerms(raw: unknown): string[] {
+  if (Array.isArray(raw)) {
+    return raw.map((x) => String(x).trim()).filter(Boolean);
+  }
+  if (typeof raw === "string" && raw.trim()) {
+    return [raw.trim()];
+  }
+  return [];
+}
+
+/** Terms to highlight in NDE cards for dataset / GEO keyword search + ontology facet labels. */
 function datasetKeywordHighlightTerms(
   templateId: string,
   slots: Record<string, string | string[]>
@@ -21,18 +37,40 @@ function datasetKeywordHighlightTerms(
   if (templateId !== "dataset_search" && templateId !== "geo_dataset_search") {
     return [];
   }
+  const parts: string[] = [];
   const rawList = slots.keywords_list;
   if (Array.isArray(rawList) && rawList.length > 0) {
-    return [...new Set(rawList.map((x) => String(x).trim()).filter(Boolean))];
+    parts.push(...rawList.map((x) => String(x).trim()).filter(Boolean));
+  } else {
+    const kw = slots.keywords;
+    if (Array.isArray(kw)) {
+      parts.push(...kw.map((x) => String(x).trim()).filter(Boolean));
+    } else if (typeof kw === "string" && kw.trim()) {
+      parts.push(kw.trim());
+    }
   }
-  const kw = slots.keywords;
-  if (Array.isArray(kw)) {
-    return [...new Set(kw.map((x) => String(x).trim()).filter(Boolean))];
+  for (const key of [
+    "health_condition_labels",
+    "species_labels",
+    "infectious_agent_labels",
+  ] as const) {
+    parts.push(...parseHighlightTerms(slots[key]));
   }
-  if (typeof kw === "string" && kw.trim()) {
-    return [kw.trim()];
+  return [...new Set(parts)];
+}
+
+/** GXA / gene-expression templates: highlight chosen ontology labels in the results table. */
+function gxaOntologyHighlightTerms(slots: Record<string, string | string[]>): string[] {
+  const parts: string[] = [];
+  for (const key of [
+    "organism_taxon_ids_labels",
+    "tissue_uberon_ids_labels",
+    "tissue_uberon_ids_ols_labels",
+    "disease_efo_labels",
+  ] as const) {
+    parts.push(...parseHighlightTerms(slots[key]));
   }
-  return [];
+  return [...new Set(parts)];
 }
 
 /** dataset_search: need keywords and/or at least one facet (matches server-side query builder). */
@@ -97,10 +135,15 @@ export default function TemplatePage() {
   const template = pack?.templates?.find((t) => t.id === templateId) ?? null;
   const meta = getTemplateMeta(templateId);
 
-  const ndeHighlightTerms = useMemo(
-    () => datasetKeywordHighlightTerms(templateId, slotValues),
-    [templateId, slotValues]
-  );
+  const formHighlightTerms = useMemo(() => {
+    if (templateId === "dataset_search" || templateId === "geo_dataset_search") {
+      return datasetKeywordHighlightTerms(templateId, slotValues);
+    }
+    if ((GXA_TASKS as readonly string[]).includes(templateId)) {
+      return gxaOntologyHighlightTerms(slotValues);
+    }
+    return [];
+  }, [templateId, slotValues]);
 
   const runQuery = useCallback(async () => {
     if (!pack || !template) return;
@@ -402,10 +445,10 @@ export default function TemplatePage() {
                     templateId={templateId}
                     templateLabel={meta.description}
                     emptyMessage={filteredEmptyHint ?? undefined}
-                    highlightTerms={ndeHighlightTerms}
+                    highlightTerms={formHighlightTerms}
                   />
                 ) : (
-                  <ResultsTable results={results} />
+                  <ResultsTable results={results} highlightTerms={formHighlightTerms} />
                 )}
               </>
             )}
