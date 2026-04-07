@@ -772,12 +772,14 @@ LIMIT 50`;
  * Build a subquery that selects ?contrast (or ?outputVar) WHERE contrast matches factor terms (and optionally tissue/experiment).
  * Used to filter contrasts BEFORE joining to associations for better performance (avoids CONTAINS on large join).
  * @param outputVar - Variable to SELECT (default "?contrast"); use "?c1" for discordance query
+ * @param organismFilterInSubquery - Optional BIND/OPTIONAL/FILTER (study taxon) scoped to outputVar
  */
 function buildFactorContrastSubquery(
   factorTerms?: string[],
   tissueFilterInSubquery: string = "",
   extraFilter: string = "",
-  outputVar: string = "?contrast"
+  outputVar: string = "?contrast",
+  organismFilterInSubquery: string = ""
 ): string {
   if (!factorTerms || factorTerms.length === 0) return "";
 
@@ -794,7 +796,7 @@ function buildFactorContrastSubquery(
     .join(" || ");
 
   return `{
-    SELECT ${outputVar} WHERE {
+    SELECT DISTINCT ${outputVar} WHERE {
       ${outputVar} a biolink:Assay .
       OPTIONAL { ${outputVar} biolink:name ?contrastLabel . }
       OPTIONAL { ${outputVar} spokegenelab:factors_1 ?f1 . }
@@ -802,6 +804,7 @@ function buildFactorContrastSubquery(
       FILTER(REGEX(STR(${outputVar}), "E-[A-Z0-9-]+-g[0-9]+_g[0-9]+"))
       ${tissueFilterInSubquery.replace(/\?contrast/g, outputVar)}
       ${extraFilter.replace(/\?contrast/g, outputVar)}
+      ${organismFilterInSubquery}
       FILTER(${termConditions})
     }
   }`;
@@ -1515,34 +1518,83 @@ export function buildGXAGenesDiscordanceQuery(
   tissueUberonIds?: string[],
   factorTerms?: string[]
 ): string {
-  const organismFilter = buildGXAOrganismFilterFromExprs(
+  // Full organism+tissue FILTER at end forces Virtuoso to join ~all up/down DE rows on ?gene first
+  // (hundreds of millions of intermediates → OOM). When tissue and/or organism is set, prefilter
+  // ?c1 and ?c2 via subqueries so associations only touch matching contrasts.
+  const organismFilterMain = buildGXAOrganismFilterFromExprs(
     organismTaxonIds,
     [gxaExperimentIdFromContrastExpr("?c1"), gxaExperimentIdFromContrastExpr("?c2")],
     ["up", "down"]
   );
 
-  let tissueFilter = "";
+  let tissueFilterC1 = "";
+  let tissueIriList = "";
   if (tissueUberonIds && tissueUberonIds.length > 0) {
     const safeUberon = tissueUberonIds
       .map((id) => id.replace(/^UBERON_/, "").replace(/"/g, "").trim())
       .filter(Boolean);
     if (safeUberon.length > 0) {
-      const iriList = safeUberon.map((id) => `<http://purl.obolibrary.org/obo/UBERON_${id}>`).join(" ");
-      tissueFilter = `\n  ?c1 biolink:has_attribute ?tissue .\n  FILTER(?tissue IN (${iriList}))`;
+      tissueIriList = safeUberon.map((id) => `<http://purl.obolibrary.org/obo/UBERON_${id}>`).join(" ");
+      tissueFilterC1 = `\n  ?c1 biolink:has_attribute ?tissue .\n  FILTER(?tissue IN (${tissueIriList}))`;
     }
   }
 
-  // Factor filter: use subquery to filter ?c1 first (discordance uses ?c1 for upregulated contrast)
-  const factorSubquery = buildFactorContrastSubquery(factorTerms, tissueFilter, "", "?c1");
+  const hasTissue = tissueIriList.length > 0;
+  const hasOrganism =
+    normalizeGxaNcbiTaxonNumericIds(organismTaxonIds ?? []).length > 0;
+  const organismSubC1 = hasOrganism
+    ? buildGXAOrganismFilterFromExprs(organismTaxonIds, [gxaExperimentIdFromContrastExpr("?c1")], ["dsc1"])
+    : "";
+  const organismSubC2 = hasOrganism
+    ? buildGXAOrganismFilterFromExprs(organismTaxonIds, [gxaExperimentIdFromContrastExpr("?c2")], ["dsc2"])
+    : "";
+  const tissueInnerC1 = hasTissue
+    ? `\n      ?c1 biolink:has_attribute ?tissue .\n      FILTER(?tissue IN (${tissueIriList}))`
+    : "";
+  const tissueInnerC2 = hasTissue
+    ? `\n      ?c2 biolink:has_attribute ?tissue .\n      FILTER(?tissue IN (${tissueIriList}))`
+    : "";
+
+  const factorSubquery = buildFactorContrastSubquery(
+    factorTerms,
+    tissueFilterC1,
+    "",
+    "?c1",
+    hasOrganism ? organismSubC1 : ""
+  );
   const useFactorSubquery = factorSubquery !== "";
 
-  const c1Source = useFactorSubquery
-    ? `# Subquery: filter contrasts by factor/tissue before joining
+  const contrastAssayRegex = "E-[A-Z0-9-]+-g[0-9]+_g[0-9]+";
+
+  let c1Prefix = "";
+  if (useFactorSubquery) {
+    c1Prefix = `# Subquery: filter ?c1 contrasts (factor / tissue / organism) before associations
   ${factorSubquery}
-  ?a1 a biolink:GeneExpressionMixin ; biolink:object ?gene ; biolink:subject ?c1 .
-${gxaAssocLog2fcBinding("?a1", "?l1", "d1")}`
-    : `?a1 a biolink:GeneExpressionMixin ; biolink:object ?gene ; biolink:subject ?c1 .
-${gxaAssocLog2fcBinding("?a1", "?l1", "d1")}`;
+  `;
+  } else if (hasTissue || hasOrganism) {
+    c1Prefix = `{
+    SELECT DISTINCT ?c1 WHERE {
+      ?c1 a biolink:Assay .
+      FILTER(REGEX(STR(?c1), "${contrastAssayRegex}"))${tissueInnerC1}${organismSubC1}
+    }
+  }
+  `;
+  }
+
+  const c2Prefix =
+    hasTissue || hasOrganism
+      ? `{
+    SELECT DISTINCT ?c2 WHERE {
+      ?c2 a biolink:Assay .
+      FILTER(REGEX(STR(?c2), "${contrastAssayRegex}"))${tissueInnerC2}${organismSubC2}
+    }
+  }
+  `
+      : "";
+
+  const movedFacetToSubquery = useFactorSubquery || hasTissue || hasOrganism;
+  const organismFilterTail = movedFacetToSubquery ? "" : organismFilterMain;
+  const tissueInMain = movedFacetToSubquery ? "" : tissueFilterC1;
 
   const factorInMain = useFactorSubquery ? "" : (() => {
     if (!factorTerms || factorTerms.length === 0) return "";
@@ -1559,8 +1611,6 @@ ${gxaAssocLog2fcBinding("?a1", "?l1", "d1")}`;
     return `\n  OPTIONAL { ?c1 biolink:name ?cl1 . }\n  OPTIONAL { ?c1 spokegenelab:factors_1 ?f1a . }\n  OPTIONAL { ?c1 spokegenelab:factors_2 ?f1b . }\n  FILTER(${termConditions})`;
   })();
 
-  const tissueInMain = useFactorSubquery ? "" : tissueFilter;
-
   return `PREFIX biolink:      <https://w3id.org/biolink/vocab/>
 PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
 PREFIX wobd:        <http://purl.org/okn/wobd/>
@@ -1570,9 +1620,10 @@ SELECT ?gene ?geneSymbol ?experimentIdUp ?experimentIdDown ?contrastLabelUp ?con
   ?arrayDesignUp ?measurementUp ?arrayDesignDown ?measurementDown
 FROM <https://purl.org/okn/frink/kg/gene-expression-atlas-okn>
 WHERE {
-  ${c1Source}
+  ${c1Prefix}?a1 a biolink:GeneExpressionMixin ; biolink:object ?gene ; biolink:subject ?c1 .
+${gxaAssocLog2fcBinding("?a1", "?l1", "d1")}
   FILTER(?l1 > 0)
-  ?a2 a biolink:GeneExpressionMixin ; biolink:object ?gene ; biolink:subject ?c2 .
+  ${c2Prefix}?a2 a biolink:GeneExpressionMixin ; biolink:object ?gene ; biolink:subject ?c2 .
 ${gxaAssocLog2fcBinding("?a2", "?l2", "d2")}
   FILTER(?l2 < 0)
   FILTER(?a1 != ?a2)
@@ -1588,7 +1639,7 @@ ${gxaAssocAdjPBinding("?a2", "?adjPValueDown", "d2a")}
   BIND(?l1 AS ?log2fcUp)
   BIND(?l2 AS ?log2fcDown)
   OPTIONAL { ?c1 biolink:name ?contrastLabelUp . }
-  OPTIONAL { ?c2 biolink:name ?contrastLabelDown . }${organismFilter}${tissueInMain}${factorInMain}
+  OPTIONAL { ?c2 biolink:name ?contrastLabelDown . }${organismFilterTail}${tissueInMain}${factorInMain}
 }
 LIMIT ${Math.min(limit, 200)}`;
 }

@@ -13,16 +13,9 @@ export function attemptRepair(
   const changes: string[] = [];
   let repaired = originalQuery;
 
-  // Strategy 1: Relax FILTER constraints
-  // Remove overly specific FILTER clauses that might be too restrictive
-  const filterRegex = /FILTER\s*\([^)]+\)/gi;
-  const filters = repaired.match(filterRegex);
-  if (filters && filters.length > 2) {
-    // Remove the last FILTER (often the most specific)
-    const lastFilter = filters[filters.length - 1];
-    repaired = repaired.replace(lastFilter, "");
-    changes.push("Removed overly specific FILTER clause");
-  }
+  // Do not remove FILTER clauses with a naive /FILTER\s*\([^)]+\)/ regex: nested parens
+  // (e.g. BOUND(?x), IN (...), organism taxon blocks) cause the match to end at the first
+  // ")", deleting only a prefix of the FILTER and leaving invalid SPARQL (e.g. leading "&&").
 
   // Strategy 2: Switch label matching strategy
   // Change exact string matching to regex matching
