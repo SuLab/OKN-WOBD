@@ -20,6 +20,7 @@ prefixes:
   schema: "http://schema.org/"
   rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
   rdfs: "http://www.w3.org/2000/01/rdf-schema#"
+  owl: "http://www.w3.org/2002/07/owl#"
   obo: "http://purl.obolibrary.org/obo/"
 
 # Guardrails: limits and safety for SPARQL execution and chat UI.
@@ -46,11 +47,13 @@ templates:
     required_slots: ["drug"]
     optional_slots: ["only_gene_expression", "max_results"]
   - id: dataset_search
-    description: "Find datasets by keywords/healthCondition"
-    required_slots: ["keywords"]  # At least one keyword required for the simple search form
+    description: "Find datasets by keywords with optional health condition, host species, and pathogen species filters"
+    required_slots: []  # keywords optional; need keywords and/or at least one facet (enforced in UI + query builder)
+    optional_slots: ["health_condition", "infectious_agent", "species"]
   - id: geo_dataset_search
-    description: "Find NCBI GEO datasets in NDE by keywords, disease, or organism"
-    required_slots: ["keywords"]
+    description: "Find NCBI GEO datasets in NDE by keywords with optional health condition, host species, and pathogen species filters"
+    required_slots: []  # keywords optional; GEO-only search allowed with no other criteria
+    optional_slots: ["health_condition", "infectious_agent", "species"]
   - id: entity_lookup
     description: "Resolve CURIE/URI/label to entity"
     required_slots: ["q"]

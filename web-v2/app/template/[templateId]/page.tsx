@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { ContextPack } from "@/lib/context-packs/types";
@@ -12,6 +12,47 @@ import { getTemplateMeta } from "@/lib/landing/template-meta";
 import { runTemplateQuery, isNDEShape, PACK_ID, type ExecutedQueryItem } from "@/lib/dashboard/run-query";
 import { SparqlEditor } from "@/components/chat/SparqlEditor";
 import { Info, ChevronDown, ChevronRight, Copy, Check } from "lucide-react";
+
+/** Terms to highlight in NDE cards for dataset / GEO keyword search (matches query builder slot shape). */
+function datasetKeywordHighlightTerms(
+  templateId: string,
+  slots: Record<string, string | string[]>
+): string[] {
+  if (templateId !== "dataset_search" && templateId !== "geo_dataset_search") {
+    return [];
+  }
+  const rawList = slots.keywords_list;
+  if (Array.isArray(rawList) && rawList.length > 0) {
+    return [...new Set(rawList.map((x) => String(x).trim()).filter(Boolean))];
+  }
+  const kw = slots.keywords;
+  if (Array.isArray(kw)) {
+    return [...new Set(kw.map((x) => String(x).trim()).filter(Boolean))];
+  }
+  if (typeof kw === "string" && kw.trim()) {
+    return [kw.trim()];
+  }
+  return [];
+}
+
+/** dataset_search: need keywords and/or at least one facet (matches server-side query builder). */
+function ndeDatasetSearchHasKeywordsOrFacet(slots: Record<string, string | string[]>): boolean {
+  const kw = slots.keywords;
+  if (typeof kw === "string" && kw.trim() !== "") return true;
+  if (Array.isArray(kw) && kw.some((x) => String(x).trim() !== "")) return true;
+  const rawList = slots.keywords_list;
+  if (Array.isArray(rawList) && rawList.some((x) => String(x).trim() !== "")) return true;
+  const hc = slots.health_condition;
+  if (typeof hc === "string" && hc.trim() !== "") return true;
+  if (Array.isArray(hc) && hc.some((x) => String(x).trim() !== "")) return true;
+  const ia = slots.infectious_agent;
+  if (typeof ia === "string" && ia.trim() !== "") return true;
+  if (Array.isArray(ia) && ia.some((x) => String(x).trim() !== "")) return true;
+  const sp = slots.species;
+  if (typeof sp === "string" && sp.trim() !== "") return true;
+  if (Array.isArray(sp) && sp.some((x) => String(x).trim() !== "")) return true;
+  return false;
+}
 
 export default function TemplatePage() {
   const params = useParams();
@@ -55,6 +96,11 @@ export default function TemplatePage() {
 
   const template = pack?.templates?.find((t) => t.id === templateId) ?? null;
   const meta = getTemplateMeta(templateId);
+
+  const ndeHighlightTerms = useMemo(
+    () => datasetKeywordHighlightTerms(templateId, slotValues),
+    [templateId, slotValues]
+  );
 
   const runQuery = useCallback(async () => {
     if (!pack || !template) return;
@@ -123,7 +169,9 @@ export default function TemplatePage() {
   const required = template?.required_slots ?? [];
   const optional = template?.optional_slots ?? [];
   const missingRequired = required.filter((slot) => !isSlotFilled(slotValues[slot]));
-  const canRun = missingRequired.length === 0;
+  const datasetSearchNeedsCriterion =
+    templateId === "dataset_search" && !ndeDatasetSearchHasKeywordsOrFacet(slotValues);
+  const canRun = missingRequired.length === 0 && !datasetSearchNeedsCriterion;
   const hasOptional = optional.length > 0;
 
   if (packError) {
@@ -189,13 +237,47 @@ export default function TemplatePage() {
               </div>
             </div>
 
+            {templateId === "dataset_search" && (
+              <p className="text-sm text-slate-600 dark:text-slate-400 border-l-2 border-slate-300 dark:border-slate-600 pl-3 py-0.5">
+                Use <span className="font-medium text-slate-700 dark:text-slate-300">keywords</span> to match
+                dataset title or description,{" "}
+                <span className="font-medium text-slate-700 dark:text-slate-300">or</span> set at least one
+                metadata filter under <span className="font-medium text-slate-700 dark:text-slate-300">Or match by metadata</span>{" "}
+                (health condition, pathogen species, or host species). You can use both. Keywords and filters
+                combine with <span className="font-medium text-slate-700 dark:text-slate-300">AND</span> when
+                multiple are filled.
+              </p>
+            )}
+            {templateId === "geo_dataset_search" && (
+              <p className="text-sm text-slate-600 dark:text-slate-400 border-l-2 border-slate-300 dark:border-slate-600 pl-3 py-0.5">
+                Keywords and metadata filters are optional. Leave everything blank to list NCBI GEO series
+                (GSE) in NDE, or narrow with text and/or filters. Multiple filters combine with{" "}
+                <span className="font-medium text-slate-700 dark:text-slate-300">AND</span>.
+              </p>
+            )}
+
             <SlotForm
               template={template}
               values={slotValues}
               onChange={handleSlotChange}
               disabled={loading}
+              primarySectionTitle={
+                templateId === "dataset_search" || templateId === "geo_dataset_search"
+                  ? "Match by text"
+                  : undefined
+              }
+              metadataSectionTitle={
+                templateId === "dataset_search" || templateId === "geo_dataset_search"
+                  ? "Or match by metadata"
+                  : undefined
+              }
             />
 
+            {datasetSearchNeedsCriterion && (
+              <p className="text-sm text-amber-800 dark:text-amber-200/90" role="status">
+                Add keywords and/or at least one metadata filter to run this search.
+              </p>
+            )}
             <div className="pt-2 flex flex-wrap items-center gap-3">
               <button
                 type="button"
@@ -224,12 +306,18 @@ export default function TemplatePage() {
               )}
             </div>
 
-            {hasOptional && (
-              <p className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                <Info className="w-4 h-4 flex-shrink-0" aria-hidden />
-                Tip: Leave optional fields blank to see all results.
-              </p>
-            )}
+            {hasOptional &&
+              (templateId === "dataset_search" || templateId === "geo_dataset_search" ? (
+                <p className="flex items-start gap-2 text-xs text-slate-500 dark:text-slate-400">
+                  <Info className="w-4 h-4 flex-shrink-0 mt-0.5" aria-hidden />
+                  Leave a metadata filter blank to skip it. Empty filters do not restrict the query.
+                </p>
+              ) : (
+                <p className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                  <Info className="w-4 h-4 flex-shrink-0" aria-hidden />
+                  Tip: Leave optional fields blank to see all results.
+                </p>
+              ))}
           </div>
         </div>
 
@@ -314,6 +402,7 @@ export default function TemplatePage() {
                     templateId={templateId}
                     templateLabel={meta.description}
                     emptyMessage={filteredEmptyHint ?? undefined}
+                    highlightTerms={ndeHighlightTerms}
                   />
                 ) : (
                   <ResultsTable results={results} />

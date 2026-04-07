@@ -39,6 +39,49 @@ function bindingValue(raw: { type: string; value: string } | undefined): string 
   return String(raw);
 }
 
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Wrap case-insensitive matches of any term in <mark> (longest terms first to avoid partial steals).
+ */
+function highlightTermsInText(text: string, terms: string[]): React.ReactNode {
+  const cleaned = [...new Set(terms.map((t) => t.trim()).filter(Boolean))];
+  if (!text || cleaned.length === 0) return text;
+
+  const pattern = [...cleaned].sort((a, b) => b.length - a.length).map(escapeRegExp).join("|");
+  if (!pattern) return text;
+
+  const re = new RegExp(`(${pattern})`, "gi");
+  const out: React.ReactNode[] = [];
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let k = 0;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) {
+      out.push(text.slice(last, m.index));
+    }
+    out.push(
+      <mark
+        key={`hl-${k++}`}
+        className="bg-amber-200 dark:bg-amber-900/55 text-inherit rounded px-0.5"
+      >
+        {m[0]}
+      </mark>
+    );
+    last = m.index + m[0].length;
+    if (m[0].length === 0) {
+      re.lastIndex += 1;
+    }
+  }
+  if (last < text.length) {
+    out.push(text.slice(last));
+  }
+  if (out.length === 0) return text;
+  return <>{out}</>;
+}
+
 /**
  * Build NIAID Data Discovery Portal (NDE) resource URL.
  * Accepts SDY ids (e.g. sdy1) and GEO accessions (e.g. GSE1000 → id=gse1000).
@@ -107,6 +150,8 @@ interface NDEResultCardsProps {
   templateLabel?: string;
   /** Shown when there are no bindings (e.g. "only gene expression" filter returned empty). */
   emptyMessage?: string;
+  /** Case-insensitive substring highlights in title and description (e.g. dataset keyword search terms). */
+  highlightTerms?: string[];
 }
 
 export function NDEResultCards({
@@ -114,6 +159,7 @@ export function NDEResultCards({
   templateId,
   templateLabel,
   emptyMessage,
+  highlightTerms = [],
 }: NDEResultCardsProps) {
   const bindings = results?.results?.bindings ?? [];
   const vars = results?.head?.vars ?? [];
@@ -193,6 +239,7 @@ export function NDEResultCards({
         const titleDisplay = name || identifier || "Untitled";
         // Title links only to NDE when we have an NDE portal URL; no GEO fallback (GEO has its own badge).
         const titleHref = ndeUrl ?? undefined;
+        const titleNode = highlightTermsInText(titleDisplay, highlightTerms);
 
         return (
           <article
@@ -224,13 +271,11 @@ export function NDEResultCards({
                     rel="noopener noreferrer"
                     className="text-niaid-link hover:underline"
                   >
-                    {titleDisplay}
+                    {titleNode}
                   </a>
                 </h3>
               ) : (
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                  {titleDisplay}
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{titleNode}</h3>
               )}
 
               {/* Description */}
@@ -238,7 +283,10 @@ export function NDEResultCards({
                 <div className="text-sm text-gray-700 dark:text-gray-300">
                   {description.length > 300 && !isDescExpanded ? (
                     <>
-                      <p>{description.slice(0, 300)}...</p>
+                      <p>
+                        {highlightTermsInText(description.slice(0, 300), highlightTerms)}
+                        …
+                      </p>
                       <button
                         type="button"
                         onClick={() =>
@@ -254,7 +302,7 @@ export function NDEResultCards({
                       </button>
                     </>
                   ) : (
-                    <p>{description}</p>
+                    <p>{highlightTermsInText(description, highlightTerms)}</p>
                   )}
                 </div>
               )}

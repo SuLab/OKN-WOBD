@@ -139,7 +139,7 @@ guardrails:
   service_policy: "allow_any_frink"
 templates:
   - id: dataset_search
-    required_slots: ["keywords"]
+    required_slots: []
 ```
 
 ### Graph context files

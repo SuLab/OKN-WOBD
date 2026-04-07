@@ -261,6 +261,262 @@ function OrganismAutocomplete({
   );
 }
 
+interface MondoSuggestion {
+  iri: string;
+  shortForm: string;
+  oboId: string;
+  label: string;
+  matchedSynonym?: string;
+}
+
+function MondoAutocomplete({
+  label,
+  placeholder,
+  value,
+  onChange,
+  disabled,
+  id,
+  required,
+}: {
+  label: string;
+  placeholder: string;
+  value: string[];
+  onChange: (value: string[]) => void;
+  disabled?: boolean;
+  id: string;
+  required?: boolean;
+}) {
+  const [input, setInput] = useState("");
+  const [suggestions, setSuggestions] = useState<MondoSuggestion[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [alreadyAddedLabel, setAlreadyAddedLabel] = useState<string | null>(null);
+  const [showSelectFromListHint, setShowSelectFromListHint] = useState(false);
+  const [openUpward, setOpenUpward] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const alreadyAddedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const selectFromListHintTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  const DROPDOWN_MAX_H = 280;
+  useEffect(() => {
+    if (!open || !wrapperRef.current) return;
+    const rect = wrapperRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    setOpenUpward(spaceBelow < DROPDOWN_MAX_H);
+  }, [open]);
+
+  useEffect(() => {
+    setHighlightedIndex(suggestions.length > 0 ? 0 : -1);
+  }, [suggestions]);
+
+  useEffect(() => {
+    if (!alreadyAddedLabel) return;
+    alreadyAddedTimeoutRef.current = setTimeout(() => setAlreadyAddedLabel(null), 2000);
+    return () => {
+      if (alreadyAddedTimeoutRef.current) clearTimeout(alreadyAddedTimeoutRef.current);
+    };
+  }, [alreadyAddedLabel]);
+
+  useEffect(() => {
+    if (!showSelectFromListHint) return;
+    selectFromListHintTimeoutRef.current = setTimeout(() => setShowSelectFromListHint(false), 2500);
+    return () => {
+      if (selectFromListHintTimeoutRef.current) clearTimeout(selectFromListHintTimeoutRef.current);
+    };
+  }, [showSelectFromListHint]);
+
+  const onSelect = useCallback(
+    (item: MondoSuggestion) => {
+      const isDuplicate = value.includes(item.oboId);
+      setInput("");
+      setSuggestions([]);
+      setOpen(false);
+      setHighlightedIndex(-1);
+      if (isDuplicate) {
+        setAlreadyAddedLabel(item.label);
+        return;
+      }
+      onChange([...value, item.oboId]);
+    },
+    [value, onChange]
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        const trimmed = (e.target as HTMLInputElement).value?.trim() ?? "";
+        if (trimmed && open && suggestions.length > 0 && highlightedIndex >= 0) {
+          e.preventDefault();
+          onSelect(suggestions[highlightedIndex]);
+          return;
+        }
+        if (trimmed) {
+          e.preventDefault();
+          setShowSelectFromListHint(true);
+          return;
+        }
+      }
+      if (!open || suggestions.length === 0) {
+        if (e.key === "Escape") setOpen(false);
+        return;
+      }
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setHighlightedIndex((i) => (i < suggestions.length - 1 ? i + 1 : 0));
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setHighlightedIndex((i) => (i > 0 ? i - 1 : suggestions.length - 1));
+      } else if (e.key === "Enter" && highlightedIndex >= 0) {
+        e.preventDefault();
+        onSelect(suggestions[highlightedIndex]);
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        setOpen(false);
+        setHighlightedIndex(-1);
+      }
+    },
+    [open, suggestions, highlightedIndex, onSelect]
+  );
+
+  const fetchSuggestions = useCallback(async (q: string) => {
+    if (q.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    setLoading(true);
+    setOpen(true);
+    try {
+      const res = await fetch(
+        `/api/tools/ontology/mondo/search?q=${encodeURIComponent(q)}&limit=15`
+      );
+      const data = await res.json();
+      setSuggestions(data.results ?? []);
+      setOpen(true);
+    } catch {
+      setSuggestions([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!input.trim()) {
+      setSuggestions([]);
+      setOpen(false);
+      return;
+    }
+    debounceRef.current = setTimeout(() => {
+      fetchSuggestions(input.trim());
+      debounceRef.current = null;
+    }, SEARCH_DEBOUNCE_MS);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [input, fetchSuggestions]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const remove = (index: number) => {
+    onChange(value.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div ref={wrapperRef} className="space-y-1 relative">
+      <label htmlFor={id} className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+        {label}
+        {required && <sup className="text-red-600 dark:text-red-400 ml-0.5" aria-hidden>*</sup>}
+      </label>
+      <div className="flex flex-wrap gap-2 items-center rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1.5 min-h-[38px] focus-within:ring-2 focus-within:ring-niaid-header focus-within:border-transparent">
+        {value.map((v, i) => (
+          <span
+            key={`${v}-${i}`}
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-600 text-slate-800 dark:text-slate-200 text-sm"
+          >
+            {v}
+            {!disabled && (
+              <button
+                type="button"
+                onClick={() => remove(i)}
+                className="hover:text-red-600 dark:hover:text-red-400 font-medium leading-none"
+                aria-label={`Remove ${v}`}
+              >
+                ×
+              </button>
+            )}
+          </span>
+        ))}
+        <input
+          id={id}
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onFocus={() => suggestions.length > 0 && setOpen(true)}
+          placeholder={value.length === 0 ? placeholder : "Add condition…"}
+          disabled={disabled}
+          className="flex-1 min-w-[120px] px-1 py-0.5 text-sm bg-transparent border-0 border-none outline-none text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400"
+          aria-autocomplete="list"
+          aria-expanded={open}
+          aria-controls={`${id}-listbox`}
+          aria-activedescendant={highlightedIndex >= 0 ? `${id}-option-${highlightedIndex}` : undefined}
+          role="combobox"
+          aria-label={label}
+        />
+      </div>
+      {open && (suggestions.length > 0 || loading) && (
+        <ul
+          id={`${id}-listbox`}
+          role="listbox"
+          className={`absolute z-50 w-full max-h-60 overflow-auto rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 shadow-lg ${openUpward ? "bottom-full mb-0.5" : "mt-0.5"}`}
+        >
+          {loading && suggestions.length === 0 && (
+            <li className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">Searching…</li>
+          )}
+          {suggestions.map((item, i) => (
+            <li
+              key={item.iri}
+              id={`${id}-option-${i}`}
+              role="option"
+              aria-selected={i === highlightedIndex}
+              className={`px-3 py-2 text-sm cursor-pointer text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-700 last:border-b-0 ${i === highlightedIndex ? "bg-slate-100 dark:bg-slate-700" : "hover:bg-slate-100 dark:hover:bg-slate-700"}`}
+              onClick={() => onSelect(item)}
+            >
+              <span className="font-medium">{item.label}</span>
+              <span className="text-slate-500 dark:text-slate-400 ml-1">{item.oboId}</span>
+              {item.matchedSynonym && (
+                <span className="block text-xs text-slate-500 dark:text-slate-400 truncate">
+                  Synonym: {item.matchedSynonym}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      {alreadyAddedLabel && (
+        <p className="text-xs text-amber-700 dark:text-amber-400 mt-1" role="status">
+          {alreadyAddedLabel} already added.
+        </p>
+      )}
+      {showSelectFromListHint && (
+        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1" role="status">
+          Select an option from the list when suggestions appear.
+        </p>
+      )}
+    </div>
+  );
+}
+
 interface UBERONSuggestion {
   iri: string;
   shortForm: string;
@@ -1299,8 +1555,16 @@ function DrugAutocomplete({
 const SLOT_LABELS: Record<string, { label: string; placeholder: string }> = {
   q: { label: "Query (CURIE, URI, or label)", placeholder: "e.g. MONDO:0004979" },
   keywords: { label: "Keywords", placeholder: "e.g. influenza vaccine" },
+  health_condition: {
+    label: "Health condition",
+    placeholder: "Search and pick from list (MONDO)",
+  },
   health_conditions: { label: "Health conditions (MONDO IRIs)", placeholder: "e.g. MONDO:0005015 or diabetes" },
-  species: { label: "Species", placeholder: "e.g. Homo sapiens or 9606" },
+  species: { label: "Host species", placeholder: "Search and pick from list (NCBI Taxon)" },
+  infectious_agent: {
+    label: "Pathogen species",
+    placeholder: "Search and pick from list (NCBI Taxon)",
+  },
   drugs: { label: "Drugs", placeholder: "e.g. doxycycline" },
   drug: { label: "Drug name(s)", placeholder: "e.g. aspirin, Lipitor, tocilizumab" },
   gene_symbols: { label: "Gene symbol(s)", placeholder: "e.g. DUSP2, TP53, SOCS1" },
@@ -1342,9 +1606,20 @@ export interface SlotFormProps {
   values: Record<string, string | string[]>;
   onChange: (values: Record<string, string | string[]>) => void;
   disabled?: boolean;
+  /** Shown above primary slots (e.g. dataset search keywords). */
+  primarySectionTitle?: string;
+  /** Shown above the optional / advanced block; adds a top divider when set. */
+  metadataSectionTitle?: string;
 }
 
-export function SlotForm({ template, values, onChange, disabled }: SlotFormProps) {
+export function SlotForm({
+  template,
+  values,
+  onChange,
+  disabled,
+  primarySectionTitle,
+  metadataSectionTitle,
+}: SlotFormProps) {
   const [advancedOpen, setAdvancedOpen] = useState(true);
   const required = template.required_slots ?? [];
   const optional = template.optional_slots ?? [];
@@ -1365,6 +1640,50 @@ export function SlotForm({ template, values, onChange, disabled }: SlotFormProps
     const isRequired = required.includes(slotName);
     const raw = values[slotName];
 
+    if (
+      slotName === "health_condition" &&
+      (template.id === "dataset_search" || template.id === "geo_dataset_search")
+    ) {
+      const mondoValue = Array.isArray(raw)
+        ? raw
+        : typeof raw === "string"
+          ? raw.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean)
+          : [];
+      return (
+        <MondoAutocomplete
+          key={slotName}
+          id={`slot-${template.id}-${slotName}`}
+          label={label}
+          placeholder={placeholder}
+          value={mondoValue}
+          onChange={(v) => updateSlot(slotName, v)}
+          disabled={disabled}
+          required={isRequired}
+        />
+      );
+    }
+    if (
+      (slotName === "species" || slotName === "infectious_agent") &&
+      (template.id === "dataset_search" || template.id === "geo_dataset_search")
+    ) {
+      const organismValue = Array.isArray(raw)
+        ? raw
+        : typeof raw === "string"
+          ? raw.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean)
+          : [];
+      return (
+        <OrganismAutocomplete
+          key={slotName}
+          id={`slot-${template.id}-${slotName}`}
+          label={label}
+          placeholder={placeholder}
+          value={organismValue}
+          onChange={(v) => updateSlot(slotName, v)}
+          disabled={disabled}
+          required={isRequired}
+        />
+      );
+    }
     if (slotName === "organism_taxon_ids") {
       const organismValue = Array.isArray(raw) ? raw : typeof raw === "string" ? raw.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean) : [];
       return (
@@ -1574,33 +1893,54 @@ export function SlotForm({ template, values, onChange, disabled }: SlotFormProps
           placeholder={placeholder}
           disabled={disabled}
           className="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-niaid-header focus:border-transparent"
-          aria-required={primarySlots.includes(slotName)}
+          aria-required={isRequired}
           aria-invalid={isRequired && !isSlotFilled(raw)}
         />
       </div>
     );
   };
 
+  const filtersToggle = (
+    <>
+      <button
+        type="button"
+        onClick={() => setAdvancedOpen((o) => !o)}
+        className="text-sm text-niaid-link hover:underline"
+        aria-expanded={advancedOpen}
+      >
+        {advancedOpen ? "Hide filters" : "Filters / Advanced"}
+      </button>
+      {advancedOpen && (
+        <div className="space-y-3 pl-0 border-l-0">
+          {optional.map(renderInput)}
+        </div>
+      )}
+    </>
+  );
+
   return (
     <div className="space-y-3">
-      {primarySlots.map(renderInput)}
-      {optional.length > 0 && (
-        <>
-          <button
-            type="button"
-            onClick={() => setAdvancedOpen((o) => !o)}
-            className="text-sm text-niaid-link hover:underline"
-            aria-expanded={advancedOpen}
-          >
-            {advancedOpen ? "Hide filters" : "Filters / Advanced"}
-          </button>
-          {advancedOpen && (
-            <div className="space-y-3 pl-0 border-l-0">
-              {optional.map(renderInput)}
-            </div>
-          )}
-        </>
+      {primarySectionTitle ? (
+        <div className="space-y-3">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            {primarySectionTitle}
+          </h2>
+          {primarySlots.map(renderInput)}
+        </div>
+      ) : (
+        primarySlots.map(renderInput)
       )}
+      {optional.length > 0 &&
+        (metadataSectionTitle ? (
+          <div className="pt-4 mt-1 border-t border-slate-200 dark:border-slate-700 space-y-3">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              {metadataSectionTitle}
+            </h2>
+            {filtersToggle}
+          </div>
+        ) : (
+          filtersToggle
+        ))}
     </div>
   );
 }

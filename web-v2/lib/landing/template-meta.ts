@@ -39,20 +39,24 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
     id: "dataset_search",
     titlePart1: "Datasets",
     titlePart2: " by keywords",
-    description: "Find datasets by keywords, disease, organism, or drugs",
+    description:
+      "Find NDE datasets by keywords and/or filters for health condition, host species, and pathogen species.",
     icon: Database,
     iconColor: "text-blue-600 dark:text-blue-400",
-    blurb: "This query finds datasets in NDE that study a specific disease, organism, or other criteria.",
+    blurb:
+      "Search the NDE graph: use keywords (optional) and/or open Filters / Advanced for health condition (MONDO via search), pathogen species (NCBI Taxon), and host species (NCBI Taxon). You need at least one of keywords or a filter. All filled filters apply together (AND).",
     buttonLabel: "Search Datasets",
   },
   {
     id: "geo_dataset_search",
     titlePart1: "NCBI GEO",
     titlePart2: " datasets in NDE",
-    description: "Find NCBI GEO datasets in NDE by keywords, disease, or organism",
+    description:
+      "Find NCBI GEO datasets in NDE (GSE only), with optional keywords and filters for health condition, host species, and pathogen species.",
     icon: Database,
     iconColor: "text-emerald-600 dark:text-emerald-400",
-    blurb: "Search only NCBI GEO datasets within the NDE graph. Same schema.org as other NDE resources; results are restricted to datasets with GSE identifiers or GEO URLs.",
+    blurb:
+      "Same as dataset search but results are limited to GEO series (GSE identifiers). Optional facet filters match linked schema:healthCondition, host species (schema:species), and pathogen species (schema:infectiousAgent) in NDE.",
     buttonLabel: "Search GEO",
   },
   {

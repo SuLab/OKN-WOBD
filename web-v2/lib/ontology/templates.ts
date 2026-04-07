@@ -1,6 +1,8 @@
 // Fixed SPARQL templates for ontology-grounded query chaining
 // All queries use FROM clauses for graph scoping - no GRAPH enumeration
 
+import { mondoDigitsToOboIri } from "@/lib/ontology/mondo-iri";
+
 /**
  * Build SPARQL query to ground candidate labels to MONDO terms in Ubergraph
  * Stage 2: Ground candidate labels to MONDO
@@ -453,11 +455,218 @@ WHERE {
 LIMIT 50`;
 }
 
+function escapeSparqlStringLiteral(s: string): string {
+  return s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+function escapeRegexForSparql(term: string): string {
+  const cleaned = term.trim().replace(/\.$/, "");
+  return cleaned.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function resolveHealthConditionIri(input: string): string | null {
+  const trimmed = input.replace(/[<>]/g, "").trim();
+  const mondoPurl = trimmed.match(/^https?:\/\/purl\.obolibrary\.org\/obo\/MONDO_(\d+)$/i);
+  if (mondoPurl) return mondoDigitsToOboIri(mondoPurl[1]);
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  const mondo = trimmed.match(/^MONDO[:_\s]+0*(\d+)$/i);
+  if (mondo) return mondoDigitsToOboIri(mondo[1]);
+  return null;
+}
+
+function resolveSpeciesIrisForFacet(input: string): string[] {
+  const trimmed = input.replace(/[<>]/g, "").trim();
+  if (/^\d+$/.test(trimmed)) {
+    return [
+      `https://www.uniprot.org/taxonomy/${trimmed}`,
+      `http://purl.obolibrary.org/obo/NCBITaxon_${trimmed}`,
+    ];
+  }
+  if (/^https?:\/\/www\.uniprot\.org\/taxonomy\/\d+$/i.test(trimmed)) return [trimmed];
+  if (/^https?:\/\/purl\.obolibrary\.org\/obo\/NCBITaxon_\d+$/i.test(trimmed)) return [trimmed];
+  return [];
+}
+
+function buildKeywordRegexFilter(keywordRegexTerms: string[]): string {
+  const terms = keywordRegexTerms.map((t) => t.trim()).filter(Boolean).map(escapeRegexForSparql);
+  if (terms.length === 0) {
+    throw new Error("At least one keyword term required for dataset keyword search");
+  }
+  if (terms.length === 1) {
+    const t = terms[0];
+    return `  FILTER(
+    REGEX(STR(?name), "${t}", "i")
+    || (BOUND(?description) && REGEX(STR(?description), "${t}", "i"))
+  )`;
+  }
+  const pieces = terms.map(
+    (t) =>
+      `(REGEX(STR(?name), "${t}", "i") || (BOUND(?description) && REGEX(STR(?description), "${t}", "i")))`
+  );
+  return `  FILTER(
+    ${pieces.join(" &&\n    ")}
+  )`;
+}
+
+function buildFacetHealthConditionBlock(inputs: string[]): string {
+  const iris: string[] = [];
+  const textTerms: string[] = [];
+  for (const raw of inputs) {
+    const t = raw.trim();
+    if (!t) continue;
+    const resolved = resolveHealthConditionIri(t);
+    if (resolved) iris.push(resolved.replace(/[<>]/g, ""));
+    else {
+      const trimmed = t.replace(/[<>]/g, "").trim();
+      if (/^https?:\/\//i.test(trimmed)) iris.push(trimmed);
+      else textTerms.push(t);
+    }
+  }
+  const uniqueIris = [...new Set(iris)];
+  if (uniqueIris.length === 0 && textTerms.length === 0) return "";
+
+  const filterParts: string[] = [];
+  if (uniqueIris.length > 0) {
+    filterParts.push(uniqueIris.map((iri) => `?hcTerm = <${iri}>`).join(" || "));
+  }
+  for (const term of textTerms) {
+    const esc = escapeSparqlStringLiteral(term);
+    filterParts.push(`(BOUND(?hcName) && CONTAINS(LCASE(?hcName), LCASE("${esc}")))`);
+  }
+
+  if (textTerms.length === 0) {
+    return `
+  ?dataset schema:healthCondition ?hcTerm .
+  FILTER(${filterParts.join(" || ")})`;
+  }
+  return `
+  ?dataset schema:healthCondition ?hcTerm .
+  OPTIONAL { ?hcTerm schema:name ?hcName }
+  FILTER(${filterParts.join(" || ")})`;
+}
+
+function buildFacetSpeciesBlock(inputs: string[]): string {
+  const iris: string[] = [];
+  const textTerms: string[] = [];
+  for (const raw of inputs) {
+    const t = raw.trim();
+    if (!t) continue;
+    const found = resolveSpeciesIrisForFacet(t);
+    if (found.length > 0) iris.push(...found);
+    else textTerms.push(t);
+  }
+  const uniqueIris = [...new Set(iris.map((i) => i.replace(/[<>]/g, "")))];
+  if (uniqueIris.length === 0 && textTerms.length === 0) return "";
+
+  const filterParts: string[] = [];
+  if (uniqueIris.length > 0) {
+    filterParts.push(uniqueIris.map((iri) => `?spTerm = <${iri}>`).join(" || "));
+  }
+  for (const term of textTerms) {
+    const esc = escapeSparqlStringLiteral(term);
+    filterParts.push(`CONTAINS(LCASE(?spName), LCASE("${esc}"))`);
+  }
+  return `
+  ?dataset schema:species ?spTerm .
+  ?spTerm schema:name ?spName .
+  FILTER(${filterParts.join(" || ")})`;
+}
+
+function buildFacetInfectiousAgentBlock(inputs: string[]): string {
+  const iris: string[] = [];
+  const textTerms: string[] = [];
+  for (const raw of inputs) {
+    const t = raw.trim();
+    if (!t) continue;
+    const found = resolveSpeciesIrisForFacet(t);
+    if (found.length > 0) iris.push(...found);
+    else textTerms.push(t);
+  }
+  const uniqueIris = [...new Set(iris.map((i) => i.replace(/[<>]/g, "")))];
+  if (uniqueIris.length === 0 && textTerms.length === 0) return "";
+
+  const filterParts: string[] = [];
+  if (uniqueIris.length > 0) {
+    filterParts.push(uniqueIris.map((iri) => `?iaTerm = <${iri}>`).join(" || "));
+  }
+  for (const term of textTerms) {
+    const trimmed = term.replace(/[<>]/g, "").trim();
+    if (/^https?:\/\//i.test(trimmed)) {
+      filterParts.push(`?iaTerm = <${trimmed}>`);
+    } else {
+      const esc = escapeSparqlStringLiteral(term);
+      filterParts.push(`CONTAINS(LCASE(?iaName), LCASE("${esc}"))`);
+    }
+  }
+  return `
+  ?dataset schema:infectiousAgent ?iaTerm .
+  ?iaTerm schema:name ?iaName .
+  FILTER(${filterParts.join(" || ")})`;
+}
+
 /**
- * Build SPARQL query to find datasets by Wikidata drug identifiers
- * @param wikidataIRIs - Array of Wikidata IRIs (e.g., ["http://www.wikidata.org/entity/Q421094"])
- * @param useTextMatching - If true, includes optional text matching on drug names
+ * NDE dataset search: keyword REGEX on schema:name / optional schema:description,
+ * with optional AND filters on schema:healthCondition, schema:species, schema:infectiousAgent
+ * (term IRI equality when input is a URI/CURIE, else CONTAINS on schema:name).
+ * Health-condition values may be MONDO CURIE/IRI (resolved to MONDO IRIs), other http(s) term IRIs, or free text (schema:name CONTAINS).
+ * Species and infectious-agent slot values may be NCBI taxon IDs (mapped to UniProt taxonomy + NCBITaxon IRIs), full URIs, or text.
+ *
+ * @param keywordRegexTerms - Terms matched with REGEX (AND across terms); omit or empty for facet-only search
+ * @param geoOnly - If true, restrict to GEO-style datasets (schema:identifier GSE[0-9]+)
  */
+export function buildNDEDatasetKeywordAndFacetQuery(
+  keywordRegexTerms: string[],
+  options: {
+    healthConditionInputs?: string[];
+    speciesInputs?: string[];
+    infectiousAgentInputs?: string[];
+    geoOnly?: boolean;
+  } = {}
+): string {
+  const { healthConditionInputs = [], speciesInputs = [], infectiousAgentInputs = [], geoOnly = false } =
+    options;
+  const kwTerms = keywordRegexTerms.map((t) => t.trim()).filter(Boolean);
+  const keywordFilter =
+    kwTerms.length > 0 ? buildKeywordRegexFilter(kwTerms) : "";
+  const healthBlock =
+    healthConditionInputs.length > 0 ? buildFacetHealthConditionBlock(healthConditionInputs) : "";
+  const speciesBlock = speciesInputs.length > 0 ? buildFacetSpeciesBlock(speciesInputs) : "";
+  const agentBlock =
+    infectiousAgentInputs.length > 0 ? buildFacetInfectiousAgentBlock(infectiousAgentInputs) : "";
+  const geoBlock = geoOnly
+    ? `
+  FILTER(REGEX(STR(COALESCE(?ident, "")), "GSE[0-9]+", "i"))`
+    : "";
+
+  const hasFacet = Boolean(healthBlock || speciesBlock || agentBlock);
+  if (!geoOnly && !keywordFilter && !hasFacet) {
+    throw new Error(
+      "Provide keywords and/or at least one filter (health condition, pathogen species, or host species)."
+    );
+  }
+
+  // One row per dataset; optional portal links (NDEResultCards uses identifier, urls, sameAsList, owlSameAsList).
+  const resourceOptionals = `
+  OPTIONAL { ?dataset schema:identifier ?ident }
+  OPTIONAL { ?dataset schema:url ?url }
+  OPTIONAL { ?dataset schema:sameAs ?sameAs }
+  OPTIONAL { ?dataset owl:sameAs ?owlSameAs }`;
+
+  return `SELECT ?dataset ?name ?description
+  (SAMPLE(?ident) AS ?identifier)
+  (GROUP_CONCAT(DISTINCT STR(?url); SEPARATOR=" ") AS ?urls)
+  (GROUP_CONCAT(DISTINCT STR(?sameAs); SEPARATOR=" ") AS ?sameAsList)
+  (GROUP_CONCAT(DISTINCT STR(?owlSameAs); SEPARATOR=" ") AS ?owlSameAsList)
+FROM <https://purl.org/okn/frink/kg/nde>
+WHERE {
+  ?dataset a schema:Dataset ;
+           schema:name ?name .
+  OPTIONAL { ?dataset schema:description ?description }${resourceOptionals}
+${keywordFilter}${healthBlock}${speciesBlock}${agentBlock}${geoBlock}
+}
+GROUP BY ?dataset ?name ?description`.trim();
+}
+
 /**
  * Build SPARQL query to find diseases treated by a drug in Wikidata
  * Maps drug to diseases via P2175 (medical condition treated) and P6680 (exact match to MONDO)

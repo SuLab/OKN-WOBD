@@ -6,8 +6,9 @@ export const GEO_DATASET_SEARCH_TEMPLATE_ID = "geo_dataset_search";
 
 export const geoDatasetSearchTemplate: TemplateDefinition = {
   id: GEO_DATASET_SEARCH_TEMPLATE_ID,
-  description: "Find NCBI GEO datasets in NDE by keywords, disease, or organism",
-  required_slots: ["keywords"],
+  description: "Find NCBI GEO datasets in NDE by keywords with optional health condition, host species, and pathogen species filters",
+  required_slots: [],
+  optional_slots: ["health_condition", "infectious_agent", "species"],
 };
 
 /**

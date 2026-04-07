@@ -6,6 +6,7 @@ import {
   buildNDESpeciesQueryIRI,
   buildNDESpeciesQueryCURIE,
   buildNDEFallbackQuery,
+  buildNDEDatasetKeywordAndFacetQuery,
   buildGXAExperimentsForGenesQuery,
   buildWikidataDrugQuery,
   buildNDEDiseaseAndOrganismQuery,
@@ -19,8 +20,9 @@ export const DATASET_SEARCH_TEMPLATE_ID = "dataset_search";
 
 export const datasetSearchTemplate: TemplateDefinition = {
   id: DATASET_SEARCH_TEMPLATE_ID,
-  description: "Find datasets by keywords/healthCondition",
-  required_slots: ["keywords"],
+  description: "Find datasets by keywords with optional health condition, host species, and pathogen species filters",
+  required_slots: [],
+  optional_slots: ["health_condition", "infectious_agent", "species"],
 };
 
 export interface DatasetSearchOptions {
@@ -534,47 +536,69 @@ export async function buildDatasetSearchQuery(
     return fallbackQuery;
   }
 
-  // Fall back to keyword-based search
+  // Keyword-based search with optional facet slots (form / chat)
   const prefixes = pack.prefixes;
   const keywordsList: string[] | undefined = (slots as any).keywords_list;
   const keywords: string = Array.isArray(slots.keywords)
     ? (slots.keywords as string[]).join(" ")
     : (slots.keywords ?? "").toString();
 
+  const keywordRegexTerms: string[] =
+    Array.isArray(keywordsList) && keywordsList.length > 0
+      ? keywordsList.map((k) => String(k).trim()).filter(Boolean)
+      : [keywords.trim()].filter(Boolean);
+
+  const healthConditionRaw = slots.health_condition;
+  const healthConditionInputs: string[] = Array.isArray(healthConditionRaw)
+    ? healthConditionRaw.map((s) => String(s).trim()).filter(Boolean)
+    : typeof healthConditionRaw === "string" && healthConditionRaw.trim()
+      ? healthConditionRaw
+          .split(/[,\s]+/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+
+  const infectiousAgentRaw = slots.infectious_agent;
+  const infectiousAgentInputs: string[] = Array.isArray(infectiousAgentRaw)
+    ? infectiousAgentRaw.map((s) => String(s).trim()).filter(Boolean)
+    : typeof infectiousAgentRaw === "string" && infectiousAgentRaw.trim()
+      ? infectiousAgentRaw
+          .split(/[,\s]+/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+
+  const speciesRaw = slots.species;
+  const speciesInputs: string[] = Array.isArray(speciesRaw)
+    ? speciesRaw.map((s) => String(s).trim()).filter(Boolean)
+    : typeof speciesRaw === "string" && speciesRaw.trim()
+      ? speciesRaw
+          .split(/[,\s]+/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+
+  let body = buildNDEDatasetKeywordAndFacetQuery(keywordRegexTerms, {
+    healthConditionInputs:
+      healthConditionInputs.length > 0 ? healthConditionInputs : undefined,
+    speciesInputs: speciesInputs.length > 0 ? speciesInputs : undefined,
+    infectiousAgentInputs:
+      infectiousAgentInputs.length > 0 ? infectiousAgentInputs : undefined,
+    geoOnly,
+  });
+
   let query = "";
   for (const [prefix, uri] of Object.entries(prefixes)) {
     query += `PREFIX ${prefix}: <${uri}>\n`;
   }
+  query += body;
 
-  // Build keyword FILTER clause
-  let filterClause: string;
-  if (Array.isArray(keywordsList) && keywordsList.length > 0) {
-    const terms = keywordsList.map(k => k.replace(/"/g, '\\"'));
-    const pieces = terms.map(
-      t =>
-        `(REGEX(STR(?name), "${t}", "i") || (BOUND(?description) && REGEX(STR(?description), "${t}", "i")))`
-    );
-    filterClause = `FILTER(\n    ${pieces.join(" &&\n    ")}\n  )`;
-  } else {
-    const escaped = keywords.replace(/"/g, '\\"');
-    filterClause = `FILTER(\n    REGEX(STR(?name), "${escaped}", "i")\n    || (BOUND(?description) && REGEX(STR(?description), "${escaped}", "i"))\n  )`;
+  const limit = intent.slots?.limit as number | undefined;
+  if (limit) {
+    const maxLimit = Math.min(limit, pack.guardrails.max_limit);
+    const withoutLimit = query.replace(/\s*LIMIT\s+\d+\s*$/i, "").trim();
+    query = `${withoutLimit}\nLIMIT ${maxLimit}`;
   }
-
-  // Basic dataset search over schema:Dataset with name/description keyword filter
-  const geoFilterClause = geoOnly
-    ? "\n  OPTIONAL { ?dataset schema:identifier ?identifier . }\n  FILTER(REGEX(STR(COALESCE(?identifier, \"\")), \"GSE[0-9]+\", \"i\"))"
-    : "";
-  query += `
-SELECT ?dataset ?name ?description${geoOnly ? " ?identifier" : ""}
-WHERE {
-  ?dataset a schema:Dataset ;
-           schema:name ?name .
-  OPTIONAL { ?dataset schema:description ?description . }
-  ${filterClause}
-  ${geoFilterClause}
-}
-${(intent.slots?.limit as number) ? `LIMIT ${Math.min((intent.slots?.limit as number), pack.guardrails.max_limit)}` : ""}
-  `.trim();
 
   return query;
 }
