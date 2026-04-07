@@ -48,6 +48,17 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
     buttonLabel: "Search Datasets",
   },
   {
+    id: "gene_expression_gene_level_de_per_contrast",
+    titlePart1: "Gene-level differential expression",
+    titlePart2: " per contrast",
+    description:
+      "Across GXA experiments: gene(s), contrasts, direction (up/down), log2FC, and adjusted p-value in one result set",
+    icon: Layers,
+    iconColor: "text-cyan-600 dark:text-cyan-400",
+    blurb: "One query for one or more genes: experiment and contrast identifiers, optional up/down filter, and a direction column alongside log2FC and adjusted p-value.",
+    buttonLabel: "Run query",
+  },
+  {
     id: "gene_expression_dataset_search",
     titlePart1: "Gene expression",
     titlePart2: " experiments",
@@ -65,17 +76,6 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
     icon: List,
     iconColor: "text-slate-600 dark:text-slate-400",
     blurb: "List differentially expressed genes for a given gene expression experiment (e.g. E-GEOD-76).",
-    buttonLabel: "Run query",
-  },
-  {
-    id: "gene_expression_gene_level_de_per_contrast",
-    titlePart1: "Gene-level differential expression",
-    titlePart2: " per contrast",
-    description:
-      "Across GXA experiments: gene(s), contrasts, direction (up/down), log2FC, and adjusted p-value in one result set",
-    icon: Layers,
-    iconColor: "text-cyan-600 dark:text-cyan-400",
-    blurb: "One query for one or more genes: experiment and contrast identifiers, optional up/down filter, and a direction column alongside log2FC and adjusted p-value.",
     buttonLabel: "Run query",
   },
   {
