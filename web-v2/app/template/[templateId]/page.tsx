@@ -280,17 +280,6 @@ export default function TemplatePage() {
               </div>
             </div>
 
-            {templateId === "dataset_search" && (
-              <p className="text-sm text-slate-600 dark:text-slate-400 border-l-2 border-slate-300 dark:border-slate-600 pl-3 py-0.5">
-                Use <span className="font-medium text-slate-700 dark:text-slate-300">keywords</span> to match
-                dataset title or description,{" "}
-                <span className="font-medium text-slate-700 dark:text-slate-300">or</span> set at least one
-                metadata filter under <span className="font-medium text-slate-700 dark:text-slate-300">Or match by metadata</span>{" "}
-                (health condition, pathogen species, or host species). You can use both. Keywords and filters
-                combine with <span className="font-medium text-slate-700 dark:text-slate-300">AND</span> when
-                multiple are filled.
-              </p>
-            )}
             {templateId === "geo_dataset_search" && (
               <p className="text-sm text-slate-600 dark:text-slate-400 border-l-2 border-slate-300 dark:border-slate-600 pl-3 py-0.5">
                 Keywords and metadata filters are optional. Leave everything blank to list NCBI GEO series
