@@ -164,33 +164,37 @@ export async function POST(request: Request) {
     if (eGeodIds.length > 0) {
       const gxaQuery = buildGXACoverageForExperimentIdsQuery(eGeodIds);
       if (gxaQuery) {
-        const gxaEndpoint = pack?.endpoint_mode?.direct_endpoints?.["gene-expression-atlas-okn"];
-        if (gxaEndpoint) {
-          try {
-            const gxaRes = await executeSPARQL(gxaQuery, gxaEndpoint, { timeout_s: 60 });
-            const gxaBindings = gxaRes.result?.results?.bindings ?? [];
-            gxaExperimentIds = new Set(
-              gxaBindings.map((b: Record<string, unknown>) => {
-                const v = b.experimentId ?? b.experimentid;
-                return getBindingValue(v as { type: string; value: string } | string | undefined);
-              }).filter(Boolean)
-            );
-            for (const b of gxaBindings as Record<string, unknown>[]) {
-              const eid = getBindingValue((b.experimentId ?? b.experimentid) as { type: string; value: string } | string | undefined);
-              const cc = getBindingValue((b.contrastCount ?? b.contrastcount) as { type: string; value: string } | string | undefined);
-              const scl = getBindingValue((b.sampleContrastLabel ?? b.samplecontrastlabel) as { type: string; value: string } | string | undefined);
-              if (eid) eGeodToCoverage.set(eid, { experimentId: eid, contrastCount: cc || "0", sampleContrastLabel: scl || "" });
-            }
-            if (process.env.NODE_ENV !== "production") {
-              console.log("[drug-datasets] GXA endpoint OK, experiments in GXA:", gxaExperimentIds.size, [...gxaExperimentIds].slice(0, 5));
-            }
-          } catch (err) {
-            if (process.env.NODE_ENV !== "production") {
-              console.warn("[drug-datasets] GXA lookup failed (non-fatal):", err instanceof Error ? err.message : err);
+        // Same path as GXA template cards and chat NDE↔GXA bridge: federated SPARQL (not per-graph service).
+        const federatedEndpoint =
+          pack?.endpoint_mode?.federated_endpoint ||
+          process.env.NEXT_PUBLIC_FRINK_FEDERATION_URL ||
+          "https://frink.apps.renci.org/federation/sparql";
+        try {
+          const gxaRes = await executeSPARQL(gxaQuery, federatedEndpoint, { timeout_s: 120 });
+          const gxaBindings = gxaRes.result?.results?.bindings ?? [];
+          gxaExperimentIds = new Set(
+            gxaBindings.map((b: Record<string, unknown>) => {
+              const v = b.experimentId ?? b.experimentid;
+              return getBindingValue(v as { type: string; value: string } | string | undefined);
+            }).filter(Boolean)
+          );
+          for (const b of gxaBindings as Record<string, unknown>[]) {
+            const eid = getBindingValue((b.experimentId ?? b.experimentid) as { type: string; value: string } | string | undefined);
+            const cc = getBindingValue((b.contrastCount ?? b.contrastcount) as { type: string; value: string } | string | undefined);
+            const scl = getBindingValue((b.sampleContrastLabel ?? b.samplecontrastlabel) as { type: string; value: string } | string | undefined);
+            if (eid) eGeodToCoverage.set(eid, { experimentId: eid, contrastCount: cc || "0", sampleContrastLabel: scl || "" });
+          }
+          if (process.env.NODE_ENV !== "production") {
+            if (gxaRes.error) {
+              console.warn("[drug-datasets] GXA coverage (federated) returned error:", gxaRes.error);
+            } else {
+              console.log("[drug-datasets] GXA coverage (federated) OK, experiments:", gxaExperimentIds.size, [...gxaExperimentIds].slice(0, 5));
             }
           }
-        } else if (process.env.NODE_ENV !== "production") {
-          console.warn("[drug-datasets] No gene-expression-atlas-okn direct endpoint in pack");
+        } catch (err) {
+          if (process.env.NODE_ENV !== "production") {
+            console.warn("[drug-datasets] GXA lookup failed (non-fatal):", err instanceof Error ? err.message : err);
+          }
         }
       }
     }
