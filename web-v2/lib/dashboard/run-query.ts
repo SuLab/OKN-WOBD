@@ -1,6 +1,7 @@
 import type { ContextPack } from "@/lib/context-packs/types";
 import type { Intent } from "@/types";
 import type { SPARQLResult } from "@/types";
+import { ndeBindingHasGeoOrGseEvidence } from "@/lib/dashboard/nde-geo-evidence";
 
 export const PACK_ID = "wobd";
 
@@ -168,9 +169,30 @@ export async function runTemplateQuery({
     ? [{ query: execData.executed_query as string }]
     : [];
 
+  let finalResults: SPARQLResult = { head: { vars }, results: { bindings } };
+  let filteredEmptyHint: string | undefined;
+
+  const onlyGeneExpressionDatasetSearch =
+    templateId === DATASET_SEARCH_TEMPLATE_ID &&
+    (slots.only_gene_expression === "true" ||
+      (Array.isArray(slots.only_gene_expression) && slots.only_gene_expression[0] === "true"));
+
+  if (onlyGeneExpressionDatasetSearch && bindings.length > 0) {
+    const before = bindings.length;
+    const filtered = bindings.filter((b: Record<string, unknown>) =>
+      ndeBindingHasGeoOrGseEvidence(b)
+    );
+    finalResults = { head: { vars }, results: { bindings: filtered } };
+    if (filtered.length === 0 && before > 0) {
+      filteredEmptyHint =
+        'No matching datasets include a GEO series (GSE) or E-GEOD accession in their NDE metadata. Try unchecking "Only show datasets with gene expression data" to see all results.';
+    }
+  }
+
   return {
-    results: { head: { vars }, results: { bindings } },
+    results: finalResults,
     error: null,
+    filteredEmptyHint,
     executedQueries,
   };
 }

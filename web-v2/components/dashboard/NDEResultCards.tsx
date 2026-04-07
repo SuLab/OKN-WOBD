@@ -90,8 +90,13 @@ function highlightTermsInText(text: string, terms: string[]): React.ReactNode {
 function getNDEResourceUrl(identifier: string, datasetUri?: string): string | null {
   const idFromIdentifier = toNIAIDResourceId(identifier) || (datasetUri ? toNIAIDResourceId(datasetUri) : null);
   if (idFromIdentifier) return `${NIAID_RESOURCE_BASE}${encodeURIComponent(idFromIdentifier)}`;
-  // NDE portal also uses GEO accession as resource id (lowercase, e.g. gse1000)
-  const geoId = identifier?.trim();
+  // NDE portal also uses GEO accession as resource id (lowercase, e.g. gse1000).
+  // Identifier may be GROUP_CONCAT of several values — pick first GSE token if present.
+  let geoId = identifier?.trim() ?? "";
+  if (geoId && !NDE_GEO_ID_PATTERN.test(geoId)) {
+    const m = geoId.match(/\b(GSE\d+)\b/i);
+    if (m) geoId = m[1];
+  }
   if (geoId && NDE_GEO_ID_PATTERN.test(geoId))
     return `${NIAID_RESOURCE_BASE}${encodeURIComponent(geoId.toLowerCase())}`;
   const geoIdFromUri = datasetUri?.trim();

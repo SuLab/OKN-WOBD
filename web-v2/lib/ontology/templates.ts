@@ -653,7 +653,7 @@ export function buildNDEDatasetKeywordAndFacetQuery(
   OPTIONAL { ?dataset owl:sameAs ?owlSameAs }`;
 
   return `SELECT ?dataset ?name ?description
-  (SAMPLE(?ident) AS ?identifier)
+  (GROUP_CONCAT(DISTINCT STR(?ident); SEPARATOR=" ") AS ?identifier)
   (GROUP_CONCAT(DISTINCT STR(?url); SEPARATOR=" ") AS ?urls)
   (GROUP_CONCAT(DISTINCT STR(?sameAs); SEPARATOR=" ") AS ?sameAsList)
   (GROUP_CONCAT(DISTINCT STR(?owlSameAs); SEPARATOR=" ") AS ?owlSameAsList)

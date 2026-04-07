@@ -22,7 +22,7 @@ export const datasetSearchTemplate: TemplateDefinition = {
   id: DATASET_SEARCH_TEMPLATE_ID,
   description: "Find datasets by keywords with optional health condition, host species, and pathogen species filters",
   required_slots: [],
-  optional_slots: ["health_condition", "infectious_agent", "species"],
+  optional_slots: ["health_condition", "infectious_agent", "species", "only_gene_expression"],
 };
 
 export interface DatasetSearchOptions {

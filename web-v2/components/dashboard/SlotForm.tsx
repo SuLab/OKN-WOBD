@@ -1800,6 +1800,10 @@ export function SlotForm({
     }
     if (slotName === "only_gene_expression") {
       const checked = raw === "true" || (Array.isArray(raw) && raw[0] === "true");
+      const checkboxLabel =
+        template.id === "dataset_search"
+          ? "Only show datasets with GEO/GSE (gene expression) in metadata"
+          : label;
       return (
         <div key={slotName} className="flex items-center gap-2">
           <input
@@ -1812,7 +1816,7 @@ export function SlotForm({
             aria-describedby={undefined}
           />
           <label htmlFor={`slot-${template.id}-${slotName}`} className="text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
-            {label}
+            {checkboxLabel}
           </label>
         </div>
       );

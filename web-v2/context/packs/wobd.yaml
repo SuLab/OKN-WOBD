@@ -49,7 +49,7 @@ templates:
   - id: dataset_search
     description: "Find datasets by keywords with optional health condition, host species, and pathogen species filters"
     required_slots: []  # keywords optional; need keywords and/or at least one facet (enforced in UI + query builder)
-    optional_slots: ["health_condition", "infectious_agent", "species"]
+    optional_slots: ["health_condition", "infectious_agent", "species", "only_gene_expression"]
   - id: geo_dataset_search
     description: "Find NCBI GEO datasets in NDE by keywords with optional health condition, host species, and pathogen species filters"
     required_slots: []  # keywords optional; GEO-only search allowed with no other criteria
