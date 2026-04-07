@@ -39,9 +39,10 @@ guardrails:
   service_allowlist: []
   forbid_ops: ["INSERT", "DELETE", "LOAD", "CLEAR", "DROP", "CREATE", "MOVE", "COPY", "ADD"]
 
+# Template descriptions here are for the pack/runtime (slots, routing). User-facing card + /template/ copy: lib/landing/template-meta.ts
 templates:
   - id: drug_datasets
-    description: "Find NDE datasets for diseases treated by a drug. Optionally restrict to GEO/gene expression and include GXA/SPOKE-GeneLab links for matching experiments."
+    description: "Find NDE datasets for diseases treated by a drug and optionally limit to datasets with gene expression data."
     required_slots: ["drug"]
     optional_slots: ["only_gene_expression", "max_results"]
   - id: dataset_search

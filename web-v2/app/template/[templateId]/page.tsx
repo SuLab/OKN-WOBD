@@ -179,7 +179,7 @@ export default function TemplatePage() {
               </span>
               <div>
                 <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-                  {template.description}
+                  {meta.description}
                 </h1>
                 {meta.blurb && (
                   <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
@@ -312,7 +312,7 @@ export default function TemplatePage() {
                   <NDEResultCards
                     results={results}
                     templateId={templateId}
-                    templateLabel={template.description}
+                    templateLabel={meta.description}
                     emptyMessage={filteredEmptyHint ?? undefined}
                   />
                 ) : (

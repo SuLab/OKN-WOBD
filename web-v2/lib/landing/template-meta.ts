@@ -13,6 +13,7 @@ export interface TemplateMetaItem {
   id: string;
   titlePart1: string;
   titlePart2: string;
+  /** One-line summary: query cards (landing) and /template/[id] page title + results label. */
   description: string;
   icon: LucideIcon;
   iconColor: string;
@@ -27,10 +28,11 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
     id: "drug_datasets",
     titlePart1: "Datasets",
     titlePart2: " for a drug",
-    description: "Find NDE datasets for diseases treated by a drug",
+    description:
+      "Find NDE datasets for diseases treated by a drug and optionally limit to datasets with gene expression data.",
     icon: Pill,
     iconColor: "text-teal-600 dark:text-teal-400",
-    blurb: "Enter a drug name (e.g. tocilizumab). We look up diseases it treats in Wikidata, then find NDE datasets. Optionally restrict to GEO/gene expression and include GXA/SPOKE-GeneLab links for matching experiments.",
+    blurb: "Enter a drug name (e.g. tocilizumab) to find NDE datasets for diseases treated by the drug.",
     buttonLabel: "Find datasets",
   },
   {
