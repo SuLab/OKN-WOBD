@@ -8,13 +8,14 @@ const NIAID_RESOURCE_BASE = "https://data.niaid.nih.gov/resources?id=";
 
 /** NIAID portal accepts study ids like sdy1, sdy112 (ImmPort). */
 const NIAID_STUDY_ID_PATTERN = /^(SDY\d+)$/i;
+/** ClinicalTrials.gov ids (NDE portal accepts resources?id=nct01234567). */
+const NCT_PORTAL_ID_PATTERN = /^(NCT\d{8})$/i;
 /** NDE also accepts GEO accessions as resource id (e.g. GSE1000 → resources?id=gse1000). */
 const NDE_GEO_ID_PATTERN = /^GSE\d+$/i;
 
 /**
- * Extract the NIAID Data Discovery Portal resource id.
- * We only use values that are clearly study ids (e.g. SDY1) or from a NIAID URL.
- * We do NOT use arbitrary dataset IRI path segments (e.g. m38y09r3r9) as that is an internal id.
+ * Extract portal id from a literal identifier string or URL: SDY… (ImmPort) or SDY embedded in a URL.
+ * For WOBD datasets, prefer {@link portalIdFromOknWobdDatasetIri} on ?dataset (canonical NDE id, e.g. vivli_…).
  */
 function toNIAIDResourceId(identifier: string): string | null {
   if (!identifier || typeof identifier !== "string") return null;
@@ -30,6 +31,35 @@ function toNIAIDResourceId(identifier: string): string | null {
     // not a URL
   }
   return null;
+}
+
+/**
+ * NDE portal resource id from schema:identifier when it is an NCT id (possibly inside GROUP_CONCAT).
+ */
+function extractNctPortalId(identifier: string): string | null {
+  if (!identifier || typeof identifier !== "string") return null;
+  const s = identifier.trim();
+  if (!s) return null;
+  if (NCT_PORTAL_ID_PATTERN.test(s)) return s.toLowerCase();
+  const m = s.match(/\b(NCT\d{8})\b/i);
+  return m ? m[1].toLowerCase() : null;
+}
+
+/**
+ * WOBD RDF uses https://okn.wobd.org/dataset/{catalog}/{id}; NDE portal accepts the same {catalog}_{...} or catalog-specific id as ?id=.
+ */
+function portalIdFromOknWobdDatasetIri(datasetUri: string): string | null {
+  if (!datasetUri || typeof datasetUri !== "string") return null;
+  try {
+    const u = new URL(datasetUri.trim());
+    if (u.hostname !== "okn.wobd.org") return null;
+    const path = u.pathname.replace(/\/$/, "");
+    const m = path.match(/^\/dataset\/[^/]+\/(.+)$/);
+    if (!m) return null;
+    return decodeURIComponent(m[1]);
+  } catch {
+    return null;
+  }
 }
 
 /** Extract string value from a SPARQL binding value (object with type/value or raw). */
@@ -84,14 +114,25 @@ function highlightTermsInText(text: string, terms: string[]): React.ReactNode {
 
 /**
  * Build NIAID Data Discovery Portal (NDE) resource URL.
- * Accepts SDY ids (e.g. sdy1) and GEO accessions (e.g. GSE1000 → id=gse1000).
- * See https://data.niaid.nih.gov/resources?id=gse1000
+ * Prefer ?dataset IRI from WOBD RDF (…/dataset/{catalog}/{id}) — that id matches NDE (e.g. vivli_…), not always NCT/DOI in schema:identifier.
+ * Then SDY, NCT, GSE from identifier. See https://data.niaid.nih.gov/resources?id=gse1000
  */
 function getNDEResourceUrl(identifier: string, datasetUri?: string): string | null {
-  const idFromIdentifier = toNIAIDResourceId(identifier) || (datasetUri ? toNIAIDResourceId(datasetUri) : null);
+  const ds = datasetUri?.trim();
+  if (ds) {
+    const oknPortalId = portalIdFromOknWobdDatasetIri(ds);
+    if (oknPortalId)
+      return `${NIAID_RESOURCE_BASE}${encodeURIComponent(oknPortalId)}`;
+    const idFromDatasetUri = toNIAIDResourceId(ds);
+    if (idFromDatasetUri) return `${NIAID_RESOURCE_BASE}${encodeURIComponent(idFromDatasetUri)}`;
+    if (NDE_GEO_ID_PATTERN.test(ds))
+      return `${NIAID_RESOURCE_BASE}${encodeURIComponent(ds.toLowerCase())}`;
+  }
+
+  const idFromIdentifier =
+    toNIAIDResourceId(identifier) || extractNctPortalId(identifier);
   if (idFromIdentifier) return `${NIAID_RESOURCE_BASE}${encodeURIComponent(idFromIdentifier)}`;
-  // NDE portal also uses GEO accession as resource id (lowercase, e.g. gse1000).
-  // Identifier may be GROUP_CONCAT of several values — pick first GSE token if present.
+
   let geoId = identifier?.trim() ?? "";
   if (geoId && !NDE_GEO_ID_PATTERN.test(geoId)) {
     const m = geoId.match(/\b(GSE\d+)\b/i);
@@ -99,9 +140,6 @@ function getNDEResourceUrl(identifier: string, datasetUri?: string): string | nu
   }
   if (geoId && NDE_GEO_ID_PATTERN.test(geoId))
     return `${NIAID_RESOURCE_BASE}${encodeURIComponent(geoId.toLowerCase())}`;
-  const geoIdFromUri = datasetUri?.trim();
-  if (geoIdFromUri && NDE_GEO_ID_PATTERN.test(geoIdFromUri))
-    return `${NIAID_RESOURCE_BASE}${encodeURIComponent(geoIdFromUri.toLowerCase())}`;
   return null;
 }
 
