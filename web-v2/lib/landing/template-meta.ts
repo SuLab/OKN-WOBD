@@ -44,20 +44,8 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
     icon: Database,
     iconColor: "text-blue-600 dark:text-blue-400",
     blurb:
-      "Search the NDE graph: use keywords (optional) and/or open Filters / Advanced for health condition (MONDO via search), pathogen species (NCBI Taxon), and host species (NCBI Taxon). Optionally limit to datasets whose metadata mentions a GEO series (GSE) or E-GEOD accession. You need at least one of keywords or a filter. All filled filters apply together (AND).",
+      "Search the NDE graph: use keywords (optional) and/or open Filters / Advanced for health condition (MONDO via search), pathogen species (NCBI Taxon), and host species (NCBI Taxon). Optionally limit to datasets whose metadata mentions a GEO series (GSE) or E-GEOD accession. NCBI GEO (GSE) studies are included here when keywords or metadata match—you no longer need a separate GEO-only card. You need at least one of keywords or a filter. All filled filters apply together (AND).",
     buttonLabel: "Search Datasets",
-  },
-  {
-    id: "geo_dataset_search",
-    titlePart1: "NCBI GEO",
-    titlePart2: " datasets in NDE",
-    description:
-      "Find NCBI GEO datasets in NDE (GSE only), with optional keywords and filters for health condition, host species, and pathogen species.",
-    icon: Database,
-    iconColor: "text-emerald-600 dark:text-emerald-400",
-    blurb:
-      "Same as dataset search but results are limited to GEO series (GSE identifiers). Optional facet filters match linked schema:healthCondition, host species (schema:species), and pathogen species (schema:infectiousAgent) in NDE.",
-    buttonLabel: "Search GEO",
   },
   {
     id: "gene_expression_dataset_search",
@@ -112,7 +100,25 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
   },
 ];
 
-const META_BY_ID = Object.fromEntries(TEMPLATE_META.map((m) => [m.id, m]));
+/** Not shown on landing cards; kept for /template/geo_dataset_search and drug_datasets step 3 (geoOnly). */
+const HIDDEN_TEMPLATE_META: TemplateMetaItem[] = [
+  {
+    id: "geo_dataset_search",
+    titlePart1: "NCBI GEO",
+    titlePart2: " datasets in NDE",
+    description:
+      "Find NCBI GEO datasets in NDE (GSE only), with optional keywords and filters for health condition, host species, and pathogen species.",
+    icon: Database,
+    iconColor: "text-emerald-600 dark:text-emerald-400",
+    blurb:
+      "Results are limited to GEO series (GSE identifiers). For the full NDE dataset search (including GEO when metadata matches), use Datasets by keywords from the home page.",
+    buttonLabel: "Search GEO",
+  },
+];
+
+const META_BY_ID = Object.fromEntries(
+  [...TEMPLATE_META, ...HIDDEN_TEMPLATE_META].map((m) => [m.id, m])
+);
 
 export function getTemplateMeta(templateId: string): TemplateMetaItem | undefined {
   return META_BY_ID[templateId];
