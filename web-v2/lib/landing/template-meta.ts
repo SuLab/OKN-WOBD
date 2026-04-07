@@ -27,10 +27,10 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
     id: "drug_datasets",
     titlePart1: "Datasets",
     titlePart2: " for a drug",
-    description: "Find NDE datasets for diseases treated by a drug (multi-hop: drug → Wikidata → NDE)",
+    description: "Find NDE datasets for diseases treated by a drug",
     icon: Pill,
     iconColor: "text-teal-600 dark:text-teal-400",
-    blurb: "Enter a drug name (e.g. methotrexate). We look up diseases it treats in Wikidata, then find NDE datasets. Optionally restrict to GEO/gene expression and include GXA/SPOKE-GeneLab links for matching experiments.",
+    blurb: "Enter a drug name (e.g. tocilizumab). We look up diseases it treats in Wikidata, then find NDE datasets. Optionally restrict to GEO/gene expression and include GXA/SPOKE-GeneLab links for matching experiments.",
     buttonLabel: "Find datasets",
   },
   {
