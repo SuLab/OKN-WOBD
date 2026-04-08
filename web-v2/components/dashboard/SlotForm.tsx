@@ -6,6 +6,7 @@ import {
   type OntologyToken,
   ONTOLOGY_ID_TO_LABEL_SLOT,
 } from "@/lib/dashboard/ui-only-slots";
+import { DEFAULT_MONDO_DESCENDANT_EXPAND_CAP } from "@/lib/ontology/mondo-descendants-ols";
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -1866,8 +1867,7 @@ export function SlotForm({
             </label>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 pl-6 max-w-xl">
-            Uses the EBI OLS API. Very broad terms may hit a safety cap on how many subclass IRIs are
-            queried at once.
+            Expansion is limited to {DEFAULT_MONDO_DESCENDANT_EXPAND_CAP} subclasses.
           </p>
         </div>
       );

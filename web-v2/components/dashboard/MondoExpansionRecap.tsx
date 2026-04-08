@@ -51,26 +51,23 @@ export function MondoExpansionRecap({
       aria-label="MONDO subclass expansion summary"
     >
       <p className="font-semibold text-slate-900 dark:text-slate-100">MONDO subclass expansion</p>
-      <ul className="mt-1.5 list-disc pl-5 space-y-1">
+      <ul className="mt-1.5 list-disc pl-5 space-y-1.5">
         <li>
-          {stats.rootsExpanded} root term{stats.rootsExpanded === 1 ? "" : "s"} expanded →{" "}
-          <strong>{stats.mondoIrisInFilter}</strong> distinct MONDO IRIs collected (cap{" "}
+          <span className="text-slate-600 dark:text-slate-400">Query filter (SPARQL): </span>
+          {stats.rootsExpanded} root term{stats.rootsExpanded === 1 ? "" : "s"} expanded into{" "}
+          <strong>{stats.mondoIrisInFilter}</strong> distinct MONDO IRIs (maximum{" "}
           <strong>{stats.iriCap}</strong>).
           {stats.truncated && (
             <span className="text-amber-800 dark:text-amber-200 font-medium">
               {" "}
-              List may be truncated (cap or OLS pagination).
+              Set may be incomplete (hit that limit or OLS paging).
             </span>
           )}
-        </li>
-        <li>
-          <strong>{stats.highlightLabelCount}</strong> OLS labels kept for highlighting (cap{" "}
-          {stats.highlightLabelCap}).
         </li>
         {inResults.length > 0 && (
           <li>
             <span className="text-slate-600 dark:text-slate-400">
-              Subclass labels that appear in result health metadata:{" "}
+              Expanded subclass labels that appear as health conditions in these results:{" "}
             </span>
             <span className="text-slate-800 dark:text-slate-200">{inResults.join("; ")}</span>
           </li>

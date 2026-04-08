@@ -11,11 +11,17 @@ const OLS_MONDO_TERM = "https://www.ebi.ac.uk/ols4/api/ontologies/mondo/terms";
 
 const MONDO_OBO_PREFIX = "http://purl.obolibrary.org/obo/MONDO_";
 
-/** Cap merged MONDO IRIs in the NDE facet FILTER (SPARQL size / endpoint limits). */
-export const DEFAULT_MAX_MONDO_IRIS_FOR_NDE_EXPAND = 750;
+/**
+ * Shared cap for MONDO subclass expansion: max merged IRIs in the SPARQL filter and max distinct
+ * labels for UI highlighting (keeps query size, regex, and behavior aligned).
+ */
+export const DEFAULT_MONDO_DESCENDANT_EXPAND_CAP = 200;
 
-/** Cap distinct preferred labels passed to the UI highlighter (regex size / noise). */
-export const DEFAULT_MAX_MONDO_HIGHLIGHT_LABELS = 200;
+/** @alias {@link DEFAULT_MONDO_DESCENDANT_EXPAND_CAP} */
+export const DEFAULT_MAX_MONDO_IRIS_FOR_NDE_EXPAND = DEFAULT_MONDO_DESCENDANT_EXPAND_CAP;
+
+/** @alias {@link DEFAULT_MONDO_DESCENDANT_EXPAND_CAP} */
+export const DEFAULT_MAX_MONDO_HIGHLIGHT_LABELS = DEFAULT_MONDO_DESCENDANT_EXPAND_CAP;
 
 interface OLSEntityElement {
   iri?: string;
@@ -130,8 +136,8 @@ export async function fetchMondoDescendantIrisAndLabelsFromOLS(
   ancestorIri: string,
   options?: { maxIris?: number; maxLabels?: number; signal?: AbortSignal }
 ): Promise<{ iris: string[]; labels: string[]; truncated: boolean }> {
-  const maxIris = Math.max(1, options?.maxIris ?? DEFAULT_MAX_MONDO_IRIS_FOR_NDE_EXPAND);
-  const maxLabels = Math.max(1, options?.maxLabels ?? DEFAULT_MAX_MONDO_HIGHLIGHT_LABELS);
+  const maxIris = Math.max(1, options?.maxIris ?? DEFAULT_MONDO_DESCENDANT_EXPAND_CAP);
+  const maxLabels = Math.max(1, options?.maxLabels ?? DEFAULT_MONDO_DESCENDANT_EXPAND_CAP);
   const iris = new Set<string>();
   const labels = new Set<string>();
   iris.add(ancestorIri);
@@ -210,7 +216,7 @@ export function finalizeHighlightLabels(raw: string[], max: number): string[] {
 }
 
 /**
- * Expand MONDO-valued health condition slot entries to include OLS descendants (within a global IRI cap).
+ * Expand MONDO-valued health condition slot entries to include OLS descendants (shared IRIs + labels cap).
  * Non-MONDO values (free text, other IRIs) are left unchanged.
  */
 function countMondoOboIrisInList(strings: string[]): number {
@@ -228,8 +234,8 @@ export async function expandHealthConditionInputsWithMondoDescendants(
   inputs: string[],
   options?: { maxTotalIris?: number; maxHighlightLabels?: number; signal?: AbortSignal }
 ): Promise<MondoHealthExpansionResult> {
-  const maxTotal = Math.max(1, options?.maxTotalIris ?? DEFAULT_MAX_MONDO_IRIS_FOR_NDE_EXPAND);
-  const maxHl = options?.maxHighlightLabels ?? DEFAULT_MAX_MONDO_HIGHLIGHT_LABELS;
+  const maxTotal = Math.max(1, options?.maxTotalIris ?? DEFAULT_MONDO_DESCENDANT_EXPAND_CAP);
+  const maxHl = options?.maxHighlightLabels ?? DEFAULT_MONDO_DESCENDANT_EXPAND_CAP;
   const out: string[] = [];
   const seen = new Set<string>();
   const labelAccum: string[] = [];

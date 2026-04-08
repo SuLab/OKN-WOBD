@@ -8,6 +8,7 @@ import {
   Pill,
   type LucideIcon,
 } from "lucide-react";
+import { DEFAULT_MONDO_DESCENDANT_EXPAND_CAP } from "@/lib/ontology/mondo-descendants-ols";
 
 export interface TemplateMetaItem {
   id: string;
@@ -43,8 +44,7 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
       "Find NDE datasets by keywords and/or filters for health condition, host species, and pathogen species.",
     icon: Database,
     iconColor: "text-blue-600 dark:text-blue-400",
-    blurb:
-      "Search the NDE graph: use keywords and/or open \"Filters / Advanced\" for health condition, pathogen species, and host species. Health condition matches the MONDO term(s) you pick exactly unless you enable \"Include MONDO subclasses\" (then OLS adds subclass IRIs, up to a cap). Optionally limit to datasets whose metadata mentions a GEO series (GSE) or E-GEOD accession. You need to enter at least one keyword or a filter. All filled filters apply together (AND).",
+    blurb: `Search the NDE graph: use keywords and/or open "Filters / Advanced" for health condition, pathogen species, and host species. Health condition matches the MONDO term(s) you pick exactly unless you enable "Include MONDO subclasses" (then OLS adds subclass IRIs and labels, up to a shared cap of ${DEFAULT_MONDO_DESCENDANT_EXPAND_CAP} for both the SPARQL filter and highlighting). Optionally limit to datasets whose metadata mentions a GEO series (GSE) or E-GEOD accession. You need to enter at least one keyword or a filter. All filled filters apply together (AND).`,
     buttonLabel: "Search Datasets",
   },
   {
