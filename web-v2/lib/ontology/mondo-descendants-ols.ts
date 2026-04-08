@@ -30,9 +30,28 @@ interface OLSEntitiesPage {
   totalPages?: number;
 }
 
+/** Stats when MONDO subclass expansion ran (trust / debugging UI). */
+export interface MondoExpansionStats {
+  rootsExpanded: number;
+  /** Distinct MONDO OBO IRIs in the expanded filter list. */
+  mondoIrisInFilter: number;
+  iriCap: number;
+  /** True if OLS pagination was cut short or the global IRI cap was hit. */
+  truncated: boolean;
+  highlightLabelCount: number;
+  highlightLabelCap: number;
+  /**
+   * Set by dataset_search when ontology workflow uses REGEX fallback (IRIs not in SPARQL).
+   * Omitted or true when expanded MONDO IRIs are in the query filter.
+   */
+  appliedToSparqlFilter?: boolean;
+}
+
 export interface MondoHealthExpansionResult {
   expandedInputs: string[];
   highlightLabels: string[];
+  /** Present when at least one MONDO root was expanded. */
+  stats?: MondoExpansionStats;
 }
 
 function isMondoOboIri(iri: string): boolean {
@@ -194,6 +213,17 @@ export function finalizeHighlightLabels(raw: string[], max: number): string[] {
  * Expand MONDO-valued health condition slot entries to include OLS descendants (within a global IRI cap).
  * Non-MONDO values (free text, other IRIs) are left unchanged.
  */
+function countMondoOboIrisInList(strings: string[]): number {
+  let n = 0;
+  for (const s of strings) {
+    const t = s.trim();
+    if (!t) continue;
+    const r = resolveHealthConditionIri(t) || t.replace(/[<>]/g, "").trim();
+    if (isMondoOboIri(r)) n += 1;
+  }
+  return n;
+}
+
 export async function expandHealthConditionInputsWithMondoDescendants(
   inputs: string[],
   options?: { maxTotalIris?: number; maxHighlightLabels?: number; signal?: AbortSignal }
@@ -203,6 +233,8 @@ export async function expandHealthConditionInputsWithMondoDescendants(
   const out: string[] = [];
   const seen = new Set<string>();
   const labelAccum: string[] = [];
+  let mondoRootsExpanded = 0;
+  let anyFetchTruncated = false;
 
   const pushUnique = (v: string) => {
     if (!v || seen.has(v)) return;
@@ -217,13 +249,15 @@ export async function expandHealthConditionInputsWithMondoDescendants(
 
     const resolved = resolveHealthConditionIri(t);
     if (resolved && isMondoOboIri(resolved)) {
+      mondoRootsExpanded += 1;
       const room = maxTotal - out.length;
       if (room <= 0) break;
-      const { iris, labels } = await fetchMondoDescendantIrisAndLabelsFromOLS(resolved, {
+      const { iris, labels, truncated } = await fetchMondoDescendantIrisAndLabelsFromOLS(resolved, {
         maxIris: room,
         maxLabels: maxHl,
         signal: options?.signal,
       });
+      if (truncated) anyFetchTruncated = true;
       labelAccum.push(...labels);
       for (const iri of iris) {
         pushUnique(iri);
@@ -235,8 +269,26 @@ export async function expandHealthConditionInputsWithMondoDescendants(
     if (out.length >= maxTotal) break;
   }
 
+  const highlightLabels = finalizeHighlightLabels(labelAccum, maxHl);
+  const hitGlobalCap = out.length >= maxTotal;
+  const truncated = anyFetchTruncated || hitGlobalCap;
+  const mondoIrisInFilter = countMondoOboIrisInList(out);
+
+  const stats: MondoExpansionStats | undefined =
+    mondoRootsExpanded > 0
+      ? {
+          rootsExpanded: mondoRootsExpanded,
+          mondoIrisInFilter,
+          iriCap: maxTotal,
+          truncated,
+          highlightLabelCount: highlightLabels.length,
+          highlightLabelCap: maxHl,
+        }
+      : undefined;
+
   return {
     expandedInputs: out,
-    highlightLabels: finalizeHighlightLabels(labelAccum, maxHl),
+    highlightLabels,
+    stats,
   };
 }

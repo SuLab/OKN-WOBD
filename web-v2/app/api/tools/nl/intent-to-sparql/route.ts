@@ -43,6 +43,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       query: result.query,
       mondo_expansion_highlight_labels: result.mondo_expansion_highlight_labels,
+      mondo_expansion_stats: result.mondo_expansion_stats,
     });
   } catch (error: any) {
     return NextResponse.json(

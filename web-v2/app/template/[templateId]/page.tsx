@@ -5,7 +5,9 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { ContextPack } from "@/lib/context-packs/types";
 import type { SPARQLResult } from "@/types";
+import type { MondoExpansionStats } from "@/lib/ontology/mondo-descendants-ols";
 import { SlotForm, isSlotFilled, getSlotMeta } from "@/components/dashboard/SlotForm";
+import { MondoExpansionRecap } from "@/components/dashboard/MondoExpansionRecap";
 import { NDEResultCards } from "@/components/dashboard/NDEResultCards";
 import { ResultsTable } from "@/components/chat/ResultsTable";
 import { getTemplateMeta } from "@/lib/landing/template-meta";
@@ -130,6 +132,7 @@ export default function TemplatePage() {
   const [loading, setLoading] = useState(false);
   /** Labels from OLS for MONDO subclass expansion (last successful NDE template query). */
   const [mondoExpansionHighlightLabels, setMondoExpansionHighlightLabels] = useState<string[]>([]);
+  const [mondoExpansionStats, setMondoExpansionStats] = useState<MondoExpansionStats | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const runningRef = useRef(false);
 
@@ -173,6 +176,22 @@ export default function TemplatePage() {
     return [...new Set([...base, ...mondoExpansionHighlightLabels])];
   }, [templateId, slotValues, mondoExpansionHighlightLabels]);
 
+  const diseaseNamesFromResults = useMemo(() => {
+    if (!results?.results?.bindings?.length) return [];
+    const out: string[] = [];
+    for (const b of results.results.bindings) {
+      const v = b.diseaseNames?.value;
+      if (typeof v === "string" && v.trim()) out.push(v);
+    }
+    return out;
+  }, [results]);
+
+  const showMondoExpansionRecap = Boolean(
+    mondoExpansionStats &&
+      results &&
+      (templateId === "dataset_search" || templateId === "geo_dataset_search")
+  );
+
   const runQuery = useCallback(async () => {
     if (!pack || !template) return;
     if (runningRef.current) return;
@@ -182,6 +201,7 @@ export default function TemplatePage() {
     setFilteredEmptyHint(null);
     setExecutedQueries([]);
     setMondoExpansionHighlightLabels([]);
+    setMondoExpansionStats(null);
     setLoading(true);
     abortRef.current = new AbortController();
     const signal = abortRef.current.signal;
@@ -193,6 +213,7 @@ export default function TemplatePage() {
         filteredEmptyHint: hint,
         executedQueries: queries,
         mondoExpansionHighlightLabels: expansionHl,
+        mondoExpansionStats: expansionStat,
       } = await runTemplateQuery({
         templateId,
         slots: slotValues,
@@ -212,12 +233,14 @@ export default function TemplatePage() {
         setFilteredEmptyHint(null);
         setExecutedQueries(queries ?? []);
         setMondoExpansionHighlightLabels([]);
+        setMondoExpansionStats(null);
         return;
       }
       setResults(res);
       setFilteredEmptyHint(hint ?? null);
       setExecutedQueries(queries ?? []);
       setMondoExpansionHighlightLabels(expansionHl ?? []);
+      setMondoExpansionStats(expansionStat ?? null);
     } catch (e: unknown) {
       if (signal.aborted) return;
       const isAbort =
@@ -226,6 +249,7 @@ export default function TemplatePage() {
       setResultsError(isAbort ? "Query was cancelled." : (e instanceof Error ? e.message : String((e as Error)?.message ?? "Unknown error")));
       setResults(null);
       setMondoExpansionHighlightLabels([]);
+      setMondoExpansionStats(null);
     } finally {
       setLoading(false);
       abortRef.current = null;
@@ -466,6 +490,13 @@ export default function TemplatePage() {
             )}
             {results && (
               <>
+                {showMondoExpansionRecap && mondoExpansionStats && (
+                  <MondoExpansionRecap
+                    stats={mondoExpansionStats}
+                    highlightLabels={mondoExpansionHighlightLabels}
+                    diseaseNamesFromResults={diseaseNamesFromResults}
+                  />
+                )}
                 {isNDEShape(results.head.vars) ? (
                   <NDEResultCards
                     results={results}

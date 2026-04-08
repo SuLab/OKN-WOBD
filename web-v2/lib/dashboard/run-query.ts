@@ -1,6 +1,7 @@
 import type { ContextPack } from "@/lib/context-packs/types";
 import type { Intent } from "@/types";
 import type { SPARQLResult } from "@/types";
+import type { MondoExpansionStats } from "@/lib/ontology/mondo-descendants-ols";
 import { ndeBindingHasGeoOrGseEvidence } from "@/lib/dashboard/nde-geo-evidence";
 import { omitUiOnlyOntologyLabelSlots } from "@/lib/dashboard/ui-only-slots";
 
@@ -71,6 +72,29 @@ export interface RunQueryResult {
   executedQueries?: ExecutedQueryItem[];
   /** OLS preferred labels for MONDO subclasses when expansion was used (NDE result highlighting). */
   mondoExpansionHighlightLabels?: string[];
+  /** MONDO subclass expansion recap (dataset_search / geo when expansion ran). */
+  mondoExpansionStats?: MondoExpansionStats;
+}
+
+function parseMondoExpansionStats(raw: Record<string, unknown> | null | undefined): MondoExpansionStats | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const roots = raw.roots_expanded;
+  const iris = raw.mondo_iris_in_filter;
+  const cap = raw.iri_cap;
+  if (typeof roots !== "number" || typeof iris !== "number" || typeof cap !== "number") return undefined;
+  const applied = raw.applied_to_sparql_filter;
+  const stats: MondoExpansionStats = {
+    rootsExpanded: roots,
+    mondoIrisInFilter: iris,
+    iriCap: cap,
+    truncated: raw.truncated === true,
+    highlightLabelCount: typeof raw.highlight_label_count === "number" ? raw.highlight_label_count : 0,
+    highlightLabelCap: typeof raw.highlight_label_cap === "number" ? raw.highlight_label_cap : 200,
+  };
+  if (applied === false) {
+    stats.appliedToSparqlFilter = false;
+  }
+  return stats;
 }
 
 const DRUG_DATASETS_TEMPLATE_ID = "drug_datasets";
@@ -137,8 +161,9 @@ export async function runTemplateQuery({
   const sparqlJson = (await sparqlRes.json()) as {
     query?: string;
     mondo_expansion_highlight_labels?: string[];
+    mondo_expansion_stats?: Record<string, unknown>;
   };
-  const { query, mondo_expansion_highlight_labels } = sparqlJson;
+  const { query, mondo_expansion_highlight_labels, mondo_expansion_stats } = sparqlJson;
   if (!query) throw new Error("No query returned");
 
   const execRes = await fetch("/api/tools/sparql/execute", {
@@ -206,5 +231,6 @@ export async function runTemplateQuery({
       mondo_expansion_highlight_labels.length > 0
         ? mondo_expansion_highlight_labels
         : undefined,
+    mondoExpansionStats: parseMondoExpansionStats(mondo_expansion_stats),
   };
 }

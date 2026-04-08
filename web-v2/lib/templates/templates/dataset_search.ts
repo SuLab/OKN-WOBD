@@ -11,6 +11,7 @@ import {
   buildWikidataDrugQuery,
   buildNDEDiseaseAndOrganismQuery,
 } from "@/lib/ontology/templates";
+import type { MondoExpansionStats } from "@/lib/ontology/mondo-descendants-ols";
 import { expandHealthConditionInputsWithMondoDescendants } from "@/lib/ontology/mondo-descendants-ols";
 import {
   convertGeneNameToSymbol,
@@ -20,25 +21,42 @@ import type { TemplateGenerateResult } from "@/lib/templates/generate-types";
 
 export const DATASET_SEARCH_TEMPLATE_ID = "dataset_search";
 
-function dsResult(query: string, expansionLabels?: string[]): TemplateGenerateResult {
+function dsResult(
+  query: string,
+  expansionLabels?: string[],
+  expansionStats?: MondoExpansionStats
+): TemplateGenerateResult {
+  const out: TemplateGenerateResult = { query };
   if (expansionLabels && expansionLabels.length > 0) {
-    return { query, mondoExpansionHighlightLabels: expansionLabels };
+    out.mondoExpansionHighlightLabels = expansionLabels;
   }
-  return { query };
+  if (expansionStats) {
+    out.mondoExpansionStats = expansionStats;
+  }
+  return out;
 }
 
 function withLimit(
   query: string,
   limit: number | undefined,
   pack: ContextPack,
-  expansionLabels?: string[]
+  expansionLabels?: string[],
+  expansionStats?: MondoExpansionStats
 ): TemplateGenerateResult {
   if (!limit) {
-    return dsResult(query, expansionLabels);
+    return dsResult(query, expansionLabels, expansionStats);
   }
   const maxLimit = Math.min(limit, pack.guardrails.max_limit);
   const withoutLimit = query.replace(/\s*LIMIT\s+\d+\s*$/i, "").trim();
-  return dsResult(`${withoutLimit}\nLIMIT ${maxLimit}`, expansionLabels);
+  return dsResult(`${withoutLimit}\nLIMIT ${maxLimit}`, expansionLabels, expansionStats);
+}
+
+function withSparqlFilterContext(
+  stats: MondoExpansionStats | undefined,
+  appliedToSparqlFilter: boolean
+): MondoExpansionStats | undefined {
+  if (!stats) return undefined;
+  return { ...stats, appliedToSparqlFilter };
 }
 
 export const datasetSearchTemplate: TemplateDefinition = {
@@ -70,13 +88,17 @@ function isMondoExpandDescendantsEnabled(slot: unknown): boolean {
 async function maybeExpandMondoIrisForNDE(
   mondoIRIs: string[],
   mondoExpandSlot: unknown
-): Promise<{ iris: string[]; highlightLabels: string[] }> {
+): Promise<{ iris: string[]; highlightLabels: string[]; stats?: MondoExpansionStats }> {
   if (mondoIRIs.length === 0 || !isMondoExpandDescendantsEnabled(mondoExpandSlot)) {
     return { iris: mondoIRIs, highlightLabels: [] };
   }
   try {
     const r = await expandHealthConditionInputsWithMondoDescendants(mondoIRIs);
-    return { iris: r.expandedInputs, highlightLabels: r.highlightLabels };
+    return {
+      iris: r.expandedInputs,
+      highlightLabels: r.highlightLabels,
+      stats: r.stats,
+    };
   } catch (e) {
     console.warn(
       "[Template] MONDO descendant expansion failed; using selected IRIs only:",
@@ -90,13 +112,17 @@ async function maybeExpandMondoIrisForNDE(
 async function maybeExpandHealthConditionFacetInputs(
   inputs: string[],
   mondoExpandSlot: unknown
-): Promise<{ inputs: string[]; highlightLabels: string[] }> {
+): Promise<{ inputs: string[]; highlightLabels: string[]; stats?: MondoExpansionStats }> {
   if (inputs.length === 0 || !isMondoExpandDescendantsEnabled(mondoExpandSlot)) {
     return { inputs, highlightLabels: [] };
   }
   try {
     const r = await expandHealthConditionInputsWithMondoDescendants(inputs);
-    return { inputs: r.expandedInputs, highlightLabels: r.highlightLabels };
+    return {
+      inputs: r.expandedInputs,
+      highlightLabels: r.highlightLabels,
+      stats: r.stats,
+    };
   } catch (e) {
     console.warn(
       "[Template] MONDO descendant expansion failed; using selected terms only:",
@@ -174,7 +200,7 @@ export async function buildDatasetSearchQuery(
         .filter(Boolean)
         .slice(0, 5);
 
-      const { iris: mondoIRIsForQuery, highlightLabels: mondoExpandHl } =
+      const { iris: mondoIRIsForQuery, highlightLabels: mondoExpandHl, stats: mondoExpandStats } =
         await maybeExpandMondoIrisForNDE(mondoIRIs, slots.mondo_expand_descendants);
 
       // When we have keyword fallback, use the simple REGEX-only query so NDE returns results (the full
@@ -197,7 +223,13 @@ export async function buildDatasetSearchQuery(
             geoOnly
           );
 
-      return withLimit(combinedQuery, intent.slots?.limit as number | undefined, pack, mondoExpandHl);
+      return withLimit(
+        combinedQuery,
+        intent.slots?.limit as number | undefined,
+        pack,
+        mondoExpandHl,
+        withSparqlFilterContext(mondoExpandStats, keywordFallbackTerms.length === 0)
+      );
     }
   }
 
@@ -328,7 +360,7 @@ export async function buildDatasetSearchQuery(
       console.log(`[Template] useTextMatching: ${useTextMatching}, diseaseLabels: ${diseaseLabels.length}, keywordFallback: ${keywordFallbackTerms.length}`);
       console.log(`[Template] ndeEncoding: ${ndeEncoding}`);
 
-      const { iris: mondoIRIsForQuery, highlightLabels: mondoExpandHl } =
+      const { iris: mondoIRIsForQuery, highlightLabels: mondoExpandHl, stats: mondoExpandStats } =
         await maybeExpandMondoIrisForNDE(mondoIRIs, slots.mondo_expand_descendants);
 
       // When we have keyword fallback, use the simple REGEX-only query so NDE returns results
@@ -349,7 +381,13 @@ export async function buildDatasetSearchQuery(
       console.log(`[Template] Generated query, length: ${ontologyQuery?.length || 0} chars`);
       console.log(`[Template] Query is truthy: ${!!ontologyQuery}, type: ${typeof ontologyQuery}`);
 
-      return withLimit(ontologyQuery, intent.slots?.limit as number | undefined, pack, mondoExpandHl);
+      return withLimit(
+        ontologyQuery,
+        intent.slots?.limit as number | undefined,
+        pack,
+        mondoExpandHl,
+        withSparqlFilterContext(mondoExpandStats, keywordFallbackTerms.length === 0)
+      );
     }
 
     // If no MONDO IRIs but we have Wikidata IRIs, this is handled by fallback logic in the executor
@@ -627,6 +665,7 @@ export async function buildDatasetSearchQuery(
 
   let healthForFacet = healthConditionInputs;
   let mondoFacetExpandHl: string[] = [];
+  let mondoFacetExpandStats: MondoExpansionStats | undefined;
   if (healthConditionInputs.length > 0) {
     const expanded = await maybeExpandHealthConditionFacetInputs(
       healthConditionInputs,
@@ -634,6 +673,7 @@ export async function buildDatasetSearchQuery(
     );
     healthForFacet = expanded.inputs;
     mondoFacetExpandHl = expanded.highlightLabels;
+    mondoFacetExpandStats = expanded.stats;
   }
 
   let body = buildNDEDatasetKeywordAndFacetQuery(keywordRegexTerms, {
@@ -658,7 +698,7 @@ export async function buildDatasetSearchQuery(
     query = `${withoutLimit}\nLIMIT ${maxLimit}`;
   }
 
-  return dsResult(query, mondoFacetExpandHl);
+  return dsResult(query, mondoFacetExpandHl, withSparqlFilterContext(mondoFacetExpandStats, true));
 }
 
 

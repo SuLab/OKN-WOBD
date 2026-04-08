@@ -1,7 +1,20 @@
 import type { ContextPack } from "@/lib/context-packs/types";
 import type { Intent } from "@/types";
+import type { MondoExpansionStats } from "@/lib/ontology/mondo-descendants-ols";
 import type { TemplateGenerateResult } from "@/lib/templates/generate-types";
 import { getTemplateForIntent } from "./registry";
+
+/** JSON shape for intent-to-sparql (snake_case). */
+export type MondoExpansionStatsJson = {
+  roots_expanded: number;
+  mondo_iris_in_filter: number;
+  iri_cap: number;
+  truncated: boolean;
+  highlight_label_count: number;
+  highlight_label_cap: number;
+  /** False when expanded IRIs were not used in SPARQL (keyword fallback). */
+  applied_to_sparql_filter?: boolean;
+};
 
 export interface TemplateGenerationResult {
   ok: boolean;
@@ -9,11 +22,28 @@ export interface TemplateGenerationResult {
   error?: string;
   /** MONDO subclass labels from OLS when dataset_search used expansion (UI highlighting). */
   mondo_expansion_highlight_labels?: string[];
+  mondo_expansion_stats?: MondoExpansionStatsJson;
+}
+
+function statsToJson(s: MondoExpansionStats): MondoExpansionStatsJson {
+  const j: MondoExpansionStatsJson = {
+    roots_expanded: s.rootsExpanded,
+    mondo_iris_in_filter: s.mondoIrisInFilter,
+    iri_cap: s.iriCap,
+    truncated: s.truncated,
+    highlight_label_count: s.highlightLabelCount,
+    highlight_label_cap: s.highlightLabelCap,
+  };
+  if (s.appliedToSparqlFilter === false) {
+    j.applied_to_sparql_filter = false;
+  }
+  return j;
 }
 
 function normalizeTemplateOutput(raw: string | TemplateGenerateResult): {
   query: string;
   mondo_expansion_highlight_labels?: string[];
+  mondo_expansion_stats?: MondoExpansionStatsJson;
 } {
   if (typeof raw === "string") {
     return { query: raw };
@@ -23,6 +53,7 @@ function normalizeTemplateOutput(raw: string | TemplateGenerateResult): {
     query: raw.query,
     mondo_expansion_highlight_labels:
       labels && labels.length > 0 ? labels : undefined,
+    mondo_expansion_stats: raw.mondoExpansionStats ? statsToJson(raw.mondoExpansionStats) : undefined,
   };
 }
 
@@ -60,8 +91,9 @@ export async function generateSPARQLFromIntent(intent: Intent, pack: ContextPack
 
   try {
     const raw = await template.generate(intent, pack);
-    const { query, mondo_expansion_highlight_labels } = normalizeTemplateOutput(raw);
-    return { ok: true, query, mondo_expansion_highlight_labels };
+    const { query, mondo_expansion_highlight_labels, mondo_expansion_stats } =
+      normalizeTemplateOutput(raw);
+    return { ok: true, query, mondo_expansion_highlight_labels, mondo_expansion_stats };
   } catch (error: any) {
     return {
       ok: false,
