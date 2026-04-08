@@ -2,19 +2,21 @@
 
 import React, { useState, useEffect } from "react";
 import type { SPARQLResult } from "@/types";
+import { highlightTermsInText } from "@/lib/dashboard/highlight-terms-in-text";
 import { Pagination, DEFAULT_PAGE_SIZE } from "./Pagination";
 
 const NIAID_RESOURCE_BASE = "https://data.niaid.nih.gov/resources?id=";
 
 /** NIAID portal accepts study ids like sdy1, sdy112 (ImmPort). */
 const NIAID_STUDY_ID_PATTERN = /^(SDY\d+)$/i;
+/** ClinicalTrials.gov ids (NDE portal accepts resources?id=nct01234567). */
+const NCT_PORTAL_ID_PATTERN = /^(NCT\d{8})$/i;
 /** NDE also accepts GEO accessions as resource id (e.g. GSE1000 → resources?id=gse1000). */
 const NDE_GEO_ID_PATTERN = /^GSE\d+$/i;
 
 /**
- * Extract the NIAID Data Discovery Portal resource id.
- * We only use values that are clearly study ids (e.g. SDY1) or from a NIAID URL.
- * We do NOT use arbitrary dataset IRI path segments (e.g. m38y09r3r9) as that is an internal id.
+ * Extract portal id from a literal identifier string or URL: SDY… (ImmPort) or SDY embedded in a URL.
+ * For WOBD datasets, prefer {@link portalIdFromOknWobdDatasetIri} on ?dataset (canonical NDE id, e.g. vivli_…).
  */
 function toNIAIDResourceId(identifier: string): string | null {
   if (!identifier || typeof identifier !== "string") return null;
@@ -32,6 +34,35 @@ function toNIAIDResourceId(identifier: string): string | null {
   return null;
 }
 
+/**
+ * NDE portal resource id from schema:identifier when it is an NCT id (possibly inside GROUP_CONCAT).
+ */
+function extractNctPortalId(identifier: string): string | null {
+  if (!identifier || typeof identifier !== "string") return null;
+  const s = identifier.trim();
+  if (!s) return null;
+  if (NCT_PORTAL_ID_PATTERN.test(s)) return s.toLowerCase();
+  const m = s.match(/\b(NCT\d{8})\b/i);
+  return m ? m[1].toLowerCase() : null;
+}
+
+/**
+ * WOBD RDF uses https://okn.wobd.org/dataset/{catalog}/{id}; NDE portal accepts the same {catalog}_{...} or catalog-specific id as ?id=.
+ */
+function portalIdFromOknWobdDatasetIri(datasetUri: string): string | null {
+  if (!datasetUri || typeof datasetUri !== "string") return null;
+  try {
+    const u = new URL(datasetUri.trim());
+    if (u.hostname !== "okn.wobd.org") return null;
+    const path = u.pathname.replace(/\/$/, "");
+    const m = path.match(/^\/dataset\/[^/]+\/(.+)$/);
+    if (!m) return null;
+    return decodeURIComponent(m[1]);
+  } catch {
+    return null;
+  }
+}
+
 /** Extract string value from a SPARQL binding value (object with type/value or raw). */
 function bindingValue(raw: { type: string; value: string } | undefined): string {
   if (!raw) return "";
@@ -41,19 +72,32 @@ function bindingValue(raw: { type: string; value: string } | undefined): string 
 
 /**
  * Build NIAID Data Discovery Portal (NDE) resource URL.
- * Accepts SDY ids (e.g. sdy1) and GEO accessions (e.g. GSE1000 → id=gse1000).
- * See https://data.niaid.nih.gov/resources?id=gse1000
+ * Prefer ?dataset IRI from WOBD RDF (…/dataset/{catalog}/{id}) — that id matches NDE (e.g. vivli_…), not always NCT/DOI in schema:identifier.
+ * Then SDY, NCT, GSE from identifier. See https://data.niaid.nih.gov/resources?id=gse1000
  */
 function getNDEResourceUrl(identifier: string, datasetUri?: string): string | null {
-  const idFromIdentifier = toNIAIDResourceId(identifier) || (datasetUri ? toNIAIDResourceId(datasetUri) : null);
+  const ds = datasetUri?.trim();
+  if (ds) {
+    const oknPortalId = portalIdFromOknWobdDatasetIri(ds);
+    if (oknPortalId)
+      return `${NIAID_RESOURCE_BASE}${encodeURIComponent(oknPortalId)}`;
+    const idFromDatasetUri = toNIAIDResourceId(ds);
+    if (idFromDatasetUri) return `${NIAID_RESOURCE_BASE}${encodeURIComponent(idFromDatasetUri)}`;
+    if (NDE_GEO_ID_PATTERN.test(ds))
+      return `${NIAID_RESOURCE_BASE}${encodeURIComponent(ds.toLowerCase())}`;
+  }
+
+  const idFromIdentifier =
+    toNIAIDResourceId(identifier) || extractNctPortalId(identifier);
   if (idFromIdentifier) return `${NIAID_RESOURCE_BASE}${encodeURIComponent(idFromIdentifier)}`;
-  // NDE portal also uses GEO accession as resource id (lowercase, e.g. gse1000)
-  const geoId = identifier?.trim();
+
+  let geoId = identifier?.trim() ?? "";
+  if (geoId && !NDE_GEO_ID_PATTERN.test(geoId)) {
+    const m = geoId.match(/\b(GSE\d+)\b/i);
+    if (m) geoId = m[1];
+  }
   if (geoId && NDE_GEO_ID_PATTERN.test(geoId))
     return `${NIAID_RESOURCE_BASE}${encodeURIComponent(geoId.toLowerCase())}`;
-  const geoIdFromUri = datasetUri?.trim();
-  if (geoIdFromUri && NDE_GEO_ID_PATTERN.test(geoIdFromUri))
-    return `${NIAID_RESOURCE_BASE}${encodeURIComponent(geoIdFromUri.toLowerCase())}`;
   return null;
 }
 
@@ -88,18 +132,83 @@ function gseToEGeod(value: string): string | null {
 
 /** Map binding var names to NDE-style metadata labels and tag color classes. */
 const METADATA_LABELS: Record<string, { label: string; tagClass: string }> = {
-  diseaseName: { label: "Health Condition", tagClass: "bg-niaid-tagHealthCondition text-gray-800" },
-  diseaseNames: { label: "Health Condition", tagClass: "bg-niaid-tagHealthCondition text-gray-800" },
-  speciesName: { label: "Species", tagClass: "bg-niaid-tagSpecies text-gray-800" },
-  organismNames: { label: "Species", tagClass: "bg-niaid-tagSpecies text-gray-800" },
+  diseaseName: {
+    label: "Health Condition",
+    tagClass: "bg-[#fed7d7] border border-[#feb2b2] text-[#9b2c2c]",
+  },
+  diseaseNames: {
+    label: "Health Condition",
+    tagClass: "bg-[#fed7d7] border border-[#feb2b2] text-[#9b2c2c]",
+  },
+  speciesName: {
+    label: "Species",
+    tagClass: "bg-[#c6f6d5] border border-[#9ae6b4] text-[#276749]",
+  },
+  organismNames: {
+    label: "Host",
+    tagClass: "bg-[#c6f6d5] border border-[#9ae6b4] text-[#276749]",
+  },
+  infectiousAgentNames: {
+    label: "Pathogen",
+    tagClass: "bg-[#fed7e2] border border-[#fbb6ce] text-[#97266d]",
+  },
   drugName: { label: "Drug", tagClass: "bg-niaid-tagFunding text-gray-800" },
   name: { label: "Name", tagClass: "bg-niaid-tagTopic text-gray-700" },
 };
 
 /** Vars whose value is a semicolon-separated list; each item is shown as its own tag. */
-const MULTI_VALUE_METADATA_VARS = ["diseaseNames", "organismNames"];
+const MULTI_VALUE_METADATA_VARS = ["diseaseNames", "organismNames", "infectiousAgentNames"];
+
+/** Shown as dedicated rows (value-only chips), not in the generic metadata strip. */
+const FACET_METADATA_MULTI_VARS = ["diseaseNames", "organismNames", "infectiousAgentNames"] as const;
+const FACET_METADATA_SINGLE_VARS = ["diseaseName", "speciesName"] as const;
+
+const CHIP_BASE =
+  "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium";
+
+/** <mark> for matches inside colored facet chips (readable on pink / green / pathogen fills). */
+const CHIP_HIGHLIGHT_MARK_CLASS =
+  "bg-amber-300/95 dark:bg-amber-500/45 text-inherit rounded px-0.5 ring-1 ring-amber-700/35 dark:ring-amber-300/50";
+
+/** Left column for facet rows (aligned labels). */
+const FACET_ROW_LABEL_CLASS =
+  "text-xs font-semibold text-gray-700 dark:text-gray-200 whitespace-nowrap shrink-0 pt-0.5 w-[8.5rem] sm:w-36";
 
 const DEFAULT_TAG_CLASS = "bg-niaid-tagTopic text-gray-700";
+
+function splitSemicolonList(raw: string): string[] {
+  return raw
+    .split(";")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+/** Unique ordered values for a facet row (multi = GROUP_CONCAT; single = one binding). */
+function facetChipValues(
+  row: SPARQLResult["results"]["bindings"][number],
+  multiVar: string,
+  singleVar?: string
+): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  const multi = bindingValue(row[multiVar]);
+  if (multi) {
+    for (const item of splitSemicolonList(multi)) {
+      if (!seen.has(item)) {
+        seen.add(item);
+        out.push(item);
+      }
+    }
+  }
+  if (singleVar) {
+    const s = bindingValue(row[singleVar]);
+    if (s && !seen.has(s)) {
+      seen.add(s);
+      out.push(s);
+    }
+  }
+  return out;
+}
 
 interface NDEResultCardsProps {
   results: SPARQLResult;
@@ -107,6 +216,8 @@ interface NDEResultCardsProps {
   templateLabel?: string;
   /** Shown when there are no bindings (e.g. "only gene expression" filter returned empty). */
   emptyMessage?: string;
+  /** Case-insensitive substring highlights in title and description (e.g. dataset keyword search terms). */
+  highlightTerms?: string[];
 }
 
 export function NDEResultCards({
@@ -114,6 +225,7 @@ export function NDEResultCards({
   templateId,
   templateLabel,
   emptyMessage,
+  highlightTerms = [],
 }: NDEResultCardsProps) {
   const bindings = results?.results?.bindings ?? [];
   const vars = results?.head?.vars ?? [];
@@ -137,7 +249,12 @@ export function NDEResultCards({
 
   const resultLabel = templateLabel || templateId || "Results";
 
-  /** Vars to show as metadata tags (exclude name, description, identifier, hasGeneExpression, GXA/SPOKE-GeneLab link vars). */
+  const facetVarSet = new Set<string>([
+    ...FACET_METADATA_MULTI_VARS,
+    ...FACET_METADATA_SINGLE_VARS,
+  ]);
+
+  /** Vars to show as metadata tags (exclude name, description, identifier, facet rows, GXA/SPOKE-GeneLab link vars). */
   const metadataVars = vars.filter(
     (v) =>
       v !== "dataset" &&
@@ -152,7 +269,8 @@ export function NDEResultCards({
       v !== "spokeGenelabStudyUrl" &&
       v !== "urls" &&
       v !== "sameAsList" &&
-      v !== "owlSameAsList"
+      v !== "owlSameAsList" &&
+      !facetVarSet.has(v)
   );
 
   const totalItems = bindings.length;
@@ -193,6 +311,7 @@ export function NDEResultCards({
         const titleDisplay = name || identifier || "Untitled";
         // Title links only to NDE when we have an NDE portal URL; no GEO fallback (GEO has its own badge).
         const titleHref = ndeUrl ?? undefined;
+        const titleNode = highlightTermsInText(titleDisplay, highlightTerms);
 
         return (
           <article
@@ -224,13 +343,11 @@ export function NDEResultCards({
                     rel="noopener noreferrer"
                     className="text-niaid-link hover:underline"
                   >
-                    {titleDisplay}
+                    {titleNode}
                   </a>
                 </h3>
               ) : (
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                  {titleDisplay}
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{titleNode}</h3>
               )}
 
               {/* Description */}
@@ -238,7 +355,10 @@ export function NDEResultCards({
                 <div className="text-sm text-gray-700 dark:text-gray-300">
                   {description.length > 300 && !isDescExpanded ? (
                     <>
-                      <p>{description.slice(0, 300)}...</p>
+                      <p>
+                        {highlightTermsInText(description.slice(0, 300), highlightTerms)}
+                        …
+                      </p>
                       <button
                         type="button"
                         onClick={() =>
@@ -254,66 +374,129 @@ export function NDEResultCards({
                       </button>
                     </>
                   ) : (
-                    <p>{description}</p>
+                    <p>{highlightTermsInText(description, highlightTerms)}</p>
                   )}
                 </div>
               )}
 
-              {/* Metadata tags */}
-              {metadataVars.length > 0 && (
-                <div className="flex flex-wrap gap-2 items-center">
-                  {(isMetaExpanded ? metadataVars : metadataVars.slice(0, 5)).map((v) => {
-                    const val = bindingValue(row[v]);
-                    if (val === "" || val === name) return null;
-                    const { label, tagClass } = METADATA_LABELS[v] ?? {
-                      label: v,
-                      tagClass: DEFAULT_TAG_CLASS,
-                    };
-                    // Semicolon-separated list: render one tag per value (e.g. diseaseNames, organismNames)
-                    if (MULTI_VALUE_METADATA_VARS.includes(v)) {
-                      const items = val
-                        .split(";")
-                        .map((s) => s.trim())
-                        .filter(Boolean);
-                      return (
-                        <React.Fragment key={v}>
-                          {items.map((item, i) => (
-                            <span
-                              key={`${v}-${i}`}
-                              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${tagClass}`}
-                            >
-                              {label}: {item}
+              {/* Facet metadata: separate rows (health → pathogen → host), label + value-only chips */}
+              {(() => {
+                const healthChips = facetChipValues(row, "diseaseNames", "diseaseName");
+                const pathogenChips = facetChipValues(row, "infectiousAgentNames");
+                const hostChips = facetChipValues(row, "organismNames", "speciesName");
+                const hasFacetRows =
+                  healthChips.length > 0 || pathogenChips.length > 0 || hostChips.length > 0;
+                const healthChipClass = METADATA_LABELS.diseaseNames.tagClass;
+                const pathogenChipClass = METADATA_LABELS.infectiousAgentNames.tagClass;
+                const hostChipClass = METADATA_LABELS.organismNames.tagClass;
+
+                if (!hasFacetRows && metadataVars.length === 0) return null;
+
+                return (
+                  <div className="space-y-2">
+                    {healthChips.length > 0 && (
+                      <div
+                        className="flex flex-wrap items-start gap-x-3 gap-y-2"
+                        role="group"
+                        aria-label="Health conditions"
+                      >
+                        <span className={FACET_ROW_LABEL_CLASS}>Health Condition:</span>
+                        <div className="flex flex-wrap gap-2 flex-1 min-w-0">
+                          {healthChips.map((item, i) => (
+                            <span key={`hc-${i}`} className={`${CHIP_BASE} ${healthChipClass}`}>
+                              {highlightTermsInText(item, highlightTerms, {
+                                markClassName: CHIP_HIGHLIGHT_MARK_CLASS,
+                              })}
                             </span>
                           ))}
-                        </React.Fragment>
-                      );
-                    }
-                    return (
-                      <span
-                        key={v}
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${tagClass}`}
+                        </div>
+                      </div>
+                    )}
+                    {pathogenChips.length > 0 && (
+                      <div
+                        className="flex flex-wrap items-start gap-x-3 gap-y-2"
+                        role="group"
+                        aria-label="Pathogens"
                       >
-                        {label}: {val}
-                      </span>
-                    );
-                  })}
-                  {metadataVars.length > 5 && !isMetaExpanded && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowAllMetadata((prev) => {
-                          const next = new Set(prev);
-                          next.add(globalIndex);
-                          return next;
-                        })
-                      }
-                      className="text-niaid-link hover:underline text-xs"
-                    >
-                      Show metadata +
-                    </button>
-                  )}
-                </div>
-              )}
+                        <span className={FACET_ROW_LABEL_CLASS}>Pathogen:</span>
+                        <div className="flex flex-wrap gap-2 flex-1 min-w-0">
+                          {pathogenChips.map((item, i) => (
+                            <span key={`path-${i}`} className={`${CHIP_BASE} ${pathogenChipClass}`}>
+                              {highlightTermsInText(item, highlightTerms, {
+                                markClassName: CHIP_HIGHLIGHT_MARK_CLASS,
+                              })}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {hostChips.length > 0 && (
+                      <div
+                        className="flex flex-wrap items-start gap-x-3 gap-y-2"
+                        role="group"
+                        aria-label="Host species"
+                      >
+                        <span className={FACET_ROW_LABEL_CLASS}>Host:</span>
+                        <div className="flex flex-wrap gap-2 flex-1 min-w-0">
+                          {hostChips.map((item, i) => (
+                            <span key={`host-${i}`} className={`${CHIP_BASE} ${hostChipClass}`}>
+                              {highlightTermsInText(item, highlightTerms, {
+                                markClassName: CHIP_HIGHLIGHT_MARK_CLASS,
+                              })}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Other metadata (drug, etc.): label + value, optional expand */}
+                    {metadataVars.length > 0 && (
+                      <div className="flex flex-wrap gap-2 items-center">
+                        {(isMetaExpanded ? metadataVars : metadataVars.slice(0, 5)).map((v) => {
+                          const val = bindingValue(row[v]);
+                          if (val === "" || val === name) return null;
+                          const { label, tagClass } = METADATA_LABELS[v] ?? {
+                            label: v,
+                            tagClass: DEFAULT_TAG_CLASS,
+                          };
+                          if (MULTI_VALUE_METADATA_VARS.includes(v)) {
+                            const items = splitSemicolonList(val);
+                            return (
+                              <React.Fragment key={v}>
+                                {items.map((item, i) => (
+                                  <span key={`${v}-${i}`} className={`${CHIP_BASE} ${tagClass}`}>
+                                    {label}: {item}
+                                  </span>
+                                ))}
+                              </React.Fragment>
+                            );
+                          }
+                          return (
+                            <span key={v} className={`${CHIP_BASE} ${tagClass}`}>
+                              {label}: {val}
+                            </span>
+                          );
+                        })}
+                        {metadataVars.length > 5 && !isMetaExpanded && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setShowAllMetadata((prev) => {
+                                const next = new Set(prev);
+                                next.add(globalIndex);
+                                return next;
+                              })
+                            }
+                            className="text-niaid-link hover:underline text-xs"
+                          >
+                            Show metadata +
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Gene expression badge + View resource (NIAID portal) + GXA/GEO/SPOKE-GeneLab */}
               <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">

@@ -1,6 +1,22 @@
 // Fixed SPARQL templates for ontology-grounded query chaining
 // All queries use FROM clauses for graph scoping - no GRAPH enumeration
 
+import { mondoDigitsToOboIri } from "@/lib/ontology/mondo-iri";
+
+/** FRINK GXA uses http://purl.org/okn/wobd/log2fc; legacy exports use spokegenelab:. */
+function gxaAssocLog2fcBinding(assocVar: string, log2Var: string, uniq: string): string {
+  return `  OPTIONAL { ${assocVar} wobd:log2fc ?_gxa_${uniq}_lw . }
+  OPTIONAL { ${assocVar} spokegenelab:log2fc ?_gxa_${uniq}_ls . }
+  BIND(COALESCE(?_gxa_${uniq}_lw, ?_gxa_${uniq}_ls) AS ${log2Var})
+  FILTER(BOUND(${log2Var}))`;
+}
+
+function gxaAssocAdjPBinding(assocVar: string, adjVar: string, uniq: string): string {
+  return `  OPTIONAL { ${assocVar} wobd:adj_p_value ?_gxa_${uniq}_aw . }
+  OPTIONAL { ${assocVar} spokegenelab:adj_p_value ?_gxa_${uniq}_as . }
+  BIND(COALESCE(?_gxa_${uniq}_aw, ?_gxa_${uniq}_as) AS ${adjVar})`;
+}
+
 /**
  * Build SPARQL query to ground candidate labels to MONDO terms in Ubergraph
  * Stage 2: Ground candidate labels to MONDO
@@ -453,11 +469,242 @@ WHERE {
 LIMIT 50`;
 }
 
+function escapeSparqlStringLiteral(s: string): string {
+  return s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+function escapeRegexForSparql(term: string): string {
+  const cleaned = term.trim().replace(/\.$/, "");
+  return cleaned.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/** Resolve MONDO CURIE/IRI or other http(s) term IRI for NDE health-condition facet matching. */
+export function resolveHealthConditionIri(input: string): string | null {
+  const trimmed = input.replace(/[<>]/g, "").trim();
+  const mondoPurl = trimmed.match(/^https?:\/\/purl\.obolibrary\.org\/obo\/MONDO_(\d+)$/i);
+  if (mondoPurl) return mondoDigitsToOboIri(mondoPurl[1]);
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  const mondo = trimmed.match(/^MONDO[:_\s]+0*(\d+)$/i);
+  if (mondo) return mondoDigitsToOboIri(mondo[1]);
+  return null;
+}
+
+function resolveSpeciesIrisForFacet(input: string): string[] {
+  const trimmed = input.replace(/[<>]/g, "").trim();
+  if (/^\d+$/.test(trimmed)) {
+    return [
+      `https://www.uniprot.org/taxonomy/${trimmed}`,
+      `http://purl.obolibrary.org/obo/NCBITaxon_${trimmed}`,
+    ];
+  }
+  if (/^https?:\/\/www\.uniprot\.org\/taxonomy\/\d+$/i.test(trimmed)) return [trimmed];
+  if (/^https?:\/\/purl\.obolibrary\.org\/obo\/NCBITaxon_\d+$/i.test(trimmed)) return [trimmed];
+  return [];
+}
+
+function buildKeywordRegexFilter(keywordRegexTerms: string[]): string {
+  const terms = keywordRegexTerms.map((t) => t.trim()).filter(Boolean).map(escapeRegexForSparql);
+  if (terms.length === 0) {
+    throw new Error("At least one keyword term required for dataset keyword search");
+  }
+  if (terms.length === 1) {
+    const t = terms[0];
+    return `  FILTER(
+    REGEX(STR(?name), "${t}", "i")
+    || (BOUND(?description) && REGEX(STR(?description), "${t}", "i"))
+  )`;
+  }
+  const pieces = terms.map(
+    (t) =>
+      `(REGEX(STR(?name), "${t}", "i") || (BOUND(?description) && REGEX(STR(?description), "${t}", "i")))`
+  );
+  return `  FILTER(
+    ${pieces.join(" &&\n    ")}
+  )`;
+}
+
+function buildFacetHealthConditionBlock(inputs: string[]): string {
+  const iris: string[] = [];
+  const textTerms: string[] = [];
+  for (const raw of inputs) {
+    const t = raw.trim();
+    if (!t) continue;
+    const resolved = resolveHealthConditionIri(t);
+    if (resolved) iris.push(resolved.replace(/[<>]/g, ""));
+    else {
+      const trimmed = t.replace(/[<>]/g, "").trim();
+      if (/^https?:\/\//i.test(trimmed)) iris.push(trimmed);
+      else textTerms.push(t);
+    }
+  }
+  const uniqueIris = [...new Set(iris)];
+  if (uniqueIris.length === 0 && textTerms.length === 0) return "";
+
+  const filterParts: string[] = [];
+  if (uniqueIris.length > 0) {
+    filterParts.push(uniqueIris.map((iri) => `?hcTerm = <${iri}>`).join(" || "));
+  }
+  for (const term of textTerms) {
+    const esc = escapeSparqlStringLiteral(term);
+    filterParts.push(`(BOUND(?hcName) && CONTAINS(LCASE(?hcName), LCASE("${esc}")))`);
+  }
+
+  if (textTerms.length === 0) {
+    return `
+  ?dataset schema:healthCondition ?hcTerm .
+  FILTER(${filterParts.join(" || ")})`;
+  }
+  return `
+  ?dataset schema:healthCondition ?hcTerm .
+  OPTIONAL { ?hcTerm schema:name ?hcName }
+  FILTER(${filterParts.join(" || ")})`;
+}
+
+function buildFacetSpeciesBlock(inputs: string[]): string {
+  const iris: string[] = [];
+  const textTerms: string[] = [];
+  for (const raw of inputs) {
+    const t = raw.trim();
+    if (!t) continue;
+    const found = resolveSpeciesIrisForFacet(t);
+    if (found.length > 0) iris.push(...found);
+    else textTerms.push(t);
+  }
+  const uniqueIris = [...new Set(iris.map((i) => i.replace(/[<>]/g, "")))];
+  if (uniqueIris.length === 0 && textTerms.length === 0) return "";
+
+  const filterParts: string[] = [];
+  if (uniqueIris.length > 0) {
+    filterParts.push(uniqueIris.map((iri) => `?spTerm = <${iri}>`).join(" || "));
+  }
+  for (const term of textTerms) {
+    const esc = escapeSparqlStringLiteral(term);
+    filterParts.push(`CONTAINS(LCASE(?spName), LCASE("${esc}"))`);
+  }
+  return `
+  ?dataset schema:species ?spTerm .
+  ?spTerm schema:name ?spName .
+  FILTER(${filterParts.join(" || ")})`;
+}
+
+function buildFacetInfectiousAgentBlock(inputs: string[]): string {
+  const iris: string[] = [];
+  const textTerms: string[] = [];
+  for (const raw of inputs) {
+    const t = raw.trim();
+    if (!t) continue;
+    const found = resolveSpeciesIrisForFacet(t);
+    if (found.length > 0) iris.push(...found);
+    else textTerms.push(t);
+  }
+  const uniqueIris = [...new Set(iris.map((i) => i.replace(/[<>]/g, "")))];
+  if (uniqueIris.length === 0 && textTerms.length === 0) return "";
+
+  const filterParts: string[] = [];
+  if (uniqueIris.length > 0) {
+    filterParts.push(uniqueIris.map((iri) => `?iaTerm = <${iri}>`).join(" || "));
+  }
+  for (const term of textTerms) {
+    const trimmed = term.replace(/[<>]/g, "").trim();
+    if (/^https?:\/\//i.test(trimmed)) {
+      filterParts.push(`?iaTerm = <${trimmed}>`);
+    } else {
+      const esc = escapeSparqlStringLiteral(term);
+      filterParts.push(`CONTAINS(LCASE(?iaName), LCASE("${esc}"))`);
+    }
+  }
+  return `
+  ?dataset schema:infectiousAgent ?iaTerm .
+  ?iaTerm schema:name ?iaName .
+  FILTER(${filterParts.join(" || ")})`;
+}
+
 /**
- * Build SPARQL query to find datasets by Wikidata drug identifiers
- * @param wikidataIRIs - Array of Wikidata IRIs (e.g., ["http://www.wikidata.org/entity/Q421094"])
- * @param useTextMatching - If true, includes optional text matching on drug names
+ * NDE dataset search: keyword REGEX on schema:name / optional schema:description,
+ * with optional AND filters on schema:healthCondition, schema:species, schema:infectiousAgent
+ * (term IRI equality when input is a URI/CURIE, else CONTAINS on schema:name).
+ * Health-condition values may be MONDO CURIE/IRI (resolved to MONDO IRIs), other http(s) term IRIs, or free text (schema:name CONTAINS).
+ * For MONDO subclass expansion (OLS), expand inputs before calling this function (see dataset_search template).
+ * Species and infectious-agent slot values may be NCBI taxon IDs (mapped to UniProt taxonomy + NCBITaxon IRIs), full URIs, or text.
+ *
+ * Result rows include aggregated tags for UI (NDEResultCards): ?diseaseNames, ?organismNames,
+ * ?infectiousAgentNames (semicolon-separated labels, or term IRI string if no schema:name).
+ *
+ * @param keywordRegexTerms - Terms matched with REGEX (AND across terms); omit or empty for facet-only search
+ * @param geoOnly - If true, restrict to GEO-style datasets (schema:identifier GSE[0-9]+)
  */
+export function buildNDEDatasetKeywordAndFacetQuery(
+  keywordRegexTerms: string[],
+  options: {
+    healthConditionInputs?: string[];
+    speciesInputs?: string[];
+    infectiousAgentInputs?: string[];
+    geoOnly?: boolean;
+  } = {}
+): string {
+  const { healthConditionInputs = [], speciesInputs = [], infectiousAgentInputs = [], geoOnly = false } =
+    options;
+  const kwTerms = keywordRegexTerms.map((t) => t.trim()).filter(Boolean);
+  const keywordFilter =
+    kwTerms.length > 0 ? buildKeywordRegexFilter(kwTerms) : "";
+  const healthBlock =
+    healthConditionInputs.length > 0 ? buildFacetHealthConditionBlock(healthConditionInputs) : "";
+  const speciesBlock = speciesInputs.length > 0 ? buildFacetSpeciesBlock(speciesInputs) : "";
+  const agentBlock =
+    infectiousAgentInputs.length > 0 ? buildFacetInfectiousAgentBlock(infectiousAgentInputs) : "";
+  const geoBlock = geoOnly
+    ? `
+  FILTER(REGEX(STR(COALESCE(?ident, "")), "GSE[0-9]+", "i"))`
+    : "";
+
+  const hasFacet = Boolean(healthBlock || speciesBlock || agentBlock);
+  if (!geoOnly && !keywordFilter && !hasFacet) {
+    throw new Error(
+      "Provide keywords and/or at least one filter (health condition, pathogen species, or host species)."
+    );
+  }
+
+  // One row per dataset; optional portal links (NDEResultCards uses identifier, urls, sameAsList, owlSameAsList).
+  const resourceOptionals = `
+  OPTIONAL { ?dataset schema:identifier ?ident }
+  OPTIONAL { ?dataset schema:url ?url }
+  OPTIONAL { ?dataset schema:sameAs ?sameAs }
+  OPTIONAL { ?dataset owl:sameAs ?owlSameAs }`;
+
+  // All health conditions / host species / pathogens on the dataset (for result tags), independent of facet filters.
+  const datasetFacetTagOptionals = `
+  OPTIONAL {
+    ?dataset schema:healthCondition ?hcMeta .
+    OPTIONAL { ?hcMeta schema:name ?hcMetaName }
+  }
+  OPTIONAL {
+    ?dataset schema:species ?spMeta .
+    OPTIONAL { ?spMeta schema:name ?spMetaName }
+  }
+  OPTIONAL {
+    ?dataset schema:infectiousAgent ?iaMeta .
+    OPTIONAL { ?iaMeta schema:name ?iaMetaName }
+  }`;
+
+  return `SELECT ?dataset ?name ?description
+  (GROUP_CONCAT(DISTINCT STR(?ident); SEPARATOR=" ") AS ?identifier)
+  (GROUP_CONCAT(DISTINCT STR(?url); SEPARATOR=" ") AS ?urls)
+  (GROUP_CONCAT(DISTINCT STR(?sameAs); SEPARATOR=" ") AS ?sameAsList)
+  (GROUP_CONCAT(DISTINCT STR(?owlSameAs); SEPARATOR=" ") AS ?owlSameAsList)
+  (GROUP_CONCAT(DISTINCT COALESCE(?hcMetaName, STR(?hcMeta)); SEPARATOR="; ") AS ?diseaseNames)
+  (GROUP_CONCAT(DISTINCT COALESCE(?spMetaName, STR(?spMeta)); SEPARATOR="; ") AS ?organismNames)
+  (GROUP_CONCAT(DISTINCT COALESCE(?iaMetaName, STR(?iaMeta)); SEPARATOR="; ") AS ?infectiousAgentNames)
+FROM <https://purl.org/okn/frink/kg/nde>
+WHERE {
+  ?dataset a schema:Dataset ;
+           schema:name ?name .
+  OPTIONAL { ?dataset schema:description ?description }${resourceOptionals}
+${keywordFilter}${healthBlock}${speciesBlock}${agentBlock}${geoBlock}
+${datasetFacetTagOptionals}
+}
+GROUP BY ?dataset ?name ?description`.trim();
+}
+
 /**
  * Build SPARQL query to find diseases treated by a drug in Wikidata
  * Maps drug to diseases via P2175 (medical condition treated) and P6680 (exact match to MONDO)
@@ -549,12 +796,14 @@ LIMIT 50`;
  * Build a subquery that selects ?contrast (or ?outputVar) WHERE contrast matches factor terms (and optionally tissue/experiment).
  * Used to filter contrasts BEFORE joining to associations for better performance (avoids CONTAINS on large join).
  * @param outputVar - Variable to SELECT (default "?contrast"); use "?c1" for discordance query
+ * @param organismFilterInSubquery - Optional BIND/OPTIONAL/FILTER (study taxon) scoped to outputVar
  */
 function buildFactorContrastSubquery(
   factorTerms?: string[],
   tissueFilterInSubquery: string = "",
   extraFilter: string = "",
-  outputVar: string = "?contrast"
+  outputVar: string = "?contrast",
+  organismFilterInSubquery: string = ""
 ): string {
   if (!factorTerms || factorTerms.length === 0) return "";
 
@@ -571,7 +820,7 @@ function buildFactorContrastSubquery(
     .join(" || ");
 
   return `{
-    SELECT ${outputVar} WHERE {
+    SELECT DISTINCT ${outputVar} WHERE {
       ${outputVar} a biolink:Assay .
       OPTIONAL { ${outputVar} biolink:name ?contrastLabel . }
       OPTIONAL { ${outputVar} spokegenelab:factors_1 ?f1 . }
@@ -579,9 +828,86 @@ function buildFactorContrastSubquery(
       FILTER(REGEX(STR(${outputVar}), "E-[A-Z0-9-]+-g[0-9]+_g[0-9]+"))
       ${tissueFilterInSubquery.replace(/\?contrast/g, outputVar)}
       ${extraFilter.replace(/\?contrast/g, outputVar)}
+      ${organismFilterInSubquery}
       FILTER(${termConditions})
     }
   }`;
+}
+
+/** Normalize slot / pasted values to NCBI taxonomy numeric IDs (GXA uses OBO NCBITaxon_* IRIs). */
+function normalizeGxaNcbiTaxonNumericIds(organismTaxonIds: string[]): string[] {
+  const out: string[] = [];
+  for (const raw of organismTaxonIds) {
+    const s = raw.replace(/"/g, "").trim();
+    if (!s) continue;
+    const mObo = s.match(/obo\/NCBITaxon_(\d+)/i) || s.match(/NCBITaxon[_:](\d+)/i);
+    if (mObo) {
+      out.push(mObo[1]);
+      continue;
+    }
+    if (/^\d+$/.test(s)) {
+      out.push(s);
+    }
+  }
+  return [...new Set(out)];
+}
+
+function buildGXATaxonMatchFilterExpr(taxonVar: string, numericIds: string[]): string {
+  if (numericIds.length === 0) return "";
+  const esc = (r: string) => r.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts: string[] = [];
+  for (const id of numericIds) {
+    parts.push(`${taxonVar} = <http://purl.obolibrary.org/obo/NCBITaxon_${id}>`);
+    parts.push(`REGEX(STR(${taxonVar}), "NCBITaxon[_:]${esc(id)}(?:[^0-9]|$)")`);
+  }
+  return parts.join(" || ");
+}
+
+/** SPARQL expression for GXA experiment accession from an Assay (contrast) IRI. */
+function gxaExperimentIdFromContrastExpr(contrastVar: string): string {
+  return `REPLACE(STR(${contrastVar}), "^.*/(E-[A-Z0-9-]+)-.*$", "$1")`;
+}
+
+function buildGXAOrganismStudyTaxonParts(
+  numericIds: string[],
+  experimentIdExpr: string,
+  tag: string
+): { setup: string; disjunct: string } {
+  const tOkn = `?__gxTaxOkn_${tag}`;
+  const tSp = `?__gxTaxSpoke_${tag}`;
+  const sOkn = `?__gxStudyOkn_${tag}`;
+  const sSp = `?__gxStudySpoke_${tag}`;
+  const setup = `
+    BIND(IRI(CONCAT("http://purl.org/okn/wobd/study/", ${experimentIdExpr})) AS ${sOkn})
+    OPTIONAL { ${sOkn} biolink:in_taxon ${tOkn} . }
+    BIND(IRI(CONCAT("https://spoke.ucsf.edu/genelab/", ${experimentIdExpr})) AS ${sSp})
+    OPTIONAL { ${sSp} biolink:in_taxon ${tSp} . }`;
+  const disjunct = `(BOUND(${tOkn}) && (${buildGXATaxonMatchFilterExpr(tOkn, numericIds)})) || (BOUND(${tSp}) && (${buildGXATaxonMatchFilterExpr(tSp, numericIds)}))`;
+  return { setup, disjunct };
+}
+
+/**
+ * Restrict to experiments whose Study has biolink:in_taxon matching NCBI taxon IDs (OKN-WOBD and/or
+ * SPOKE GeneLab study IRIs). Uses OPTIONAL + FILTER, not FILTER EXISTS: Virtuoso incorrectly
+ * satisfied EXISTS when the inner pattern used BIND(REPLACE(STR(?contrast), ...)), which let
+ * unrelated studies satisfy the organism constraint (e.g. mouse E-GEOD-3749 under Arabidopsis).
+ */
+function buildGXAOrganismFilterFromExprs(
+  organismTaxonIds: string[] | undefined,
+  experimentIdExprs: string[],
+  tags: string[]
+): string {
+  if (!organismTaxonIds || organismTaxonIds.length === 0 || experimentIdExprs.length === 0) {
+    return "";
+  }
+  const ids = normalizeGxaNcbiTaxonNumericIds(organismTaxonIds);
+  if (ids.length === 0) return "";
+  const parts = experimentIdExprs.map((ex, i) =>
+    buildGXAOrganismStudyTaxonParts(ids, ex, tags[i] ?? `t${i}`)
+  );
+  const setup = parts.map((p) => p.setup).join("");
+  const filterInner = parts.map((p) => `(${p.disjunct})`).join(" && ");
+  return `${setup}\n    FILTER( ${filterInner} )`;
 }
 
 /**
@@ -621,17 +947,11 @@ export function buildGXAExperimentCoverageQuery(
   factorTerms?: string[],
   diseaseEfoIds?: string[]
 ): string {
-  let organismFilter = "";
-  if (organismTaxonIds && organismTaxonIds.length > 0) {
-    const safeIds = organismTaxonIds.map((id) => id.replace(/"/g, '\\"').trim()).filter(Boolean);
-    if (safeIds.length > 0) {
-      const values = safeIds.map((id) => `"${id}"`).join(" ");
-      organismFilter = `
-    ?association biolink:object ?gene .
-    ?gene biolink:in_taxon ?taxon .
-    FILTER(STR(?taxon) IN (${safeIds.map((id) => `"${id}"`).join(", ")}))`;
-    }
-  }
+  const organismFilter = buildGXAOrganismFilterFromExprs(
+    organismTaxonIds,
+    ["?experimentId"],
+    ["cov"]
+  );
 
   let tissueFilter = "";
   if (tissueUberonIds && tissueUberonIds.length > 0) {
@@ -795,10 +1115,11 @@ export function buildGXAGenesForExperimentQuery(
     log2fcFilter += `\n    FILTER(BOUND(?adjPValue) && ?adjPValue <= ${maxAdjPValue})`;
   }
 
-  let organismFilter = "";
-  if (organismTaxonIds && organismTaxonIds.length > 0) {
-    organismFilter = `\n  # Organism filter (Phase 4)\n  ?gene biolink:in_taxon ?taxon .\n  FILTER(STR(?taxon) IN (${organismTaxonIds.map((id) => `"${id.replace(/"/g, '\\"')}"`).join(", ")}))`;
-  }
+  const organismFilter = buildGXAOrganismFilterFromExprs(
+    organismTaxonIds,
+    [gxaExperimentIdFromContrastExpr("?contrast")],
+    ["gfe"]
+  );
 
   let tissueFilter = "";
   if (tissueUberonIds && tissueUberonIds.length > 0) {
@@ -824,18 +1145,18 @@ export function buildGXAGenesForExperimentQuery(
   ${factorSubquery}
   ?assoc a biolink:GeneExpressionMixin ;
          biolink:object ?gene ;
-         biolink:subject ?contrast ;
-         spokegenelab:log2fc ?log2fc .`
+         biolink:subject ?contrast .
+${gxaAssocLog2fcBinding("?assoc", "?log2fc", "gfe")}`
     : `?assoc a biolink:GeneExpressionMixin ;
          biolink:object ?gene ;
-         biolink:subject ?contrast ;
-         spokegenelab:log2fc ?log2fc .
-  OPTIONAL { ?assoc spokegenelab:adj_p_value ?adjPValue . }
+         biolink:subject ?contrast .
+${gxaAssocLog2fcBinding("?assoc", "?log2fc", "gfe")}
+${gxaAssocAdjPBinding("?assoc", "?adjPValue", "gfea")}
   ?contrast a biolink:Assay .
   FILTER(CONTAINS(STR(?contrast), "${safeId}"))`;
 
   const contrastRest = useFactorSubquery
-    ? `OPTIONAL { ?assoc spokegenelab:adj_p_value ?adjPValue . }`
+    ? gxaAssocAdjPBinding("?assoc", "?adjPValue", "gfea")
     : "";
 
   const tissueInMain = useFactorSubquery ? "" : tissueFilter;
@@ -856,6 +1177,7 @@ export function buildGXAGenesForExperimentQuery(
 
   return `PREFIX biolink:      <https://w3id.org/biolink/vocab/>
 PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
+PREFIX wobd:        <http://purl.org/okn/wobd/>
 
 SELECT DISTINCT
   ?experimentId
@@ -882,7 +1204,9 @@ LIMIT ${Math.min(limit, 500)}`;
 
 /**
  * Build SPARQL query to find GXA experiments/contrasts where given genes are DE.
- * Returns one row per (experiment, contrast, gene) with DE metrics and labels.
+ * Returns one row per (contrast, gene) with DE metrics and labels. Includes ?experimentId
+ * (GXA accession, e.g. E-GEOD-139813) for comparison with the Atlas UI; ?contrast is the
+ * canonical Assay IRI for joins.
  *
  * @param geneSymbols - Array of gene symbols to search for (e.g., ["Dusp2"])
  * @param limit - Max number of rows to return (default 100)
@@ -890,6 +1214,7 @@ LIMIT ${Math.min(limit, 500)}`;
  * @param organismTaxonIds - Optional NCBITaxon IDs to filter by organism (e.g. ["10090", "9606"])
  * @param tissueUberonIds - Optional UBERON IDs to filter by tissue (e.g. ["0002082"])
  * @param factorTerms - Optional text terms to match in factors/contrast labels (e.g. ["aortic banding"])
+ * @param includeDirectionColumn - When true, SELECT includes ?direction ("up"/"down" from log2fc) like the cross-dataset summary query.
  */
 export function buildGXAExperimentsForGenesQuery(
   geneSymbols: string[],
@@ -897,7 +1222,8 @@ export function buildGXAExperimentsForGenesQuery(
   upregulated?: boolean,
   organismTaxonIds?: string[],
   tissueUberonIds?: string[],
-  factorTerms?: string[]
+  factorTerms?: string[],
+  includeDirectionColumn: boolean = false
 ): string {
   if (!geneSymbols || geneSymbols.length === 0) {
     throw new Error("At least one gene symbol is required for GXA experiments-for-gene query");
@@ -914,10 +1240,11 @@ export function buildGXAExperimentsForGenesQuery(
     log2fcFilter = "\n    FILTER(?log2fc < 0)";
   }
 
-  let organismFilter = "";
-  if (organismTaxonIds && organismTaxonIds.length > 0) {
-    organismFilter = `\n  # Organism filter (Phase 4)\n  ?gene biolink:in_taxon ?taxon .\n  FILTER(STR(?taxon) IN (${organismTaxonIds.map((id) => `"${id.replace(/"/g, '\\"')}"`).join(", ")}))`;
-  }
+  const organismFilter = buildGXAOrganismFilterFromExprs(
+    organismTaxonIds,
+    [gxaExperimentIdFromContrastExpr("?contrast")],
+    ["gxeg"]
+  );
 
   let tissueFilter = "";
   if (tissueUberonIds && tissueUberonIds.length > 0) {
@@ -939,12 +1266,12 @@ export function buildGXAExperimentsForGenesQuery(
   ${factorSubquery}
   ?assoc a biolink:GeneExpressionMixin ;
          biolink:object ?gene ;
-         biolink:subject ?contrast ;
-         spokegenelab:log2fc ?log2fc .`
+         biolink:subject ?contrast .
+${gxaAssocLog2fcBinding("?assoc", "?log2fc", "gxeg")}`
     : `?assoc a biolink:GeneExpressionMixin ;
          biolink:object ?gene ;
-         biolink:subject ?contrast ;
-         spokegenelab:log2fc ?log2fc .
+         biolink:subject ?contrast .
+${gxaAssocLog2fcBinding("?assoc", "?log2fc", "gxeg")}
   ?contrast a biolink:Assay .`;
 
   const factorInMain = useFactorSubquery ? "" : (() => {
@@ -964,33 +1291,36 @@ export function buildGXAExperimentsForGenesQuery(
 
   const tissueInMain = useFactorSubquery ? "" : tissueFilter;
 
+  const directionSelect = includeDirectionColumn ? "\n  ?direction" : "";
+  const directionBind = includeDirectionColumn
+    ? "\n  BIND(IF(?log2fc > 0, \"up\", \"down\") AS ?direction)"
+    : "";
+
   return `PREFIX biolink:      <https://w3id.org/biolink/vocab/>
 PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
+PREFIX wobd:        <http://purl.org/okn/wobd/>
 
 SELECT DISTINCT
   ?experimentId
   ?contrast
-  ?contrastId
   ?contrastLabel
   ?gene
-  ?geneSymbol
+  ?geneSymbol${directionSelect}
   ?log2fc
   ?adjPValue
 FROM <https://purl.org/okn/frink/kg/gene-expression-atlas-okn>
 WHERE {
   ${contrastSource}
-  OPTIONAL { ?assoc spokegenelab:adj_p_value ?adjPValue . }
+${gxaAssocAdjPBinding("?assoc", "?adjPValue", "gxega")}
   ?gene biolink:symbol ?geneSymbol .
   FILTER(
     ${geneFilters}
   )${log2fcFilter}${organismFilter}${tissueInMain}${factorInMain}
 
   BIND(REPLACE(STR(?contrast), "^.*/(E-[A-Z0-9-]+)-.*$", "$1") AS ?experimentId)
-  OPTIONAL { ?contrast spokegenelab:contrast_id ?contrastIdProp . }
-  BIND(COALESCE(?contrastIdProp, REPLACE(STR(?contrast), "^.*-(g[0-9]+_g[0-9]+)$", "$1")) AS ?contrastId)
-  OPTIONAL { ?contrast biolink:name ?contrastLabel . }
+  OPTIONAL { ?contrast biolink:name ?contrastLabel . }${directionBind}
 }
-ORDER BY ?geneSymbol ?experimentId ?contrastId
+ORDER BY ?geneSymbol ?experimentId STR(?contrast)
 LIMIT ${Math.min(limit, 500)}`;
 }
 
@@ -1016,10 +1346,11 @@ export function buildGXAGeneCrossDatasetSummaryQuery(
   }
   const safeSymbol = geneSymbol.trim().toLowerCase().replace(/"/g, '\\"');
 
-  let organismFilter = "";
-  if (organismTaxonIds && organismTaxonIds.length > 0) {
-    organismFilter = `\n  ?gene biolink:in_taxon ?taxon .\n  FILTER(STR(?taxon) IN (${organismTaxonIds.map((id) => `"${id.replace(/"/g, '\\"')}"`).join(", ")}))`;
-  }
+  const organismFilter = buildGXAOrganismFilterFromExprs(
+    organismTaxonIds,
+    [gxaExperimentIdFromContrastExpr("?contrast")],
+    ["gxsum"]
+  );
 
   let tissueFilter = "";
   if (tissueUberonIds && tissueUberonIds.length > 0) {
@@ -1041,12 +1372,12 @@ export function buildGXAGeneCrossDatasetSummaryQuery(
   ${factorSubquery}
   ?assoc a biolink:GeneExpressionMixin ;
          biolink:object ?gene ;
-         biolink:subject ?contrast ;
-         spokegenelab:log2fc ?log2fc .`
+         biolink:subject ?contrast .
+${gxaAssocLog2fcBinding("?assoc", "?log2fc", "gxsum")}`
     : `?assoc a biolink:GeneExpressionMixin ;
          biolink:object ?gene ;
-         biolink:subject ?contrast ;
-         spokegenelab:log2fc ?log2fc .
+         biolink:subject ?contrast .
+${gxaAssocLog2fcBinding("?assoc", "?log2fc", "gxsum")}
   ?contrast a biolink:Assay .`;
 
   const factorInMain = useFactorSubquery ? "" : (() => {
@@ -1068,6 +1399,7 @@ export function buildGXAGeneCrossDatasetSummaryQuery(
 
   return `PREFIX biolink:      <https://w3id.org/biolink/vocab/>
 PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
+PREFIX wobd:        <http://purl.org/okn/wobd/>
 
 SELECT DISTINCT
   ?geneSymbol
@@ -1080,7 +1412,7 @@ SELECT DISTINCT
 FROM <https://purl.org/okn/frink/kg/gene-expression-atlas-okn>
 WHERE {
   ${contrastSource}
-  OPTIONAL { ?assoc spokegenelab:adj_p_value ?adjPValue . }
+${gxaAssocAdjPBinding("?assoc", "?adjPValue", "gxsuma")}
   ?gene biolink:symbol ?geneSymbol .
   FILTER(LCASE(?geneSymbol) = "${safeSymbol}")
 
@@ -1121,10 +1453,11 @@ export function buildGXAGenesAgreementQuery(
         ? "FILTER(?log2fc < 0)"
         : "FILTER(?log2fc != 0)";
 
-  let organismFilter = "";
-  if (organismTaxonIds && organismTaxonIds.length > 0) {
-    organismFilter = `\n  ?gene biolink:in_taxon ?taxon .\n  FILTER(STR(?taxon) IN (${organismTaxonIds.map((id) => `"${id.replace(/"/g, '\\"')}"`).join(", ")}))`;
-  }
+  const organismFilter = buildGXAOrganismFilterFromExprs(
+    organismTaxonIds,
+    [gxaExperimentIdFromContrastExpr("?contrast")],
+    ["gxagr"]
+  );
 
   let tissueFilter = "";
   if (tissueUberonIds && tissueUberonIds.length > 0) {
@@ -1146,12 +1479,12 @@ export function buildGXAGenesAgreementQuery(
   ${factorSubquery}
   ?assoc a biolink:GeneExpressionMixin ;
          biolink:object ?gene ;
-         biolink:subject ?contrast ;
-         spokegenelab:log2fc ?log2fc .`
+         biolink:subject ?contrast .
+${gxaAssocLog2fcBinding("?assoc", "?log2fc", "gxagr")}`
     : `?assoc a biolink:GeneExpressionMixin ;
          biolink:object ?gene ;
-         biolink:subject ?contrast ;
-         spokegenelab:log2fc ?log2fc .
+         biolink:subject ?contrast .
+${gxaAssocLog2fcBinding("?assoc", "?log2fc", "gxagr")}
   ?contrast a biolink:Assay .`;
 
   const factorInMain = useFactorSubquery ? "" : (() => {
@@ -1173,6 +1506,7 @@ export function buildGXAGenesAgreementQuery(
 
   return `PREFIX biolink:      <https://w3id.org/biolink/vocab/>
 PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
+PREFIX wobd:        <http://purl.org/okn/wobd/>
 
 SELECT ?geneSymbol ?direction (COUNT(DISTINCT ?experimentId) AS ?experimentCount)
   (GROUP_CONCAT(DISTINCT ?experimentId; separator=" | ") AS ?sampleExperimentIds)
@@ -1208,31 +1542,83 @@ export function buildGXAGenesDiscordanceQuery(
   tissueUberonIds?: string[],
   factorTerms?: string[]
 ): string {
-  let organismFilter = "";
-  if (organismTaxonIds && organismTaxonIds.length > 0) {
-    organismFilter = `\n  ?gene biolink:in_taxon ?taxon .\n  FILTER(STR(?taxon) IN (${organismTaxonIds.map((id) => `"${id.replace(/"/g, '\\"')}"`).join(", ")}))`;
-  }
+  // Full organism+tissue FILTER at end forces Virtuoso to join ~all up/down DE rows on ?gene first
+  // (hundreds of millions of intermediates → OOM). When tissue and/or organism is set, prefilter
+  // ?c1 and ?c2 via subqueries so associations only touch matching contrasts.
+  const organismFilterMain = buildGXAOrganismFilterFromExprs(
+    organismTaxonIds,
+    [gxaExperimentIdFromContrastExpr("?c1"), gxaExperimentIdFromContrastExpr("?c2")],
+    ["up", "down"]
+  );
 
-  let tissueFilter = "";
+  let tissueFilterC1 = "";
+  let tissueIriList = "";
   if (tissueUberonIds && tissueUberonIds.length > 0) {
     const safeUberon = tissueUberonIds
       .map((id) => id.replace(/^UBERON_/, "").replace(/"/g, "").trim())
       .filter(Boolean);
     if (safeUberon.length > 0) {
-      const iriList = safeUberon.map((id) => `<http://purl.obolibrary.org/obo/UBERON_${id}>`).join(" ");
-      tissueFilter = `\n  ?c1 biolink:has_attribute ?tissue .\n  FILTER(?tissue IN (${iriList}))`;
+      tissueIriList = safeUberon.map((id) => `<http://purl.obolibrary.org/obo/UBERON_${id}>`).join(" ");
+      tissueFilterC1 = `\n  ?c1 biolink:has_attribute ?tissue .\n  FILTER(?tissue IN (${tissueIriList}))`;
     }
   }
 
-  // Factor filter: use subquery to filter ?c1 first (discordance uses ?c1 for upregulated contrast)
-  const factorSubquery = buildFactorContrastSubquery(factorTerms, tissueFilter, "", "?c1");
+  const hasTissue = tissueIriList.length > 0;
+  const hasOrganism =
+    normalizeGxaNcbiTaxonNumericIds(organismTaxonIds ?? []).length > 0;
+  const organismSubC1 = hasOrganism
+    ? buildGXAOrganismFilterFromExprs(organismTaxonIds, [gxaExperimentIdFromContrastExpr("?c1")], ["dsc1"])
+    : "";
+  const organismSubC2 = hasOrganism
+    ? buildGXAOrganismFilterFromExprs(organismTaxonIds, [gxaExperimentIdFromContrastExpr("?c2")], ["dsc2"])
+    : "";
+  const tissueInnerC1 = hasTissue
+    ? `\n      ?c1 biolink:has_attribute ?tissue .\n      FILTER(?tissue IN (${tissueIriList}))`
+    : "";
+  const tissueInnerC2 = hasTissue
+    ? `\n      ?c2 biolink:has_attribute ?tissue .\n      FILTER(?tissue IN (${tissueIriList}))`
+    : "";
+
+  const factorSubquery = buildFactorContrastSubquery(
+    factorTerms,
+    tissueFilterC1,
+    "",
+    "?c1",
+    hasOrganism ? organismSubC1 : ""
+  );
   const useFactorSubquery = factorSubquery !== "";
 
-  const c1Source = useFactorSubquery
-    ? `# Subquery: filter contrasts by factor/tissue before joining
+  const contrastAssayRegex = "E-[A-Z0-9-]+-g[0-9]+_g[0-9]+";
+
+  let c1Prefix = "";
+  if (useFactorSubquery) {
+    c1Prefix = `# Subquery: filter ?c1 contrasts (factor / tissue / organism) before associations
   ${factorSubquery}
-  ?a1 a biolink:GeneExpressionMixin ; biolink:object ?gene ; biolink:subject ?c1 ; spokegenelab:log2fc ?l1 .`
-    : `?a1 a biolink:GeneExpressionMixin ; biolink:object ?gene ; biolink:subject ?c1 ; spokegenelab:log2fc ?l1 .`;
+  `;
+  } else if (hasTissue || hasOrganism) {
+    c1Prefix = `{
+    SELECT DISTINCT ?c1 WHERE {
+      ?c1 a biolink:Assay .
+      FILTER(REGEX(STR(?c1), "${contrastAssayRegex}"))${tissueInnerC1}${organismSubC1}
+    }
+  }
+  `;
+  }
+
+  const c2Prefix =
+    hasTissue || hasOrganism
+      ? `{
+    SELECT DISTINCT ?c2 WHERE {
+      ?c2 a biolink:Assay .
+      FILTER(REGEX(STR(?c2), "${contrastAssayRegex}"))${tissueInnerC2}${organismSubC2}
+    }
+  }
+  `
+      : "";
+
+  const movedFacetToSubquery = useFactorSubquery || hasTissue || hasOrganism;
+  const organismFilterTail = movedFacetToSubquery ? "" : organismFilterMain;
+  const tissueInMain = movedFacetToSubquery ? "" : tissueFilterC1;
 
   const factorInMain = useFactorSubquery ? "" : (() => {
     if (!factorTerms || factorTerms.length === 0) return "";
@@ -1249,24 +1635,25 @@ export function buildGXAGenesDiscordanceQuery(
     return `\n  OPTIONAL { ?c1 biolink:name ?cl1 . }\n  OPTIONAL { ?c1 spokegenelab:factors_1 ?f1a . }\n  OPTIONAL { ?c1 spokegenelab:factors_2 ?f1b . }\n  FILTER(${termConditions})`;
   })();
 
-  const tissueInMain = useFactorSubquery ? "" : tissueFilter;
-
   return `PREFIX biolink:      <https://w3id.org/biolink/vocab/>
 PREFIX spokegenelab: <https://spoke.ucsf.edu/genelab/>
+PREFIX wobd:        <http://purl.org/okn/wobd/>
 
 SELECT ?gene ?geneSymbol ?experimentIdUp ?experimentIdDown ?contrastLabelUp ?contrastLabelDown
   ?log2fcUp ?log2fcDown ?adjPValueUp ?adjPValueDown
   ?arrayDesignUp ?measurementUp ?arrayDesignDown ?measurementDown
 FROM <https://purl.org/okn/frink/kg/gene-expression-atlas-okn>
 WHERE {
-  ${c1Source}
+  ${c1Prefix}?a1 a biolink:GeneExpressionMixin ; biolink:object ?gene ; biolink:subject ?c1 .
+${gxaAssocLog2fcBinding("?a1", "?l1", "d1")}
   FILTER(?l1 > 0)
-  ?a2 a biolink:GeneExpressionMixin ; biolink:object ?gene ; biolink:subject ?c2 ; spokegenelab:log2fc ?l2 .
+  ${c2Prefix}?a2 a biolink:GeneExpressionMixin ; biolink:object ?gene ; biolink:subject ?c2 .
+${gxaAssocLog2fcBinding("?a2", "?l2", "d2")}
   FILTER(?l2 < 0)
   FILTER(?a1 != ?a2)
   OPTIONAL { ?gene biolink:symbol ?geneSymbol . }
-  OPTIONAL { ?a1 spokegenelab:adj_p_value ?adjPValueUp . }
-  OPTIONAL { ?a2 spokegenelab:adj_p_value ?adjPValueDown . }
+${gxaAssocAdjPBinding("?a1", "?adjPValueUp", "d1a")}
+${gxaAssocAdjPBinding("?a2", "?adjPValueDown", "d2a")}
   OPTIONAL { ?c1 spokegenelab:array_design ?arrayDesignUp . }
   OPTIONAL { ?c1 spokegenelab:measurement ?measurementUp . }
   OPTIONAL { ?c2 spokegenelab:array_design ?arrayDesignDown . }
@@ -1276,7 +1663,7 @@ WHERE {
   BIND(?l1 AS ?log2fcUp)
   BIND(?l2 AS ?log2fcDown)
   OPTIONAL { ?c1 biolink:name ?contrastLabelUp . }
-  OPTIONAL { ?c2 biolink:name ?contrastLabelDown . }${organismFilter}${tissueInMain}${factorInMain}
+  OPTIONAL { ?c2 biolink:name ?contrastLabelDown . }${organismFilterTail}${tissueInMain}${factorInMain}
 }
 LIMIT ${Math.min(limit, 200)}`;
 }

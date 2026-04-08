@@ -11,6 +11,7 @@ const GXA_TASKS = [
   "gene_expression_genes_in_experiment",
   "gene_expression_experiments_for_gene",
   "gene_expression_gene_cross_dataset_summary",
+  "gene_expression_gene_level_de_per_contrast",
   "gene_expression_genes_agreement",
   "gene_expression_genes_discordance",
 ];

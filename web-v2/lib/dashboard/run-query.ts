@@ -1,6 +1,9 @@
 import type { ContextPack } from "@/lib/context-packs/types";
 import type { Intent } from "@/types";
 import type { SPARQLResult } from "@/types";
+import type { MondoExpansionStats } from "@/lib/ontology/mondo-descendants-ols";
+import { ndeBindingHasGeoOrGseEvidence } from "@/lib/dashboard/nde-geo-evidence";
+import { omitUiOnlyOntologyLabelSlots } from "@/lib/dashboard/ui-only-slots";
 
 export const PACK_ID = "wobd";
 
@@ -9,6 +12,7 @@ export const GXA_TASKS = [
   "gene_expression_genes_in_experiment",
   "gene_expression_experiments_for_gene",
   "gene_expression_gene_cross_dataset_summary",
+  "gene_expression_gene_level_de_per_contrast",
   "gene_expression_genes_agreement",
   "gene_expression_genes_discordance",
 ] as const;
@@ -34,7 +38,7 @@ export function buildIntent(
     context_pack: pack.id,
     graph_mode: "federated",
     graphs,
-    slots: { ...slots },
+    slots: omitUiOnlyOntologyLabelSlots(slots),
     confidence: 0.9,
     notes: "Dashboard form",
   };
@@ -66,6 +70,31 @@ export interface RunQueryResult {
   filteredEmptyHint?: string;
   /** Executed SPARQL query(s) for display in "Show Queries" (one per template run or one per step for drug_datasets). */
   executedQueries?: ExecutedQueryItem[];
+  /** OLS preferred labels for MONDO subclasses when expansion was used (NDE result highlighting). */
+  mondoExpansionHighlightLabels?: string[];
+  /** MONDO subclass expansion recap (dataset_search / geo when expansion ran). */
+  mondoExpansionStats?: MondoExpansionStats;
+}
+
+function parseMondoExpansionStats(raw: Record<string, unknown> | null | undefined): MondoExpansionStats | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const roots = raw.roots_expanded;
+  const iris = raw.mondo_iris_in_filter;
+  const cap = raw.iri_cap;
+  if (typeof roots !== "number" || typeof iris !== "number" || typeof cap !== "number") return undefined;
+  const applied = raw.applied_to_sparql_filter;
+  const stats: MondoExpansionStats = {
+    rootsExpanded: roots,
+    mondoIrisInFilter: iris,
+    iriCap: cap,
+    truncated: raw.truncated === true,
+    highlightLabelCount: typeof raw.highlight_label_count === "number" ? raw.highlight_label_count : 0,
+    highlightLabelCap: typeof raw.highlight_label_cap === "number" ? raw.highlight_label_cap : 200,
+  };
+  if (applied === false) {
+    stats.appliedToSparqlFilter = false;
+  }
+  return stats;
 }
 
 const DRUG_DATASETS_TEMPLATE_ID = "drug_datasets";
@@ -129,7 +158,12 @@ export async function runTemplateQuery({
     const err = await sparqlRes.json();
     throw new Error(err.error || "SPARQL generation failed");
   }
-  const { query } = await sparqlRes.json();
+  const sparqlJson = (await sparqlRes.json()) as {
+    query?: string;
+    mondo_expansion_highlight_labels?: string[];
+    mondo_expansion_stats?: Record<string, unknown>;
+  };
+  const { query, mondo_expansion_highlight_labels, mondo_expansion_stats } = sparqlJson;
   if (!query) throw new Error("No query returned");
 
   const execRes = await fetch("/api/tools/sparql/execute", {
@@ -167,9 +201,36 @@ export async function runTemplateQuery({
     ? [{ query: execData.executed_query as string }]
     : [];
 
+  let finalResults: SPARQLResult = { head: { vars }, results: { bindings } };
+  let filteredEmptyHint: string | undefined;
+
+  const onlyGeneExpressionDatasetSearch =
+    templateId === DATASET_SEARCH_TEMPLATE_ID &&
+    (slots.only_gene_expression === "true" ||
+      (Array.isArray(slots.only_gene_expression) && slots.only_gene_expression[0] === "true"));
+
+  if (onlyGeneExpressionDatasetSearch && bindings.length > 0) {
+    const before = bindings.length;
+    const filtered = bindings.filter((b: Record<string, unknown>) =>
+      ndeBindingHasGeoOrGseEvidence(b)
+    );
+    finalResults = { head: { vars }, results: { bindings: filtered } };
+    if (filtered.length === 0 && before > 0) {
+      filteredEmptyHint =
+        'No matching datasets include a GEO series (GSE) or E-GEOD accession in their NDE metadata. Try unchecking "Only show datasets with gene expression data" to see all results.';
+    }
+  }
+
   return {
-    results: { head: { vars }, results: { bindings } },
+    results: finalResults,
     error: null,
+    filteredEmptyHint,
     executedQueries,
+    mondoExpansionHighlightLabels:
+      Array.isArray(mondo_expansion_highlight_labels) &&
+      mondo_expansion_highlight_labels.length > 0
+        ? mondo_expansion_highlight_labels
+        : undefined,
+    mondoExpansionStats: parseMondoExpansionStats(mondo_expansion_stats),
   };
 }

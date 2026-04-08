@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import type { SPARQLResult } from "@/types";
+import { highlightTermsInText } from "@/lib/dashboard/highlight-terms-in-text";
 import { Pagination, DEFAULT_PAGE_SIZE } from "@/components/dashboard/Pagination";
 
 /** GXA experiment ID columns – link to GEO/GXA sample metadata (Phase 5a) */
@@ -80,6 +81,8 @@ function isGxaExperimentId(value: string): boolean {
 interface ResultsTableProps {
     results: SPARQLResult;
     onDownload?: (format: "csv" | "tsv", processedData?: any[]) => void;
+    /** Ontology / form labels to mark in plain-text cells (e.g. GXA template facet labels). */
+    highlightTerms?: string[];
 }
 
 interface GroupedRow {
@@ -87,7 +90,7 @@ interface GroupedRow {
     [key: string]: string | string[]; // Other fields, with entity fields as arrays
 }
 
-export function ResultsTable({ results, onDownload }: ResultsTableProps) {
+export function ResultsTable({ results, onDownload, highlightTerms = [] }: ResultsTableProps) {
     // All hooks must be called unconditionally at the top - BEFORE any early returns
     const [sortColumn, setSortColumn] = useState<string | null>(null);
     const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -110,7 +113,8 @@ export function ResultsTable({ results, onDownload }: ResultsTableProps) {
     const bindings = results?.results?.bindings || [];
     const hasDatasetColumn = vars.includes("dataset");
     const entityColumns = vars.filter(v =>
-        v === "diseaseName" || v === "diseaseNames" || v === "speciesName" || v === "organismNames" || v === "drugName" ||
+        v === "diseaseName" || v === "diseaseNames" || v === "speciesName" || v === "organismNames" ||
+        v === "infectiousAgentNames" || v === "drugName" ||
         (v.endsWith("Name") && v !== "name" && v !== "datasetName")
     );
     const gxaExperimentIdColumns = vars.filter(v => GXA_EXPERIMENT_ID_COLUMNS.includes(v));
@@ -228,9 +232,11 @@ export function ResultsTable({ results, onDownload }: ResultsTableProps) {
 
     function formatValueForDisplay(value: string | string[] | undefined): React.ReactNode {
         if (!value) return "";
+        const hl = (s: string) =>
+            highlightTerms.length > 0 ? highlightTermsInText(s, highlightTerms) : s;
         if (Array.isArray(value)) {
             if (value.length === 0) return "";
-            if (value.length === 1) return value[0];
+            if (value.length === 1) return hl(value[0]);
             // Show as badges for multiple values
             return (
                 <div className="flex flex-wrap gap-1">
@@ -239,13 +245,13 @@ export function ResultsTable({ results, onDownload }: ResultsTableProps) {
                             key={idx}
                             className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-accent/10 text-accent border border-accent/20"
                         >
-                            {v}
+                            {hl(v)}
                         </span>
                     ))}
                 </div>
             );
         }
-        return String(value);
+        return hl(String(value));
     }
 
     /** Render experiment ID with links to GXA/GEO metadata (Phase 5a). Truncates with "show more" when long. */
@@ -355,11 +361,13 @@ export function ResultsTable({ results, onDownload }: ResultsTableProps) {
                   : items.slice(0, INITIAL_VISIBLE_ITEMS);
         const hiddenCount = items.length - visibleItems.length;
 
+        const hl = (s: string) =>
+            highlightTerms.length > 0 ? highlightTermsInText(s, highlightTerms) : s;
         return (
             <div className="flex flex-col gap-0.5">
                 {visibleItems.map((item, idx) => (
                     <span key={idx} className="text-xs">
-                        {item}
+                        {hl(item)}
                     </span>
                 ))}
                 {items.length > INITIAL_VISIBLE_ITEMS && (

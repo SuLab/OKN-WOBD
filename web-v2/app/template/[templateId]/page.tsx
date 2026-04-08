@@ -1,17 +1,120 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { ContextPack } from "@/lib/context-packs/types";
 import type { SPARQLResult } from "@/types";
+import type { MondoExpansionStats } from "@/lib/ontology/mondo-descendants-ols";
 import { SlotForm, isSlotFilled, getSlotMeta } from "@/components/dashboard/SlotForm";
+import { MondoExpansionRecap } from "@/components/dashboard/MondoExpansionRecap";
 import { NDEResultCards } from "@/components/dashboard/NDEResultCards";
 import { ResultsTable } from "@/components/chat/ResultsTable";
 import { getTemplateMeta } from "@/lib/landing/template-meta";
-import { runTemplateQuery, isNDEShape, PACK_ID, type ExecutedQueryItem } from "@/lib/dashboard/run-query";
+import {
+  runTemplateQuery,
+  isNDEShape,
+  PACK_ID,
+  GXA_TASKS,
+  type ExecutedQueryItem,
+} from "@/lib/dashboard/run-query";
 import { SparqlEditor } from "@/components/chat/SparqlEditor";
+import { datasetSearchTemplate } from "@/lib/templates/templates/dataset_search";
+import { geoDatasetSearchTemplate } from "@/lib/templates/templates/geo_dataset_search";
+import type { TemplateDefinition } from "@/lib/context-packs/types";
 import { Info, ChevronDown, ChevronRight, Copy, Check } from "lucide-react";
+
+/** Merge pack YAML template metadata with built-in NDE template slots so new slots (e.g. MONDO expansion) are not dropped if the pack file lags. */
+function mergeNdeTemplateWithBuiltin(
+  packTemplate: TemplateDefinition | undefined,
+  id: string
+): TemplateDefinition | null {
+  if (!packTemplate) return null;
+  if (id === "dataset_search") {
+    const b = datasetSearchTemplate;
+    const opt = [...new Set([...(packTemplate.optional_slots ?? []), ...(b.optional_slots ?? [])])];
+    return { ...packTemplate, optional_slots: opt };
+  }
+  if (id === "geo_dataset_search") {
+    const b = geoDatasetSearchTemplate;
+    const opt = [...new Set([...(packTemplate.optional_slots ?? []), ...(b.optional_slots ?? [])])];
+    return { ...packTemplate, optional_slots: opt };
+  }
+  return packTemplate;
+}
+
+function parseHighlightTerms(raw: unknown): string[] {
+  if (Array.isArray(raw)) {
+    return raw.map((x) => String(x).trim()).filter(Boolean);
+  }
+  if (typeof raw === "string" && raw.trim()) {
+    return [raw.trim()];
+  }
+  return [];
+}
+
+/** Terms to highlight in NDE cards for dataset / GEO keyword search + ontology facet labels. */
+function datasetKeywordHighlightTerms(
+  templateId: string,
+  slots: Record<string, string | string[]>
+): string[] {
+  if (templateId !== "dataset_search" && templateId !== "geo_dataset_search") {
+    return [];
+  }
+  const parts: string[] = [];
+  const rawList = slots.keywords_list;
+  if (Array.isArray(rawList) && rawList.length > 0) {
+    parts.push(...rawList.map((x) => String(x).trim()).filter(Boolean));
+  } else {
+    const kw = slots.keywords;
+    if (Array.isArray(kw)) {
+      parts.push(...kw.map((x) => String(x).trim()).filter(Boolean));
+    } else if (typeof kw === "string" && kw.trim()) {
+      parts.push(kw.trim());
+    }
+  }
+  for (const key of [
+    "health_condition_labels",
+    "species_labels",
+    "infectious_agent_labels",
+  ] as const) {
+    parts.push(...parseHighlightTerms(slots[key]));
+  }
+  return [...new Set(parts)];
+}
+
+/** GXA / gene-expression templates: highlight chosen ontology labels in the results table. */
+function gxaOntologyHighlightTerms(slots: Record<string, string | string[]>): string[] {
+  const parts: string[] = [];
+  for (const key of [
+    "organism_taxon_ids_labels",
+    "tissue_uberon_ids_labels",
+    "tissue_uberon_ids_ols_labels",
+    "disease_efo_labels",
+  ] as const) {
+    parts.push(...parseHighlightTerms(slots[key]));
+  }
+  return [...new Set(parts)];
+}
+
+/** dataset_search: need keywords and/or at least one facet (matches server-side query builder). */
+function ndeDatasetSearchHasKeywordsOrFacet(slots: Record<string, string | string[]>): boolean {
+  const kw = slots.keywords;
+  if (typeof kw === "string" && kw.trim() !== "") return true;
+  if (Array.isArray(kw) && kw.some((x) => String(x).trim() !== "")) return true;
+  const rawList = slots.keywords_list;
+  if (Array.isArray(rawList) && rawList.some((x) => String(x).trim() !== "")) return true;
+  const hc = slots.health_condition;
+  if (typeof hc === "string" && hc.trim() !== "") return true;
+  if (Array.isArray(hc) && hc.some((x) => String(x).trim() !== "")) return true;
+  const ia = slots.infectious_agent;
+  if (typeof ia === "string" && ia.trim() !== "") return true;
+  if (Array.isArray(ia) && ia.some((x) => String(x).trim() !== "")) return true;
+  const sp = slots.species;
+  if (typeof sp === "string" && sp.trim() !== "") return true;
+  if (Array.isArray(sp) && sp.some((x) => String(x).trim() !== "")) return true;
+  return false;
+}
 
 export default function TemplatePage() {
   const params = useParams();
@@ -27,6 +130,9 @@ export default function TemplatePage() {
   const [showQueriesOpen, setShowQueriesOpen] = useState(false);
   const [copiedQueryIndex, setCopiedQueryIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  /** Labels from OLS for MONDO subclass expansion (last successful NDE template query). */
+  const [mondoExpansionHighlightLabels, setMondoExpansionHighlightLabels] = useState<string[]>([]);
+  const [mondoExpansionStats, setMondoExpansionStats] = useState<MondoExpansionStats | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const runningRef = useRef(false);
 
@@ -53,8 +159,38 @@ export default function TemplatePage() {
     };
   }, []);
 
-  const template = pack?.templates?.find((t) => t.id === templateId) ?? null;
+  const template = useMemo(() => {
+    const t = pack?.templates?.find((x) => x.id === templateId);
+    return mergeNdeTemplateWithBuiltin(t, templateId);
+  }, [pack, templateId]);
   const meta = getTemplateMeta(templateId);
+
+  const formHighlightTerms = useMemo(() => {
+    let base: string[] = [];
+    if (templateId === "dataset_search" || templateId === "geo_dataset_search") {
+      base = datasetKeywordHighlightTerms(templateId, slotValues);
+    } else if ((GXA_TASKS as readonly string[]).includes(templateId)) {
+      base = gxaOntologyHighlightTerms(slotValues);
+    }
+    if (mondoExpansionHighlightLabels.length === 0) return base;
+    return [...new Set([...base, ...mondoExpansionHighlightLabels])];
+  }, [templateId, slotValues, mondoExpansionHighlightLabels]);
+
+  const diseaseNamesFromResults = useMemo(() => {
+    if (!results?.results?.bindings?.length) return [];
+    const out: string[] = [];
+    for (const b of results.results.bindings) {
+      const v = b.diseaseNames?.value;
+      if (typeof v === "string" && v.trim()) out.push(v);
+    }
+    return out;
+  }, [results]);
+
+  const showMondoExpansionRecap = Boolean(
+    mondoExpansionStats &&
+      results &&
+      (templateId === "dataset_search" || templateId === "geo_dataset_search")
+  );
 
   const runQuery = useCallback(async () => {
     if (!pack || !template) return;
@@ -64,12 +200,21 @@ export default function TemplatePage() {
     setResults(null);
     setFilteredEmptyHint(null);
     setExecutedQueries([]);
+    setMondoExpansionHighlightLabels([]);
+    setMondoExpansionStats(null);
     setLoading(true);
     abortRef.current = new AbortController();
     const signal = abortRef.current.signal;
 
     try {
-      const { results: res, error: err, filteredEmptyHint: hint, executedQueries: queries } = await runTemplateQuery({
+      const {
+        results: res,
+        error: err,
+        filteredEmptyHint: hint,
+        executedQueries: queries,
+        mondoExpansionHighlightLabels: expansionHl,
+        mondoExpansionStats: expansionStat,
+      } = await runTemplateQuery({
         templateId,
         slots: slotValues,
         pack,
@@ -87,11 +232,15 @@ export default function TemplatePage() {
         setResults(null);
         setFilteredEmptyHint(null);
         setExecutedQueries(queries ?? []);
+        setMondoExpansionHighlightLabels([]);
+        setMondoExpansionStats(null);
         return;
       }
       setResults(res);
       setFilteredEmptyHint(hint ?? null);
       setExecutedQueries(queries ?? []);
+      setMondoExpansionHighlightLabels(expansionHl ?? []);
+      setMondoExpansionStats(expansionStat ?? null);
     } catch (e: unknown) {
       if (signal.aborted) return;
       const isAbort =
@@ -99,6 +248,8 @@ export default function TemplatePage() {
         (typeof (e as { name?: string })?.name === "string" && (e as { name: string }).name === "AbortError");
       setResultsError(isAbort ? "Query was cancelled." : (e instanceof Error ? e.message : String((e as Error)?.message ?? "Unknown error")));
       setResults(null);
+      setMondoExpansionHighlightLabels([]);
+      setMondoExpansionStats(null);
     } finally {
       setLoading(false);
       abortRef.current = null;
@@ -123,7 +274,9 @@ export default function TemplatePage() {
   const required = template?.required_slots ?? [];
   const optional = template?.optional_slots ?? [];
   const missingRequired = required.filter((slot) => !isSlotFilled(slotValues[slot]));
-  const canRun = missingRequired.length === 0;
+  const datasetSearchNeedsCriterion =
+    templateId === "dataset_search" && !ndeDatasetSearchHasKeywordsOrFacet(slotValues);
+  const canRun = missingRequired.length === 0 && !datasetSearchNeedsCriterion;
   const hasOptional = optional.length > 0;
 
   if (packError) {
@@ -179,7 +332,7 @@ export default function TemplatePage() {
               </span>
               <div>
                 <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-                  {template.description}
+                  {meta.description}
                 </h1>
                 {meta.blurb && (
                   <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
@@ -189,13 +342,36 @@ export default function TemplatePage() {
               </div>
             </div>
 
+            {templateId === "geo_dataset_search" && (
+              <p className="text-sm text-slate-600 dark:text-slate-400 border-l-2 border-slate-300 dark:border-slate-600 pl-3 py-0.5">
+                Keywords and metadata filters are optional. Leave everything blank to list NCBI GEO series
+                (GSE) in NDE, or narrow with text and/or filters. Multiple filters combine with{" "}
+                <span className="font-medium text-slate-700 dark:text-slate-300">AND</span>.
+              </p>
+            )}
+
             <SlotForm
               template={template}
               values={slotValues}
               onChange={handleSlotChange}
               disabled={loading}
+              primarySectionTitle={
+                templateId === "dataset_search" || templateId === "geo_dataset_search"
+                  ? "Match by text"
+                  : undefined
+              }
+              metadataSectionTitle={
+                templateId === "dataset_search" || templateId === "geo_dataset_search"
+                  ? "Or match by metadata"
+                  : undefined
+              }
             />
 
+            {datasetSearchNeedsCriterion && (
+              <p className="text-sm text-amber-800 dark:text-amber-200/90" role="status">
+                Add keywords and/or at least one metadata filter to run this search.
+              </p>
+            )}
             <div className="pt-2 flex flex-wrap items-center gap-3">
               <button
                 type="button"
@@ -224,12 +400,18 @@ export default function TemplatePage() {
               )}
             </div>
 
-            {hasOptional && (
-              <p className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                <Info className="w-4 h-4 flex-shrink-0" aria-hidden />
-                Tip: Leave optional fields blank to see all results.
-              </p>
-            )}
+            {hasOptional &&
+              (templateId === "dataset_search" || templateId === "geo_dataset_search" ? (
+                <p className="flex items-start gap-2 text-xs text-slate-500 dark:text-slate-400">
+                  <Info className="w-4 h-4 flex-shrink-0 mt-0.5" aria-hidden />
+                  Leave a metadata filter blank to skip it. Empty filters do not restrict the query.
+                </p>
+              ) : (
+                <p className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                  <Info className="w-4 h-4 flex-shrink-0" aria-hidden />
+                  Tip: Leave optional fields blank to see all results.
+                </p>
+              ))}
           </div>
         </div>
 
@@ -308,15 +490,23 @@ export default function TemplatePage() {
             )}
             {results && (
               <>
+                {showMondoExpansionRecap && mondoExpansionStats && (
+                  <MondoExpansionRecap
+                    stats={mondoExpansionStats}
+                    highlightLabels={mondoExpansionHighlightLabels}
+                    diseaseNamesFromResults={diseaseNamesFromResults}
+                  />
+                )}
                 {isNDEShape(results.head.vars) ? (
                   <NDEResultCards
                     results={results}
                     templateId={templateId}
-                    templateLabel={template.description}
+                    templateLabel={meta.description}
                     emptyMessage={filteredEmptyHint ?? undefined}
+                    highlightTerms={formHighlightTerms}
                   />
                 ) : (
-                  <ResultsTable results={results} />
+                  <ResultsTable results={results} highlightTerms={formHighlightTerms} />
                 )}
               </>
             )}

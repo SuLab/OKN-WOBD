@@ -6,22 +6,131 @@ import {
   buildNDESpeciesQueryIRI,
   buildNDESpeciesQueryCURIE,
   buildNDEFallbackQuery,
+  buildNDEDatasetKeywordAndFacetQuery,
   buildGXAExperimentsForGenesQuery,
   buildWikidataDrugQuery,
   buildNDEDiseaseAndOrganismQuery,
 } from "@/lib/ontology/templates";
+import type { MondoExpansionStats } from "@/lib/ontology/mondo-descendants-ols";
+import { expandHealthConditionInputsWithMondoDescendants } from "@/lib/ontology/mondo-descendants-ols";
 import {
   convertGeneNameToSymbol,
   isGeneName,
 } from "@/lib/ontology/hgnc-client";
+import type { TemplateGenerateResult } from "@/lib/templates/generate-types";
 
 export const DATASET_SEARCH_TEMPLATE_ID = "dataset_search";
 
+function dsResult(
+  query: string,
+  expansionLabels?: string[],
+  expansionStats?: MondoExpansionStats
+): TemplateGenerateResult {
+  const out: TemplateGenerateResult = { query };
+  if (expansionLabels && expansionLabels.length > 0) {
+    out.mondoExpansionHighlightLabels = expansionLabels;
+  }
+  if (expansionStats) {
+    out.mondoExpansionStats = expansionStats;
+  }
+  return out;
+}
+
+function withLimit(
+  query: string,
+  limit: number | undefined,
+  pack: ContextPack,
+  expansionLabels?: string[],
+  expansionStats?: MondoExpansionStats
+): TemplateGenerateResult {
+  if (!limit) {
+    return dsResult(query, expansionLabels, expansionStats);
+  }
+  const maxLimit = Math.min(limit, pack.guardrails.max_limit);
+  const withoutLimit = query.replace(/\s*LIMIT\s+\d+\s*$/i, "").trim();
+  return dsResult(`${withoutLimit}\nLIMIT ${maxLimit}`, expansionLabels, expansionStats);
+}
+
+function withSparqlFilterContext(
+  stats: MondoExpansionStats | undefined,
+  appliedToSparqlFilter: boolean
+): MondoExpansionStats | undefined {
+  if (!stats) return undefined;
+  return { ...stats, appliedToSparqlFilter };
+}
+
 export const datasetSearchTemplate: TemplateDefinition = {
   id: DATASET_SEARCH_TEMPLATE_ID,
-  description: "Find datasets by keywords/healthCondition",
-  required_slots: ["keywords"],
+  description: "Find datasets by keywords with optional health condition, host species, and pathogen species filters",
+  required_slots: [],
+  optional_slots: [
+    "health_condition",
+    "mondo_expand_descendants",
+    "infectious_agent",
+    "species",
+    "only_gene_expression",
+  ],
 };
+
+/** Opt-in: MONDO subclass expansion when `mondo_expand_descendants` is truthy (form checkbox / JSON). */
+function isMondoExpandDescendantsEnabled(slot: unknown): boolean {
+  if (slot === true) return true;
+  const raw = Array.isArray(slot) ? slot[0] : slot;
+  if (raw === undefined || raw === null || raw === false) return false;
+  if (typeof raw === "number" && raw === 1) return true;
+  if (typeof raw === "string") {
+    const t = raw.trim().toLowerCase();
+    return t === "true" || t === "1" || t === "yes" || t === "on";
+  }
+  return false;
+}
+
+async function maybeExpandMondoIrisForNDE(
+  mondoIRIs: string[],
+  mondoExpandSlot: unknown
+): Promise<{ iris: string[]; highlightLabels: string[]; stats?: MondoExpansionStats }> {
+  if (mondoIRIs.length === 0 || !isMondoExpandDescendantsEnabled(mondoExpandSlot)) {
+    return { iris: mondoIRIs, highlightLabels: [] };
+  }
+  try {
+    const r = await expandHealthConditionInputsWithMondoDescendants(mondoIRIs);
+    return {
+      iris: r.expandedInputs,
+      highlightLabels: r.highlightLabels,
+      stats: r.stats,
+    };
+  } catch (e) {
+    console.warn(
+      "[Template] MONDO descendant expansion failed; using selected IRIs only:",
+      e
+    );
+    return { iris: mondoIRIs, highlightLabels: [] };
+  }
+}
+
+/** Keyword/facet `health_condition` slot: MONDO values expanded; free text and other IRIs unchanged. */
+async function maybeExpandHealthConditionFacetInputs(
+  inputs: string[],
+  mondoExpandSlot: unknown
+): Promise<{ inputs: string[]; highlightLabels: string[]; stats?: MondoExpansionStats }> {
+  if (inputs.length === 0 || !isMondoExpandDescendantsEnabled(mondoExpandSlot)) {
+    return { inputs, highlightLabels: [] };
+  }
+  try {
+    const r = await expandHealthConditionInputsWithMondoDescendants(inputs);
+    return {
+      inputs: r.expandedInputs,
+      highlightLabels: r.highlightLabels,
+      stats: r.stats,
+    };
+  } catch (e) {
+    console.warn(
+      "[Template] MONDO descendant expansion failed; using selected terms only:",
+      e
+    );
+    return { inputs, highlightLabels: [] };
+  }
+}
 
 export interface DatasetSearchOptions {
   /** Restrict results to NCBI GEO datasets in NDE (identifier GSE* or url/sameAs containing geo/ncbi). */
@@ -32,7 +141,7 @@ export async function buildDatasetSearchQuery(
   intent: Intent,
   pack: ContextPack,
   options?: DatasetSearchOptions
-): Promise<string> {
+): Promise<TemplateGenerateResult> {
   const slots = intent.slots || {};
   const geoOnly = options?.geoOnly ?? false;
 
@@ -91,6 +200,9 @@ export async function buildDatasetSearchQuery(
         .filter(Boolean)
         .slice(0, 5);
 
+      const { iris: mondoIRIsForQuery, highlightLabels: mondoExpandHl, stats: mondoExpandStats } =
+        await maybeExpandMondoIrisForNDE(mondoIRIs, slots.mondo_expand_descendants);
+
       // When we have keyword fallback, use the simple REGEX-only query so NDE returns results (the full
       // disease+organism query with OPTIONALs returns 0 on the NDE endpoint even with FROM stripped)
       const combinedQuery =
@@ -101,7 +213,7 @@ export async function buildDatasetSearchQuery(
             geoOnly
           )
           : buildNDEDiseaseAndOrganismQuery(
-            mondoIRIs,
+            mondoIRIsForQuery,
             speciesIRIs,
             diseaseLabels,
             organismLabels,
@@ -111,15 +223,13 @@ export async function buildDatasetSearchQuery(
             geoOnly
           );
 
-      // Add limit if specified
-      const limit = (intent.slots?.limit as number);
-      if (limit) {
-        const maxLimit = Math.min(limit, pack.guardrails.max_limit);
-        const withoutLimit = combinedQuery.replace(/\s*LIMIT\s+\d+\s*$/i, "").trim();
-        return `${withoutLimit}\nLIMIT ${maxLimit}`;
-      }
-
-      return combinedQuery;
+      return withLimit(
+        combinedQuery,
+        intent.slots?.limit as number | undefined,
+        pack,
+        mondoExpandHl,
+        withSparqlFilterContext(mondoExpandStats, keywordFallbackTerms.length === 0)
+      );
     }
   }
 
@@ -159,15 +269,7 @@ export async function buildDatasetSearchQuery(
         ? buildNDESpeciesQueryIRI(speciesIRIs, labels, [], useTextMatching)
         : buildNDESpeciesQueryCURIE(speciesIRIs, labels, [], useTextMatching);
 
-      // Add limit if specified
-      const limit = (intent.slots?.limit as number);
-      if (limit) {
-        const maxLimit = Math.min(limit, pack.guardrails.max_limit);
-        const withoutLimit = speciesQuery.replace(/\s*LIMIT\s+\d+\s*$/i, "").trim();
-        return `${withoutLimit}\nLIMIT ${maxLimit}`;
-      }
-
-      return speciesQuery;
+      return withLimit(speciesQuery, intent.slots?.limit as number | undefined, pack);
     }
   }
 
@@ -205,15 +307,7 @@ export async function buildDatasetSearchQuery(
       // Use Wikidata drug query template
       const drugQuery = buildWikidataDrugQuery(wikidataIRIs, labels, useTextMatching);
 
-      // Add limit if specified
-      const limit = (intent.slots?.limit as number);
-      if (limit) {
-        const maxLimit = Math.min(limit, pack.guardrails.max_limit);
-        const withoutLimit = drugQuery.replace(/\s*LIMIT\s+\d+\s*$/i, "").trim();
-        return `${withoutLimit}\nLIMIT ${maxLimit}`;
-      }
-
-      return drugQuery;
+      return withLimit(drugQuery, intent.slots?.limit as number | undefined, pack);
     }
   }
 
@@ -266,12 +360,15 @@ export async function buildDatasetSearchQuery(
       console.log(`[Template] useTextMatching: ${useTextMatching}, diseaseLabels: ${diseaseLabels.length}, keywordFallback: ${keywordFallbackTerms.length}`);
       console.log(`[Template] ndeEncoding: ${ndeEncoding}`);
 
+      const { iris: mondoIRIsForQuery, highlightLabels: mondoExpandHl, stats: mondoExpandStats } =
+        await maybeExpandMondoIrisForNDE(mondoIRIs, slots.mondo_expand_descendants);
+
       // When we have keyword fallback, use the simple REGEX-only query so NDE returns results
       const ontologyQuery =
         keywordFallbackTerms.length > 0
           ? buildNDEFallbackQuery(String(keywordFallbackTerms[0]), keywordFallbackTerms.slice(1) as string[], geoOnly)
           : buildNDEDiseaseAndOrganismQuery(
-            mondoIRIs,
+            mondoIRIsForQuery,
             [],
             diseaseLabels,
             [],
@@ -284,15 +381,13 @@ export async function buildDatasetSearchQuery(
       console.log(`[Template] Generated query, length: ${ontologyQuery?.length || 0} chars`);
       console.log(`[Template] Query is truthy: ${!!ontologyQuery}, type: ${typeof ontologyQuery}`);
 
-      // Add limit if specified
-      const limit = (intent.slots?.limit as number);
-      if (limit) {
-        const maxLimit = Math.min(limit, pack.guardrails.max_limit);
-        const withoutLimit = ontologyQuery.replace(/\s*LIMIT\s+\d+\s*$/i, "").trim();
-        return `${withoutLimit}\nLIMIT ${maxLimit}`;
-      }
-
-      return ontologyQuery;
+      return withLimit(
+        ontologyQuery,
+        intent.slots?.limit as number | undefined,
+        pack,
+        mondoExpandHl,
+        withSparqlFilterContext(mondoExpandStats, keywordFallbackTerms.length === 0)
+      );
     }
 
     // If no MONDO IRIs but we have Wikidata IRIs, this is handled by fallback logic in the executor
@@ -505,7 +600,7 @@ export async function buildDatasetSearchQuery(
         );
         const geneQuery = buildGXAExperimentsForGenesQuery(geneSymbols, limit, upregulated);
 
-        return geneQuery;
+        return dsResult(geneQuery);
       } else {
         console.warn(`[Template] Gene entity detected but no gene symbols extracted. Raw phrase: ${ontologyState.raw_phrase}`);
       }
@@ -523,60 +618,87 @@ export async function buildDatasetSearchQuery(
     // Use fallback text search template
     const fallbackQuery = buildNDEFallbackQuery(rawPhrase, candidateLabels, geoOnly);
 
-    // Add limit if specified
-    const limit = (intent.slots?.limit as number);
-    if (limit) {
-      const maxLimit = Math.min(limit, pack.guardrails.max_limit);
-      const withoutLimit = fallbackQuery.replace(/\s*LIMIT\s+\d+\s*$/i, "").trim();
-      return `${withoutLimit}\nLIMIT ${maxLimit}`;
-    }
-
-    return fallbackQuery;
+    return withLimit(fallbackQuery, intent.slots?.limit as number | undefined, pack);
   }
 
-  // Fall back to keyword-based search
+  // Keyword-based search with optional facet slots (form / chat)
   const prefixes = pack.prefixes;
   const keywordsList: string[] | undefined = (slots as any).keywords_list;
   const keywords: string = Array.isArray(slots.keywords)
     ? (slots.keywords as string[]).join(" ")
     : (slots.keywords ?? "").toString();
 
+  const keywordRegexTerms: string[] =
+    Array.isArray(keywordsList) && keywordsList.length > 0
+      ? keywordsList.map((k) => String(k).trim()).filter(Boolean)
+      : [keywords.trim()].filter(Boolean);
+
+  const healthConditionRaw = slots.health_condition;
+  const healthConditionInputs: string[] = Array.isArray(healthConditionRaw)
+    ? healthConditionRaw.map((s) => String(s).trim()).filter(Boolean)
+    : typeof healthConditionRaw === "string" && healthConditionRaw.trim()
+      ? healthConditionRaw
+          .split(/[,\s]+/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+
+  const infectiousAgentRaw = slots.infectious_agent;
+  const infectiousAgentInputs: string[] = Array.isArray(infectiousAgentRaw)
+    ? infectiousAgentRaw.map((s) => String(s).trim()).filter(Boolean)
+    : typeof infectiousAgentRaw === "string" && infectiousAgentRaw.trim()
+      ? infectiousAgentRaw
+          .split(/[,\s]+/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+
+  const speciesRaw = slots.species;
+  const speciesInputs: string[] = Array.isArray(speciesRaw)
+    ? speciesRaw.map((s) => String(s).trim()).filter(Boolean)
+    : typeof speciesRaw === "string" && speciesRaw.trim()
+      ? speciesRaw
+          .split(/[,\s]+/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+
+  let healthForFacet = healthConditionInputs;
+  let mondoFacetExpandHl: string[] = [];
+  let mondoFacetExpandStats: MondoExpansionStats | undefined;
+  if (healthConditionInputs.length > 0) {
+    const expanded = await maybeExpandHealthConditionFacetInputs(
+      healthConditionInputs,
+      slots.mondo_expand_descendants
+    );
+    healthForFacet = expanded.inputs;
+    mondoFacetExpandHl = expanded.highlightLabels;
+    mondoFacetExpandStats = expanded.stats;
+  }
+
+  let body = buildNDEDatasetKeywordAndFacetQuery(keywordRegexTerms, {
+    healthConditionInputs:
+      healthForFacet.length > 0 ? healthForFacet : undefined,
+    speciesInputs: speciesInputs.length > 0 ? speciesInputs : undefined,
+    infectiousAgentInputs:
+      infectiousAgentInputs.length > 0 ? infectiousAgentInputs : undefined,
+    geoOnly,
+  });
+
   let query = "";
   for (const [prefix, uri] of Object.entries(prefixes)) {
     query += `PREFIX ${prefix}: <${uri}>\n`;
   }
+  query += body;
 
-  // Build keyword FILTER clause
-  let filterClause: string;
-  if (Array.isArray(keywordsList) && keywordsList.length > 0) {
-    const terms = keywordsList.map(k => k.replace(/"/g, '\\"'));
-    const pieces = terms.map(
-      t =>
-        `(REGEX(STR(?name), "${t}", "i") || (BOUND(?description) && REGEX(STR(?description), "${t}", "i")))`
-    );
-    filterClause = `FILTER(\n    ${pieces.join(" &&\n    ")}\n  )`;
-  } else {
-    const escaped = keywords.replace(/"/g, '\\"');
-    filterClause = `FILTER(\n    REGEX(STR(?name), "${escaped}", "i")\n    || (BOUND(?description) && REGEX(STR(?description), "${escaped}", "i"))\n  )`;
+  const limit = intent.slots?.limit as number | undefined;
+  if (limit) {
+    const maxLimit = Math.min(limit, pack.guardrails.max_limit);
+    const withoutLimit = query.replace(/\s*LIMIT\s+\d+\s*$/i, "").trim();
+    query = `${withoutLimit}\nLIMIT ${maxLimit}`;
   }
 
-  // Basic dataset search over schema:Dataset with name/description keyword filter
-  const geoFilterClause = geoOnly
-    ? "\n  OPTIONAL { ?dataset schema:identifier ?identifier . }\n  FILTER(REGEX(STR(COALESCE(?identifier, \"\")), \"GSE[0-9]+\", \"i\"))"
-    : "";
-  query += `
-SELECT ?dataset ?name ?description${geoOnly ? " ?identifier" : ""}
-WHERE {
-  ?dataset a schema:Dataset ;
-           schema:name ?name .
-  OPTIONAL { ?dataset schema:description ?description . }
-  ${filterClause}
-  ${geoFilterClause}
-}
-${(intent.slots?.limit as number) ? `LIMIT ${Math.min((intent.slots?.limit as number), pack.guardrails.max_limit)}` : ""}
-  `.trim();
-
-  return query;
+  return dsResult(query, mondoFacetExpandHl, withSparqlFilterContext(mondoFacetExpandStats, true));
 }
 
 

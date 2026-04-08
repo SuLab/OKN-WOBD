@@ -20,6 +20,7 @@ prefixes:
   schema: "http://schema.org/"
   rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
   rdfs: "http://www.w3.org/2000/01/rdf-schema#"
+  owl: "http://www.w3.org/2002/07/owl#"
   obo: "http://purl.obolibrary.org/obo/"
 
 # Guardrails: limits and safety for SPARQL execution and chat UI.
@@ -39,17 +40,20 @@ guardrails:
   service_allowlist: []
   forbid_ops: ["INSERT", "DELETE", "LOAD", "CLEAR", "DROP", "CREATE", "MOVE", "COPY", "ADD"]
 
+# Template descriptions here are for the pack/runtime (slots, routing). User-facing card + /template/ copy: lib/landing/template-meta.ts
 templates:
   - id: drug_datasets
-    description: "Find NDE datasets for diseases treated by a drug. Optionally restrict to GEO/gene expression and include GXA/SPOKE-GeneLab links for matching experiments."
+    description: "Find NDE datasets for diseases treated by a drug and optionally limit to datasets with gene expression data."
     required_slots: ["drug"]
     optional_slots: ["only_gene_expression", "max_results"]
   - id: dataset_search
-    description: "Find datasets by keywords/healthCondition"
-    required_slots: ["keywords"]  # At least one keyword required for the simple search form
+    description: "Find datasets by keywords with optional health condition, host species, and pathogen species filters"
+    required_slots: []  # keywords optional; need keywords and/or at least one facet (enforced in UI + query builder)
+    optional_slots: ["health_condition", "mondo_expand_descendants", "infectious_agent", "species", "only_gene_expression"]
   - id: geo_dataset_search
-    description: "Find NCBI GEO datasets in NDE by keywords, disease, or organism"
-    required_slots: ["keywords"]
+    description: "Find NCBI GEO datasets in NDE by keywords with optional health condition, host species, and pathogen species filters"
+    required_slots: []  # keywords optional; GEO-only search allowed with no other criteria
+    optional_slots: ["health_condition", "mondo_expand_descendants", "infectious_agent", "species"]
   - id: entity_lookup
     description: "Resolve CURIE/URI/label to entity"
     required_slots: ["q"]
@@ -69,6 +73,10 @@ templates:
     description: "Summarize a gene's DE evidence across experiments (per contrast)"
     required_slots: ["gene_symbol"]
     optional_slots: ["organism_taxon_ids", "tissue_uberon_ids_ols", "factor_terms"]
+  - id: gene_expression_gene_level_de_per_contrast
+    description: "Gene-level differential expression per contrast: gene(s), contrasts, direction (up/down), and metrics across GXA experiments"
+    required_slots: ["gene_symbols"]
+    optional_slots: ["direction", "limit", "organism_taxon_ids", "tissue_uberon_ids_ols", "factor_terms"]
   - id: gene_expression_genes_agreement
     description: "Find genes DE in the same direction across multiple experiments"
     required_slots: []

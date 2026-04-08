@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { executeSPARQL, injectFromClauses, removeFromClauses } from "@/lib/sparql/executor";
+import { executeSPARQL, injectFromClauses } from "@/lib/sparql/executor";
 import { validateSPARQL } from "@/lib/sparql/validator";
 import { loadContextPack } from "@/lib/context-packs/loader";
 import { runStore } from "@/lib/runs/store";
@@ -66,17 +66,16 @@ export async function POST(request: Request) {
       process.env.NEXT_PUBLIC_FRINK_FEDERATION_URL ||
       "https://frink.apps.renci.org/federation/sparql";
 
-    if (queryTargetsGXA && pack?.endpoint_mode.direct_endpoints?.["gene-expression-atlas-okn"]) {
-      endpoint = pack.endpoint_mode.direct_endpoints["gene-expression-atlas-okn"];
-      // Remove all FROM clauses when querying direct endpoint (default graph is the GXA graph)
-      finalQuery = removeFromClauses(finalQuery);
-    }
+    // Always run GXA template queries through the federated endpoint. Templates bind
+    // log2fc/adj_p_value from both http://purl.org/okn/wobd/ and spokegenelab: for
+    // compatibility; the direct GXA service only has wobd: predicates after the OKN-WOBD
+    // RDF refresh. Federation remains the default path for timeouts and multi-graph queries.
     // NDE-intent queries (e.g. dataset_search) use the federated endpoint with FROM clauses
     // (already injected above); they are no longer routed to the NDE direct endpoint.
 
-    // GXA direct endpoint can take 1–2 minutes; NDE (direct or via federation) can be slow for keyword search. Use longer timeouts.
+    // GXA queries can take 1–2 minutes (federation or direct); NDE can be slow for keyword search.
     const baseTimeout = options?.timeout_s ?? pack?.guardrails?.timeout_seconds ?? 25;
-    const isGXA = queryTargetsGXA && endpoint?.includes("gene-expression-atlas-okn");
+    const isGXA = queryTargetsGXA;
     const endpointIsNDE = !queryTargetsGXA && endpoint?.includes("nde");
     const federatedIncludesNDE = mode === "federated" && Array.isArray(graphs) && graphs.includes("nde");
     const timeout = isGXA
@@ -85,8 +84,7 @@ export async function POST(request: Request) {
         ? Math.max(baseTimeout, 60)
         : baseTimeout;
 
-    // Optional preflight probes (skip for GXA direct endpoint, which can be slow and
-    // has been flaky with small sample queries)
+    // Optional preflight probes (skip for GXA queries — graph is large / slow to sample)
     let preflightResult = null;
     if (run_preflight !== false && pack?.schema_hints && !queryTargetsGXA) {
       try {

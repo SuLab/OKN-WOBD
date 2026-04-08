@@ -2,18 +2,19 @@ import {
   Database,
   FlaskConical,
   List,
-  Search,
-  BarChart2,
+  Layers,
   GitMerge,
   ArrowLeftRight,
   Pill,
   type LucideIcon,
 } from "lucide-react";
+import { DEFAULT_MONDO_DESCENDANT_EXPAND_CAP } from "@/lib/ontology/mondo-descendants-ols";
 
 export interface TemplateMetaItem {
   id: string;
   titlePart1: string;
   titlePart2: string;
+  /** One-line summary: query cards (landing) and /template/[id] page title + results label. */
   description: string;
   icon: LucideIcon;
   iconColor: string;
@@ -25,74 +26,37 @@ export interface TemplateMetaItem {
 
 export const TEMPLATE_META: TemplateMetaItem[] = [
   {
-    id: "drug_datasets",
-    titlePart1: "Datasets",
-    titlePart2: " for a drug",
-    description: "Find NDE datasets for diseases treated by a drug (multi-hop: drug → Wikidata → NDE)",
-    icon: Pill,
-    iconColor: "text-teal-600 dark:text-teal-400",
-    blurb: "Enter a drug name (e.g. methotrexate). We look up diseases it treats in Wikidata, then find NDE datasets. Optionally restrict to GEO/gene expression and include GXA/SPOKE-GeneLab links for matching experiments.",
-    buttonLabel: "Find datasets",
-  },
-  {
     id: "dataset_search",
     titlePart1: "Datasets",
     titlePart2: " by keywords",
-    description: "Find datasets by keywords, disease, organism, or drugs",
+    description:
+      "Find NDE datasets by keywords and/or filters for health condition, host species, and pathogen species.",
     icon: Database,
     iconColor: "text-blue-600 dark:text-blue-400",
-    blurb: "This query finds datasets in NDE that study a specific disease, organism, or other criteria.",
+    blurb: `Search the NDE graph: use keywords and/or open "Filters / Advanced" for health condition, pathogen species, and host species. Health condition matches the MONDO term(s) you pick exactly unless you enable "Include MONDO subclasses" (then OLS adds subclass IRIs and labels, up to a shared cap of ${DEFAULT_MONDO_DESCENDANT_EXPAND_CAP} for both the SPARQL filter and highlighting). Optionally limit to datasets whose metadata mentions a GEO series (GSE) or E-GEOD accession. You need to enter at least one keyword or a filter. All filled filters apply together (AND).`,
     buttonLabel: "Search Datasets",
   },
   {
-    id: "geo_dataset_search",
-    titlePart1: "NCBI GEO",
-    titlePart2: " datasets in NDE",
-    description: "Find NCBI GEO datasets in NDE by keywords, disease, or organism",
-    icon: Database,
-    iconColor: "text-emerald-600 dark:text-emerald-400",
-    blurb: "Search only NCBI GEO datasets within the NDE graph. Same schema.org as other NDE resources; results are restricted to datasets with GSE identifiers or GEO URLs.",
-    buttonLabel: "Search GEO",
-  },
-  {
-    id: "gene_expression_dataset_search",
-    titlePart1: "Gene expression",
-    titlePart2: " experiments",
-    description: "List experiments (datasets) with differential expression results",
-    icon: FlaskConical,
-    iconColor: "text-purple-600 dark:text-purple-400",
-    blurb: "List gene expression experiments that have differential expression results. Optionally filter by organism, tissue, or factor.",
+    id: "gene_expression_gene_level_de_per_contrast",
+    titlePart1: "Gene-level differential expression",
+    titlePart2: " per contrast",
+    description:
+      "Across GXA experiments: gene(s), contrasts, direction (up/down), log2FC, and adjusted p-value in one result set",
+    icon: Layers,
+    iconColor: "text-cyan-600 dark:text-cyan-400",
+    blurb: "One query for one or more genes: experiment and contrast identifiers, optional up/down filter, and a direction column alongside log2FC and adjusted p-value.",
     buttonLabel: "Run query",
   },
   {
-    id: "gene_expression_genes_in_experiment",
-    titlePart1: "Genes",
-    titlePart2: " in experiment",
-    description: "List differentially expressed genes for a given experiment (per contrast)",
-    icon: List,
-    iconColor: "text-slate-600 dark:text-slate-400",
-    blurb: "List differentially expressed genes for a given gene expression experiment (e.g. E-GEOD-76).",
-    buttonLabel: "Run query",
-  },
-  {
-    id: "gene_expression_experiments_for_gene",
-    titlePart1: "Experiments",
-    titlePart2: " for gene",
-    description: "Find experiments where a gene is differentially expressed",
-    icon: Search,
-    iconColor: "text-[var(--niaid-link)]",
-    blurb: "Find gene expression experiments or contrasts where a gene is differentially expressed.",
-    buttonLabel: "Run query",
-  },
-  {
-    id: "gene_expression_gene_cross_dataset_summary",
-    titlePart1: "Gene summary",
-    titlePart2: " across experiments",
-    description: "Summarize a gene's DE evidence across experiments (per contrast)",
-    icon: BarChart2,
-    iconColor: "text-emerald-600 dark:text-emerald-400",
-    blurb: "Summarize a gene's differential expression evidence across experiments.",
-    buttonLabel: "Run query",
+    id: "drug_datasets",
+    titlePart1: "Datasets",
+    titlePart2: " for a drug",
+    description:
+      "Find NDE datasets for diseases treated by a drug and optionally limit to datasets with gene expression data.",
+    icon: Pill,
+    iconColor: "text-teal-600 dark:text-teal-400",
+    blurb: "Enter a drug name (e.g. tocilizumab) to find NDE datasets for diseases treated by the drug.",
+    buttonLabel: "Find datasets",
   },
   {
     id: "gene_expression_genes_agreement",
@@ -116,7 +80,45 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
   },
 ];
 
-const META_BY_ID = Object.fromEntries(TEMPLATE_META.map((m) => [m.id, m]));
+/** Not shown on landing cards; kept for direct /template/... URLs and dashboard flows. */
+const HIDDEN_TEMPLATE_META: TemplateMetaItem[] = [
+  {
+    id: "gene_expression_dataset_search",
+    titlePart1: "Gene expression",
+    titlePart2: " experiments",
+    description: "List experiments (datasets) with differential expression results",
+    icon: FlaskConical,
+    iconColor: "text-purple-600 dark:text-purple-400",
+    blurb: "List gene expression experiments that have differential expression results. Optionally filter by organism, tissue, or factor.",
+    buttonLabel: "Run query",
+  },
+  {
+    id: "gene_expression_genes_in_experiment",
+    titlePart1: "Genes",
+    titlePart2: " in experiment",
+    description: "List differentially expressed genes for a given experiment (per contrast)",
+    icon: List,
+    iconColor: "text-slate-600 dark:text-slate-400",
+    blurb: "List differentially expressed genes for a given gene expression experiment (e.g. E-GEOD-76).",
+    buttonLabel: "Run query",
+  },
+  {
+    id: "geo_dataset_search",
+    titlePart1: "NCBI GEO",
+    titlePart2: " datasets in NDE",
+    description:
+      "Find NCBI GEO datasets in NDE (GSE only), with optional keywords and filters for health condition, host species, and pathogen species.",
+    icon: Database,
+    iconColor: "text-emerald-600 dark:text-emerald-400",
+    blurb:
+      "Results are limited to GEO series (GSE identifiers). For the full NDE dataset search (including GEO when metadata matches), use Datasets by keywords from the home page.",
+    buttonLabel: "Search GEO",
+  },
+];
+
+const META_BY_ID = Object.fromEntries(
+  [...TEMPLATE_META, ...HIDDEN_TEMPLATE_META].map((m) => [m.id, m])
+);
 
 export function getTemplateMeta(templateId: string): TemplateMetaItem | undefined {
   return META_BY_ID[templateId];
