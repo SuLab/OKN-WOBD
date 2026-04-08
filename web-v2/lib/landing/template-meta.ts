@@ -26,17 +26,6 @@ export interface TemplateMetaItem {
 
 export const TEMPLATE_META: TemplateMetaItem[] = [
   {
-    id: "drug_datasets",
-    titlePart1: "Datasets",
-    titlePart2: " for a drug",
-    description:
-      "Find NDE datasets for diseases treated by a drug and optionally limit to datasets with gene expression data.",
-    icon: Pill,
-    iconColor: "text-teal-600 dark:text-teal-400",
-    blurb: "Enter a drug name (e.g. tocilizumab) to find NDE datasets for diseases treated by the drug.",
-    buttonLabel: "Find datasets",
-  },
-  {
     id: "dataset_search",
     titlePart1: "Datasets",
     titlePart2: " by keywords",
@@ -59,24 +48,15 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
     buttonLabel: "Run query",
   },
   {
-    id: "gene_expression_dataset_search",
-    titlePart1: "Gene expression",
-    titlePart2: " experiments",
-    description: "List experiments (datasets) with differential expression results",
-    icon: FlaskConical,
-    iconColor: "text-purple-600 dark:text-purple-400",
-    blurb: "List gene expression experiments that have differential expression results. Optionally filter by organism, tissue, or factor.",
-    buttonLabel: "Run query",
-  },
-  {
-    id: "gene_expression_genes_in_experiment",
-    titlePart1: "Genes",
-    titlePart2: " in experiment",
-    description: "List differentially expressed genes for a given experiment (per contrast)",
-    icon: List,
-    iconColor: "text-slate-600 dark:text-slate-400",
-    blurb: "List differentially expressed genes for a given gene expression experiment (e.g. E-GEOD-76).",
-    buttonLabel: "Run query",
+    id: "drug_datasets",
+    titlePart1: "Datasets",
+    titlePart2: " for a drug",
+    description:
+      "Find NDE datasets for diseases treated by a drug and optionally limit to datasets with gene expression data.",
+    icon: Pill,
+    iconColor: "text-teal-600 dark:text-teal-400",
+    blurb: "Enter a drug name (e.g. tocilizumab) to find NDE datasets for diseases treated by the drug.",
+    buttonLabel: "Find datasets",
   },
   {
     id: "gene_expression_genes_agreement",
@@ -100,8 +80,28 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
   },
 ];
 
-/** Not shown on landing cards; kept for /template/geo_dataset_search and drug_datasets step 3 (geoOnly). */
+/** Not shown on landing cards; kept for direct /template/... URLs and dashboard flows. */
 const HIDDEN_TEMPLATE_META: TemplateMetaItem[] = [
+  {
+    id: "gene_expression_dataset_search",
+    titlePart1: "Gene expression",
+    titlePart2: " experiments",
+    description: "List experiments (datasets) with differential expression results",
+    icon: FlaskConical,
+    iconColor: "text-purple-600 dark:text-purple-400",
+    blurb: "List gene expression experiments that have differential expression results. Optionally filter by organism, tissue, or factor.",
+    buttonLabel: "Run query",
+  },
+  {
+    id: "gene_expression_genes_in_experiment",
+    titlePart1: "Genes",
+    titlePart2: " in experiment",
+    description: "List differentially expressed genes for a given experiment (per contrast)",
+    icon: List,
+    iconColor: "text-slate-600 dark:text-slate-400",
+    blurb: "List differentially expressed genes for a given gene expression experiment (e.g. E-GEOD-76).",
+    buttonLabel: "Run query",
+  },
   {
     id: "geo_dataset_search",
     titlePart1: "NCBI GEO",
