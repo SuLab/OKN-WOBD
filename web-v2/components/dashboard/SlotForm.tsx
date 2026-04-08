@@ -1609,6 +1609,10 @@ const SLOT_LABELS: Record<string, { label: string; placeholder: string }> = {
   limit: { label: "Limit", placeholder: "e.g. 50 or 100" },
   direction: { label: "Direction", placeholder: "up or down" },
   only_gene_expression: { label: "Only show datasets with gene expression data", placeholder: "" },
+  mondo_expand_descendants: {
+    label: "Include MONDO subclasses",
+    placeholder: "",
+  },
   max_results: { label: "Maximum results", placeholder: "Default 500" },
 };
 
@@ -1832,6 +1836,40 @@ export function SlotForm({
           disabled={disabled}
           required={isRequired}
         />
+      );
+    }
+    if (slotName === "mondo_expand_descendants") {
+      if (template.id !== "dataset_search" && template.id !== "geo_dataset_search") {
+        return null;
+      }
+      const rawVal: unknown = Array.isArray(raw) ? raw[0] : raw;
+      const checked =
+        rawVal === true ||
+        rawVal === 1 ||
+        (typeof rawVal === "string" && ["true", "1", "yes", "on"].includes(rawVal.trim().toLowerCase()));
+      return (
+        <div key={slotName} className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <input
+              id={`slot-${template.id}-${slotName}`}
+              type="checkbox"
+              checked={checked}
+              onChange={(e) => updateSlot(slotName, e.target.checked ? "true" : "false")}
+              disabled={disabled}
+              className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-niaid-header focus:ring-niaid-header"
+            />
+            <label
+              htmlFor={`slot-${template.id}-${slotName}`}
+              className="text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer"
+            >
+              {label} (match selected MONDO and more specific MONDO terms)
+            </label>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 pl-6 max-w-xl">
+            Uses the EBI OLS API. Very broad terms may hit a safety cap on how many subclass IRIs are
+            queried at once.
+          </p>
+        </div>
       );
     }
     if (slotName === "only_gene_expression") {

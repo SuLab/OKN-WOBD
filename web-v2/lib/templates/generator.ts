@@ -1,11 +1,29 @@
 import type { ContextPack } from "@/lib/context-packs/types";
 import type { Intent } from "@/types";
+import type { TemplateGenerateResult } from "@/lib/templates/generate-types";
 import { getTemplateForIntent } from "./registry";
 
 export interface TemplateGenerationResult {
   ok: boolean;
   query?: string;
   error?: string;
+  /** MONDO subclass labels from OLS when dataset_search used expansion (UI highlighting). */
+  mondo_expansion_highlight_labels?: string[];
+}
+
+function normalizeTemplateOutput(raw: string | TemplateGenerateResult): {
+  query: string;
+  mondo_expansion_highlight_labels?: string[];
+} {
+  if (typeof raw === "string") {
+    return { query: raw };
+  }
+  const labels = raw.mondoExpansionHighlightLabels;
+  return {
+    query: raw.query,
+    mondo_expansion_highlight_labels:
+      labels && labels.length > 0 ? labels : undefined,
+  };
 }
 
 export async function generateSPARQLFromIntent(intent: Intent, pack: ContextPack): Promise<TemplateGenerationResult> {
@@ -41,8 +59,9 @@ export async function generateSPARQLFromIntent(intent: Intent, pack: ContextPack
   }
 
   try {
-    const query = await template.generate(intent, pack);
-    return { ok: true, query };
+    const raw = await template.generate(intent, pack);
+    const { query, mondo_expansion_highlight_labels } = normalizeTemplateOutput(raw);
+    return { ok: true, query, mondo_expansion_highlight_labels };
   } catch (error: any) {
     return {
       ok: false,

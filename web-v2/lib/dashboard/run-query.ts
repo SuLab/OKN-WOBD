@@ -69,6 +69,8 @@ export interface RunQueryResult {
   filteredEmptyHint?: string;
   /** Executed SPARQL query(s) for display in "Show Queries" (one per template run or one per step for drug_datasets). */
   executedQueries?: ExecutedQueryItem[];
+  /** OLS preferred labels for MONDO subclasses when expansion was used (NDE result highlighting). */
+  mondoExpansionHighlightLabels?: string[];
 }
 
 const DRUG_DATASETS_TEMPLATE_ID = "drug_datasets";
@@ -132,7 +134,11 @@ export async function runTemplateQuery({
     const err = await sparqlRes.json();
     throw new Error(err.error || "SPARQL generation failed");
   }
-  const { query } = await sparqlRes.json();
+  const sparqlJson = (await sparqlRes.json()) as {
+    query?: string;
+    mondo_expansion_highlight_labels?: string[];
+  };
+  const { query, mondo_expansion_highlight_labels } = sparqlJson;
   if (!query) throw new Error("No query returned");
 
   const execRes = await fetch("/api/tools/sparql/execute", {
@@ -195,5 +201,10 @@ export async function runTemplateQuery({
     error: null,
     filteredEmptyHint,
     executedQueries,
+    mondoExpansionHighlightLabels:
+      Array.isArray(mondo_expansion_highlight_labels) &&
+      mondo_expansion_highlight_labels.length > 0
+        ? mondo_expansion_highlight_labels
+        : undefined,
   };
 }

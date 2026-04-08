@@ -478,7 +478,8 @@ function escapeRegexForSparql(term: string): string {
   return cleaned.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function resolveHealthConditionIri(input: string): string | null {
+/** Resolve MONDO CURIE/IRI or other http(s) term IRI for NDE health-condition facet matching. */
+export function resolveHealthConditionIri(input: string): string | null {
   const trimmed = input.replace(/[<>]/g, "").trim();
   const mondoPurl = trimmed.match(/^https?:\/\/purl\.obolibrary\.org\/obo\/MONDO_(\d+)$/i);
   if (mondoPurl) return mondoDigitsToOboIri(mondoPurl[1]);
@@ -623,6 +624,7 @@ function buildFacetInfectiousAgentBlock(inputs: string[]): string {
  * with optional AND filters on schema:healthCondition, schema:species, schema:infectiousAgent
  * (term IRI equality when input is a URI/CURIE, else CONTAINS on schema:name).
  * Health-condition values may be MONDO CURIE/IRI (resolved to MONDO IRIs), other http(s) term IRIs, or free text (schema:name CONTAINS).
+ * For MONDO subclass expansion (OLS), expand inputs before calling this function (see dataset_search template).
  * Species and infectious-agent slot values may be NCBI taxon IDs (mapped to UniProt taxonomy + NCBITaxon IRIs), full URIs, or text.
  *
  * @param keywordRegexTerms - Terms matched with REGEX (AND across terms); omit or empty for facet-only search

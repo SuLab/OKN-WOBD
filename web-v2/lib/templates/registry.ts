@@ -1,5 +1,6 @@
 import type { ContextPack } from "@/lib/context-packs/types";
 import type { Intent } from "@/types";
+import type { TemplateGenerateResult } from "@/lib/templates/generate-types";
 import {
   DATASET_SEARCH_TEMPLATE_ID,
   datasetSearchTemplate,
@@ -63,7 +64,10 @@ export type TemplateId =
   | typeof GENE_EXPRESSION_GENES_AGREEMENT_TEMPLATE_ID
   | typeof GENE_EXPRESSION_GENES_DISCORDANCE_TEMPLATE_ID;
 
-type TemplateGenerator = (intent: Intent, pack: ContextPack) => string | Promise<string>;
+type TemplateGenerator = (
+  intent: Intent,
+  pack: ContextPack
+) => string | TemplateGenerateResult | Promise<string | TemplateGenerateResult>;
 
 interface RegisteredTemplate {
   id: TemplateId;

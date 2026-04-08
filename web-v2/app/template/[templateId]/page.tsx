@@ -17,7 +17,29 @@ import {
   type ExecutedQueryItem,
 } from "@/lib/dashboard/run-query";
 import { SparqlEditor } from "@/components/chat/SparqlEditor";
+import { datasetSearchTemplate } from "@/lib/templates/templates/dataset_search";
+import { geoDatasetSearchTemplate } from "@/lib/templates/templates/geo_dataset_search";
+import type { TemplateDefinition } from "@/lib/context-packs/types";
 import { Info, ChevronDown, ChevronRight, Copy, Check } from "lucide-react";
+
+/** Merge pack YAML template metadata with built-in NDE template slots so new slots (e.g. MONDO expansion) are not dropped if the pack file lags. */
+function mergeNdeTemplateWithBuiltin(
+  packTemplate: TemplateDefinition | undefined,
+  id: string
+): TemplateDefinition | null {
+  if (!packTemplate) return null;
+  if (id === "dataset_search") {
+    const b = datasetSearchTemplate;
+    const opt = [...new Set([...(packTemplate.optional_slots ?? []), ...(b.optional_slots ?? [])])];
+    return { ...packTemplate, optional_slots: opt };
+  }
+  if (id === "geo_dataset_search") {
+    const b = geoDatasetSearchTemplate;
+    const opt = [...new Set([...(packTemplate.optional_slots ?? []), ...(b.optional_slots ?? [])])];
+    return { ...packTemplate, optional_slots: opt };
+  }
+  return packTemplate;
+}
 
 function parseHighlightTerms(raw: unknown): string[] {
   if (Array.isArray(raw)) {
@@ -106,6 +128,8 @@ export default function TemplatePage() {
   const [showQueriesOpen, setShowQueriesOpen] = useState(false);
   const [copiedQueryIndex, setCopiedQueryIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  /** Labels from OLS for MONDO subclass expansion (last successful NDE template query). */
+  const [mondoExpansionHighlightLabels, setMondoExpansionHighlightLabels] = useState<string[]>([]);
   const abortRef = useRef<AbortController | null>(null);
   const runningRef = useRef(false);
 
@@ -132,18 +156,22 @@ export default function TemplatePage() {
     };
   }, []);
 
-  const template = pack?.templates?.find((t) => t.id === templateId) ?? null;
+  const template = useMemo(() => {
+    const t = pack?.templates?.find((x) => x.id === templateId);
+    return mergeNdeTemplateWithBuiltin(t, templateId);
+  }, [pack, templateId]);
   const meta = getTemplateMeta(templateId);
 
   const formHighlightTerms = useMemo(() => {
+    let base: string[] = [];
     if (templateId === "dataset_search" || templateId === "geo_dataset_search") {
-      return datasetKeywordHighlightTerms(templateId, slotValues);
+      base = datasetKeywordHighlightTerms(templateId, slotValues);
+    } else if ((GXA_TASKS as readonly string[]).includes(templateId)) {
+      base = gxaOntologyHighlightTerms(slotValues);
     }
-    if ((GXA_TASKS as readonly string[]).includes(templateId)) {
-      return gxaOntologyHighlightTerms(slotValues);
-    }
-    return [];
-  }, [templateId, slotValues]);
+    if (mondoExpansionHighlightLabels.length === 0) return base;
+    return [...new Set([...base, ...mondoExpansionHighlightLabels])];
+  }, [templateId, slotValues, mondoExpansionHighlightLabels]);
 
   const runQuery = useCallback(async () => {
     if (!pack || !template) return;
@@ -153,12 +181,19 @@ export default function TemplatePage() {
     setResults(null);
     setFilteredEmptyHint(null);
     setExecutedQueries([]);
+    setMondoExpansionHighlightLabels([]);
     setLoading(true);
     abortRef.current = new AbortController();
     const signal = abortRef.current.signal;
 
     try {
-      const { results: res, error: err, filteredEmptyHint: hint, executedQueries: queries } = await runTemplateQuery({
+      const {
+        results: res,
+        error: err,
+        filteredEmptyHint: hint,
+        executedQueries: queries,
+        mondoExpansionHighlightLabels: expansionHl,
+      } = await runTemplateQuery({
         templateId,
         slots: slotValues,
         pack,
@@ -176,11 +211,13 @@ export default function TemplatePage() {
         setResults(null);
         setFilteredEmptyHint(null);
         setExecutedQueries(queries ?? []);
+        setMondoExpansionHighlightLabels([]);
         return;
       }
       setResults(res);
       setFilteredEmptyHint(hint ?? null);
       setExecutedQueries(queries ?? []);
+      setMondoExpansionHighlightLabels(expansionHl ?? []);
     } catch (e: unknown) {
       if (signal.aborted) return;
       const isAbort =
@@ -188,6 +225,7 @@ export default function TemplatePage() {
         (typeof (e as { name?: string })?.name === "string" && (e as { name: string }).name === "AbortError");
       setResultsError(isAbort ? "Query was cancelled." : (e instanceof Error ? e.message : String((e as Error)?.message ?? "Unknown error")));
       setResults(null);
+      setMondoExpansionHighlightLabels([]);
     } finally {
       setLoading(false);
       abortRef.current = null;

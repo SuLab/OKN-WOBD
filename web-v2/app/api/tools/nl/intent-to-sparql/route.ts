@@ -40,7 +40,10 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({ query: result.query });
+    return NextResponse.json({
+      query: result.query,
+      mondo_expansion_highlight_labels: result.mondo_expansion_highlight_labels,
+    });
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || "SPARQL generation failed" },
