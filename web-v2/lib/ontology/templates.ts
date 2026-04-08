@@ -627,6 +627,9 @@ function buildFacetInfectiousAgentBlock(inputs: string[]): string {
  * For MONDO subclass expansion (OLS), expand inputs before calling this function (see dataset_search template).
  * Species and infectious-agent slot values may be NCBI taxon IDs (mapped to UniProt taxonomy + NCBITaxon IRIs), full URIs, or text.
  *
+ * Result rows include aggregated tags for UI (NDEResultCards): ?diseaseNames, ?organismNames,
+ * ?infectiousAgentNames (semicolon-separated labels, or term IRI string if no schema:name).
+ *
  * @param keywordRegexTerms - Terms matched with REGEX (AND across terms); omit or empty for facet-only search
  * @param geoOnly - If true, restrict to GEO-style datasets (schema:identifier GSE[0-9]+)
  */
@@ -668,17 +671,36 @@ export function buildNDEDatasetKeywordAndFacetQuery(
   OPTIONAL { ?dataset schema:sameAs ?sameAs }
   OPTIONAL { ?dataset owl:sameAs ?owlSameAs }`;
 
+  // All health conditions / host species / pathogens on the dataset (for result tags), independent of facet filters.
+  const datasetFacetTagOptionals = `
+  OPTIONAL {
+    ?dataset schema:healthCondition ?hcMeta .
+    OPTIONAL { ?hcMeta schema:name ?hcMetaName }
+  }
+  OPTIONAL {
+    ?dataset schema:species ?spMeta .
+    OPTIONAL { ?spMeta schema:name ?spMetaName }
+  }
+  OPTIONAL {
+    ?dataset schema:infectiousAgent ?iaMeta .
+    OPTIONAL { ?iaMeta schema:name ?iaMetaName }
+  }`;
+
   return `SELECT ?dataset ?name ?description
   (GROUP_CONCAT(DISTINCT STR(?ident); SEPARATOR=" ") AS ?identifier)
   (GROUP_CONCAT(DISTINCT STR(?url); SEPARATOR=" ") AS ?urls)
   (GROUP_CONCAT(DISTINCT STR(?sameAs); SEPARATOR=" ") AS ?sameAsList)
   (GROUP_CONCAT(DISTINCT STR(?owlSameAs); SEPARATOR=" ") AS ?owlSameAsList)
+  (GROUP_CONCAT(DISTINCT COALESCE(?hcMetaName, STR(?hcMeta)); SEPARATOR="; ") AS ?diseaseNames)
+  (GROUP_CONCAT(DISTINCT COALESCE(?spMetaName, STR(?spMeta)); SEPARATOR="; ") AS ?organismNames)
+  (GROUP_CONCAT(DISTINCT COALESCE(?iaMetaName, STR(?iaMeta)); SEPARATOR="; ") AS ?infectiousAgentNames)
 FROM <https://purl.org/okn/frink/kg/nde>
 WHERE {
   ?dataset a schema:Dataset ;
            schema:name ?name .
   OPTIONAL { ?dataset schema:description ?description }${resourceOptionals}
 ${keywordFilter}${healthBlock}${speciesBlock}${agentBlock}${geoBlock}
+${datasetFacetTagOptionals}
 }
 GROUP BY ?dataset ?name ?description`.trim();
 }

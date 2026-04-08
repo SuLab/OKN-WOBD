@@ -4,15 +4,29 @@ function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+const DEFAULT_MARK_CLASS =
+  "bg-amber-200 dark:bg-amber-900/55 text-inherit rounded px-0.5";
+
+export type HighlightTermsInTextOptions = {
+  /** Override default <mark> classes (e.g. for colored chips). */
+  markClassName?: string;
+};
+
 /**
  * Wrap case-insensitive matches of any term in <mark> (longest terms first to avoid partial steals).
  */
-export function highlightTermsInText(text: string, terms: string[]): React.ReactNode {
+export function highlightTermsInText(
+  text: string,
+  terms: string[],
+  options?: HighlightTermsInTextOptions
+): React.ReactNode {
   const cleaned = [...new Set(terms.map((t) => t.trim()).filter(Boolean))];
   if (!text || cleaned.length === 0) return text;
 
   const pattern = [...cleaned].sort((a, b) => b.length - a.length).map(escapeRegExp).join("|");
   if (!pattern) return text;
+
+  const markClassName = options?.markClassName ?? DEFAULT_MARK_CLASS;
 
   const re = new RegExp(`(${pattern})`, "gi");
   const out: React.ReactNode[] = [];
@@ -26,7 +40,7 @@ export function highlightTermsInText(text: string, terms: string[]): React.React
     out.push(
       <mark
         key={`hl-${k++}`}
-        className="bg-amber-200 dark:bg-amber-900/55 text-inherit rounded px-0.5"
+        className={markClassName}
       >
         {m[0]}
       </mark>
