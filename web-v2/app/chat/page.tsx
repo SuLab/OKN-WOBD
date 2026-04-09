@@ -726,7 +726,7 @@ function ChatPage() {
   }, [isLoading]);
 
   return (
-    <div className="flex h-[calc(100vh-80px)] bg-white dark:bg-slate-950 overflow-hidden">
+    <div className="flex min-h-0 flex-1 bg-white dark:bg-slate-950 overflow-hidden">
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header with clear button */}
         {messages.length > 0 && (

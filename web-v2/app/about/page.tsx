@@ -1,7 +1,7 @@
 export default function AboutPage() {
   return (
     <div
-      className="min-h-[calc(100vh-80px)] px-4 py-8"
+      className="px-4 py-6 sm:py-8"
       style={{ backgroundColor: "var(--niaid-page-bg)" }}
     >
       <div className="mx-auto max-w-3xl space-y-8 text-slate-700">
@@ -14,6 +14,18 @@ export default function AboutPage() {
             research effort to make infectious and immune-related datasets and knowledge easier
             to find, query, reuse, and connect with other data sources in an AI-ready open
             knowledge network.
+          </p>
+          <p className="mt-3 text-slate-600 dark:text-slate-400">
+            This work is supported by the U.S. National Science Foundation under award{" "}
+            <a
+              className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
+              href="https://www.nsf.gov/awardsearch/show-award/?AWD_ID=2535091"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              2535091
+            </a>
+            .
           </p>
         </header>
 
@@ -170,6 +182,19 @@ export default function AboutPage() {
             it against the registered graph endpoints so you can explore the NDE dataset layer and
             related biological knowledge in FRINK without writing queries by hand.
           </p>
+        </section>
+
+        <section className="space-y-3 border-t border-slate-200 pt-6 dark:border-slate-700">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Team</h2>
+          <ul className="list-disc space-y-1 pl-5 text-slate-700 dark:text-slate-300">
+            <li>Trish Whetzel</li>
+            <li>Ben Good</li>
+            <li>Andrew Su</li>
+            <li>Chris Bizon</li>
+            <li>Ginger Tsueng</li>
+            <li>Jim Balhoff</li>
+            <li>Yaphet Kebede</li>
+          </ul>
         </section>
       </div>
     </div>

@@ -58,6 +58,10 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
     blurb: "Enter a drug name (e.g. tocilizumab) to find NDE datasets for diseases treated by the drug.",
     buttonLabel: "Find datasets",
   },
+];
+
+/** Not shown on landing cards; kept for direct /template/... URLs and dashboard flows. */
+const HIDDEN_TEMPLATE_META: TemplateMetaItem[] = [
   {
     id: "gene_expression_genes_agreement",
     titlePart1: "Genes",
@@ -78,10 +82,6 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
     blurb: "Find genes that are differentially expressed in opposite directions across contrasts.",
     buttonLabel: "Run query",
   },
-];
-
-/** Not shown on landing cards; kept for direct /template/... URLs and dashboard flows. */
-const HIDDEN_TEMPLATE_META: TemplateMetaItem[] = [
   {
     id: "gene_expression_dataset_search",
     titlePart1: "Gene expression",
