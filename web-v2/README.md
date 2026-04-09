@@ -296,19 +296,7 @@ All SPARQL queries are validated before execution:
 - [x] Error handling
 
 ## Deployment
-
-### Vercel (Recommended)
-
-1. Connect your repository to Vercel
-2. Set environment variables in Vercel dashboard
-3. Deploy
-
-### Self-Hosted
-
-```bash
-npm run build
-npm start
-```
+See the [deployment documentation](docs/DEPLOYMENT.md) for full steps.
 
 ## Environment Variables
 
