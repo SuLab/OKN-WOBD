@@ -1,6 +1,6 @@
 // Registry graph data - auto-updated from OKN Registry
 // This file is automatically updated when registry fetch succeeds
-// Last updated: 2026-04-07T03:51:44.359Z
+// Last updated: 2026-04-09T15:19:22.817Z
 // Source: /Users/whetzel/git/SuLab/OKN-WOBD/web-v2/data/registry-graphs.json
 
 import type { GraphInfo } from "@/types";
@@ -63,6 +63,11 @@ export const GRAPHS_DATA: RegistryGraphInfo[] = [
     endpoint: "https://frink.apps.renci.org/dreamkg/sparql",
   },
   { 
+    shortname: "evoweb", 
+    label: "EvoWeb",    description: "EvoWeb - An Open Knowledge Graph of Co-evolving Genes (NIAID)",
+    endpoint: "https://frink.apps.renci.org/evoweb/sparql",
+  },
+  { 
     shortname: "fiokg", 
     label: "SAWGraph FRS KG",    description: "The FRS (Facility Registry Service) KG is the part of the SAWGraph project that stores data about facilities from EPA's Facility Registry service (FRS) together with their NAICS industry classification and the spatial location.",
     endpoint: "https://frink.apps.renci.org/fiokg/sparql",
@@ -121,6 +126,16 @@ export const GRAPHS_DATA: RegistryGraphInfo[] = [
     shortname: "okn-void", 
     label: "OKN VoID graph descriptions",    description: "Collected VoID (Vocabulary of Interlinked Datasets) metadata for all OKN graphs",
     endpoint: "https://frink.apps.renci.org/okn-void/sparql",
+  },
+  { 
+    shortname: "pankgraph", 
+    label: "PanKgraph",    description: "PanKgraph — PanKbase Knowledge Graph (NIDDK)",
+    endpoint: "https://frink.apps.renci.org/pankgraph/sparql",
+  },
+  { 
+    shortname: "phaseskg", 
+    label: "PHASES KG",    description: "Knowledge graph Promoting Healthy Aging through Semantic Enrichment",
+    endpoint: "https://frink.apps.renci.org/phaseskg/sparql",
   },
   { 
     shortname: "prokn", 

@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-04-07T03:51:44.358Z",
+  "lastUpdated": "2026-04-09T15:19:22.816Z",
   "graphs": [
     {
       "shortname": "biobricks-aopwiki",
@@ -60,6 +60,12 @@
       "label": "DREAM-KG",
       "description": "Develop Dynamic, REsponsive, Adaptive, and Multifaceted Knowledge Graphs to Address Homelessness With Explainable AI",
       "endpoint": "https://frink.apps.renci.org/dreamkg/sparql"
+    },
+    {
+      "shortname": "evoweb",
+      "label": "EvoWeb",
+      "description": "EvoWeb - An Open Knowledge Graph of Co-evolving Genes (NIAID)",
+      "endpoint": "https://frink.apps.renci.org/evoweb/sparql"
     },
     {
       "shortname": "fiokg",
@@ -132,6 +138,18 @@
       "label": "OKN VoID graph descriptions",
       "description": "Collected VoID (Vocabulary of Interlinked Datasets) metadata for all OKN graphs",
       "endpoint": "https://frink.apps.renci.org/okn-void/sparql"
+    },
+    {
+      "shortname": "pankgraph",
+      "label": "PanKgraph",
+      "description": "PanKgraph — PanKbase Knowledge Graph (NIDDK)",
+      "endpoint": "https://frink.apps.renci.org/pankgraph/sparql"
+    },
+    {
+      "shortname": "phaseskg",
+      "label": "PHASES KG",
+      "description": "Knowledge graph Promoting Healthy Aging through Semantic Enrichment",
+      "endpoint": "https://frink.apps.renci.org/phaseskg/sparql"
     },
     {
       "shortname": "prokn",
