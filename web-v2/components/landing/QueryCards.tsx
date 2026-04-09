@@ -9,7 +9,7 @@ export function QueryCards() {
     >
       <h2
         id="query-cards-heading"
-        className="text-center text-xl font-semibold text-slate-900 dark:text-slate-100 mb-6"
+        className="text-center text-lg sm:text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4"
       >
         What would you like to find?
       </h2>

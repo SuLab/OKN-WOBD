@@ -281,7 +281,10 @@ export default function TemplatePage() {
 
   if (packError) {
     return (
-      <div className="p-6 max-w-5xl mx-auto" style={{ backgroundColor: "var(--niaid-page-bg)" }}>
+      <div
+        className="mx-auto flex max-w-5xl flex-1 flex-col p-4 sm:p-6"
+        style={{ backgroundColor: "var(--niaid-page-bg)" }}
+      >
         <p className="text-red-600 dark:text-red-400">{packError}</p>
         <Link href="/" className="mt-4 inline-block text-sm text-niaid-link hover:underline">
           ← Back to templates
@@ -292,7 +295,10 @@ export default function TemplatePage() {
 
   if (!pack) {
     return (
-      <div className="p-6 max-w-5xl mx-auto flex items-center justify-center min-h-[200px]" style={{ backgroundColor: "var(--niaid-page-bg)" }}>
+      <div
+        className="mx-auto flex max-w-5xl flex-1 items-center justify-center p-4 sm:p-6"
+        style={{ backgroundColor: "var(--niaid-page-bg)" }}
+      >
         <p className="text-slate-600 dark:text-slate-400">Loading…</p>
       </div>
     );
@@ -300,7 +306,10 @@ export default function TemplatePage() {
 
   if (!template || !meta) {
     return (
-      <div className="p-6 max-w-5xl mx-auto" style={{ backgroundColor: "var(--niaid-page-bg)" }}>
+      <div
+        className="mx-auto flex max-w-5xl flex-1 flex-col p-4 sm:p-6"
+        style={{ backgroundColor: "var(--niaid-page-bg)" }}
+      >
         <p className="text-slate-600 dark:text-slate-400">Template not found.</p>
         <Link href="/" className="mt-4 inline-block text-sm text-niaid-link hover:underline">
           ← Back to templates
@@ -313,10 +322,10 @@ export default function TemplatePage() {
 
   return (
     <div
-      className="min-h-[calc(100vh-80px)] flex flex-col p-6"
+      className="flex flex-1 flex-col p-4 sm:p-5"
       style={{ backgroundColor: "var(--niaid-page-bg)" }}
     >
-      <div className="max-w-5xl mx-auto w-full space-y-6">
+      <div className="mx-auto w-full max-w-5xl space-y-4 sm:space-y-5">
         <Link
           href="/"
           className="inline-flex items-center gap-1 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-niaid-link"

@@ -1,6 +1,6 @@
 // Registry graph data - auto-updated from OKN Registry
 // This file is automatically updated when registry fetch succeeds
-// Last updated: 2026-04-09T15:19:22.817Z
+// Last updated: 2026-04-09T16:46:34.986Z
 // Source: /Users/whetzel/git/SuLab/OKN-WOBD/web-v2/data/registry-graphs.json
 
 import type { GraphInfo } from "@/types";

@@ -1,7 +1,7 @@
 export default function AboutPage() {
   return (
     <div
-      className="min-h-[calc(100vh-80px)] px-4 py-8"
+      className="px-4 py-6 sm:py-8"
       style={{ backgroundColor: "var(--niaid-page-bg)" }}
     >
       <div className="mx-auto max-w-3xl space-y-8 text-slate-700">
