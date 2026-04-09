@@ -22,7 +22,7 @@ These instructions are for deployment of the web app (code within the web-v2 dir
 `cd /home/ubuntu/OKN-WOBD/web-v2`
 
 - Add new npm modules in /home/ubuntu/OKN-WOBD/web-v2 as:
-`npm install`
+`npm ci`
 
 - Re-build the web site in /home/ubuntu/OKN-WOBD/web-v2 as:
 `npm run build`
