@@ -7,6 +7,7 @@ import {
   ONTOLOGY_ID_TO_LABEL_SLOT,
 } from "@/lib/dashboard/ui-only-slots";
 import { DEFAULT_MONDO_DESCENDANT_EXPAND_CAP } from "@/lib/ontology/mondo-descendants-ols";
+import { isEnsemblGeneStableId } from "@/lib/ontology/gene-identifiers";
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -1153,6 +1154,24 @@ function GeneSymbolAutocomplete({
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter") {
         const trimmed = (e.target as HTMLInputElement).value?.trim() ?? "";
+        if (trimmed && isEnsemblGeneStableId(trimmed)) {
+          e.preventDefault();
+          const normalized = trimmed.toUpperCase();
+          if (value.includes(normalized)) {
+            setAlreadyAddedLabel(normalized);
+            return;
+          }
+          if (single) {
+            onChange([normalized]);
+          } else {
+            onChange([...value, normalized]);
+          }
+          setInput("");
+          setSuggestions([]);
+          setOpen(false);
+          setHighlightedIndex(-1);
+          return;
+        }
         if (trimmed && open && suggestions.length > 0 && highlightedIndex >= 0) {
           e.preventDefault();
           onSelect(suggestions[highlightedIndex]);
@@ -1183,7 +1202,7 @@ function GeneSymbolAutocomplete({
         setHighlightedIndex(-1);
       }
     },
-    [open, suggestions, highlightedIndex, onSelect]
+    [open, suggestions, highlightedIndex, onSelect, value, onChange, single]
   );
 
   const fetchSuggestions = useCallback(async (q: string) => {
@@ -1210,6 +1229,11 @@ function GeneSymbolAutocomplete({
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (!input.trim()) {
+      setSuggestions([]);
+      setOpen(false);
+      return;
+    }
+    if (isEnsemblGeneStableId(input.trim())) {
       setSuggestions([]);
       setOpen(false);
       return;
@@ -1315,7 +1339,7 @@ function GeneSymbolAutocomplete({
       )}
       {showSelectFromListHint && (
         <p className="text-xs text-slate-600 dark:text-slate-400 mt-1" role="status">
-          Select an option from the list when suggestions appear.
+          Select an option from the list when suggestions appear, or paste an Ensembl gene ID (e.g. ENSMUSG…) and press Enter.
         </p>
       )}
     </div>
@@ -1596,7 +1620,10 @@ const SLOT_LABELS: Record<string, { label: string; placeholder: string }> = {
   },
   drugs: { label: "Drugs", placeholder: "e.g. doxycycline" },
   drug: { label: "Drug name(s)", placeholder: "e.g. aspirin, Lipitor, tocilizumab" },
-  gene_symbols: { label: "Gene symbol(s)", placeholder: "e.g. DUSP2, TP53, SOCS1" },
+  gene_symbols: {
+    label: "Gene symbol(s)",
+    placeholder: "e.g. DUSP2, TP53 — or paste Ensembl gene ID (ENSMUSG…, ENSG…)",
+  },
   gene_symbol: { label: "Gene symbol", placeholder: "e.g. DUSP2" },
   experiment_id: { label: "Experiment ID", placeholder: "e.g. E-GEOD-76" },
   organism_taxon_ids: { label: "Organism / taxon IDs", placeholder: "e.g. Mus musculus or 10090" },
