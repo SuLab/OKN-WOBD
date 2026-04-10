@@ -1215,6 +1215,8 @@ LIMIT ${Math.min(limit, 500)}`;
  * @param tissueUberonIds - Optional UBERON IDs to filter by tissue (e.g. ["0002082"])
  * @param factorTerms - Optional text terms to match in factors/contrast labels (e.g. ["aortic banding"])
  * @param includeDirectionColumn - When true, SELECT includes ?direction ("up"/"down" from log2fc) like the cross-dataset summary query.
+ * @param ensemblGeneIds - Optional Ensembl gene stable IDs; matched against `spokegenelab:ensembl_id`
+ *   and/or `biolink:id` (GXA exports use biolink:id; some graphs also emit spokegenelab:ensembl_id).
  */
 export function buildGXAExperimentsForGenesQuery(
   geneSymbols: string[],
@@ -1223,15 +1225,47 @@ export function buildGXAExperimentsForGenesQuery(
   organismTaxonIds?: string[],
   tissueUberonIds?: string[],
   factorTerms?: string[],
-  includeDirectionColumn: boolean = false
+  includeDirectionColumn: boolean = false,
+  ensemblGeneIds: string[] = []
 ): string {
-  if (!geneSymbols || geneSymbols.length === 0) {
-    throw new Error("At least one gene symbol is required for GXA experiments-for-gene query");
+  const safeEnsembl = (ensemblGeneIds ?? [])
+    .map((id) => id.trim().toUpperCase())
+    .filter(Boolean);
+  const hasSymbols = geneSymbols && geneSymbols.length > 0;
+  if (!hasSymbols && safeEnsembl.length === 0) {
+    throw new Error(
+      "At least one gene symbol or Ensembl gene id is required for GXA experiments-for-gene query"
+    );
   }
 
-  const geneFilters = geneSymbols.map(symbol =>
-    `LCASE(?geneSymbol) = "${symbol.toLowerCase()}"`
-  ).join(" ||\n    ");
+  const symbolFilters = hasSymbols
+    ? geneSymbols.map(
+        (symbol) =>
+          `LCASE(?geneSymbol) = "${symbol.toLowerCase().replace(/"/g, '\\"')}"`
+      )
+    : [];
+  const ensemblStrLiterals = safeEnsembl.map((id) =>
+    id.toLowerCase().replace(/\\/g, "\\\\").replace(/"/g, '\\"')
+  );
+
+  const filterParts: string[] = [];
+  if (symbolFilters.length > 0) {
+    filterParts.push(
+      symbolFilters.length === 1 ? symbolFilters[0] : `(\n    ${symbolFilters.join(" ||\n    ")}\n  )`
+    );
+  }
+  if (ensemblStrLiterals.length > 0) {
+    const bySpoke = ensemblStrLiterals
+      .map((lit) => `LCASE(STR(?ensemblGeneIdStr)) = "${lit}"`)
+      .join(" ||\n    ");
+    const byBiolinkId = ensemblStrLiterals
+      .map((lit) => `LCASE(STR(?ensemblBiolinkGeneIdStr)) = "${lit}"`)
+      .join(" ||\n    ");
+    filterParts.push(
+      `(BOUND(?ensemblGeneIdStr) && (\n    ${bySpoke}\n  )) || (BOUND(?ensemblBiolinkGeneIdStr) && (\n    ${byBiolinkId}\n  ))`
+    );
+  }
+  const geneFilterExpr = filterParts.join(" ||\n    ");
 
   let log2fcFilter = "";
   if (upregulated === true) {
@@ -1313,8 +1347,10 @@ WHERE {
   ${contrastSource}
 ${gxaAssocAdjPBinding("?assoc", "?adjPValue", "gxega")}
   ?gene biolink:symbol ?geneSymbol .
+  OPTIONAL { ?gene spokegenelab:ensembl_id ?ensemblGeneIdStr . }
+  OPTIONAL { ?gene biolink:id ?ensemblBiolinkGeneIdStr . }
   FILTER(
-    ${geneFilters}
+    ${geneFilterExpr}
   )${log2fcFilter}${organismFilter}${tissueInMain}${factorInMain}
 
   BIND(REPLACE(STR(?contrast), "^.*/(E-[A-Z0-9-]+)-.*$", "$1") AS ?experimentId)

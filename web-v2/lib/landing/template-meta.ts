@@ -44,7 +44,8 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
       "Across GXA experiments: gene(s), contrasts, direction (up/down), log2FC, and adjusted p-value in one result set",
     icon: Layers,
     iconColor: "text-cyan-600 dark:text-cyan-400",
-    blurb: "One query for one or more genes: experiment and contrast identifiers, optional up/down filter, and a direction column alongside log2FC and adjusted p-value.",
+    blurb:
+      "Query for one or more genes (by gene symbol, gene name, or Ensembl ID): experiment and contrast identifiers, optional up/down filter, and a direction column alongside log2FC and adjusted p-value.",
     buttonLabel: "Run query",
   },
   {
