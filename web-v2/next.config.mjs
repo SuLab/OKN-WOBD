@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
   // App Router is now stable and default in Next.js 14
   // No experimental config needed
   webpack: (config, { dev, isServer }) => {

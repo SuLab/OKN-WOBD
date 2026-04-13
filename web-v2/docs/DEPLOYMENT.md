@@ -37,3 +37,14 @@ sudo journalctl -u okn-wobd-web -f
 - Manual launch alternative (without systemd and not preferred for production deployment, stops when you close the SSH session (unless you detached)):
 `npm start -- -p 3000`
 
+### Docker (container image)
+
+Build context is `web-v2/` only. From the repository root:
+
+```
+docker build -f web-v2/Dockerfile -t wobd-web-v2 web-v2
+docker run --rm -p 3000:3000 -e NEXT_PUBLIC_FRINK_FEDERATION_URL=... wobd-web-v2
+```
+
+Pass production secrets and URLs with `-e` or your orchestrator’s environment configuration. The app listens on port 3000 inside the container (`HOSTNAME=0.0.0.0`).
+
