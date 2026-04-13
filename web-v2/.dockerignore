@@ -1,0 +1,28 @@
+# dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# build output
+.next
+out
+
+# env and secrets (inject at runtime)
+.env
+.env.*
+!.env.example
+
+# git / IDE
+.git
+.gitignore
+.cursor
+.vscode
+*.md
+docs
+
+# tests and misc
+coverage
+*.test.ts
+*.test.tsx
+test-llm-sparql-generation.js
