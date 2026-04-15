@@ -1,5 +1,6 @@
 // SPARQL execution against FRINK federation endpoint
 
+import { parseJsonOrThrow } from "@/lib/http/parse-fetch-json";
 import type { SPARQLResult } from "@/types";
 
 const FRINK_FEDERATION_URL = process.env.NEXT_PUBLIC_FRINK_FEDERATION_URL ||
@@ -41,12 +42,15 @@ export async function executeSPARQL(
 
     clearTimeout(timeoutId);
 
+    const bodyText = await response.text();
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`SPARQL endpoint error: ${response.status} ${response.statusText}\n${errorText}`);
+      const preview = bodyText.trim().replace(/\s+/g, " ").slice(0, 500);
+      throw new Error(
+        `SPARQL endpoint error: ${response.status} ${response.statusText}${preview ? `\n${preview}` : ""}`,
+      );
     }
 
-    const result: SPARQLResult = await response.json();
+    const result = parseJsonOrThrow<SPARQLResult>(bodyText, response, "SPARQL federation");
     const latency_ms = Date.now() - startTime;
     const row_count = result.results?.bindings?.length || 0;
 

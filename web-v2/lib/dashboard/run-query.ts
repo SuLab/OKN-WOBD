@@ -4,6 +4,7 @@ import type { SPARQLResult } from "@/types";
 import type { MondoExpansionStats } from "@/lib/ontology/mondo-descendants-ols";
 import { ndeBindingHasGeoOrGseEvidence } from "@/lib/dashboard/nde-geo-evidence";
 import { omitUiOnlyOntologyLabelSlots } from "@/lib/dashboard/ui-only-slots";
+import { errorMessageFromFailedApiBody, parseJsonOrThrow } from "@/lib/http/parse-fetch-json";
 
 export const PACK_ID = "wobd";
 
@@ -130,8 +131,28 @@ export async function runTemplateQuery({
       body: JSON.stringify({ drugs, onlyGeneExpression, maxResults }),
       signal,
     });
-    const data = await res.json();
+    const drugBodyText = await res.text();
     if (signal?.aborted) return { results: null, error: "Query was cancelled." };
+    if (!res.ok) {
+      return {
+        results: null,
+        error: errorMessageFromFailedApiBody(res, drugBodyText, "Drug datasets API"),
+      };
+    }
+    let data: {
+      error?: string | null;
+      results?: SPARQLResult | null;
+      filtered_empty_hint?: string;
+      executed_queries?: ExecutedQueryItem[];
+    };
+    try {
+      data = parseJsonOrThrow(drugBodyText, res, "Drug datasets API");
+    } catch (e) {
+      return {
+        results: null,
+        error: e instanceof Error ? e.message : "Invalid response from drug datasets API.",
+      };
+    }
     if (data.error && !data.results) {
       return { results: null, error: data.error };
     }
@@ -154,15 +175,15 @@ export async function runTemplateQuery({
     body: JSON.stringify({ intent, pack_id: PACK_ID }),
     signal,
   });
+  const sparqlBodyText = await sparqlRes.text();
   if (!sparqlRes.ok) {
-    const err = await sparqlRes.json();
-    throw new Error(err.error || "SPARQL generation failed");
+    throw new Error(errorMessageFromFailedApiBody(sparqlRes, sparqlBodyText, "intent-to-sparql API"));
   }
-  const sparqlJson = (await sparqlRes.json()) as {
+  const sparqlJson = parseJsonOrThrow<{
     query?: string;
     mondo_expansion_highlight_labels?: string[];
     mondo_expansion_stats?: Record<string, unknown>;
-  };
+  }>(sparqlBodyText, sparqlRes, "intent-to-sparql API");
   const { query, mondo_expansion_highlight_labels, mondo_expansion_stats } = sparqlJson;
   if (!query) throw new Error("No query returned");
 
@@ -180,13 +201,36 @@ export async function runTemplateQuery({
     }),
     signal,
   });
-  const execData = await execRes.json();
+  const execBodyText = await execRes.text();
 
   if (signal?.aborted) {
     return { results: null, error: "Query was cancelled." };
   }
 
-  if (!execRes.ok || execData.error) {
+  if (!execRes.ok) {
+    return {
+      results: null,
+      error: errorMessageFromFailedApiBody(execRes, execBodyText, "SPARQL execute API"),
+    };
+  }
+
+  let execData: {
+    error?: string;
+    bindings?: SPARQLResult["results"]["bindings"];
+    head?: SPARQLResult["head"];
+    result?: SPARQLResult;
+    executed_query?: string;
+  };
+  try {
+    execData = parseJsonOrThrow(execBodyText, execRes, "SPARQL execute API");
+  } catch (e) {
+    return {
+      results: null,
+      error: e instanceof Error ? e.message : "Invalid response from SPARQL execute API.",
+    };
+  }
+
+  if (execData.error) {
     return {
       results: null,
       error: execData.error || "Query execution failed",
