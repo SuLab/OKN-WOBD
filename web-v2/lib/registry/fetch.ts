@@ -1,4 +1,4 @@
-// Fetch graph information from OKN Registry
+// Fetch graph information from OKN Registry (live path) or use the checked-in list in ./graphs (static path).
 // Registry page: https://frink.renci.org/registry/
 
 import { promises as fs } from "fs";
@@ -8,6 +8,12 @@ import { GRAPHS_DATA, type RegistryGraphInfo } from "./graphs";
 const REGISTRY_URL = "https://frink.renci.org/registry/";
 const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours (1 day)
 const GRAPHS_DATA_FILE = path.join(process.cwd(), "data/registry-graphs.json");
+
+/**
+ * When true, graph lists come only from ./graphs (GRAPHS_DATA): no HTTP to the OKN Registry, no disk writes.
+ * Set to false to restore live registry fetch and graphs file updates.
+ */
+export const USE_STATIC_GRAPH_LIST = true;
 
 // 6pm PT = 1am UTC (next day) or 2am UTC (next day) depending on DST
 // We'll check if it's after 6pm PT (01:00 UTC or 02:00 UTC)
@@ -25,7 +31,7 @@ let cacheTimestamp: number = 0; // Start at 0 to force first fetch
 /**
  * Write graphs data back to JSON file
  * Also updates the graphs.ts file for TypeScript imports
- * 
+ *
  * Note: File writing may not work in serverless environments (e.g., Vercel)
  * but the in-memory cache will still function correctly.
  */
@@ -81,10 +87,18 @@ ${graphsArray}
 }
 
 /**
- * Fetch graphs from OKN Registry
- * Falls back to cached/file data if registry is unavailable
+ * Fetch graphs from OKN Registry (when USE_STATIC_GRAPH_LIST is false), or from ./graphs only (when true).
+ * Falls back to cached/file data if registry is unavailable (live path only).
  */
 export async function fetchGraphsFromRegistry(forceRefresh: boolean = false): Promise<RegistryGraphInfo[]> {
+    if (USE_STATIC_GRAPH_LIST) {
+        if (forceRefresh || cacheTimestamp === 0) {
+            cachedGraphs = [...GRAPHS_DATA];
+            cacheTimestamp = Date.now();
+        }
+        return cachedGraphs;
+    }
+
     const now = Date.now();
     const cacheAge = now - cacheTimestamp;
 
@@ -230,9 +244,9 @@ function parseRegistryHTML(html: string): RegistryGraphInfo[] {
 }
 
 /**
- * Extract shortname from registry item
+ * Extract shortname from registry item (reserved for live-registry JSON parsing)
  */
-function extractShortname(item: any): string | null {
+function _extractShortname(item: any): string | null {
     if (item.shortname) return item.shortname;
     if (item.identifier) {
         // Extract shortname from identifier/URL
@@ -274,8 +288,7 @@ export function clearCache(): void {
 export function getCacheStatus(): { timestamp: number; age: number; count: number } {
     return {
         timestamp: cacheTimestamp,
-        age: Date.now() - cacheTimestamp,
+        age: cacheTimestamp === 0 ? 0 : Date.now() - cacheTimestamp,
         count: cachedGraphs.length,
     };
 }
-

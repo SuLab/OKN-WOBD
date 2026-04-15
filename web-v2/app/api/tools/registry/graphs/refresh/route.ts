@@ -1,25 +1,27 @@
 import { NextResponse } from "next/server";
-import { fetchGraphsFromRegistry, clearCache, getCacheStatus } from "@/lib/registry/fetch";
+import {
+    fetchGraphsFromRegistry,
+    clearCache,
+    getCacheStatus,
+    USE_STATIC_GRAPH_LIST,
+} from "@/lib/registry/fetch";
 
 /**
- * Manual refresh endpoint for registry graphs
  * POST /api/tools/registry/graphs/refresh
- * 
- * Forces a refresh from the OKN Registry and updates the graphs.ts file
+ * Reloads graph list: from ./graphs when USE_STATIC_GRAPH_LIST is true; otherwise from OKN Registry (and may update graphs files).
  */
 export async function POST() {
     try {
-        // Clear cache to force refresh
         clearCache();
-
-        // Fetch from registry (force refresh)
         const graphs = await fetchGraphsFromRegistry(true);
 
         const status = getCacheStatus();
 
         return NextResponse.json({
             success: true,
-            message: `Refreshed ${graphs.length} graphs from OKN Registry`,
+            message: USE_STATIC_GRAPH_LIST
+                ? `Reloaded ${graphs.length} graphs from static graph list`
+                : `Refreshed ${graphs.length} graphs from OKN Registry`,
             count: graphs.length,
             timestamp: new Date(status.timestamp).toISOString(),
             graphs: graphs.map(g => ({
@@ -33,7 +35,9 @@ export async function POST() {
         return NextResponse.json(
             {
                 success: false,
-                error: error.message || "Failed to refresh graphs from registry"
+                error: error.message || (USE_STATIC_GRAPH_LIST
+                    ? "Failed to reload graph list"
+                    : "Failed to refresh graphs from registry")
             },
             { status: 500 }
         );
@@ -58,9 +62,11 @@ export async function GET() {
                 minutes: ageMinutes,
                 total_ms: status.age,
             },
-            nextRefresh: status.timestamp > 0
-                ? new Date(status.timestamp + 24 * 60 * 60 * 1000).toISOString()
-                : null,
+            nextRefresh: USE_STATIC_GRAPH_LIST
+                ? null
+                : status.timestamp > 0
+                    ? new Date(status.timestamp + 24 * 60 * 60 * 1000).toISOString()
+                    : null,
         });
     } catch (_error: any) {
         return NextResponse.json(
