@@ -1,5 +1,6 @@
 import type { QueryPlan, QueryStep, ExecutionEvent, StepResultContext, Intent, SPARQLResult } from "@/types";
 import type { ContextPack } from "@/lib/context-packs/types";
+import { parseJsonOrThrow, throwForFailedApiResponseWithBody } from "@/lib/http/parse-fetch-json";
 import { generateSPARQLFromIntent } from "@/lib/templates/generator";
 import { resolveEntity, entityResolutionToContext, type EntityResolutionResult } from "./entity-resolver";
 
@@ -484,16 +485,21 @@ async function executeStep(
         }),
     });
 
+    const bodyText = await response.text();
     if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "SPARQL execution failed");
+        throwForFailedApiResponseWithBody(response, bodyText, "SPARQL execute");
     }
 
-    const result = await response.json();
+    const result = parseJsonOrThrow<{
+        head?: { vars?: string[] };
+        bindings?: SPARQLResult["results"]["bindings"];
+        error?: string;
+    }>(bodyText, response, "SPARQL execute");
     const latency_ms = Date.now() - startTime;
 
+    const headVars = result.head?.vars;
     const sparql_results: SPARQLResult = {
-        head: result.head,
+        head: { vars: Array.isArray(headVars) ? headVars : [] },
         results: {
             bindings: result.bindings || [],
         },

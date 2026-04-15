@@ -1641,7 +1641,7 @@ const SLOT_LABELS: Record<string, { label: string; placeholder: string }> = {
     label: "Include MONDO subclasses",
     placeholder: "",
   },
-  max_results: { label: "Maximum results", placeholder: "Default 500" },
+  max_results: { label: "Maximum results", placeholder: "Default 200" },
 };
 
 export function getSlotMeta(varName: string): { label: string; placeholder: string } {
@@ -1926,7 +1926,7 @@ export function SlotForm({
       const rawStr = Array.isArray(raw) ? raw[0] : raw;
       const value = typeof rawStr === "string" && rawStr.trim() !== "" ? rawStr.trim() : "";
       const options = [
-        { value: "", label: "Default (500)" },
+        { value: "", label: "Default (200)" },
         { value: "50", label: "50" },
         { value: "100", label: "100" },
         { value: "200", label: "200" },

@@ -22,12 +22,15 @@ LIMIT 50
 
 const MAX_DATASET_RESULTS_CAP = 500;
 
+/** Default NDE row cap when the client does not pass max_results (keeps responses and GXA augment bounded). */
+export const DEFAULT_DRUG_DATASET_LIMIT = 200;
+
 /**
  * Build a fixed 3-step plan: entity resolution (drug name(s) → Wikidata IRIs) →
  * Wikidata (diseases treated by drug + MONDO) → NDE (datasets for those diseases).
  * No LLM; used by the dashboard drug_datasets template.
  * @param drugNames - Drug name(s) to look up
- * @param options - Optional maxResults (capped at MAX_DATASET_RESULTS_CAP), geoOnly (step 3 uses geo_dataset_search)
+ * @param options - Optional maxResults (capped at MAX_DATASET_RESULTS_CAP; omitted uses DEFAULT_DRUG_DATASET_LIMIT), geoOnly (step 3 uses geo_dataset_search)
  */
 export function buildDrugDatasetsPlan(
   drugNames: string[],
@@ -38,7 +41,7 @@ export function buildDrugDatasetsPlan(
   const maxResults =
     options?.maxResults != null && options.maxResults > 0
       ? Math.min(options.maxResults, MAX_DATASET_RESULTS_CAP)
-      : undefined;
+      : DEFAULT_DRUG_DATASET_LIMIT;
   const geoOnly = options?.geoOnly === true;
   const step1Description =
     names.length === 1
@@ -97,7 +100,7 @@ export function buildDrugDatasetsPlan(
         graphs: ["nde"],
         slots: {
           health_conditions: "{{step2.disease_iris}}",
-          ...(maxResults != null ? { limit: maxResults } : {}),
+          limit: maxResults,
         },
         confidence: 1,
         notes: "Dashboard drug_datasets step 3",

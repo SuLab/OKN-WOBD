@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     const onlyGeneExpression = body.onlyGeneExpression === true || body.onlyGeneExpression === "true";
     const maxResults =
       body.maxResults != null && body.maxResults !== ""
-        ? Math.min(500, Math.max(1, Number(body.maxResults) || 500))
+        ? Math.min(500, Math.max(1, Number(body.maxResults) || 200))
         : undefined;
 
     if (drugs.length === 0) {
