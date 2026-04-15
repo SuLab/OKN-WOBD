@@ -1,5 +1,7 @@
 ## WOBD Web (Streamlit NL→SPARQL interface)
 
+> **Not maintained.** This Streamlit app is retained for historical reference only. For the supported web experience, use the **template-based Next.js application** in [`web-v2/`](../web-v2/README.md) at the repository root.
+
 This subproject provides a Streamlit-based web UI for the OKN-WOBD project.
 It turns natural-language questions into SPARQL queries against configured
 SPARQL endpoints (e.g. NDE datasets in FRINK and gene expression sources).
