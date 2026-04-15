@@ -41,11 +41,11 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
     titlePart1: "Gene-level differential expression",
     titlePart2: " per contrast",
     description:
-      "Across GXA experiments: gene(s), contrasts, direction (up/down), log2FC, and adjusted p-value in one result set",
+      "Find GXA experiments and contrasts by gene where the gene is differentially expressed.",
     icon: Layers,
     iconColor: "text-cyan-600 dark:text-cyan-400",
     blurb:
-      "Query for one or more genes (by gene symbol, gene name, or Ensembl ID): experiment and contrast identifiers, optional up/down filter, and a direction column alongside log2FC and adjusted p-value.",
+      "Query for one or more genes (by gene symbol, gene name, or Ensembl ID). Optionally restrict to up- or down-regulation and narrow by organism, tissue, or factor terms.",
     buttonLabel: "Run query",
   },
   {
