@@ -123,7 +123,7 @@ export async function runTemplateQuery({
       : slots.max_results;
     const maxResults =
       typeof maxResultsRaw === "string" && maxResultsRaw.trim() !== ""
-        ? Math.min(Math.max(1, parseInt(maxResultsRaw, 10) || 500), 500)
+        ? Math.min(Math.max(1, parseInt(maxResultsRaw, 10) || 200), 500)
         : undefined;
     const res = await fetch("/api/tools/drug-datasets", {
       method: "POST",
