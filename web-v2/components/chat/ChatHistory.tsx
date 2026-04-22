@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { withBasePath } from "@/lib/base-path";
 import type { ChatMessage } from "@/types";
 import { QueryPlanPreview } from "./QueryPlanPreview";
 import { MermaidDiagram } from "./MermaidDiagram";
@@ -244,7 +245,7 @@ function CollapsibleSPARQL({ query }: { query: string }) {
     async function generateSummary() {
       setIsLoadingSummary(true);
       try {
-        const response = await fetch("/api/tools/sparql/summarize", {
+        const response = await fetch(withBasePath("/api/tools/sparql/summarize"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ sparql: query }),

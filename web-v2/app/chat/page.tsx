@@ -21,6 +21,7 @@ import {
 import { needsMultiHop } from "@/lib/agents/complexity-detector";
 import { planMultiHopQuery } from "@/lib/agents/query-planner";
 import { executeQueryPlan } from "@/lib/agents/query-executor";
+import { withBasePath } from "@/lib/base-path";
 import type { ContextPack } from "@/lib/context-packs/types";
 
 // Wrap ChatPage with Suspense to prevent Fast Refresh issues
@@ -201,14 +202,14 @@ function ChatPage() {
     try {
       // Load context pack via API
       const packId = "wobd";
-      const packResponse = await fetch(`/api/context-packs?pack_id=${packId}`);
+      const packResponse = await fetch(withBasePath(`/api/context-packs?pack_id=${packId}`));
       if (!packResponse.ok) {
         throw new Error("Failed to load context pack");
       }
       const pack: ContextPack = await packResponse.json();
 
       // Generate plan
-      const llmEndpoint = "/api/tools/llm/complete";
+      const llmEndpoint = withBasePath("/api/tools/llm/complete");
       const sessionId = getSessionId();
       const plan = await planMultiHopQuery(text, pack, llmEndpoint, sessionId);
 
@@ -348,7 +349,7 @@ function ChatPage() {
     try {
       const parts = text.trim().split(/\s+/);
       const shortname = (parts[1] || "").trim();
-      const url = `/api/tools/graphs/diagram?shortname=${encodeURIComponent(shortname)}`;
+      const url = withBasePath(`/api/tools/graphs/diagram?shortname=${encodeURIComponent(shortname)}`);
       const response = await fetch(url);
       const data = await response.json();
 
@@ -410,7 +411,7 @@ function ChatPage() {
       if (isSuggest) {
         // Handle suggestions
         // Default to full mode (quick=false) to get content-based suggestions
-        let url = "/api/tools/registry/graphs/suggestions";
+        let url = withBasePath("/api/tools/registry/graphs/suggestions");
         if (shortname) {
           url += `?graphs=${encodeURIComponent(shortname)}&quick=false`;
         } else {
@@ -450,7 +451,7 @@ function ChatPage() {
         setSelectedMessageId(assistantMessage.id);
       } else {
         // Handle graph info
-        let url = "/api/tools/graphs/info";
+        let url = withBasePath("/api/tools/graphs/info");
         if (shortname) {
           url += `?shortname=${encodeURIComponent(shortname)}`;
         }

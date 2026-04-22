@@ -13,6 +13,7 @@ import {
   detectOntologyIntent,
   processOntologyQuery,
 } from "@/lib/ontology/preprocessor";
+import { absoluteUrl } from "@/lib/base-path";
 
 // Phase 3: Intent routing for lanes A/B/C (currently deterministic, no LLM)
 export async function POST(request: Request) {
@@ -80,10 +81,7 @@ export async function POST(request: Request) {
 
     // 4) Optional LLM-assisted slot filling for template lane, if allowed
     if (intent.lane === "template" && pack.guardrails.allow_open_nl2sparql) {
-      const llmUrl = new URL(
-        "/api/tools/llm/complete",
-        request.url
-      ).toString();
+      const llmUrl = absoluteUrl(request, "/api/tools/llm/complete");
 
       const llmResult = await fillSlotsWithLLM(text, intent, llmUrl);
       if (llmResult.used_llm) {
@@ -98,10 +96,7 @@ export async function POST(request: Request) {
     // Only run for dataset_search tasks
     if (intent.task === "dataset_search" && detectOntologyIntent(text, intent)) {
       try {
-        const llmUrl = new URL(
-          "/api/tools/llm/complete",
-          request.url
-        ).toString();
+        const llmUrl = absoluteUrl(request, "/api/tools/llm/complete");
         const ontologyState = await processOntologyQuery(text, intent, pack, llmUrl);
         // Store ontology state in intent slots
         intent.slots.ontology_state = ontologyState;

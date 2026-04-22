@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { withBasePath } from "@/lib/base-path";
+
 export function Header() {
     return (
         <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
@@ -9,7 +11,7 @@ export function Header() {
                 className="flex shrink-0 items-center gap-3 rounded-md outline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--niaid-link)]"
             >
                 <Image
-                    src="/wobd-logo.png"
+                    src={withBasePath("/wobd-logo.png")}
                     alt="WOBD — Web of Biological Data"
                     width={54}
                     height={45}

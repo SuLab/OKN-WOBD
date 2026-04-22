@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, FormEvent, useEffect, useRef } from "react";
+import { withBasePath } from "@/lib/base-path";
 import { SparqlEditor, type SparqlEditorRef } from "./SparqlEditor";
 
 type Lane = "template" | "open" | "raw";
@@ -181,7 +182,7 @@ export function ChatComposer({ initialValue = "", onMessage }: ChatComposerProps
 
     setIsModifying(true);
     try {
-      const response = await fetch("/api/tools/sparql/modify", {
+      const response = await fetch(withBasePath("/api/tools/sparql/modify"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

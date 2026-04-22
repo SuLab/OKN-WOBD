@@ -2,6 +2,7 @@ import type { ContextPack } from "@/lib/context-packs/types";
 import type { Intent } from "@/types";
 import type { SPARQLResult } from "@/types";
 import type { MondoExpansionStats } from "@/lib/ontology/mondo-descendants-ols";
+import { withBasePath } from "@/lib/base-path";
 import { ndeBindingHasGeoOrGseEvidence } from "@/lib/dashboard/nde-geo-evidence";
 import { omitUiOnlyOntologyLabelSlots } from "@/lib/dashboard/ui-only-slots";
 import { errorMessageFromFailedApiBody, parseJsonOrThrow } from "@/lib/http/parse-fetch-json";
@@ -125,7 +126,7 @@ export async function runTemplateQuery({
       typeof maxResultsRaw === "string" && maxResultsRaw.trim() !== ""
         ? Math.min(Math.max(1, parseInt(maxResultsRaw, 10) || 200), 500)
         : undefined;
-    const res = await fetch("/api/tools/drug-datasets", {
+    const res = await fetch(withBasePath("/api/tools/drug-datasets"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ drugs, onlyGeneExpression, maxResults }),
@@ -169,7 +170,7 @@ export async function runTemplateQuery({
 
   const intent = buildIntent(templateId, slots, pack);
 
-  const sparqlRes = await fetch("/api/tools/nl/intent-to-sparql", {
+  const sparqlRes = await fetch(withBasePath("/api/tools/nl/intent-to-sparql"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ intent, pack_id: PACK_ID }),
@@ -187,7 +188,7 @@ export async function runTemplateQuery({
   const { query, mondo_expansion_highlight_labels, mondo_expansion_stats } = sparqlJson;
   if (!query) throw new Error("No query returned");
 
-  const execRes = await fetch("/api/tools/sparql/execute", {
+  const execRes = await fetch(withBasePath("/api/tools/sparql/execute"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

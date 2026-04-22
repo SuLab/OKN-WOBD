@@ -5,8 +5,11 @@ These instructions are for deployment of the web app (code within the web-v2 dir
 ### Steps to run on localhost
 - On localhost, run `cd web-v2 && npm run build` (Note: stop the app on localhost if still running under `npm run dev`)
 
-- Run a smoke-test of the built app locally:
-`cd web-v2 && npm run build && npm start`
+- Run a smoke-test of the built app at the **origin root** (no subpath):
+`cd web-v2 && npm run build && npm start` → open `http://localhost:3000`
+
+- To match **production** (subpath `/wobd`, same as the Docker image), build with the base path and open the app under that prefix:
+`cd web-v2 && NEXT_PUBLIC_BASE_PATH=/wobd npm run build && NEXT_PUBLIC_BASE_PATH=/wobd npm start` → open `http://localhost:3000/wobd`
 
 ### Steps to run on the EC2 server
 
@@ -39,12 +42,29 @@ sudo journalctl -u okn-wobd-web -f
 
 ### Docker (container image)
 
-Build context is `web-v2/` only. From the repository root:
+Build context is the `web-v2` directory. Use **one** of these:
+
+**From the repository root** (paths are relative to the clone):
 
 ```
 docker build -f web-v2/Dockerfile -t wobd-web-v2 web-v2
-docker run --rm -p 3000:3000 -e NEXT_PUBLIC_FRINK_FEDERATION_URL=... wobd-web-v2
+docker run --rm -p 3000:3000 wobd-web-v2
 ```
 
-Pass production secrets and URLs with `-e` or your orchestrator’s environment configuration. The app listens on port 3000 inside the container (`HOSTNAME=0.0.0.0`).
+**From `web-v2/`** (same result; use this if your shell is already in that directory):
+
+```
+docker build -f Dockerfile -t wobd-web-v2 .
+docker run --rm -p 3000:3000 wobd-web-v2
+```
+
+For **either** `docker run` above, `-e NEXT_PUBLIC_FRINK_FEDERATION_URL=<url>` is **optional**—add it only when you need to override the default FRINK federation URL (for example: `docker run --rm -p 3000:3000 -e NEXT_PUBLIC_FRINK_FEDERATION_URL=https://... wobd-web-v2`).
+
+**Smoke test:** the image defaults to the **`/wobd`** subpath (`NEXT_PUBLIC_BASE_PATH=/wobd` at build time), so open **`http://localhost:3000/wobd`**, not the site root. If you run `docker build` from the wrong working directory, Docker will error with `path "web-v2" not found` when the final context argument is `web-v2` but that folder is not under the current directory.
+
+Put the app behind a reverse proxy at `https://example.org/wobd` and forward that prefix to the container. To serve at the site root instead (e.g. local or dedicated host), rebuild with `--build-arg NEXT_PUBLIC_BASE_PATH=` (empty).
+
+For non-Docker builds (e.g. `npm run build` on a server), set `NEXT_PUBLIC_BASE_PATH=/wobd` in the environment when building if the app is not at the origin root.
+
+Pass any other production secrets and URLs with `-e` or your orchestrator’s environment configuration. The app listens on port 3000 inside the container (`HOSTNAME=0.0.0.0`).
 

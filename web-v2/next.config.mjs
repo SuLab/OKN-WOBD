@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
+const basePath = (process.env.NEXT_PUBLIC_BASE_PATH || "").replace(/\/$/, "") || undefined;
+
 const nextConfig = {
+  ...(basePath ? { basePath } : {}),
   output: "standalone",
   // App Router is now stable and default in Next.js 14
   // No experimental config needed
