@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { absoluteUrl } from "@/lib/base-path";
 
 export async function POST(request: Request) {
     try {
@@ -12,7 +13,7 @@ export async function POST(request: Request) {
         }
 
         // Use the same LLM endpoint pattern as other API routes
-        const llmUrl = new URL("/api/tools/llm/complete", request.url).toString();
+        const llmUrl = absoluteUrl(request, "/api/tools/llm/complete");
 
         const systemPrompt = `You are a SPARQL query assistant. The user has a SPARQL query and wants to modify it.
 

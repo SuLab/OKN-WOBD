@@ -2,6 +2,7 @@
 // Identifies entities from user phrase and maps them to appropriate ontologies
 
 import { formatOntologyMappingForLLM } from "./ontology-mapping";
+import { withBasePath } from "@/lib/base-path";
 
 export interface IdentifiedEntity {
   term: string;
@@ -102,8 +103,8 @@ Rules:
     const endpointUrl =
       llmUrl ||
       (typeof window === "undefined" && process.env.NEXT_PUBLIC_APP_URL
-        ? `${process.env.NEXT_PUBLIC_APP_URL}/api/tools/llm/complete`
-        : "/api/tools/llm/complete");
+        ? `${process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "")}/api/tools/llm/complete`
+        : withBasePath("/api/tools/llm/complete"));
 
     // Use shared key if available (server-side), otherwise requires session_id for BYOK
     // Note: On server-side, we check env vars; session_id can be passed for BYOK
@@ -214,8 +215,8 @@ Rules:
     const endpointUrl =
       llmUrl ||
       (typeof window === "undefined" && process.env.NEXT_PUBLIC_APP_URL
-        ? `${process.env.NEXT_PUBLIC_APP_URL}/api/tools/llm/complete`
-        : "/api/tools/llm/complete");
+        ? `${process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "")}/api/tools/llm/complete`
+        : withBasePath("/api/tools/llm/complete"));
 
     // Use shared key if available (server-side), otherwise requires session_id for BYOK
     const useShared = typeof process !== "undefined" && !!process.env.ANTHROPIC_SHARED_API_KEY;

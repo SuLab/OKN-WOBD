@@ -1,6 +1,7 @@
 // Query execution service for all lanes
 
 import type { Intent, SPARQLResult, ChatMessage, OntologyQueryState } from "@/types";
+import { withBasePath } from "@/lib/base-path";
 import { generateMessageId } from "./messages";
 
 export interface QueryExecutionResult {
@@ -14,7 +15,7 @@ export async function executeTemplateQuery(
     signal?: AbortSignal
 ): Promise<QueryExecutionResult> {
     // Step 1: Classify intent
-    const intentResponse = await fetch("/api/tools/nl/intent", {
+    const intentResponse = await fetch(withBasePath("/api/tools/nl/intent"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text, pack_id: packId }),
@@ -29,7 +30,7 @@ export async function executeTemplateQuery(
     const intent: Intent = await intentResponse.json();
 
     // Step 2: Generate SPARQL from intent (template lane)
-    const sparqlResponse = await fetch("/api/tools/nl/intent-to-sparql", {
+    const sparqlResponse = await fetch(withBasePath("/api/tools/nl/intent-to-sparql"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ intent, pack_id: packId }),
@@ -54,7 +55,7 @@ export async function executeOpenQuery(
     signal?: AbortSignal
 ): Promise<QueryExecutionResult> {
     // Step 1: Generate SPARQL from natural language
-    const openQueryResponse = await fetch("/api/tools/nl/open-query", {
+    const openQueryResponse = await fetch(withBasePath("/api/tools/nl/open-query"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -75,7 +76,7 @@ export async function executeOpenQuery(
     // Step 2: Classify intent (for metadata)
     let intent: Intent | undefined;
     try {
-        const intentResponse = await fetch("/api/tools/nl/intent", {
+        const intentResponse = await fetch(withBasePath("/api/tools/nl/intent"), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text, pack_id: packId }),
@@ -115,7 +116,7 @@ async function executeSPARQLQuery(
     // Dataset search only needs NDE graph; avoid ubergraph for speed.
     const executeGraphs = intent?.task === "dataset_search" ? ["nde"] : (intent?.graphs || []);
 
-    const executeResponse = await fetch("/api/tools/sparql/execute", {
+    const executeResponse = await fetch(withBasePath("/api/tools/sparql/execute"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -239,7 +240,7 @@ async function executeSPARQLQuery(
 
                 // Execute fallback query
                 const fallbackGraphs = intent?.task === "dataset_search" ? ["nde"] : (intent?.graphs || []);
-                const fallbackResponse = await fetch("/api/tools/sparql/execute", {
+                const fallbackResponse = await fetch(withBasePath("/api/tools/sparql/execute"), {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -336,7 +337,7 @@ async function executeSPARQLQuery(
                 const { buildGXACoverageForExperimentIdsQuery } = await import("@/lib/ontology/templates");
                 const gxaQuery = buildGXACoverageForExperimentIdsQuery(experimentIds);
                 if (gxaQuery) {
-                    const gxaResponse = await fetch("/api/tools/sparql/execute", {
+                    const gxaResponse = await fetch(withBasePath("/api/tools/sparql/execute"), {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({

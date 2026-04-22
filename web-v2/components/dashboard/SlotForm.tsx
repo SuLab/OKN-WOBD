@@ -8,6 +8,7 @@ import {
 } from "@/lib/dashboard/ui-only-slots";
 import { DEFAULT_MONDO_DESCENDANT_EXPAND_CAP } from "@/lib/ontology/mondo-descendants-ols";
 import { isEnsemblGeneStableId } from "@/lib/ontology/gene-identifiers";
+import { withBasePath } from "@/lib/base-path";
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -163,7 +164,7 @@ function OrganismAutocomplete({
     setOpen(true);
     try {
       const res = await fetch(
-        `/api/tools/ontology/ncbitaxon/search?q=${encodeURIComponent(q)}&limit=15`
+        withBasePath(`/api/tools/ontology/ncbitaxon/search?q=${encodeURIComponent(q)}&limit=15`)
       );
       const data = await res.json();
       setSuggestions(data.results ?? []);
@@ -419,7 +420,7 @@ function MondoAutocomplete({
     setOpen(true);
     try {
       const res = await fetch(
-        `/api/tools/ontology/mondo/search?q=${encodeURIComponent(q)}&limit=15`
+        withBasePath(`/api/tools/ontology/mondo/search?q=${encodeURIComponent(q)}&limit=15`)
       );
       const data = await res.json();
       setSuggestions(data.results ?? []);
@@ -678,7 +679,7 @@ function TissueAutocomplete({
       setOpen(true);
       try {
         const res = await fetch(
-          `/api/tools/ontology/uberon/search?q=${encodeURIComponent(q)}&limit=15&source=${source}`
+          withBasePath(`/api/tools/ontology/uberon/search?q=${encodeURIComponent(q)}&limit=15&source=${source}`)
         );
       const data = await res.json();
       setSuggestions(data.results ?? []);
@@ -936,7 +937,7 @@ function EfoAutocomplete({
     setOpen(true);
     try {
       const res = await fetch(
-        `/api/tools/ontology/efo/search?q=${encodeURIComponent(q)}&limit=15`
+        withBasePath(`/api/tools/ontology/efo/search?q=${encodeURIComponent(q)}&limit=15`)
       );
       const data = await res.json();
       setSuggestions(data.results ?? []);
@@ -1214,7 +1215,7 @@ function GeneSymbolAutocomplete({
     setOpen(true);
     try {
       const res = await fetch(
-        `/api/tools/ontology/hgnc/search?q=${encodeURIComponent(q)}&limit=15`
+        withBasePath(`/api/tools/ontology/hgnc/search?q=${encodeURIComponent(q)}&limit=15`)
       );
       const data = await res.json();
       setSuggestions(data.results ?? []);
@@ -1482,7 +1483,7 @@ function DrugAutocomplete({
     setOpen(true);
     try {
       const res = await fetch(
-        `/api/tools/ontology/wikidata/drugs?q=${encodeURIComponent(q)}&limit=15`
+        withBasePath(`/api/tools/ontology/wikidata/drugs?q=${encodeURIComponent(q)}&limit=15`)
       );
       const data = await res.json();
       setSuggestions(data.results ?? []);

@@ -1,6 +1,8 @@
 // LLM-based candidate label generation for ontology-grounded queries
 // Generates clinical disease names from colloquial phrases
 
+import { withBasePath } from "@/lib/base-path";
+
 interface CandidateLabelsResponse {
   entity_type: string;
   raw_phrase: string;
@@ -35,9 +37,11 @@ Rules:
   try {
     // Use shared OpenAI API key via the LLM proxy
     // Use provided URL or construct from environment
-    const endpointUrl = llmUrl || (typeof window === "undefined" && process.env.NEXT_PUBLIC_APP_URL
-      ? `${process.env.NEXT_PUBLIC_APP_URL}/api/tools/llm/complete`
-      : "/api/tools/llm/complete");
+    const endpointUrl =
+      llmUrl ||
+      (typeof window === "undefined" && process.env.NEXT_PUBLIC_APP_URL
+        ? `${process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "")}/api/tools/llm/complete`
+        : withBasePath("/api/tools/llm/complete"));
 
     // Use shared key if available (server-side), otherwise requires session_id for BYOK
     const useShared = typeof process !== "undefined" && !!process.env.ANTHROPIC_SHARED_API_KEY;

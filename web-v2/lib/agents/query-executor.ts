@@ -1,5 +1,6 @@
 import type { QueryPlan, QueryStep, ExecutionEvent, StepResultContext, Intent, SPARQLResult } from "@/types";
 import type { ContextPack } from "@/lib/context-packs/types";
+import { withBasePath } from "@/lib/base-path";
 import { parseJsonOrThrow, throwForFailedApiResponseWithBody } from "@/lib/http/parse-fetch-json";
 import { generateSPARQLFromIntent } from "@/lib/templates/generator";
 import { resolveEntity, entityResolutionToContext, type EntityResolutionResult } from "./entity-resolver";
@@ -471,7 +472,9 @@ async function executeStep(
 
     console.log(`[Executor] Generated SPARQL for ${step.id}:`, sparql.substring(0, 200));
 
-    const executeUrl = baseUrl ? `${baseUrl.replace(/\/$/, "")}/api/tools/sparql/execute` : "/api/tools/sparql/execute";
+    const executeUrl = baseUrl
+        ? `${baseUrl.replace(/\/$/, "")}${withBasePath("/api/tools/sparql/execute")}`
+        : withBasePath("/api/tools/sparql/execute");
     const response = await fetch(executeUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -21,6 +21,7 @@ import {
 import { SparqlEditor } from "@/components/chat/SparqlEditor";
 import { datasetSearchTemplate } from "@/lib/templates/templates/dataset_search";
 import { geoDatasetSearchTemplate } from "@/lib/templates/templates/geo_dataset_search";
+import { withBasePath } from "@/lib/base-path";
 import type { TemplateDefinition } from "@/lib/context-packs/types";
 import { Info, ChevronDown, ChevronRight, Copy, Check } from "lucide-react";
 
@@ -138,7 +139,7 @@ export default function TemplatePage() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/tools/context/packs/${PACK_ID}`)
+    fetch(withBasePath(`/api/tools/context/packs/${PACK_ID}`))
       .then((r) => {
         if (!r.ok) throw new Error(r.statusText);
         return r.json();
