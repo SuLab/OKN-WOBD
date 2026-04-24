@@ -287,7 +287,7 @@ export default function TemplatePage() {
         style={{ backgroundColor: "var(--niaid-page-bg)" }}
       >
         <p className="text-red-600 dark:text-red-400">{packError}</p>
-        <Link href="/" className="mt-4 inline-block text-sm text-niaid-link hover:underline">
+        <Link href="/queries" className="mt-4 inline-block text-sm text-niaid-link hover:underline">
           ← Back to templates
         </Link>
       </div>
@@ -312,7 +312,7 @@ export default function TemplatePage() {
         style={{ backgroundColor: "var(--niaid-page-bg)" }}
       >
         <p className="text-slate-600 dark:text-slate-400">Template not found.</p>
-        <Link href="/" className="mt-4 inline-block text-sm text-niaid-link hover:underline">
+        <Link href="/queries" className="mt-4 inline-block text-sm text-niaid-link hover:underline">
           ← Back to templates
         </Link>
       </div>
@@ -328,7 +328,7 @@ export default function TemplatePage() {
     >
       <div className="mx-auto w-full max-w-5xl space-y-4 sm:space-y-5">
         <Link
-          href="/"
+          href="/queries"
           className="inline-flex items-center gap-1 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-niaid-link"
         >
           ← Back to templates
