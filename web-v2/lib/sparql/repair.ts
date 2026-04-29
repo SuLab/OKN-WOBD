@@ -27,18 +27,9 @@ export function attemptRepair(
     changes.push("Switched from exact string match to case-insensitive regex");
   }
 
-  // Strategy 3: Remove OPTIONAL if it's causing issues
-  // This is a last resort - only if we have multiple OPTIONALs
-  const optionalCount = (repaired.match(/OPTIONAL/gi) || []).length;
-  if (optionalCount > 3) {
-    // Remove the last OPTIONAL block
-    const optionalRegex = /OPTIONAL\s*\{[^}]*\}/gs;
-    const matches = repaired.match(optionalRegex);
-    if (matches && matches.length > 0) {
-      repaired = repaired.replace(matches[matches.length - 1], "");
-      changes.push("Removed last OPTIONAL clause to simplify query");
-    }
-  }
+  // Strategy 3 (removed): naive OPTIONAL removal via /OPTIONAL\s*\{[^}]*\}/ is unsafe for nested
+  // OPTIONAL { ... OPTIONAL { ... } ... } patterns (common in NDE dataset_search). It deletes
+  // the inner block only or leaves dangling "}", yielding invalid SPARQL and FRINK 400 parse errors.
 
   // Strategy 4: Increase LIMIT if it's very small
   const limitMatch = repaired.match(/LIMIT\s+(\d+)/i);

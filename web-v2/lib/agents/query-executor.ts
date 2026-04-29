@@ -6,8 +6,14 @@ import { generateSPARQLFromIntent } from "@/lib/templates/generator";
 import { resolveEntity, entityResolutionToContext, type EntityResolutionResult } from "./entity-resolver";
 
 export interface ExecuteQueryPlanOptions {
-    /** When set (e.g. from server-side API route), SPARQL execute is called at this origin. Omit for client-side (relative URL). */
-    baseUrl?: string;
+  /** When set (e.g. from server-side API route), SPARQL execute is called at this origin. Omit for client-side (relative URL). */
+  baseUrl?: string;
+  /**
+   * When set (e.g. `"drug_datasets"`), `POST /api/tools/sparql/execute` receives
+   * `template_task`: `${prefix}:${step.id}:${intent.task}` so OKN_SPARQL_LOG correlates internals.
+   * When omitted, `query_plan:${step.id}:${intent.task}` is used (e.g. chat multi-hop).
+   */
+  template_task_prefix?: string;
 }
 
 export async function* executeQueryPlan(
@@ -158,7 +164,7 @@ export async function* executeQueryPlan(
                 }
 
                 // Execute step
-                const result = await executeStep(step, contextPack, options?.baseUrl);
+                const result = await executeStep(step, contextPack, options);
 
                 step.results = result.sparql_results;
                 step.sparql = result.sparql;
@@ -434,10 +440,28 @@ function replaceSPARQLTemplates(sparql: string, contexts: Map<string, StepResult
     });
 }
 
+/**
+ * Stable label sent to `/api/tools/sparql/execute` as `template_task` for OKN_SPARQL_LOG.
+ */
+function buildExecuteStepTemplateTask(
+  step: QueryStep,
+  options?: ExecuteQueryPlanOptions,
+): string {
+  const task =
+    typeof step.intent.task === "string" && step.intent.task.trim()
+      ? step.intent.task.trim()
+      : "step";
+  const prefix = options?.template_task_prefix?.trim();
+  if (prefix) {
+    return `${prefix}:${step.id}:${task}`.slice(0, 200);
+  }
+  return `query_plan:${step.id}:${task}`.slice(0, 200);
+}
+
 async function executeStep(
-    step: QueryStep,
-    contextPack: ContextPack,
-    baseUrl?: string
+  step: QueryStep,
+  contextPack: ContextPack,
+  executeOptions?: ExecuteQueryPlanOptions
 ): Promise<{ sparql_results: SPARQLResult; sparql: string; latency_ms: number }> {
     const startTime = Date.now();
 
@@ -472,9 +496,9 @@ async function executeStep(
 
     console.log(`[Executor] Generated SPARQL for ${step.id}:`, sparql.substring(0, 200));
 
-    const executeUrl = baseUrl
-        ? `${baseUrl.replace(/\/$/, "")}${withBasePath("/api/tools/sparql/execute")}`
-        : withBasePath("/api/tools/sparql/execute");
+    const executeUrl = executeOptions?.baseUrl
+      ? `${executeOptions.baseUrl.replace(/\/$/, "")}${withBasePath("/api/tools/sparql/execute")}`
+      : withBasePath("/api/tools/sparql/execute");
     const response = await fetch(executeUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -485,6 +509,7 @@ async function executeStep(
             graphs: step.target_graphs,
             attempt_repair: true,
             run_preflight: false,
+            template_task: buildExecuteStepTemplateTask(step, executeOptions),
         }),
     });
 

@@ -199,6 +199,8 @@ export async function runTemplateQuery({
       attempt_repair: true,
       run_preflight: false,
       debug: true,
+      /** Server: OKN_SPARQL_LOG structured stderr lines when set to 1/true. */
+      template_task: templateId,
     }),
     signal,
   });
