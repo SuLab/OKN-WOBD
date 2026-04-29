@@ -5,6 +5,11 @@ import { loadContextPack } from "@/lib/context-packs/loader";
 import { runStore } from "@/lib/runs/store";
 import { attemptRepair } from "@/lib/sparql/repair";
 import { runPreflight } from "@/lib/sparql/preflight";
+import {
+  classifyExecuteError,
+  maybeLogTemplateSparqlExecute,
+  sparqlQueryFingerprint,
+} from "@/lib/sparql/template-execute-log";
 
 // Simple UUID v4 generator (in production, use a proper library)
 function uuidv4(): string {
@@ -18,7 +23,18 @@ function uuidv4(): string {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { query, pack_id, mode, graphs, options, run_preflight, attempt_repair, debug } = body;
+    const {
+      query,
+      pack_id,
+      mode,
+      graphs,
+      options,
+      run_preflight,
+      attempt_repair,
+      debug,
+      /** Dashboard `/template/[id]` only — enables OKN_SPARQL_LOG structured lines. */
+      template_task,
+    } = body;
 
     if (!query || typeof query !== "string") {
       return NextResponse.json(
@@ -100,31 +116,38 @@ export async function POST(request: Request) {
       }
     }
 
-    // Execute
-    let execResult = await executeSPARQL(finalQuery, endpoint, { timeout_s: timeout });
+    const runId = uuidv4();
+    const queryFp = sparqlQueryFingerprint(finalQuery);
 
-    // Attempt repair if execution failed and repair is enabled
-    let repairResult = null;
-    let repairedQuery = null;
-    if (execResult.error && (attempt_repair !== false)) {
+    let execResult = await executeSPARQL(finalQuery, endpoint, { timeout_s: timeout });
+    const first_attempt_latency_ms = execResult.latency_ms;
+
+    let repairResult: ReturnType<typeof attemptRepair> | null = null;
+    let repairedQuery: string | null = null;
+    let repair_candidate_valid_for_execute = false;
+    let repair_retries_federation = false;
+    let second_attempt_latency_ms: number | undefined;
+
+    const repair_call_after_first_failure =
+      !!(execResult.error && attempt_repair !== false);
+
+    if (repair_call_after_first_failure) {
       repairResult = attemptRepair(finalQuery, execResult.error);
       if (repairResult.success && repairResult.repaired_query) {
-        // Validate repaired query
         const repairValidation = validateSPARQL(repairResult.repaired_query, guardrails);
+        repair_candidate_valid_for_execute = repairValidation.valid;
         if (repairValidation.valid) {
           repairedQuery = repairValidation.normalized_query || repairResult.repaired_query;
-          // Re-inject FROM clauses if needed
           if (mode === "federated" && graphs && Array.isArray(graphs) && graphs.length > 0) {
             repairedQuery = injectFromClauses(repairedQuery, graphs);
           }
-          // Retry execution with repaired query
+          repair_retries_federation = true;
           execResult = await executeSPARQL(repairedQuery, endpoint, { timeout_s: timeout });
+          second_attempt_latency_ms = execResult.latency_ms;
         }
       }
     }
 
-    // Create run record
-    const runId = uuidv4();
     const runRecord = {
       run_id: runId,
       timestamp: new Date().toISOString(),
@@ -158,6 +181,28 @@ export async function POST(request: Request) {
     };
 
     runStore.save(runRecord);
+
+    maybeLogTemplateSparqlExecute(template_task, {
+      run_id: runId,
+      pack_id: typeof pack_id === "string" ? pack_id : undefined,
+      endpoint,
+      timeout_s: timeout,
+      mode: typeof mode === "string" ? mode : undefined,
+      graphs: graphs ?? [],
+      query_byte_length: new TextEncoder().encode(finalQuery).length,
+      query_sha12: queryFp,
+      first_attempt_latency_ms,
+      second_attempt_latency_ms:
+        typeof second_attempt_latency_ms === "number" ? second_attempt_latency_ms : undefined,
+      outcome: execResult.error ? "failure" : "success",
+      final_error_class: classifyExecuteError(execResult.error),
+      repair_call_after_first_failure,
+      repair_returned_candidate: !!(repairResult?.repaired_query),
+      repair_candidate_valid_for_execute,
+      repair_retries_federation,
+      repair_changes: repairResult?.changes,
+      row_count: execResult.row_count,
+    });
 
     const response: Record<string, unknown> = {
       head: execResult.result.head,

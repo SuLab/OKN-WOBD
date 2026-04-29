@@ -68,3 +68,9 @@ For non-Docker builds (e.g. `npm run build` on a server), set `NEXT_PUBLIC_BASE_
 
 Pass any other production secrets and URLs with `-e` or your orchestrator’s environment configuration. The app listens on port 3000 inside the container (`HOSTNAME=0.0.0.0`).
 
+### Optional: `OKN_SPARQL_LOG` (template query diagnostics)
+
+Use this for **Docker, Kubernetes, EC2 + systemd**, or any host that runs `npm start`—add the variable wherever the Node/Next process inherits its environment.
+
+Set on the **Next.js server** (`1`, `true`, or `yes`). When set, each **dashboard template** run that calls `POST /api/tools/sparql/execute` prints one **JSON line** to the process log (e.g. `journalctl`, `docker logs`). The line includes `template_task`, `run_id`, federation `endpoint`, timeouts, first- and second-attempt latencies (if a repair retry runs), repair metadata, row count, and a short **SHA-256 fingerprint** of the query—not the full SPARQL string. Chat-only or other callers that omit `template_task` do not emit these lines. Omit the variable in production if you do not need this telemetry.
+
