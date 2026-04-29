@@ -4,6 +4,7 @@ import { buildDrugDatasetsPlan } from "@/lib/dashboard/drug-datasets-plan";
 import { executeQueryPlan } from "@/lib/agents/query-executor";
 import { augmentNdeDatasetBindingsWithGxa } from "@/lib/dashboard/nde-gxa-augment";
 import type { SPARQLResult } from "@/types";
+import { isOknSparqlLogEnabled } from "@/lib/sparql/template-execute-log";
 
 const PACK_ID = "wobd";
 
@@ -16,6 +17,12 @@ function getBindingValue(raw: { type: string; value: string } | string | undefin
 function getBindingField(b: Record<string, unknown>, key: string): string {
   const raw = b[key] ?? b[key.charAt(0).toUpperCase() + key.slice(1)];
   return getBindingValue(raw as { type: string; value: string } | string | undefined);
+}
+
+/** One JSON stderr line — same OKN_SPARQL_LOG gate as templated federation execute logs. */
+function logDrugStructured(payload: Record<string, unknown>): void {
+  if (!isOknSparqlLogEnabled()) return;
+  console.info(JSON.stringify(payload));
 }
 
 export async function POST(request: Request) {
@@ -60,8 +67,19 @@ export async function POST(request: Request) {
       ? `${request.headers.get("x-forwarded-proto") || "https"}://${request.headers.get("x-forwarded-host")}`
       : new URL(request.url).origin;
 
-    for await (const event of executeQueryPlan(plan, pack, { baseUrl })) {
+    const pipelineT0 = Date.now();
+    const stepLatencyMsById: Record<string, number> = {};
+    let failedStepId: string | null = null;
+
+    for await (const event of executeQueryPlan(plan, pack, {
+      baseUrl,
+      template_task_prefix: "drug_datasets",
+    })) {
+      if (event.type === "step_completed" && typeof event.step.latency_ms === "number") {
+        stepLatencyMsById[event.step.id] = event.step.latency_ms;
+      }
       if (event.type === "step_failed") {
+        failedStepId = event.step.id;
         lastError = event.step.error ?? event.error ?? "Step failed";
       }
       if (event.type === "plan_completed") {
@@ -90,6 +108,35 @@ export async function POST(request: Request) {
       }
     }
 
+    const elapsedPlanMs = Date.now() - pipelineT0;
+    const provisionalBindings = finalResults?.results?.bindings?.length ?? 0;
+    let pipelineOutcome: string;
+    if (failedStepId) {
+      pipelineOutcome = "failed_step";
+    } else if (lastError && !finalResults) {
+      pipelineOutcome = "stopped_error_no_binding_table";
+    } else if (!finalResults) {
+      pipelineOutcome = "no_final_results";
+    } else if (provisionalBindings === 0) {
+      pipelineOutcome = "completed_zero_rows_nde";
+    } else {
+      pipelineOutcome = "completed_with_binding_rows_nde_pre_augment";
+    }
+
+    logDrugStructured({
+      event: "drug_datasets_pipeline_post_plan",
+      plan_id: plan.id,
+      drugs,
+      only_gene_expression: onlyGeneExpression,
+      max_results: maxResults,
+      elapsed_ms_execute_plan_loop: elapsedPlanMs,
+      step_latency_ms_by_id: stepLatencyMsById,
+      failed_step_id: failedStepId,
+      last_error_snapshot: lastError,
+      nde_row_count_before_augment_pipeline: provisionalBindings,
+      pipeline_outcome: pipelineOutcome,
+    });
+
     if (lastError && !finalResults) {
       return NextResponse.json(
         { error: lastError, results: null },
@@ -109,9 +156,19 @@ export async function POST(request: Request) {
       const sampleIds = bindings.slice(0, 3).map((b) => getBindingField(b as Record<string, unknown>, "identifier"));
       console.log("[drug-datasets] NDE bindings:", bindings.length, "sample identifiers:", sampleIds);
     }
+    const augmentT0 = Date.now();
     finalResults = await augmentNdeDatasetBindingsWithGxa(pack, finalResults as SPARQLResult);
-
     const augmentedBindings = finalResults.results?.bindings ?? [];
+
+    logDrugStructured({
+      event: "drug_datasets_post_augment",
+      plan_id: plan.id,
+      drugs,
+      nde_row_count_after_augment: augmentedBindings.length,
+      augment_wall_ms: Date.now() - augmentT0,
+      elapsed_ms_since_plan_start_to_post_augment: Date.now() - pipelineT0,
+    });
+
     let filteredEmptyHint: string | null = null;
     // When onlyGeneExpression is true we already restricted step 3 to GEO (geo_dataset_search), so the
     // result set is already GEO-only. Do NOT filter by hasGeneExpression (GXA coverage), or we'd show 0
@@ -129,6 +186,10 @@ export async function POST(request: Request) {
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Unknown error";
+    logDrugStructured({
+      event: "drug_datasets_uncaught_exception",
+      error_message: message,
+    });
     return NextResponse.json(
       { error: message, results: null },
       { status: 500 }

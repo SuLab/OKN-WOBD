@@ -5,7 +5,7 @@
 
 import { createHash } from "crypto";
 
-function loggingEnabled(): boolean {
+export function isOknSparqlLogEnabled(): boolean {
   const v = process.env.OKN_SPARQL_LOG?.trim()?.toLowerCase();
   return v === "1" || v === "true" || v === "yes";
 }
@@ -51,7 +51,7 @@ export function maybeLogTemplateSparqlExecute(
   template_task: unknown,
   payload: TemplateSparqlLogPayload,
 ): void {
-  if (!loggingEnabled()) return;
+  if (!isOknSparqlLogEnabled()) return;
   if (typeof template_task !== "string" || !template_task.trim()) return;
 
   const line = JSON.stringify({
