@@ -70,7 +70,17 @@ Pass any other production secrets and URLs with `-e` or your orchestrator’s en
 
 ### Optional: `OKN_SPARQL_LOG` (template query diagnostics)
 
-Use this for **Docker, Kubernetes, EC2 + systemd**, or any host that runs `npm start`—add the variable wherever the Node/Next process inherits its environment.
+Use on **Docker, Kubernetes, EC2 + systemd**, **local dev**, or any host—the variable must reach the **Next.js server** process (`1`, `true`, or `yes`).
 
-Set on the **Next.js server** (`1`, `true`, or `yes`). When set, each **dashboard template** run that calls `POST /api/tools/sparql/execute` prints one **JSON line** to the process log (e.g. `journalctl`, `docker logs`). The line includes `template_task`, `run_id`, federation `endpoint`, timeouts, first- and second-attempt latencies (if a repair retry runs), repair metadata, row count, and a short **SHA-256 fingerprint** of the query—not the full SPARQL string. **`POST /api/tools/drug-datasets`** emits additional **`drug_datasets_*`** structured lines (`drug_datasets_pipeline_post_plan`, `drug_datasets_post_augment`, exceptions) covering requested drugs, per-step federation latencies, failed step ids, pipeline outcome, row counts around GXA augment, etc. Executor-driven SPARQL steps also send **`template_task`** (`drug_datasets:step2:raw_sparql`, …, or **`query_plan:…`** for chat multi-hop) so federation attempts appear in **`template_sparql_execute`** lines the same way. Chat-only callers that omit a prefix still get `query_plan:…`; omit the variable entirely if you do not need telemetry.
+**Examples**
+
+- **Local dev:** `OKN_SPARQL_LOG=1 npm run dev` — structured lines print in that terminal.
+- **Built app:** `OKN_SPARQL_LOG=1 npm start` — match your deployed env (e.g. `NEXT_PUBLIC_BASE_PATH=/wobd npm start` if you use the `/wobd` subpath).
+- **Docker:** add `-e OKN_SPARQL_LOG=1` to `docker run` next to any other `-e` flags.
+- **systemd / EC2:** `Environment="OKN_SPARQL_LOG=1"` (or equivalent) in the unit file.
+- **`web-v2/.env.local`:** optional line `OKN_SPARQL_LOG=1` so `next dev` / `npm start` pick it up without prefixing the command.
+
+Output goes to **process logs** (that terminal, **`journalctl -u …`**, **`docker logs <container>`**).
+
+When set, each **dashboard template** run that calls `POST /api/tools/sparql/execute` prints one **JSON line** to the process log (e.g. `journalctl`, `docker logs`). The line includes `template_task`, `run_id`, federation `endpoint`, timeouts, first- and second-attempt latencies (if a repair retry runs), repair metadata, row count, and a short **SHA-256 fingerprint** of the query—not the full SPARQL string. **`POST /api/tools/drug-datasets`** emits additional **`drug_datasets_*`** structured lines (`drug_datasets_pipeline_post_plan`, `drug_datasets_post_augment`, exceptions) covering requested drugs, per-step federation latencies, failed step ids, pipeline outcome, row counts around GXA augment, etc. Executor-driven SPARQL steps also send **`template_task`** (`drug_datasets:step2:raw_sparql`, …, or **`query_plan:…`** for chat multi-hop) so federation attempts appear in **`template_sparql_execute`** lines the same way. Chat-only callers that omit a prefix still get `query_plan:…`; omit the variable entirely if you do not need telemetry.
 
