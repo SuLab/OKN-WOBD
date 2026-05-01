@@ -106,7 +106,7 @@ Official images are built in CI and pushed to **GitHub Container Registry** when
 3. **Publish a GitHub Release:** Repo → **Releases** → **Draft a new release** → choose the tag `v1.2.0` (create it here if it does not exist yet) → add release title/notes → **Publish release** (not “Save draft”). That event **starts the workflow automatically**—you do not need to trigger it by hand.
 4. **Confirm CI:** **Actions** → open the **Build and push web-v2 to GHCR** run kicked off by that release; ensure it completes without errors. **Optional:** to exercise the same workflow without publishing a release, use **Actions** → that workflow → **Run workflow** (manual runs produce a `sha-*` image tag and do **not** move `latest`; see **When it runs** above).
 5. **Pull on the server (or locally):**  
-   `docker pull ghcr.io/<owner>/<repo>:1.2.0`  
+   `docker pull ghcr.io/<owner>/<repo>:1.2.0` — e.g. `docker pull ghcr.io/sulab/okn-wobd:1.2.0`  
    or `:latest` after a **stable** (non–pre-release) publish. Authenticate to GHCR if the package is private:  
    `echo <TOKEN> | docker login ghcr.io -u <GITHUB_USERNAME> --password-stdin`  
    (token needs at least `read:packages`; authorize SSO for the org if required).
