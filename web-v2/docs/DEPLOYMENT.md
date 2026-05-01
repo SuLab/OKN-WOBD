@@ -68,6 +68,51 @@ For non-Docker builds (e.g. `npm run build` on a server), set `NEXT_PUBLIC_BASE_
 
 Pass any other production secrets and URLs with `-e` or your orchestrator’s environment configuration. The app listens on port 3000 inside the container (`HOSTNAME=0.0.0.0`).
 
+### GitHub Actions → GHCR (container registry)
+
+Official images are built in CI and pushed to **GitHub Container Registry** when a **GitHub Release is published** (not on every push to `main`).
+
+**Workflow file:** [`.github/workflows/web-v2-ghcr.yml`](../../.github/workflows/web-v2-ghcr.yml) (repository root).
+
+**When it runs**
+
+- **Release published:** Someone publishes a **GitHub Release** (draft releases do not trigger this). Use a **semver tag** on the release, e.g. `v1.2.0` (leading `v` is normal).
+- **Workflow dispatch:** In the repo → **Actions** → select **“Build and push web-v2 to GHCR”** → **Run workflow**. Useful for ad-hoc verification builds. The image is still tagged with a **`sha-*`** digest; **`latest` is not updated** on manual runs.
+
+**Image name**
+
+- `ghcr.io/<lowercase-owner>/<lowercase-repo>` — for example `ghcr.io/sulab/okn-wobd` for repository `SuLab/OKN-WOBD`.
+
+**Tags produced**
+
+- **Semver:** e.g. `1.2.0` and `1.2` derived from tag `v1.2.0`.
+- **`sha-*`:** identifies the exact Git commit built.
+- **`latest`:** updated only when a **stable** release is published (not a **pre-release**). Pre-releases still get semver-style tags but do not move `latest`.
+
+**Repository / organization setup**
+
+- **Actions** must be allowed for the repository.
+- Under **Settings → Actions → General → Workflow permissions**, the default `GITHUB_TOKEN` must be able to publish packages (often **“Read and write permissions”** at the repo level, or your org’s equivalent policy).
+- If pushes to GHCR fail with **403**, an **organization owner** may need to adjust **org Settings** for **Actions** or **Packages**.
+
+#### Steps to create a tagged release and publish the image
+
+1. Merge and verify the code you intend to ship (for example on `main`).
+2. **Create the Git tag** (semver), on the correct commit:
+   - **Git CLI:**  
+     `git tag -a v1.2.0 -m "web-v2 1.2.0"`  
+     `git push origin v1.2.0`
+   - **GitHub UI:** You can also create the tag while drafting the release (step 3).
+3. **Publish a GitHub Release:** Repo → **Releases** → **Draft a new release** → choose the tag `v1.2.0` (create it here if it does not exist yet) → add release title/notes → **Publish release** (not “Save draft”). That event **starts the workflow automatically**—you do not need to trigger it by hand.
+4. **Confirm CI:** **Actions** → open the **Build and push web-v2 to GHCR** run kicked off by that release; ensure it completes without errors. **Optional:** to exercise the same workflow without publishing a release, use **Actions** → that workflow → **Run workflow** (manual runs produce a `sha-*` image tag and do **not** move `latest`; see **When it runs** above).
+5. **Pull on the server (or locally):**  
+   `docker pull ghcr.io/<owner>/<repo>:1.2.0`  
+   or `:latest` after a **stable** (non–pre-release) publish. Authenticate to GHCR if the package is private:  
+   `echo <TOKEN> | docker login ghcr.io -u <GITHUB_USERNAME> --password-stdin`  
+   (token needs at least `read:packages`; authorize SSO for the org if required).
+
+**Note:** Pushing only a git tag **without** publishing a GitHub Release does **not** run this workflow. The intended gate is **Publish release**.
+
 ### Optional: `OKN_SPARQL_LOG` (template query diagnostics)
 
 Use on **Docker, Kubernetes, EC2 + systemd**, **local dev**, or any host—the variable must reach the **Next.js server** process (`1`, `true`, or `yes`).
