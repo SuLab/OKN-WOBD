@@ -225,7 +225,7 @@ export default function AboutPage() {
             >
               Model Context Protocol
             </a>{" "}
-            server that consolidates 27 Proto-OKN knowledge graphs &mdash; including the NDE and
+            server that consolidates over 30 Proto-OKN knowledge graphs &mdash; including the NDE and
             GXA graphs used by WOBD &mdash; into one interface. Through it, an AI assistant can
             discover relevant graphs, inspect their schemas, run SPARQL queries with automatic
             ontology expansion, bridge identifiers across graphs (genes, chemicals, diseases,
@@ -297,6 +297,7 @@ export default function AboutPage() {
             <li>Ginger Tsueng</li>
             <li>Jim Balhoff</li>
             <li>Yaphet Kebede</li>
+            <li>Peter Rose</li>
           </ul>
         </section>
       </div>
