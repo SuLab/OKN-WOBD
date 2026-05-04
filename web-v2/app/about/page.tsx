@@ -190,100 +190,12 @@ export default function AboutPage() {
             layer and related biological knowledge in FRINK without writing queries by hand. The{" "}
             <a
               className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
-              href="#mcp"
+              href="/mcp"
             >
               unified MCP server
             </a>{" "}
             exposes the same graphs (and many more) to AI assistants for open-ended,
             natural-language exploration.
-          </p>
-        </section>
-
-        <section
-          id="mcp"
-          className="space-y-3 border-t border-slate-200 pt-6 scroll-mt-24 dark:border-slate-700"
-        >
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-            Unified MCP server
-          </h2>
-          <p>
-            The{" "}
-            <a
-              className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
-              href="https://github.com/sbl-sdsc/mcp-proto-okn"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              mcp-proto-okn
-            </a>{" "}
-            project provides a single{" "}
-            <a
-              className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
-              href="https://modelcontextprotocol.io/"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              Model Context Protocol
-            </a>{" "}
-            server that consolidates over 30 Proto-OKN knowledge graphs &mdash; including the NDE and
-            GXA graphs used by WOBD &mdash; into one interface. Through it, an AI assistant can
-            discover relevant graphs, inspect their schemas, run SPARQL queries with automatic
-            ontology expansion, bridge identifiers across graphs (genes, chemicals, diseases,
-            locations, industry codes), and synthesize results from multiple sources in a single
-            conversation. See the{" "}
-            <a
-              className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
-              href="https://github.com/sbl-sdsc/mcp-proto-okn/blob/main/docs/unified-server.md"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              unified server documentation
-            </a>{" "}
-            for the full tool list and design.
-          </p>
-          <h3 className="pt-2 text-base font-semibold text-slate-900 dark:text-slate-100">
-            Connect to the public endpoint
-          </h3>
-          <p>
-            A hosted instance is available at{" "}
-            <a
-              className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700 break-all"
-              href="https://frink.apps.renci.org/mcp/proto-okn/mcp"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              https://frink.apps.renci.org/mcp/proto-okn/mcp
-            </a>
-            . Point your MCP-capable client at that URL to query the graphs without running
-            anything locally.
-          </p>
-          <h3 className="pt-2 text-base font-semibold text-slate-900 dark:text-slate-100">
-            Run it locally with Claude Desktop
-          </h3>
-          <p>
-            Add the following to your{" "}
-            <code className="rounded bg-slate-100 px-1 py-0.5 text-sm dark:bg-slate-800">
-              claude_desktop_config.json
-            </code>{" "}
-            and restart Claude Desktop:
-          </p>
-          <pre className="overflow-x-auto rounded-md bg-slate-900 p-4 text-sm text-slate-100 dark:bg-slate-800">
-            <code>{`{
-  "mcpServers": {
-    "proto-okn": {
-      "command": "/full/path/to/uv",
-      "args": ["--directory", "/path/to/mcp-proto-okn", "run", "mcp-proto-okn-unified"]
-    }
-  }
-}`}</code>
-          </pre>
-          <p>
-            The server exposes tools in four groups: <strong>discovery</strong> (list graphs,
-            route a question to likely graphs, get descriptions), <strong>schema and query</strong>{" "}
-            (inspect schemas, run SPARQL, run federated multi-graph queries, pull reusable query
-            templates), <strong>cross-graph</strong> (identifier bridging and ontology descendant
-            expansion), and <strong>visualization</strong> (schema diagrams and chat
-            transcripts).
           </p>
         </section>
 

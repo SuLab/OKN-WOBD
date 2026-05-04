@@ -86,7 +86,7 @@ export default function LandingPage() {
             </Link>
 
             <Link
-              href="/about#mcp"
+              href="/mcp"
               className="group flex flex-col rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 transition-all text-left"
             >
               <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
