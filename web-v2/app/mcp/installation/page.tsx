@@ -13,14 +13,9 @@ export default function MCPInstallationPage() {
           </h1>
           <p className="mx-auto mt-5 w-[90%] max-w-full text-left text-base leading-relaxed text-slate-600 [text-wrap:pretty] dark:text-slate-400">
             A hosted instance of the unified MCP server is available at{" "}
-            <a
-              className="break-all font-medium text-niaid-link underline-offset-2 hover:underline"
-              href="https://apps.okn.us/okn-mcp/mcp"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
+            <code className="break-all rounded bg-slate-100 px-1 py-0.5 text-sm dark:bg-slate-800">
               https://apps.okn.us/okn-mcp/mcp
-            </a>
+            </code>
             . Point your MCP-capable client at that URL &mdash; no local installation required.
             Setup steps below cover the two most common clients; for additional clients and
             up-to-date screenshots, see the upstream{" "}

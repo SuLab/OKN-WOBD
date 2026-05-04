@@ -51,7 +51,7 @@ export default function LandingPage() {
                 Proto-OKN
               </a>{" "}
               federation; today's templated queries cover NDE and GXA, while the unified MCP
-              server reaches all 27 Proto-OKN graphs.{" "}
+              server reaches over 30 Proto-OKN KGs.{" "}
               <Link href="/about" className="font-medium text-niaid-link hover:underline">
                 Learn more
               </Link>
@@ -94,7 +94,7 @@ export default function LandingPage() {
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                 Connect an AI assistant &mdash; Claude, ChatGPT, VS Code &mdash; to a single
-                Model Context Protocol server spanning all 27 Proto-OKN graphs. The assistant
+                Model Context Protocol server spanning over 30 Proto-OKN KGs. The assistant
                 discovers graphs, inspects schemas, runs SPARQL, bridges identifiers, and
                 combines results in conversation. Good for open-ended, cross-graph questions.
               </p>

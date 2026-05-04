@@ -13,81 +13,47 @@ export default function MCPPage() {
             Unified MCP server
           </h1>
           <p className="mx-auto mt-5 w-[90%] max-w-full text-left text-base leading-relaxed text-slate-600 [text-wrap:pretty] dark:text-slate-400">
-            Connect an AI assistant &mdash; Claude, ChatGPT, VS Code &mdash; to a single Model
-            Context Protocol server spanning all 27 Proto-OKN graphs. The assistant discovers
-            graphs, inspects schemas, runs SPARQL, bridges identifiers, and combines results in
-            conversation.{" "}
-            <Link href="/about" className="font-medium text-niaid-link hover:underline">
-              Learn more about WOBD
+            Connect an AI assistant &mdash; Claude, ChatGPT, VS Code &mdash; to the{" "}
+            <a
+              className="font-medium text-niaid-link hover:underline"
+              href="https://github.com/sbl-sdsc/mcp-proto-okn"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              mcp-proto-okn
+            </a>{" "}
+            <a
+              className="font-medium text-niaid-link hover:underline"
+              href="https://modelcontextprotocol.io/"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Model Context Protocol
+            </a>{" "}
+            server, a single endpoint spanning over 30 Proto-OKN KGs &mdash;
+            including the NDE and GXA graphs that power WOBD. The assistant discovers relevant
+            graphs, inspects schemas, runs SPARQL with automatic ontology expansion, bridges
+            identifiers across graphs, and synthesizes results in a single conversation; see
+            the{" "}
+            <a
+              className="font-medium text-niaid-link hover:underline"
+              href="https://github.com/sbl-sdsc/mcp-proto-okn/blob/main/docs/unified-server.md"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              unified server documentation
+            </a>{" "}
+            for the full tool list and design.{" "}
+            <Link
+              href="/mcp/installation"
+              className="font-medium text-niaid-link underline-offset-2 hover:underline"
+            >
+              Learn to connect your client to our MCP server &rarr;
             </Link>
           </p>
         </div>
 
         <VignetteCards />
-
-        <div className="w-full max-w-3xl space-y-8 text-slate-700 dark:text-slate-300">
-          <section className="space-y-3">
-            <p>
-              The{" "}
-              <a
-                className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
-                href="https://github.com/sbl-sdsc/mcp-proto-okn"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                mcp-proto-okn
-              </a>{" "}
-              project provides a single{" "}
-              <a
-                className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
-                href="https://modelcontextprotocol.io/"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                Model Context Protocol
-              </a>{" "}
-              server that consolidates over 30 Proto-OKN knowledge graphs &mdash; including the
-              NDE and GXA graphs used by WOBD &mdash; into one interface. Through it, an AI
-              assistant can discover relevant graphs, inspect their schemas, run SPARQL queries
-              with automatic ontology expansion, bridge identifiers across graphs (genes,
-              chemicals, diseases, locations, industry codes), and synthesize results from
-              multiple sources in a single conversation. See the{" "}
-              <a
-                className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
-                href="https://github.com/sbl-sdsc/mcp-proto-okn/blob/main/docs/unified-server.md"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                unified server documentation
-              </a>{" "}
-              for the full tool list and design.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <p>
-              The server exposes tools in four groups: <strong>discovery</strong> (list graphs,
-              route a question to likely graphs, get descriptions),{" "}
-              <strong>schema and query</strong> (inspect schemas, run SPARQL, run federated
-              multi-graph queries, pull reusable query templates),{" "}
-              <strong>cross-graph</strong> (identifier bridging and ontology descendant
-              expansion), and <strong>visualization</strong> (schema diagrams and chat
-              transcripts).
-            </p>
-          </section>
-
-          <section className="space-y-3 border-t border-slate-200 pt-6 dark:border-slate-700">
-            <p>
-              Ready to try it?{" "}
-              <Link
-                href="/mcp/installation"
-                className="font-medium text-niaid-link underline-offset-2 hover:underline"
-              >
-                Connect a client to the public endpoint &rarr;
-              </Link>
-            </p>
-          </section>
-        </div>
       </div>
     </div>
   );
