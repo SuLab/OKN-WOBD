@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { VignetteCards } from "@/components/landing/VignetteCards";
 
 export default function MCPPage() {
   return (
@@ -21,6 +22,8 @@ export default function MCPPage() {
             </Link>
           </p>
         </div>
+
+        <VignetteCards />
 
         <div className="w-full max-w-3xl space-y-8 text-slate-700 dark:text-slate-300">
           <section className="space-y-3">
@@ -62,45 +65,6 @@ export default function MCPPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-              Connect to the public endpoint
-            </h2>
-            <p>
-              A hosted instance is available at{" "}
-              <a
-                className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700 break-all"
-                href="https://frink.apps.renci.org/mcp/proto-okn/mcp"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                https://frink.apps.renci.org/mcp/proto-okn/mcp
-              </a>
-              . Point your MCP-capable client at that URL to query the graphs without running
-              anything locally.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-              Run it locally with Claude Desktop
-            </h2>
-            <p>
-              Add the following to your{" "}
-              <code className="rounded bg-slate-100 px-1 py-0.5 text-sm dark:bg-slate-800">
-                claude_desktop_config.json
-              </code>{" "}
-              and restart Claude Desktop:
-            </p>
-            <pre className="overflow-x-auto rounded-md bg-slate-900 p-4 text-sm text-slate-100 dark:bg-slate-800">
-              <code>{`{
-  "mcpServers": {
-    "proto-okn": {
-      "command": "/full/path/to/uv",
-      "args": ["--directory", "/path/to/mcp-proto-okn", "run", "mcp-proto-okn-unified"]
-    }
-  }
-}`}</code>
-            </pre>
             <p>
               The server exposes tools in four groups: <strong>discovery</strong> (list graphs,
               route a question to likely graphs, get descriptions),{" "}
@@ -109,6 +73,18 @@ export default function MCPPage() {
               <strong>cross-graph</strong> (identifier bridging and ontology descendant
               expansion), and <strong>visualization</strong> (schema diagrams and chat
               transcripts).
+            </p>
+          </section>
+
+          <section className="space-y-3 border-t border-slate-200 pt-6 dark:border-slate-700">
+            <p>
+              Ready to try it?{" "}
+              <Link
+                href="/mcp/installation"
+                className="font-medium text-niaid-link underline-offset-2 hover:underline"
+              >
+                Connect a client to the public endpoint &rarr;
+              </Link>
             </p>
           </section>
         </div>
