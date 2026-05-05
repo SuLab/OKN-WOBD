@@ -2,8 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { VIGNETTE_META, getVignetteMeta } from "@/lib/landing/vignette-meta";
 
+const STATIC_VIGNETTE_SLUGS = new Set<string>(["terpene-biosynthesis"]);
+
 export function generateStaticParams() {
-  return VIGNETTE_META.map((v) => ({ slug: v.slug }));
+  return VIGNETTE_META
+    .filter((v) => !STATIC_VIGNETTE_SLUGS.has(v.slug))
+    .map((v) => ({ slug: v.slug }));
 }
 
 export default function VignettePage({ params }: { params: { slug: string } }) {
