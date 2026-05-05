@@ -22,7 +22,13 @@ export default function QueriesPage() {
           <p className="mx-auto mt-5 w-[90%] max-w-full text-left text-base leading-relaxed text-slate-600 [text-wrap:pretty] dark:text-slate-400">
             Pick a template to run a predefined, validated SPARQL query pattern over the
             federated WOBD graphs. Fill in your search terms and the app assembles and executes
-            the query for you &mdash; no SPARQL required.{" "}
+            the query for you &mdash; no SPARQL required. The current templated UI covers the
+            NDE and GXA graphs; for open-ended cross-graph questions across all 30+ Proto-OKN
+            graphs, use the{" "}
+            <Link href="/mcp" className="font-medium text-niaid-link hover:underline">
+              unified MCP server
+            </Link>
+            .{" "}
             <Link href="/about" className="font-medium text-niaid-link hover:underline">
               Learn more about WOBD
             </Link>
