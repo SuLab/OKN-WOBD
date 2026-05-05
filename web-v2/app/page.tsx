@@ -127,18 +127,14 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Two ways to use WOBD */}
+        {/* Get started — two interfaces */}
         <section className="w-full" aria-labelledby="access-modes-heading">
           <h2
             id="access-modes-heading"
-            className="text-center text-lg sm:text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2"
+            className="text-center text-lg sm:text-xl font-semibold text-slate-900 dark:text-slate-100 mb-6"
           >
-            Two ways to use WOBD
+            Get started
           </h2>
-          <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-slate-600 dark:text-slate-400">
-            A focused templated UI for reproducible workflows, or a unified MCP server for
-            open-ended cross-graph exploration with your AI assistant of choice.
-          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Link
               href="/queries"
@@ -148,9 +144,8 @@ export default function LandingPage() {
                 Templated queries
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                Pick a template and fill in your search terms &mdash; genes, diseases, datasets,
-                contrasts. The app assembles and executes the SPARQL for you. Currently covers
-                NDE and GXA. Good for focused, reproducible workflows; no SPARQL required.
+                Predefined SPARQL queries you fill in with search terms (NDE + GXA). Good for
+                focused, reproducible workflows; no SPARQL required.
               </p>
               <span className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-niaid-link">
                 Try a query
@@ -166,10 +161,8 @@ export default function LandingPage() {
                 Unified MCP server
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                Connect an AI assistant &mdash; Claude, ChatGPT, VS Code &mdash; to a single
-                Model Context Protocol server spanning over 30 Proto-OKN KGs. The assistant
-                discovers graphs, inspects schemas, runs SPARQL, bridges identifiers, and
-                combines results in conversation. Good for open-ended, cross-graph questions.
+                Connect Claude, ChatGPT, or VS Code to query the entire Proto-OKN federation in
+                conversation. Good for open-ended, cross-graph questions.
               </p>
               <span className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-niaid-link">
                 Connect your AI assistant
