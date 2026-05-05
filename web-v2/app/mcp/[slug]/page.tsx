@@ -2,7 +2,10 @@ import { notFound } from "next/navigation";
 import { VIGNETTE_META, getVignetteMeta } from "@/lib/landing/vignette-meta";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
-const STATIC_VIGNETTE_SLUGS = new Set<string>(["terpene-biosynthesis"]);
+const STATIC_VIGNETTE_SLUGS = new Set<string>([
+  "terpene-biosynthesis",
+  "pfas-compounds",
+]);
 
 export function generateStaticParams() {
   return VIGNETTE_META
