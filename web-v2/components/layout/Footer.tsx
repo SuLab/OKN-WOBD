@@ -4,7 +4,6 @@ import {
   FRINK_REGISTRY_URL,
   GITHUB_REPO_URL,
   GITHUB_ISSUES_URL,
-  CONTACT_NAME,
   CONTACT_EMAIL,
   CONTACT_SUBJECT,
   NSF_AWARD_NUMBER,
@@ -72,15 +71,12 @@ export function Footer() {
           <span aria-hidden className="text-slate-400">
             ·
           </span>
-          <span>
-            Contact:{" "}
-            <a
-              href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(CONTACT_SUBJECT)}`}
-              className="hover:text-[var(--niaid-link)] hover:underline"
-            >
-              {CONTACT_NAME}
-            </a>
-          </span>
+          <a
+            href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(CONTACT_SUBJECT)}`}
+            className="hover:text-[var(--niaid-link)] hover:underline"
+          >
+            Contact
+          </a>
         </nav>
         <p className="text-xs text-slate-500">
           Supported by NSF award{" "}

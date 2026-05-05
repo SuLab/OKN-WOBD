@@ -10,6 +10,5 @@ export const NSF_AWARD_URL =
   "https://www.nsf.gov/awardsearch/show-award/?AWD_ID=2535091";
 export const PROTO_OKN_URL = "https://www.proto-okn.net/";
 
-export const CONTACT_NAME = "Andrew Su";
-export const CONTACT_EMAIL = "asu@scripps.edu";
+export const CONTACT_EMAIL = "okn-frink@renci.org";
 export const CONTACT_SUBJECT = "WOBD Support question";

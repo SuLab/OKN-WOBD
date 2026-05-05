@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import {
   CONTACT_EMAIL,
-  CONTACT_NAME,
   CONTACT_SUBJECT,
   FRINK_OKN_URL,
   FRINK_REGISTRY_URL,
@@ -281,7 +280,7 @@ export default function AboutPage() {
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
               For programmatic questions, collaboration opportunities, or support discussions,
-              contact {CONTACT_NAME}.
+              contact the WOBD team.
             </p>
             <a
               href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(CONTACT_SUBJECT)}`}
