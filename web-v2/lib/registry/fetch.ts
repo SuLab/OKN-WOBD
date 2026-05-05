@@ -1,11 +1,11 @@
 // Fetch graph information from OKN Registry (live path) or use the checked-in list in ./graphs (static path).
-// Registry page: https://frink.renci.org/registry/
+// Registry page: https://registry.okn.us/
 
 import { promises as fs } from "fs";
 import path from "path";
 import { GRAPHS_DATA, type RegistryGraphInfo } from "./graphs";
 
-const REGISTRY_URL = "https://frink.renci.org/registry/";
+const REGISTRY_URL = "https://registry.okn.us/";
 const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours (1 day)
 const GRAPHS_DATA_FILE = path.join(process.cwd(), "data/registry-graphs.json");
 

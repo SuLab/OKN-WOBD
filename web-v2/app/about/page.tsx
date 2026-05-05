@@ -146,7 +146,7 @@ export default function AboutPage() {
             Knowledge graphs are listed in the{" "}
             <a
               className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
-              href="https://frink.renci.org/registry/"
+              href="https://registry.okn.us/"
               rel="noopener noreferrer"
               target="_blank"
             >
