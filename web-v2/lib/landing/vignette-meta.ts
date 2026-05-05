@@ -15,7 +15,7 @@ export const VIGNETTE_META: VignetteMetaItem[] = [
     tag: "Diabetic nephropathy",
     title: "Diabetic nephropathy",
     description:
-      "Explore disease mechanisms, related genes, and candidate datasets for diabetic nephropathy across Proto-OKN graphs.",
+      "End-to-end differential expression from one chat — ontology resolution, ARCHS4 sample classification, and a method comparison that surfaced an interferon signaling signal pooled analysis missed.",
     icon: Stethoscope,
     iconColor: "text-rose-600 dark:text-rose-400",
   },
@@ -24,7 +24,7 @@ export const VIGNETTE_META: VignetteMetaItem[] = [
     tag: "PFAS compounds",
     title: "PFAS compounds",
     description:
-      "Trace per- and polyfluoroalkyl substances from chemical identifiers through environmental exposure and health outcome graphs.",
+      "Convergent evidence across seven knowledge graphs that 'safer' replacement PFAS chemicals (GenX, ADONA) hit the same molecular target as the legacy compounds they replaced.",
     icon: FlaskConical,
     iconColor: "text-sky-600 dark:text-sky-400",
   },
@@ -33,7 +33,7 @@ export const VIGNETTE_META: VignetteMetaItem[] = [
     tag: "Terpene biosynthesis",
     title: "Terpene biosynthesis",
     description:
-      "Walk biosynthetic pathways, enzymes, and source organisms for terpene production across knowledge graphs.",
+      "Federated discovery across plant pathway evidence, organism-spanning expression coverage, and microbial host-engineering datasets — starting material for a synthetic biology team within minutes.",
     icon: Leaf,
     iconColor: "text-emerald-600 dark:text-emerald-400",
   },
