@@ -1,11 +1,46 @@
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import {
+  CONTACT_EMAIL,
+  CONTACT_NAME,
+  CONTACT_SUBJECT,
+  FRINK_OKN_URL,
+  FRINK_REGISTRY_URL,
+  NSF_AWARD_NUMBER,
+  NSF_AWARD_URL,
+  PROTO_OKN_URL,
+} from "@/lib/site-config";
 
 export const metadata: Metadata = {
-  title: "About",
+  title: "About and growth plan",
   description:
-    "WOBD is an NSF-funded prototype federating biomedical dataset metadata with the Proto-OKN knowledge graphs. Team, roadmap, and project context.",
+    "WOBD is NSF-funded research infrastructure connecting biomedical dataset metadata with Proto-OKN knowledge graphs. Learn what it does, why it compounds, and what continued support unlocks.",
 };
+
+const growthPriorities = [
+  {
+    title: "Broader metadata ingestion",
+    body:
+      "Extend beyond the current NDE-centered layer into additional domain-specific and generalist repositories, especially clinical, environmental, and multi-omic resources that users otherwise search separately.",
+  },
+  {
+    title: "Richer dataset descriptions",
+    body:
+      "Capture sample-level annotation, study provenance, assay context, contrasts, and analysis-ready relationships so WOBD can return more actionable answers without pushing users back into every source portal.",
+  },
+  {
+    title: "Cross-graph identifiers and evaluation",
+    body:
+      "Strengthen mappings across genes, diseases, chemicals, organisms, datasets, and publications, then benchmark recurring workflows so AI-mediated answers remain auditable and reproducible as the federation grows.",
+  },
+];
+
+const supportOutcomes = [
+  "More repositories become discoverable through one query plane.",
+  "More scientific questions become reusable workflows instead of one-off integrations.",
+  "More AI-assistant answers carry graph provenance, query traces, and source records.",
+  "More program investments become interoperable with the broader Proto-OKN ecosystem.",
+];
 
 export default function AboutPage() {
   return (
@@ -21,75 +56,133 @@ export default function AboutPage() {
           ]}
         />
 
-        <div className="mx-auto w-full max-w-3xl space-y-8 text-slate-700 dark:text-slate-300">
-          <header className="space-y-4">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-              About the Web of Biological Data
-            </h1>
-            <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm dark:border-slate-700 dark:bg-slate-900">
-              <p className="text-slate-700 dark:text-slate-300">
-                <strong>WOBD</strong> federates harmonized biomedical dataset metadata from the
-                NIAID Data Ecosystem with the Proto-OKN biomedical knowledge graphs so a single
-                query can move across dataset discovery, mechanism, and disease.
-              </p>
-              <p className="mt-2 text-slate-600 dark:text-slate-400">
-                Supported by the U.S. National Science Foundation under award{" "}
-                <a
-                  className="font-medium text-niaid-link hover:underline"
-                  href="https://www.nsf.gov/awardsearch/show-award/?AWD_ID=2535091"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  #2535091
-                </a>
-                . Part of the NSF{" "}
-                <a
-                  className="font-medium text-niaid-link hover:underline"
-                  href="https://www.proto-okn.net/"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  Proto-OKN
-                </a>{" "}
-                federation.
-              </p>
+        <div className="mx-auto w-full max-w-4xl space-y-8 text-slate-700 dark:text-slate-300">
+          <header className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-8">
+            <div className="text-xs font-semibold uppercase tracking-wider text-niaid-link">
+              About WOBD
             </div>
-            <p className="text-slate-600 dark:text-slate-400">
-              The current implementation is a prototype: harmonized dataset metadata and gene
-              expression analysis results are ingested, published, and queryable through a
-              templated SPARQL UI, and the broader Proto-OKN federation is reachable through a
-              unified Model Context Protocol server.
+            <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 dark:text-slate-100 sm:text-4xl">
+              Research infrastructure for queryable, AI-ready biomedical data.
+            </h1>
+            <p className="mt-4 text-base leading-relaxed text-slate-700 dark:text-slate-300">
+              The Web of Biological Data federates harmonized biomedical dataset metadata with
+              Proto-OKN knowledge graphs so researchers can move from a question to mechanisms,
+              diseases, exposures, genes, and supporting datasets in one reproducible workflow.
+            </p>
+            <p className="mt-3 text-base leading-relaxed text-slate-600 dark:text-slate-400">
+              WOBD is supported by the U.S. National Science Foundation under award{" "}
+              <a
+                className="font-medium text-niaid-link hover:underline"
+                href={NSF_AWARD_URL}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                #{NSF_AWARD_NUMBER}
+              </a>{" "}
+              and is part of the{" "}
+              <a
+                className="font-medium text-niaid-link hover:underline"
+                href={PROTO_OKN_URL}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Proto-OKN
+              </a>{" "}
+              federation.
             </p>
           </header>
 
-          <section className="space-y-3 border-t border-slate-200 pt-6 dark:border-slate-700">
+          <section className="grid gap-4 md:grid-cols-[0.9fr_1.1fr]">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+              <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+                The value proposition
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                Biomedical data resources are often funded, curated, and queried separately.
+                WOBD makes those investments work together by giving datasets and knowledge
+                graphs a shared query plane that both humans and AI assistants can use.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+              <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+                Why continued support compounds
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                WOBD is not a single-purpose application. Each graph, repository, identifier
+                bridge, and metadata extension expands the set of questions that can be asked
+                across the entire federation without rebuilding a bespoke integration.
+              </p>
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
             <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-              Roadmap
+              Growth plan
             </h2>
-            <p>
-              Two strands of future work would substantially expand what WOBD can answer:
+            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+              The next stage of WOBD should focus on durable infrastructure: more sources,
+              richer metadata, stronger cross-graph identity, and evaluation that keeps
+              AI-assisted discovery inspectable.
             </p>
-            <ul className="list-disc space-y-2 pl-6">
-              <li>
-                <strong>Broader dataset metadata ingestion.</strong> Today the dataset metadata
-                layer is built primarily from NDE. Adding additional repositories (other
-                domain-specific and generalist sources) would extend the federation&apos;s
-                reach into clinical, environmental, and multi-omic data that NDE does not
-                presently cover.
-              </li>
-              <li>
-                <strong>Richer dataset metadata expressiveness.</strong> Current dataset records
-                describe what a dataset is and where to find it. Expanding the schema to capture
-                richer relationships &mdash; sample-level annotation, study-level provenance,
-                contrast-level metadata &mdash; would let federated queries return more
-                actionable results without requiring users to drop into per-dataset portals.
-              </li>
-            </ul>
-            <p>
-              Both directions require sustained engineering investment. Both also compound: each
-              additional metadata source and each schema extension widens the set of
-              cross-domain questions the unified MCP server can answer in a single chat.
-            </p>
+            <div className="mt-5 grid gap-4 md:grid-cols-3">
+              {growthPriorities.map((priority) => (
+                <div
+                  key={priority.title}
+                  className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60"
+                >
+                  <h3 className="text-sm font-semibold text-niaid-link">
+                    {priority.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                    {priority.body}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+              What support unlocks
+            </h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {supportOutcomes.map((outcome) => (
+                <div
+                  key={outcome}
+                  className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-relaxed text-slate-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300"
+                >
+                  {outcome}
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="space-y-4 border-t border-slate-200 pt-6 dark:border-slate-700">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+              Current user-facing surfaces
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-niaid-link">
+                  Guided query templates
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed">
+                  Researchers fill in terms for dataset discovery, drug-related datasets, and
+                  gene-expression questions. WOBD generates validated graph queries and returns
+                  table or dataset-card results with query traces.
+                </p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-niaid-link">
+                  Unified MCP server
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed">
+                  AI assistants can discover relevant graphs, inspect schemas, bridge
+                  identifiers, run SPARQL, and synthesize answers across the wider Proto-OKN
+                  federation from one conversation.
+                </p>
+              </div>
+            </div>
           </section>
 
           <section className="space-y-4 border-t border-slate-200 pt-6 dark:border-slate-700">
@@ -129,33 +222,10 @@ export default function AboutPage() {
 
           <section className="space-y-3 border-t border-slate-200 pt-6 dark:border-slate-700">
             <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-              Relationship to Proto-OKN
+              Technical foundation
             </h2>
             <p>
-              The WOBD work extends ideas from the NSF{" "}
-              <a
-                className="font-medium text-niaid-link hover:underline"
-                href="https://www.proto-okn.net/"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                Proto-OKN
-              </a>{" "}
-              program: a publicly accessible, interconnected set of knowledge graphs and data
-              services aimed at trustworthy, data-driven discovery. WOBD is a focused path
-              within that broader fabric &mdash; the templated UI exposes the NDE and GXA graphs
-              for reproducible workflows, and the unified MCP server reaches the entire
-              federation, including curated biology in Wikidata, SPOKE-OKN, AOP-Wiki, and
-              dozens of other graphs.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-              Dataset metadata: the NIAID Data Ecosystem (NDE)
-            </h2>
-            <p>
-              The primary structured metadata behind many graphs in this project comes from the{" "}
+              The primary structured dataset metadata layer comes from the{" "}
               <a
                 className="font-medium text-niaid-link hover:underline"
                 href="https://data.niaid.nih.gov"
@@ -164,84 +234,62 @@ export default function AboutPage() {
               >
                 NIAID Data Ecosystem Discovery Portal
               </a>{" "}
-              (NDE). The NDE aggregates and harmonizes dataset records from domain-specific and
-              generalist repositories, clinical, epidemiological, multi-omic, and more into a
-              unified search index with a Schema.org&ndash;aligned schema, filters for host,
-              pathogen, condition, and technique, and an API for programmatic access. Records
-              point back to their source repositories rather than replacing them; the value is
-              consistent discovery across sources.
+              (NDE), which harmonizes dataset records from domain-specific and generalist
+              repositories. Metadata harvested from that pipeline is published as the NDE graph
+              and loaded alongside other graphs in the federation.
             </p>
             <p>
-              For a full description of the portal&apos;s design and scope, see Whetzel et&nbsp;al.,{" "}
-              <a
-                className="font-medium text-niaid-link hover:underline"
-                href="https://journals.asm.org/doi/10.1128/msystems.01270-25"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                The NIAID Discovery Portal: A Unified Search Engine for Infectious and
-                Immune-Mediated Disease Datasets
-              </a>{" "}
-              (<em>mSystems</em>, 2026). Metadata harvested from the NDE pipeline is published as
-              the NDE graph and loaded alongside other graphs in the federation used by this
-              application.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-              Gene Expression Atlas (GXA) data
-            </h2>
-            <p>
-              Data for the GXA graph is built from experiments in the{" "}
+              WOBD also uses data from the{" "}
               <a
                 className="font-medium text-niaid-link hover:underline"
                 href="https://www.ebi.ac.uk/gxa/home"
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                EMBL-EBI Gene Expression Atlas (GXA)
-              </a>
-              , public differential-expression and functional studies. Experiment packages are
-              retrieved from the Atlas infrastructure, parsed, and emitted as Biolink-compatible
-              linked data (study metadata, contrasts, genes, and pathway enrichment) so users
-              can run queries that span NDE dataset metadata, GXA expression results, and other
-              knowledge graphs in the federation, combining and interpreting those results in
-              one workflow.
+                EMBL-EBI Gene Expression Atlas
+              </a>{" "}
+              (GXA), emitting study metadata, contrasts, genes, and pathway enrichment as linked
+              data so expression evidence can be queried with dataset metadata and other
+              knowledge graphs.
             </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-              FRINK registry and how things connect
-            </h2>
             <p>
               Knowledge graphs are listed in the{" "}
               <a
                 className="font-medium text-niaid-link hover:underline"
-                href="https://registry.okn.us/"
+                href={FRINK_REGISTRY_URL}
                 rel="noopener noreferrer"
                 target="_blank"
               >
                 FRINK registry
               </a>
-              , each with a short name, title, description, and a link to its query endpoint. The{" "}
+              , and the{" "}
               <a
                 className="font-medium text-niaid-link hover:underline"
-                href="https://apps.okn.us/"
+                href={FRINK_OKN_URL}
                 rel="noopener noreferrer"
                 target="_blank"
               >
                 FRINK SPARQL federation
               </a>{" "}
-              exposes those graphs so they can be queried individually or in combination. The
-              NDE graph is published in that ecosystem; the GXA graph is published similarly. At
-              a high level, WOBD links NDE metadata (what datasets exist, how they are
-              annotated, and where to get them) to the same query plane as curated biological
-              knowledge (genes, diseases, drugs, pathways, expression contrasts) already present
-              in FRINK, so templated SPARQL queries and AI assistants can span dataset discovery
-              and mechanistic context without siloed portals.
+              exposes those graphs so they can be queried individually or together.
             </p>
+          </section>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+              Discuss WOBD growth or collaboration
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+              For programmatic questions, collaboration opportunities, or support discussions,
+              contact {CONTACT_NAME}.
+            </p>
+            <a
+              href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(CONTACT_SUBJECT)}`}
+              className="mt-5 inline-flex items-center rounded-md px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
+              style={{ backgroundColor: "var(--niaid-button)" }}
+            >
+              Contact the team
+            </a>
           </section>
         </div>
       </div>
