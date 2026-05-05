@@ -46,6 +46,24 @@ export default function DiabeticNephropathyDetailsPage() {
           </p>
         </div>
 
+        <section className="w-full max-w-3xl">
+          <div
+            className="rounded-lg border border-slate-200 border-l-4 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+            style={{ borderLeftColor: "var(--niaid-link)" }}
+          >
+            <div className="text-xs font-semibold uppercase tracking-wider text-niaid-link">
+              Key finding
+            </div>
+            <p className="mt-2 text-base leading-relaxed text-slate-800 dark:text-slate-200">
+              An <strong>end-to-end DE workflow</strong> &mdash; disease ontology resolution,
+              ARCHS4 sample classification, statistical testing, enrichment &mdash; executed
+              from one chat. Comparing pooled and study-matched modes revealed an{" "}
+              <strong>interferon signaling signal</strong> (OAS2, RSAD2) that the simpler
+              pooled analysis would have missed.
+            </p>
+          </div>
+        </section>
+
         <div className="w-full max-w-3xl space-y-10 text-slate-700 dark:text-slate-300">
           <section className="space-y-3">
             <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">

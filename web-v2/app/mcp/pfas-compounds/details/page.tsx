@@ -46,6 +46,24 @@ export default function PFASDetailsPage() {
           </p>
         </div>
 
+        <section className="w-full max-w-3xl">
+          <div
+            className="rounded-lg border border-slate-200 border-l-4 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+            style={{ borderLeftColor: "var(--niaid-link)" }}
+          >
+            <div className="text-xs font-semibold uppercase tracking-wider text-niaid-link">
+              Key finding
+            </div>
+            <p className="mt-2 text-base leading-relaxed text-slate-800 dark:text-slate-200">
+              <strong>GenX</strong>, the chemical that replaced PFOA, is detected at{" "}
+              <strong>73% the frequency of legacy PFOS</strong> in U.S. water systems and was
+              the <strong>most potent PPAR&alpha; activator</strong> of 16 PFAS tested by the
+              EPA &mdash; convergent evidence across seven graphs that compound-by-compound
+              substitution is not reducing risk.
+            </p>
+          </div>
+        </section>
+
         <div className="w-full max-w-3xl space-y-10 text-slate-700 dark:text-slate-300">
           <section className="space-y-3">
             <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">

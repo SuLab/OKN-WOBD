@@ -47,6 +47,23 @@ export default function TerpeneBiosynthesisVignettePage() {
           </p>
         </div>
 
+        <section className="w-full max-w-3xl">
+          <div
+            className="rounded-lg border border-slate-200 border-l-4 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+            style={{ borderLeftColor: "var(--niaid-link)" }}
+          >
+            <div className="text-xs font-semibold uppercase tracking-wider text-niaid-link">
+              Key finding
+            </div>
+            <p className="mt-2 text-base leading-relaxed text-slate-800 dark:text-slate-200">
+              <strong>20+ datasets</strong> surfaced spanning <strong>seven plant species</strong>
+              {" "}and <strong>three microbial hosts</strong>, with a candidate enzyme panel
+              anchored across pathway and expression evidence &mdash; usable starting material
+              for a synthetic biology team within minutes.
+            </p>
+          </div>
+        </section>
+
         <div className="w-full max-w-3xl space-y-10 text-slate-700 dark:text-slate-300">
           <section className="space-y-3">
             <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
