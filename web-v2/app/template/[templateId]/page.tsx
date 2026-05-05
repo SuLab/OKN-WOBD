@@ -284,13 +284,17 @@ export default function TemplatePage() {
   if (packError) {
     return (
       <div
-        className="mx-auto flex max-w-5xl flex-1 flex-col p-4 sm:p-6"
+        className="mx-auto flex max-w-5xl flex-1 flex-col gap-4 p-4 sm:p-6"
         style={{ backgroundColor: "var(--niaid-page-bg)" }}
       >
+        <Breadcrumbs
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Queries", href: "/queries" },
+            { label: "Error" },
+          ]}
+        />
         <p className="text-red-600 dark:text-red-400">{packError}</p>
-        <Link href="/queries" className="mt-4 inline-block text-sm text-niaid-link hover:underline">
-          ← Back to templates
-        </Link>
       </div>
     );
   }
@@ -309,13 +313,17 @@ export default function TemplatePage() {
   if (!template || !meta) {
     return (
       <div
-        className="mx-auto flex max-w-5xl flex-1 flex-col p-4 sm:p-6"
+        className="mx-auto flex max-w-5xl flex-1 flex-col gap-4 p-4 sm:p-6"
         style={{ backgroundColor: "var(--niaid-page-bg)" }}
       >
+        <Breadcrumbs
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Queries", href: "/queries" },
+            { label: "Not found" },
+          ]}
+        />
         <p className="text-slate-600 dark:text-slate-400">Template not found.</p>
-        <Link href="/queries" className="mt-4 inline-block text-sm text-niaid-link hover:underline">
-          ← Back to templates
-        </Link>
       </div>
     );
   }
