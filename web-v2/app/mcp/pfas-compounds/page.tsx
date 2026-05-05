@@ -170,6 +170,65 @@ export default function PFASVignettePage() {
           </div>
         </section>
 
+        <section className="w-full max-w-3xl space-y-3">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+            What the chat looks like
+          </h2>
+          <p className="text-slate-700 dark:text-slate-300">
+            Excerpt from a conversation that produced these findings:
+          </p>
+          <div className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
+            <div className="flex justify-end">
+              <div
+                className="max-w-[85%] rounded-2xl rounded-br-sm px-4 py-2 text-sm text-white shadow-sm"
+                style={{ backgroundColor: "var(--niaid-link)" }}
+              >
+                Are GenX and ADONA actually safer than the legacy PFAS they replaced? Pull
+                together evidence from across the Proto-OKN graphs.
+              </div>
+            </div>
+            <div className="flex justify-start">
+              <div className="max-w-[90%] rounded-2xl rounded-bl-sm bg-white px-4 py-3 text-sm leading-relaxed text-slate-800 shadow-sm dark:bg-slate-900 dark:text-slate-200">
+                <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Querying sawgraph, biobricks-aopwiki, spoke-okn, nde, wikidata&hellip;
+                </p>
+                <p className="mt-2">
+                  Convergent evidence from seven graphs plus PubMed:{" "}
+                  <strong>the replacements are not safer.</strong>
+                </p>
+                <ul className="mt-2 list-disc space-y-1 pl-5">
+                  <li>
+                    <strong>SAWGraph:</strong> GenX appears in 16,954 water-system observations
+                    &mdash; 73% the frequency of legacy PFOS.
+                  </li>
+                  <li>
+                    <strong>PubMed</strong> (Evans et al., EPA 2022): in a 16-PFAS PPAR&alpha;
+                    binding panel, GenX was the most potent activator.
+                  </li>
+                  <li>
+                    <strong>NDE</strong> (GSE212294): in PPAR&alpha;-knockout mice, GenX&apos;s
+                    hepatic effects disappear entirely &mdash; a <em>purer</em> PPAR&alpha;
+                    activator than PFOA.
+                  </li>
+                  <li>
+                    <strong>AOP-Wiki</strong> (AOP 166): PPAR&alpha; activation &rarr;
+                    hepatocellular carcinoma. <strong>SPOKE-OKN</strong>: PPARA on liver and
+                    kidney cancer pathways.
+                  </li>
+                </ul>
+                <p className="mt-2">
+                  The replacement chemical hits the same molecular target, more strongly, at
+                  concentrations already in U.S. drinking water.
+                </p>
+              </div>
+            </div>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Illustrative excerpt; phrasing is paraphrased and lightly edited from the upstream
+            analysis. Live results may vary as graphs are updated.
+          </p>
+        </section>
+
         <section className="w-full max-w-3xl space-y-3 text-slate-700 dark:text-slate-300">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
             What this query unlocks
