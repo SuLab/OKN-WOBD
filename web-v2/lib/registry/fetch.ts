@@ -170,7 +170,7 @@ function parseRegistryJSON(data: any): RegistryGraphInfo[] {
             shortname: item.shortname || item.id || "",
             label: item.title || item.label || item.name || "",
             description: item.description || "",
-            endpoint: item.endpoint || `https://frink.apps.renci.org/${item.shortname}/sparql`,
+            endpoint: item.endpoint || `https://apps.okn.us/${item.shortname}/sparql`,
         }));
     }
 
@@ -179,7 +179,7 @@ function parseRegistryJSON(data: any): RegistryGraphInfo[] {
             shortname: item.shortname || item.id || "",
             label: item.title || item.label || item.name || "",
             description: item.description || "",
-            endpoint: item.endpoint || `https://frink.apps.renci.org/${item.shortname}/sparql`,
+            endpoint: item.endpoint || `https://apps.okn.us/${item.shortname}/sparql`,
         }));
     }
 
@@ -210,7 +210,7 @@ function parseRegistryHTML(html: string): RegistryGraphInfo[] {
                 shortname,
                 label: title,
                 description: description || "",
-                endpoint: `https://frink.apps.renci.org/${shortname}/sparql`,
+                endpoint: `https://apps.okn.us/${shortname}/sparql`,
             });
         }
     }
@@ -235,7 +235,7 @@ function parseRegistryHTML(html: string): RegistryGraphInfo[] {
                 shortname,
                 label: title,
                 description: description || "",
-                endpoint: `https://frink.apps.renci.org/${shortname}/sparql`,
+                endpoint: `https://apps.okn.us/${shortname}/sparql`,
             });
         }
     }

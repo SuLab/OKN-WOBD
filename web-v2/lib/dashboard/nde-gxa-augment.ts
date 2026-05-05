@@ -39,7 +39,7 @@ export async function fetchGxaCoverageForExperiments(
   const federatedEndpoint =
     pack?.endpoint_mode?.federated_endpoint ||
     process.env.NEXT_PUBLIC_FRINK_FEDERATION_URL ||
-    "https://frink.apps.renci.org/federation/sparql";
+    "https://apps.okn.us/federation/sparql";
 
   try {
     const gxaRes = await executeSPARQL(gxaQuery, federatedEndpoint, { timeout_s: 120 });

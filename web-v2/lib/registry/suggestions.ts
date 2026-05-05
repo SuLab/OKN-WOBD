@@ -15,7 +15,7 @@ function getSharedAPIKey(): string | null {
 }
 
 const FRINK_FEDERATION_URL = process.env.NEXT_PUBLIC_FRINK_FEDERATION_URL ||
-    "https://frink.apps.renci.org/federation/sparql";
+    "https://apps.okn.us/federation/sparql";
 
 /** Common NCBITaxon IDs to human-readable species names when rdfs:label is not in graph */
 const COMMON_SPECIES: Record<string, string> = {

@@ -9,7 +9,7 @@ import { groundTermToUBERON } from "@/lib/ontology/ols-client";
 
 const UBERGRAPH_ENDPOINT =
   process.env.NEXT_PUBLIC_UBERGRAPH_SPARQL_URL ||
-  "https://frink.apps.renci.org/ubergraph/sparql";
+  "https://apps.okn.us/ubergraph/sparql";
 
 const UBERON_IRI_PREFIX = "http://purl.obolibrary.org/obo/UBERON_";
 
