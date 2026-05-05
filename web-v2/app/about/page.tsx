@@ -228,7 +228,7 @@ export default function AboutPage() {
               , each with a short name, title, description, and a link to its query endpoint. The{" "}
               <a
                 className="font-medium text-niaid-link hover:underline"
-                href="https://frink.apps.renci.org/"
+                href="https://apps.okn.us/"
                 rel="noopener noreferrer"
                 target="_blank"
               >

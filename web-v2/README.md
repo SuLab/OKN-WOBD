@@ -1,6 +1,6 @@
 # WOBD Web v2
 
-**Template-based SPARQL discovery** for the Web of Biological Data: a Next.js application that runs curated query templates against the [FRINK](https://frink.apps.renci.org/) **federation** SPARQL endpoint (graph scope via `FROM` / intent `graphs`; see **Endpoint routing** below), with a provider-neutral **Tool Service API** under `app/api/tools/`.
+**Template-based SPARQL discovery** for the Web of Biological Data: a Next.js application that runs curated query templates against the [FRINK](https://apps.okn.us/) **federation** SPARQL endpoint (graph scope via `FROM` / intent `graphs`; see **Endpoint routing** below), with a provider-neutral **Tool Service API** under `app/api/tools/`.
 
 Natural language is still used where it helps (for example, optional LLM-assisted routing on the legacy chat page), but the **supported product surface** is the home page plus `/template/{templateId}` slot forms that generate vetted SPARQL. The **landing cards** are defined in `lib/landing/template-meta.ts` (currently **Datasets by keywords**, **Gene-level differential expression per contrast**, and **Datasets for a drug**); other templates in `context/packs/wobd.yaml` are reachable only via direct `/template/<id>` URLs unless you add them to that list.
 
