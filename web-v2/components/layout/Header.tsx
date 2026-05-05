@@ -5,7 +5,7 @@ import { withBasePath } from "@/lib/base-path";
 
 export function Header() {
     return (
-        <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
+        <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
             <Link
                 href="/"
                 className="flex shrink-0 items-center gap-3 rounded-md outline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--niaid-link)]"
@@ -22,7 +22,7 @@ export function Header() {
                     WOBD
                 </span>
             </Link>
-            <nav className="flex items-center gap-2 text-base font-medium text-slate-700">
+            <nav className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-slate-700 sm:text-base">
                 <Link
                     href="/"
                     className="rounded px-1 py-0.5 hover:text-[var(--niaid-link)] hover:underline"
@@ -36,7 +36,8 @@ export function Header() {
                     href="/queries"
                     className="rounded px-1 py-0.5 hover:text-[var(--niaid-link)] hover:underline"
                 >
-                    Templated queries
+                    <span className="sm:hidden">Queries</span>
+                    <span className="hidden sm:inline">Templated queries</span>
                 </Link>
                 <span aria-hidden className="text-slate-400">
                     |
@@ -45,7 +46,8 @@ export function Header() {
                     href="/mcp"
                     className="rounded px-1 py-0.5 hover:text-[var(--niaid-link)] hover:underline"
                 >
-                    Unified MCP
+                    <span className="sm:hidden">MCP</span>
+                    <span className="hidden sm:inline">Unified MCP</span>
                 </Link>
                 <span aria-hidden className="text-slate-400">
                     |
@@ -60,4 +62,3 @@ export function Header() {
         </header>
     );
 }
-
