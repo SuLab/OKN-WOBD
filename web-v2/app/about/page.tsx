@@ -55,11 +55,12 @@ export default function AboutPage() {
               </p>
             </div>
             <p className="text-slate-600 dark:text-slate-400">
-              The current implementation is a prototype: the NDE and GXA graphs are ingested,
-              published, and queryable through a templated SPARQL UI, and the broader Proto-OKN
-              federation is reachable through a unified Model Context Protocol server. Future
-              work focuses on scaling the dataset metadata layer beyond NDE and increasing the
-              expressiveness of dataset-level annotation.
+              The current implementation is a prototype: harmonized dataset metadata and gene
+              expression analysis results are ingested, published, and queryable through a
+              templated SPARQL UI, and the broader Proto-OKN federation is reachable through a
+              unified Model Context Protocol server. Future work focuses on scaling the dataset
+              metadata layer to additional sources and increasing the expressiveness of
+              dataset-level annotation.
             </p>
           </header>
 
