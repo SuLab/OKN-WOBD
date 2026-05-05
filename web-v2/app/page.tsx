@@ -1,4 +1,11 @@
 import Link from "next/link";
+import { VignetteCards } from "@/components/landing/VignetteCards";
+import {
+  NSF_AWARD_NUMBER,
+  NSF_AWARD_URL,
+  PROTO_OKN_URL,
+  GITHUB_REPO_URL,
+} from "@/lib/site-config";
 
 export default function LandingPage() {
   return (
@@ -6,66 +13,79 @@ export default function LandingPage() {
       className="flex flex-1 flex-col items-center px-4 pb-12 sm:pb-16"
       style={{ backgroundColor: "var(--niaid-page-bg)" }}
     >
-      <div className="flex w-full max-w-5xl flex-1 flex-col items-center gap-12 pt-20 sm:gap-14 sm:pt-24 md:gap-16 md:pt-28">
+      <div className="flex w-full max-w-5xl flex-1 flex-col items-center gap-12 pt-12 sm:gap-14 sm:pt-16 md:gap-16 md:pt-20">
+        {/* Hero */}
         <div className="flex w-full max-w-3xl flex-col items-center text-center">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
             Web of Biological Data
           </h1>
-          <p className="mt-3 text-base text-slate-700 dark:text-slate-300">
-            A queryable layer connecting biomedical knowledge graphs and dataset metadata.
+          <p className="mt-3 text-lg sm:text-xl font-medium text-slate-700 dark:text-slate-300 [text-wrap:balance]">
+            Federated queries across biomedical knowledge graphs and dataset metadata
           </p>
-          <div className="mt-6 space-y-4 text-left text-base leading-relaxed text-slate-600 [text-wrap:pretty] dark:text-slate-400">
-            <p>
-              WOBD links biomedical knowledge graphs so a single query can move across them. One
-              member &mdash; the{" "}
-              <a
-                href="https://data.niaid.nih.gov/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-niaid-link underline-offset-2 hover:underline"
-              >
-                NIAID Data Ecosystem
-              </a>{" "}
-              (NDE) &mdash; is unusual in that it indexes <em>datasets</em> rather than biology
-              directly. That lets a query start from a mechanistic finding in one graph and end
-              at the datasets you could analyze to investigate it further.
-            </p>
-            <p>
-              Other members supply the biology. The{" "}
-              <a
-                href="https://www.ebi.ac.uk/gxa/home"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-niaid-link underline-offset-2 hover:underline"
-              >
-                Gene Expression Atlas
-              </a>{" "}
-              (GXA), for example, contributes differential-expression results across many
-              diseases and tissues. WOBD is part of the wider{" "}
-              <a
-                href="https://www.proto-okn.net/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-niaid-link underline-offset-2 hover:underline"
-              >
-                Proto-OKN
-              </a>{" "}
-              federation; today's templated queries cover NDE and GXA, while the unified MCP
-              server reaches over 30 Proto-OKN KGs.{" "}
-              <Link href="/about" className="font-medium text-niaid-link hover:underline">
-                Learn more
-              </Link>
-            </p>
+
+          {/* Credibility chips */}
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-xs">
+            <a
+              href={NSF_AWARD_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1 font-medium text-slate-700 hover:border-slate-300 hover:text-niaid-link dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600"
+            >
+              Funded by NSF #{NSF_AWARD_NUMBER}
+            </a>
+            <a
+              href={PROTO_OKN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1 font-medium text-slate-700 hover:border-slate-300 hover:text-niaid-link dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600"
+            >
+              Proto-OKN federation member
+            </a>
+            <a
+              href={GITHUB_REPO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1 font-medium text-slate-700 hover:border-slate-300 hover:text-niaid-link dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600"
+            >
+              Open source on GitHub
+            </a>
           </div>
+
+          <p className="mt-6 text-base leading-relaxed text-slate-600 [text-wrap:pretty] dark:text-slate-400">
+            WOBD federates the{" "}
+            <a
+              href="https://data.niaid.nih.gov/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-niaid-link hover:underline"
+            >
+              NIAID Data Ecosystem
+            </a>
+            &apos;s harmonized biomedical dataset metadata with{" "}
+            <strong>30+ Proto-OKN knowledge graphs</strong> so a single query can move from a
+            research question through mechanism, exposure, or disease to the datasets that
+            support analysis. Built for working researchers and AI assistants alike.
+          </p>
         </div>
 
+        {/* Featured vignettes — proof of impact */}
+        <VignetteCards
+          heading="See it in action"
+          lead="Three worked analyses across biomanufacturing, public-health policy, and disease genomics — questions that previously required cross-disciplinary working groups, answered in a single chat."
+        />
+
+        {/* Two ways to use WOBD */}
         <section className="w-full" aria-labelledby="access-modes-heading">
           <h2
             id="access-modes-heading"
-            className="text-center text-lg sm:text-xl font-semibold text-slate-900 dark:text-slate-100 mb-6"
+            className="text-center text-lg sm:text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2"
           >
-            Two ways to query WOBD
+            Two ways to use WOBD
           </h2>
+          <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-slate-600 dark:text-slate-400">
+            A focused templated UI for reproducible workflows, or a unified MCP server for
+            open-ended cross-graph exploration with your AI assistant of choice.
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Link
               href="/queries"
@@ -80,7 +100,7 @@ export default function LandingPage() {
                 NDE and GXA. Good for focused, reproducible workflows; no SPARQL required.
               </p>
               <span className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-niaid-link">
-                Browse templates
+                Try a query
                 <span aria-hidden>&rarr;</span>
               </span>
             </Link>
@@ -99,11 +119,31 @@ export default function LandingPage() {
                 combines results in conversation. Good for open-ended, cross-graph questions.
               </p>
               <span className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-niaid-link">
-                How to connect
+                Connect your AI assistant
                 <span aria-hidden>&rarr;</span>
               </span>
             </Link>
           </div>
+        </section>
+
+        {/* Closing scope context */}
+        <section className="w-full max-w-3xl text-center">
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            WOBD is part of the broader{" "}
+            <a
+              href={PROTO_OKN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-niaid-link hover:underline"
+            >
+              Proto-OKN
+            </a>{" "}
+            federation, an NSF-funded effort to build interconnected knowledge graphs for
+            data-driven discovery.{" "}
+            <Link href="/about" className="font-medium text-niaid-link hover:underline">
+              About WOBD &amp; the team &rarr;
+            </Link>
+          </p>
         </section>
       </div>
     </div>

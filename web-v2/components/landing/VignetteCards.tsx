@@ -1,7 +1,15 @@
 import Link from "next/link";
 import { VIGNETTE_META } from "@/lib/landing/vignette-meta";
 
-export function VignetteCards() {
+export interface VignetteCardsProps {
+  heading?: string;
+  lead?: string;
+}
+
+export function VignetteCards({
+  heading = "Example vignettes",
+  lead,
+}: VignetteCardsProps = {}) {
   return (
     <section
       className="w-full max-w-5xl mx-auto"
@@ -9,10 +17,16 @@ export function VignetteCards() {
     >
       <h2
         id="vignette-cards-heading"
-        className="text-center text-lg sm:text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4"
+        className="text-center text-lg sm:text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2"
       >
-        Example vignettes
+        {heading}
       </h2>
+      {lead && (
+        <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-slate-600 dark:text-slate-400">
+          {lead}
+        </p>
+      )}
+      {!lead && <div className="mb-4" />}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {VIGNETTE_META.map((card) => {
           const Icon = card.icon;
