@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FederationDiagram } from "@/components/landing/FederationDiagram";
 import { VignetteCards } from "@/components/landing/VignetteCards";
 import {
   NSF_AWARD_NUMBER,
@@ -34,21 +35,6 @@ const audiencePaths = [
     cta: "Explore integration opportunities",
     description:
       "See how datasets, knowledge graphs, ontologies, and curated resources can become part of a shared query layer.",
-  },
-];
-
-const federationSteps = [
-  {
-    title: "Biomedical repositories",
-    body: "NDE metadata, GXA expression data, GEO-linked studies, and future domain repositories.",
-  },
-  {
-    title: "WOBD federation layer",
-    body: "Shared identifiers, graph metadata, SPARQL guardrails, ontology lookup, and provenance-aware query execution.",
-  },
-  {
-    title: "Reusable answers",
-    body: "Templated searches and AI-assistant workflows with source graphs, query traces, and rerunnable results.",
   },
 ];
 
@@ -143,34 +129,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60">
-              <div className="text-xs font-semibold uppercase tracking-wider text-niaid-link">
-                How WOBD works
-              </div>
-              <div className="mt-4 space-y-3">
-                {federationSteps.map((step, index) => (
-                  <div
-                    key={step.title}
-                    className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span
-                        className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
-                        style={{ backgroundColor: "var(--niaid-link)" }}
-                      >
-                        {index + 1}
-                      </span>
-                      <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                        {step.title}
-                      </h2>
-                    </div>
-                    <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                      {step.body}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <FederationDiagram />
           </div>
         </section>
 

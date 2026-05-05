@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Bot, Network, ShieldCheck } from "lucide-react";
 import { VignetteCards } from "@/components/landing/VignetteCards";
+import { WorkflowSteps } from "@/components/landing/WorkflowSteps";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 export const metadata: Metadata = {
@@ -72,6 +73,30 @@ export default function MCPPage() {
             </p>
           </div>
         </div>
+
+        <WorkflowSteps
+          ariaLabel="How AI assistant access works"
+          steps={[
+            {
+              title: "Connect",
+              icon: Bot,
+              body:
+                "Point Claude, ChatGPT, VS Code, or another MCP-capable client at the hosted Proto-OKN endpoint.",
+            },
+            {
+              title: "Explore graphs",
+              icon: Network,
+              body:
+                "The assistant can discover relevant graphs, inspect schemas, bridge identifiers, and run graph queries.",
+            },
+            {
+              title: "Audit answers",
+              icon: ShieldCheck,
+              body:
+                "Ask which graphs were used and request the query trace so synthesis stays grounded in source records.",
+            },
+          ]}
+        />
 
         <section className="grid w-full grid-cols-1 gap-4 md:grid-cols-2" aria-label="AI assistant use cases">
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">

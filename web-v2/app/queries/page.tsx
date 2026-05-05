@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CheckCircle, FileSearch, ListChecks } from "lucide-react";
 import { QueryCards } from "@/components/landing/QueryCards";
+import { WorkflowSteps } from "@/components/landing/WorkflowSteps";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 export const metadata: Metadata = {
@@ -45,35 +47,29 @@ export default function QueriesPage() {
           </p>
         </div>
 
-        <section className="grid w-full grid-cols-1 gap-4 md:grid-cols-3" aria-label="How guided WOBD queries work">
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-niaid-link">
-              1. Choose a question
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-              Start from a tested workflow such as finding datasets by disease, datasets for a
-              drug, or differential-expression evidence for genes.
-            </p>
-          </div>
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-niaid-link">
-              2. Fill in terms
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-              Autocomplete helps resolve genes, diseases, species, tissues, and drugs to the
-              identifiers used by the graphs.
-            </p>
-          </div>
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-niaid-link">
-              3. Inspect results
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-              WOBD returns tables or dataset cards and can show the exact graph query that ran,
-              so the workflow is auditable.
-            </p>
-          </div>
-        </section>
+        <WorkflowSteps
+          ariaLabel="How guided WOBD queries work"
+          steps={[
+            {
+              title: "Choose a question",
+              icon: ListChecks,
+              body:
+                "Start from a tested workflow such as finding datasets by disease, datasets for a drug, or differential-expression evidence for genes.",
+            },
+            {
+              title: "Fill in terms",
+              icon: FileSearch,
+              body:
+                "Autocomplete helps resolve genes, diseases, species, tissues, and drugs to the identifiers used by the graphs.",
+            },
+            {
+              title: "Inspect results",
+              icon: CheckCircle,
+              body:
+                "WOBD returns tables or dataset cards and can show the exact graph query that ran, so the workflow is auditable.",
+            },
+          ]}
+        />
 
         <QueryCards />
       </div>
