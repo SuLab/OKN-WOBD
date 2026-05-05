@@ -33,6 +33,24 @@ export function Header() {
                     |
                 </span>
                 <Link
+                    href="/queries"
+                    className="rounded px-1 py-0.5 hover:text-[var(--niaid-link)] hover:underline"
+                >
+                    Templated queries
+                </Link>
+                <span aria-hidden className="text-slate-400">
+                    |
+                </span>
+                <Link
+                    href="/mcp"
+                    className="rounded px-1 py-0.5 hover:text-[var(--niaid-link)] hover:underline"
+                >
+                    Unified MCP
+                </Link>
+                <span aria-hidden className="text-slate-400">
+                    |
+                </span>
+                <Link
                     href="/about"
                     className="rounded px-1 py-0.5 hover:text-[var(--niaid-link)] hover:underline"
                 >

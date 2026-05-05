@@ -5,6 +5,7 @@ import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 const STATIC_VIGNETTE_SLUGS = new Set<string>([
   "terpene-biosynthesis",
   "pfas-compounds",
+  "diabetic-nephropathy",
 ]);
 
 export function generateStaticParams() {
