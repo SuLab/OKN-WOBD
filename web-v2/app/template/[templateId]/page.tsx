@@ -19,6 +19,7 @@ import {
   type ExecutedQueryItem,
 } from "@/lib/dashboard/run-query";
 import { SparqlEditor } from "@/components/chat/SparqlEditor";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { datasetSearchTemplate } from "@/lib/templates/templates/dataset_search";
 import { geoDatasetSearchTemplate } from "@/lib/templates/templates/geo_dataset_search";
 import { withBasePath } from "@/lib/base-path";
@@ -327,12 +328,13 @@ export default function TemplatePage() {
       style={{ backgroundColor: "var(--niaid-page-bg)" }}
     >
       <div className="mx-auto w-full max-w-5xl space-y-4 sm:space-y-5">
-        <Link
-          href="/queries"
-          className="inline-flex items-center gap-1 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-niaid-link"
-        >
-          ← Back to templates
-        </Link>
+        <Breadcrumbs
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Queries", href: "/queries" },
+            { label: `${meta.titlePart1}${meta.titlePart2}` },
+          ]}
+        />
 
         <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm overflow-visible">
           <div className="p-4 sm:p-6 space-y-4">

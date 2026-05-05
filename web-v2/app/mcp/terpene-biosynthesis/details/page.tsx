@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getVignetteMeta } from "@/lib/landing/vignette-meta";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 const SLUG = "terpene-biosynthesis";
 
@@ -12,7 +13,15 @@ export default function TerpeneBiosynthesisVignettePage() {
       className="flex flex-1 flex-col items-center px-4 pb-8 sm:pb-10"
       style={{ backgroundColor: "var(--niaid-page-bg)" }}
     >
-      <div className="flex w-full max-w-5xl flex-1 flex-col items-center gap-12 pt-24 sm:gap-14 sm:pt-28 md:gap-16 md:pt-32">
+      <div className="flex w-full max-w-5xl flex-1 flex-col items-center gap-10 pt-6 sm:gap-12 sm:pt-8 md:gap-14">
+        <Breadcrumbs
+          items={[
+            { label: "Home", href: "/" },
+            { label: "MCP", href: "/mcp" },
+            { label: meta.title, href: "/mcp/terpene-biosynthesis" },
+            { label: "Details" },
+          ]}
+        />
         <div className="flex w-full flex-col items-center text-center">
           <span
             className={`mb-4 inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium dark:bg-slate-800 ${meta.iconColor}`}
@@ -27,13 +36,7 @@ export default function TerpeneBiosynthesisVignettePage() {
             A walk-through of how the unified MCP server supports a plant and microbial terpene
             engineering question. The assistant pulls candidate enzymes from pathway and
             expression graphs, then leans on the NDE/WOBD metadata layer to surface the
-            experimental datasets that make engineering decisions defensible.{" "}
-            <Link
-              href="/mcp/terpene-biosynthesis"
-              className="font-medium text-niaid-link hover:underline"
-            >
-              Back to overview
-            </Link>
+            experimental datasets that make engineering decisions defensible.
           </p>
         </div>
 
