@@ -74,6 +74,59 @@ export default function LandingPage() {
           lead="Three worked analyses across biomanufacturing, public-health policy, and disease genomics — questions that previously required cross-disciplinary working groups, answered in a single chat."
         />
 
+        {/* Why WOBD — value proposition */}
+        <section
+          className="w-full max-w-5xl"
+          aria-labelledby="why-wobd-heading"
+        >
+          <h2
+            id="why-wobd-heading"
+            className="text-center text-lg sm:text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2"
+          >
+            Why WOBD
+          </h2>
+          <p className="mx-auto mb-8 max-w-2xl text-center text-sm text-slate-600 dark:text-slate-400">
+            The hard part of biomedical research is rarely a single question &mdash; it is the
+            synthesis across data silos. WOBD targets that synthesis directly.
+          </p>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            <div className="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-niaid-link">
+                The problem
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                Cross-domain questions &mdash; linking environmental exposure to molecular
+                mechanism to disease outcome to supporting datasets &mdash; require synthesis
+                across databases that were separately funded, separately curated, and rarely
+                designed to interoperate. That synthesis has historically taken cross-
+                disciplinary working groups months to assemble.
+              </p>
+            </div>
+            <div className="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-niaid-link">
+                The approach
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                WOBD ingests harmonized biomedical dataset metadata (the NIAID Data Ecosystem)
+                and connects it to the Proto-OKN family of knowledge graphs through a shared
+                identifier substrate. Researchers reach the federation through a templated
+                SPARQL UI; AI assistants reach the same graphs through a unified MCP server.
+              </p>
+            </div>
+            <div className="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-niaid-link">
+                The outcome
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                Cross-domain questions become single-chat workflows. The results trace back to
+                their source graphs (auditable, reproducible, re-runnable), and every
+                additional graph or metadata source ingested into the federation widens the set
+                of questions the system can answer.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* Two ways to use WOBD */}
         <section className="w-full" aria-labelledby="access-modes-heading">
           <h2
