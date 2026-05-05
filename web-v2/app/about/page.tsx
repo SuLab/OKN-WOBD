@@ -58,13 +58,76 @@ export default function AboutPage() {
               The current implementation is a prototype: harmonized dataset metadata and gene
               expression analysis results are ingested, published, and queryable through a
               templated SPARQL UI, and the broader Proto-OKN federation is reachable through a
-              unified Model Context Protocol server. Future work focuses on scaling the dataset
-              metadata layer to additional sources and increasing the expressiveness of
-              dataset-level annotation.
+              unified Model Context Protocol server.
             </p>
           </header>
 
-          <section className="space-y-3">
+          <section className="space-y-3 border-t border-slate-200 pt-6 dark:border-slate-700">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+              Roadmap
+            </h2>
+            <p>
+              Two strands of future work would substantially expand what WOBD can answer:
+            </p>
+            <ul className="list-disc space-y-2 pl-6">
+              <li>
+                <strong>Broader dataset metadata ingestion.</strong> Today the dataset metadata
+                layer is built primarily from NDE. Adding additional repositories (other
+                domain-specific and generalist sources) would extend the federation&apos;s
+                reach into clinical, environmental, and multi-omic data that NDE does not
+                presently cover.
+              </li>
+              <li>
+                <strong>Richer dataset metadata expressiveness.</strong> Current dataset records
+                describe what a dataset is and where to find it. Expanding the schema to capture
+                richer relationships &mdash; sample-level annotation, study-level provenance,
+                contrast-level metadata &mdash; would let federated queries return more
+                actionable results without requiring users to drop into per-dataset portals.
+              </li>
+            </ul>
+            <p>
+              Both directions require sustained engineering investment. Both also compound: each
+              additional metadata source and each schema extension widens the set of
+              cross-domain questions the unified MCP server can answer in a single chat.
+            </p>
+          </section>
+
+          <section className="space-y-4 border-t border-slate-200 pt-6 dark:border-slate-700">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Team</h2>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  Scripps Research
+                </h3>
+                <ul className="mt-1 space-y-1 text-sm text-slate-700 dark:text-slate-300">
+                  <li>Trish Whetzel</li>
+                  <li>Ben Good</li>
+                  <li>Andrew Su</li>
+                  <li>Ginger Tsueng</li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  RENCI
+                </h3>
+                <ul className="mt-1 space-y-1 text-sm text-slate-700 dark:text-slate-300">
+                  <li>Chris Bizon</li>
+                  <li>Jim Balhoff</li>
+                  <li>Yaphet Kebede</li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  UCSD / UCSF
+                </h3>
+                <ul className="mt-1 space-y-1 text-sm text-slate-700 dark:text-slate-300">
+                  <li>Peter Rose</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <section className="space-y-3 border-t border-slate-200 pt-6 dark:border-slate-700">
             <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
               Relationship to Proto-OKN
             </h2>
@@ -79,36 +142,11 @@ export default function AboutPage() {
                 Proto-OKN
               </a>{" "}
               program: a publicly accessible, interconnected set of knowledge graphs and data
-              services aimed at trustworthy, data-driven discovery. WOBD is a focused path within
-              that broader fabric, connecting harmonized biomedical dataset metadata from the{" "}
-              <a
-                className="font-medium text-niaid-link hover:underline"
-                href="https://data.niaid.nih.gov/"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                NIAID Data Ecosystem Portal
-              </a>{" "}
-              with gene expression data from the{" "}
-              <a
-                className="font-medium text-niaid-link hover:underline"
-                href="https://www.ebi.ac.uk/gxa/home"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                Gene Expression Atlas
-              </a>
-              ,{" "}
-              <a
-                className="font-medium text-niaid-link hover:underline"
-                href="https://www.wikidata.org/wiki/Wikidata:Main_Page"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                Wikidata
-              </a>
-              , and other knowledge graphs so researchers can move from questions to datasets
-              and related biological context in fewer steps.
+              services aimed at trustworthy, data-driven discovery. WOBD is a focused path
+              within that broader fabric &mdash; the templated UI exposes the NDE and GXA graphs
+              for reproducible workflows, and the unified MCP server reaches the entire
+              federation, including curated biology in Wikidata, SPOKE-OKN, AOP-Wiki, and
+              dozens of other graphs.
             </p>
           </section>
 
@@ -204,72 +242,6 @@ export default function AboutPage() {
               in FRINK, so templated SPARQL queries and AI assistants can span dataset discovery
               and mechanistic context without siloed portals.
             </p>
-          </section>
-
-          <section className="space-y-3 border-t border-slate-200 pt-6 dark:border-slate-700">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-              Roadmap
-            </h2>
-            <p>
-              The current site is a working prototype, not a finished system. Two strands of
-              future work would substantially expand what WOBD can answer:
-            </p>
-            <ul className="list-disc space-y-2 pl-6">
-              <li>
-                <strong>Broader dataset metadata ingestion.</strong> Today the dataset metadata
-                layer is built primarily from NDE. Adding additional repositories (other
-                domain-specific and generalist sources) would extend the federation&apos;s
-                reach into clinical, environmental, and multi-omic data that NDE does not
-                presently cover.
-              </li>
-              <li>
-                <strong>Richer dataset metadata expressiveness.</strong> Current dataset records
-                describe what a dataset is and where to find it. Expanding the schema to capture
-                richer relationships &mdash; sample-level annotation, study-level provenance,
-                contrast-level metadata &mdash; would let federated queries return more
-                actionable results without requiring users to drop into per-dataset portals.
-              </li>
-            </ul>
-            <p>
-              Both directions require sustained engineering investment. Both also compound: each
-              additional metadata source and each schema extension widens the set of
-              cross-domain questions the unified MCP server can answer in a single chat.
-            </p>
-          </section>
-
-          <section className="space-y-4 border-t border-slate-200 pt-6 dark:border-slate-700">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Team</h2>
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div>
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                  Scripps Research
-                </h3>
-                <ul className="mt-1 space-y-1 text-sm text-slate-700 dark:text-slate-300">
-                  <li>Trish Whetzel</li>
-                  <li>Ben Good</li>
-                  <li>Andrew Su</li>
-                  <li>Ginger Tsueng</li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                  RENCI
-                </h3>
-                <ul className="mt-1 space-y-1 text-sm text-slate-700 dark:text-slate-300">
-                  <li>Chris Bizon</li>
-                  <li>Jim Balhoff</li>
-                  <li>Yaphet Kebede</li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                  UCSD / UCSF
-                </h3>
-                <ul className="mt-1 space-y-1 text-sm text-slate-700 dark:text-slate-300">
-                  <li>Peter Rose</li>
-                </ul>
-              </div>
-            </div>
           </section>
         </div>
       </div>
