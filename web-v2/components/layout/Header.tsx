@@ -37,7 +37,7 @@ export function Header() {
                     className="rounded px-1 py-0.5 hover:text-[var(--niaid-link)] hover:underline"
                 >
                     <span className="sm:hidden">Queries</span>
-                    <span className="hidden sm:inline">Templated queries</span>
+                    <span className="hidden sm:inline">Guided queries</span>
                 </Link>
                 <span aria-hidden className="text-slate-400">
                     |
@@ -47,7 +47,7 @@ export function Header() {
                     className="rounded px-1 py-0.5 hover:text-[var(--niaid-link)] hover:underline"
                 >
                     <span className="sm:hidden">MCP</span>
-                    <span className="hidden sm:inline">Unified MCP</span>
+                    <span className="hidden sm:inline">AI assistant access</span>
                 </Link>
                 <span aria-hidden className="text-slate-400">
                     |
@@ -56,7 +56,8 @@ export function Header() {
                     href="/about"
                     className="rounded px-1 py-0.5 hover:text-[var(--niaid-link)] hover:underline"
                 >
-                    About
+                    <span className="sm:hidden">About</span>
+                    <span className="hidden sm:inline">Growth plan</span>
                 </Link>
             </nav>
         </header>

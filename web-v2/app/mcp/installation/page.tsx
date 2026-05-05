@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 export const metadata: Metadata = {
@@ -27,7 +26,7 @@ export default function MCPInstallationPage() {
             Connect to the public endpoint
           </h1>
           <p className="mx-auto mt-5 w-[90%] max-w-full text-left text-base leading-relaxed text-slate-600 [text-wrap:pretty] dark:text-slate-400">
-            A hosted instance of the unified MCP server is available at{" "}
+            A hosted instance of the WOBD/Proto-OKN assistant endpoint is available at{" "}
             <code className="break-all rounded bg-slate-100 px-1 py-0.5 text-sm dark:bg-slate-800">
               https://apps.okn.us/okn-mcp/mcp
             </code>
@@ -49,6 +48,27 @@ export default function MCPInstallationPage() {
         </div>
 
         <div className="w-full max-w-3xl space-y-10 text-slate-700 dark:text-slate-300">
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+              What this enables
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+              Once connected, your assistant can discover Proto-OKN graphs, inspect graph
+              metadata, run SPARQL queries, bridge identifiers, and return answers with source
+              graph context. It is most useful for open-ended cross-graph questions; use guided
+              queries when you want a fixed, reproducible form workflow.
+            </p>
+            <div className="mt-4 rounded-lg bg-slate-50 p-4 text-sm dark:bg-slate-800/60">
+              <div className="font-semibold text-slate-900 dark:text-slate-100">
+                Quick verification prompt
+              </div>
+              <p className="mt-2 text-slate-700 dark:text-slate-300">
+                Generate a table of all Proto-OKN knowledge graphs with two columns: KG name and
+                description. Use only the proto-okn connector tools.
+              </p>
+            </div>
+          </section>
+
           <section className="space-y-4">
             <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
               Claude Desktop
@@ -91,8 +111,8 @@ export default function MCPInstallationPage() {
                 <strong>proto-okn</strong> on, and turn <strong>Web search</strong> off.
               </li>
               <li>
-                Try a prompt such as: <em>Generate a table of all Proto-OKN Knowledge Graphs with
-                two columns: &ldquo;KG Name&rdquo; and &ldquo;Description.&rdquo;</em>
+                Try the verification prompt above. If the assistant returns a graph list, the
+                connector is working.
               </li>
             </ol>
             <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -164,8 +184,8 @@ export default function MCPInstallationPage() {
                 and select <strong>proto-okn</strong>. Turn <strong>Web search</strong> off.
               </li>
               <li>
-                Try a prompt such as: <em>Generate a table of all Proto-OKN Knowledge Graphs with
-                two columns: &ldquo;KG Name&rdquo; and &ldquo;Description.&rdquo;</em>
+                Try the verification prompt above. If the assistant returns a graph list, the
+                connector is working.
               </li>
             </ol>
             <p className="text-sm text-slate-600 dark:text-slate-400">

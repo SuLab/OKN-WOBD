@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { ContextPack } from "@/lib/context-packs/types";
 import type { SPARQLResult } from "@/types";
 import type { MondoExpansionStats } from "@/lib/ontology/mondo-descendants-ols";
-import { SlotForm, isSlotFilled, getSlotMeta } from "@/components/dashboard/SlotForm";
+import { SlotForm, isSlotFilled } from "@/components/dashboard/SlotForm";
 import { MondoExpansionRecap } from "@/components/dashboard/MondoExpansionRecap";
 import { NDEResultCards } from "@/components/dashboard/NDEResultCards";
 import { ResultsTable } from "@/components/chat/ResultsTable";
@@ -118,6 +117,44 @@ function ndeDatasetSearchHasKeywordsOrFacet(slots: Record<string, string | strin
   return false;
 }
 
+const TEMPLATE_HELP: Record<
+  string,
+  { useWhen: string; example: string; results: string }
+> = {
+  dataset_search: {
+    useWhen:
+      "Use this when you know the topic, disease, organism, or pathogen and want dataset records that may support downstream analysis.",
+    example:
+      'Example: keywords "influenza vaccine", health condition "influenza", host species "human".',
+    results:
+      "Results are dataset records with names, descriptions, identifiers, source links, and highlighted matches where available.",
+  },
+  gene_expression_gene_level_de_per_contrast: {
+    useWhen:
+      "Use this when you have one or more genes and want to see where they are differentially expressed across Gene Expression Atlas experiments.",
+    example:
+      'Example: gene symbols "OAS2, RSAD2", direction "up", organism "Homo sapiens".',
+    results:
+      "Results are contrast-level rows with experiment IDs, gene identifiers, direction, log fold change, and adjusted p-values when available.",
+  },
+  drug_datasets: {
+    useWhen:
+      "Use this when you want datasets related to diseases treated by a drug, rather than datasets that mention the drug directly.",
+    example:
+      'Example: drug "tocilizumab"; optionally limit to GEO/gene-expression-oriented datasets.',
+    results:
+      "WOBD resolves the drug, finds treated diseases, searches dataset metadata for those diseases, and shows the executed query steps.",
+  },
+  geo_dataset_search: {
+    useWhen:
+      "Use this when you specifically want NCBI GEO series records from the NDE metadata graph.",
+    example:
+      'Example: keywords "kidney fibrosis", health condition "chronic kidney disease".',
+    results:
+      "Results are GEO series dataset records when GSE identifiers are represented in NDE metadata.",
+  },
+};
+
 export default function TemplatePage() {
   const params = useParams();
   const templateId = typeof params.templateId === "string" ? params.templateId : "";
@@ -166,6 +203,7 @@ export default function TemplatePage() {
     return mergeNdeTemplateWithBuiltin(t, templateId);
   }, [pack, templateId]);
   const meta = getTemplateMeta(templateId);
+  const help = TEMPLATE_HELP[templateId];
 
   const formHighlightTerms = useMemo(() => {
     let base: string[] = [];
@@ -368,6 +406,35 @@ export default function TemplatePage() {
                 (GSE) in NDE, or narrow with text and/or filters. Multiple filters combine with{" "}
                 <span className="font-medium text-slate-700 dark:text-slate-300">AND</span>.
               </p>
+            )}
+
+            {help && (
+              <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm dark:border-slate-700 dark:bg-slate-800/60 md:grid-cols-3">
+                <div>
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-niaid-link">
+                    Use this when
+                  </h2>
+                  <p className="mt-2 leading-relaxed text-slate-700 dark:text-slate-300">
+                    {help.useWhen}
+                  </p>
+                </div>
+                <div>
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-niaid-link">
+                    Example input
+                  </h2>
+                  <p className="mt-2 leading-relaxed text-slate-700 dark:text-slate-300">
+                    {help.example}
+                  </p>
+                </div>
+                <div>
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-niaid-link">
+                    How to read results
+                  </h2>
+                  <p className="mt-2 leading-relaxed text-slate-700 dark:text-slate-300">
+                    {help.results}
+                  </p>
+                </div>
+              </div>
             )}
 
             <SlotForm

@@ -30,10 +30,10 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
     titlePart1: "Datasets",
     titlePart2: " by keywords",
     description:
-      "Find NDE datasets by keywords and/or filters for health condition, host species, and pathogen species.",
+      "Find biomedical datasets by keywords, disease, host species, or pathogen species.",
     icon: Database,
     iconColor: "text-blue-600 dark:text-blue-400",
-    blurb: `Search the NDE graph: use keywords and/or open "Filters / Advanced" for health condition, pathogen species, and host species. Health condition matches the MONDO term(s) you pick exactly unless you enable "Include MONDO subclasses" (then OLS adds subclass IRIs and labels, up to a shared cap of ${DEFAULT_MONDO_DESCENDANT_EXPAND_CAP} for both the SPARQL filter and highlighting). Optionally limit to datasets whose metadata mentions a GEO series (GSE) or E-GEOD accession. You need to enter at least one keyword or a filter. All filled filters apply together (AND).`,
+    blurb: `Use this when you want to discover dataset records relevant to a topic, disease, organism, or pathogen. Disease filters use MONDO terms; enabling subclass expansion includes narrower MONDO concepts up to a shared cap of ${DEFAULT_MONDO_DESCENDANT_EXPAND_CAP}. All filled filters apply together.`,
     buttonLabel: "Search Datasets",
   },
   {
@@ -41,7 +41,7 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
     titlePart1: "Gene-level differential expression",
     titlePart2: " per contrast",
     description:
-      "Find GXA experiments and contrasts by gene where the gene is differentially expressed.",
+      "Find experiments where selected genes are differentially expressed, with contrast-level metrics.",
     icon: Layers,
     iconColor: "text-cyan-600 dark:text-cyan-400",
     blurb:
@@ -53,10 +53,10 @@ export const TEMPLATE_META: TemplateMetaItem[] = [
     titlePart1: "Datasets",
     titlePart2: " for a drug",
     description:
-      "Find NDE datasets for diseases treated by a drug and optionally limit to datasets with gene expression data.",
+      "Find datasets connected to diseases treated by a drug, with an optional gene-expression focus.",
     icon: Pill,
     iconColor: "text-teal-600 dark:text-teal-400",
-    blurb: "Enter a drug name (e.g. tocilizumab) to find NDE datasets for diseases treated by the drug.",
+    blurb: "Enter a drug name, resolve it through Wikidata, then use WOBD to find datasets for diseases treated by that drug.",
     buttonLabel: "Find datasets",
   },
 ];
