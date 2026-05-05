@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+
+export const metadata: Metadata = {
+  title: "About",
+  description:
+    "WOBD is an NSF-funded prototype federating biomedical dataset metadata with the Proto-OKN knowledge graphs. Team, roadmap, and project context.",
+};
 
 export default function AboutPage() {
   return (

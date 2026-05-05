@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { VignetteCards } from "@/components/landing/VignetteCards";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+
+export const metadata: Metadata = {
+  title: "Unified MCP server",
+  description:
+    "Connect Claude, ChatGPT, or any MCP-capable AI assistant to a single endpoint spanning over 30 Proto-OKN knowledge graphs. Three worked example analyses included.",
+};
 
 export default function MCPPage() {
   return (

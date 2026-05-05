@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import { getVignetteMeta } from "@/lib/landing/vignette-meta";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 const SLUG = "diabetic-nephropathy";
+
+export const metadata: Metadata = {
+  title: "Diabetic nephropathy: full analysis",
+  description:
+    "Full vignette: sample discovery, pooled and study-matched DE results, enrichment analysis, and the methodology comparison that surfaced interferon signaling.",
+};
 
 export default function DiabeticNephropathyDetailsPage() {
   const meta = getVignetteMeta(SLUG)!;

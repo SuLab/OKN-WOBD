@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { QueryCards } from "@/components/landing/QueryCards";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+
+export const metadata: Metadata = {
+  title: "Templated queries",
+  description:
+    "Run predefined, validated SPARQL queries over the federated WOBD graphs (NDE + GXA). Pick a template, fill in your search terms — no SPARQL required.",
+};
 
 export default function QueriesPage() {
   return (

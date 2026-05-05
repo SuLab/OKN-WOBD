@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+
+export const metadata: Metadata = {
+  title: "Connect to the public endpoint",
+  description:
+    "Step-by-step setup for Claude Desktop and ChatGPT to connect to the unified Proto-OKN MCP server.",
+};
 
 export default function MCPInstallationPage() {
   return (

@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import { getVignetteMeta } from "@/lib/landing/vignette-meta";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 const SLUG = "pfas-compounds";
+
+export const metadata: Metadata = {
+  title: "PFAS compounds: full analysis",
+  description:
+    "Full vignette: SAWGraph contamination data, EPA potency study, AOP-Wiki + g:Profiler enrichment, SPOKE-OKN disease convergence, and the convergence argument across seven knowledge graphs.",
+};
 
 export default function PFASDetailsPage() {
   const meta = getVignetteMeta(SLUG)!;

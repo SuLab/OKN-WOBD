@@ -1,8 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getVignetteMeta } from "@/lib/landing/vignette-meta";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 const SLUG = "terpene-biosynthesis";
+
+export const metadata: Metadata = {
+  title: "Terpene biosynthesis: full analysis",
+  description:
+    "Full vignette: federated approach across pathway and expression KGs plus the NDE/WOBD metadata layer, plant + microbial dataset findings, candidate enzyme panel, and ranking criteria.",
+};
 
 export default function TerpeneBiosynthesisVignettePage() {
   const meta = getVignetteMeta(SLUG)!;

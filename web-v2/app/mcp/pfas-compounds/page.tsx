@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Database, FileSearch, Lightbulb } from "lucide-react";
 import { getVignetteMeta } from "@/lib/landing/vignette-meta";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 const SLUG = "pfas-compounds";
+
+export const metadata: Metadata = {
+  title: "PFAS compounds vignette",
+  description:
+    "Convergent evidence across seven knowledge graphs that 'safer' replacement PFAS chemicals (GenX, ADONA) hit the same molecular target as the legacy compounds they replaced — case for class-based regulation.",
+};
 
 export default function PFASVignettePage() {
   const meta = getVignetteMeta(SLUG)!;

@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Database, FileSearch, Lightbulb } from "lucide-react";
 import { getVignetteMeta } from "@/lib/landing/vignette-meta";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 const SLUG = "terpene-biosynthesis";
+
+export const metadata: Metadata = {
+  title: "Terpene biosynthesis vignette",
+  description:
+    "Federated discovery across plant pathway evidence, organism-spanning expression coverage, and microbial host-engineering datasets — starting material for a synthetic biology team within minutes.",
+};
 
 export default function TerpeneBiosynthesisVignettePage() {
   const meta = getVignetteMeta(SLUG)!;
