@@ -64,6 +64,23 @@ export default function DiabeticNephropathyVignettePage() {
           </div>
         </section>
 
+        <section className="w-full max-w-3xl">
+          <div className="grid gap-3 rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900 md:grid-cols-3">
+            <EvidenceItem
+              label="Graphs and tools"
+              body="MONDO disease resolution, ARCHS4 metadata, differential-expression tooling, and enrichment analysis."
+            />
+            <EvidenceItem
+              label="WOBD contribution"
+              body="Turns disease selection, sample discovery, statistics, and interpretation into a single inspectable workflow."
+            />
+            <EvidenceItem
+              label="Audit trail"
+              body="Disease identifiers, sample counts, studies, parameters, and method choices are carried through the answer."
+            />
+          </div>
+        </section>
+
         <section className="w-full max-w-3xl space-y-3 text-slate-700 dark:text-slate-300">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
             The question
@@ -321,6 +338,19 @@ function Stat({ number, label }: { number: string; label: string }) {
     <div className="rounded-lg border border-slate-200 bg-white p-4 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900">
       <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">{number}</div>
       <div className="mt-1 text-xs text-slate-600 dark:text-slate-400">{label}</div>
+    </div>
+  );
+}
+
+function EvidenceItem({ label, body }: { label: string; body: string }) {
+  return (
+    <div>
+      <div className="text-xs font-semibold uppercase tracking-wider text-niaid-link">
+        {label}
+      </div>
+      <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+        {body}
+      </p>
     </div>
   );
 }
