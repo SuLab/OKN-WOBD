@@ -240,7 +240,7 @@ export default function LandingPage() {
             id="support-case-heading"
             className="text-center text-xl font-semibold text-slate-900 dark:text-slate-100"
           >
-            Why continued support matters
+            How WOBD grows in value
           </h2>
           <p className="mx-auto mt-2 max-w-2xl text-center text-sm leading-relaxed text-slate-600 dark:text-slate-400">
             The hard part of biomedical research is rarely a single database lookup. It is
