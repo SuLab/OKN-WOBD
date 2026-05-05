@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/hydrologykg/sparql",
+  "endpoint": "https://apps.okn.us/hydrologykg/sparql",
   "description": "Ontology. Top classes: Thing (18863), Feature (18811), SpatialObject (18810), ISGS-Well (12409), b0 (6402). Object properties: \u2014.",
   "uses_ontologies": [],
   "prefixes": {},

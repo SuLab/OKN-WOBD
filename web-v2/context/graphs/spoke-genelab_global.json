@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/spoke-genelab/sparql",
+  "endpoint": "https://apps.okn.us/spoke-genelab/sparql",
   "description": "Ontology. Top classes: Gene (59756), Statement (27903), OBI_0000070 (6467), MethylationRegion (5663), Study (140). Object properties: \u2014.",
   "uses_ontologies": [
     "OBI"

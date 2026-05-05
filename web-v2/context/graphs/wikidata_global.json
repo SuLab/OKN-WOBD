@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/wikidata/sparql",
+  "endpoint": "https://apps.okn.us/wikidata/sparql",
   "description": "Wikidata for drugs, genes, species, and disease relationships",
   "uses_ontologies": [],
   "good_for": [

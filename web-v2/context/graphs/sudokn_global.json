@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/sudokn/sparql",
+  "endpoint": "https://apps.okn.us/sudokn/sparql",
   "description": "Ontology. Top classes: MaterialProduct (62515), City (9101), AddressLine (2471), GeospatialSite (2153), GeospatialLocation (2127). Object properties: \u2014.",
   "uses_ontologies": [],
   "prefixes": {},

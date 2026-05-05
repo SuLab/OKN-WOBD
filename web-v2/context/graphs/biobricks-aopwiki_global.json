@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/biobricks-aopwiki/sparql",
+  "endpoint": "https://apps.okn.us/biobricks-aopwiki/sparql",
   "description": "Ontology. Top classes: data_1025 (12500), data_2291 (7883), KeyEventRelationship (2060), data_2298 (1621), data_1027 (1518). Object properties: \u2014.",
   "uses_ontologies": [
     "GO"

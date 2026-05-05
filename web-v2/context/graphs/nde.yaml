@@ -1,5 +1,5 @@
 id: nde
-endpoint: "https://frink.apps.renci.org/nde/sparql"
+endpoint: "https://apps.okn.us/nde/sparql"
 description: "NIAID biomedical datasets with disease, species, and publication metadata"
 good_for: ["dataset_search"]
 notable_relationships:

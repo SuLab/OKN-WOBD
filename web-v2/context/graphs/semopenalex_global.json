@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/semopenalex/sparql",
+  "endpoint": "https://apps.okn.us/semopenalex/sparql",
   "description": "Ontology. Top classes: Author (100000). Object properties: \u2014.",
   "uses_ontologies": [],
   "prefixes": {},

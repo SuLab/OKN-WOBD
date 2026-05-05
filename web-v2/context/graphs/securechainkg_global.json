@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/securechainkg/sparql",
+  "endpoint": "https://apps.okn.us/securechainkg/sparql",
   "description": "Ontology. Top classes: MaterialProduct (73432), WebAddress (13950), BusinessDescription (814), City (675), GeospatialLocation (649). Object properties: \u2014.",
   "uses_ontologies": [],
   "prefixes": {},

@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/biobricks-pubchem-annotations/sparql",
+  "endpoint": "https://apps.okn.us/biobricks-pubchem-annotations/sparql",
   "description": "Ontology. Top classes: Annotation (100000). Object properties: \u2014.",
   "uses_ontologies": [],
   "prefixes": {},

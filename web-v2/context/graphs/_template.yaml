@@ -8,9 +8,9 @@
 id: graph-shortname
 
 # Required: SPARQL endpoint URL
-# For FRINK graphs: https://frink.apps.renci.org/{shortname}/sparql
+# For FRINK graphs: https://apps.okn.us/{shortname}/sparql
 # For external graphs: the actual SPARQL endpoint URL
-endpoint: "https://frink.apps.renci.org/graph-shortname/sparql"
+endpoint: "https://apps.okn.us/graph-shortname/sparql"
 
 # Optional: Human-readable description
 # If omitted, build_graph_context.py will derive a description from the graph introspection

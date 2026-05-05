@@ -5,12 +5,12 @@ version: "0.1.0"
 
 endpoint_mode:
   default: federated
-  federated_endpoint: "https://frink.apps.renci.org/federation/sparql"
+  federated_endpoint: "https://apps.okn.us/federation/sparql"
   direct_endpoints:
-    nde: "https://frink.apps.renci.org/nde/sparql"
-    gene-expression-atlas-okn: "https://frink.apps.renci.org/gene-expression-atlas-okn/sparql"
-    spoke-okn: "https://frink.apps.renci.org/spoke-okn/sparql"
-    ubergraph: "https://frink.apps.renci.org/ubergraph/sparql"
+    nde: "https://apps.okn.us/nde/sparql"
+    gene-expression-atlas-okn: "https://apps.okn.us/gene-expression-atlas-okn/sparql"
+    spoke-okn: "https://apps.okn.us/spoke-okn/sparql"
+    ubergraph: "https://apps.okn.us/ubergraph/sparql"
 
 graphs:
   default_shortnames: ["nde", "ubergraph"]

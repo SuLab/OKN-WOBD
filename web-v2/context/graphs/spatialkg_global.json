@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/spatialkg/sparql",
+  "endpoint": "https://apps.okn.us/spatialkg/sparql",
   "description": "Ontology. Top classes: Thing (33333), Geometry (33323), SpatialObject (33323), Property (10), AnnotationProperty (7). Object properties: \u2014.",
   "uses_ontologies": [],
   "prefixes": {},

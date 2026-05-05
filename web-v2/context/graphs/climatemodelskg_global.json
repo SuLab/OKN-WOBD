@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/climatemodelskg/sparql",
+  "endpoint": "https://apps.okn.us/climatemodelskg/sparql",
   "description": "Ontology. Top classes: City (30062), No_Country_Region (6722), Member (5929), Country_Subdivision (3893), Variable (2907). Object properties: \u2014.",
   "uses_ontologies": [],
   "prefixes": {},

@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/nikg/sparql",
+  "endpoint": "https://apps.okn.us/nikg/sparql",
   "description": "Ontology. Top classes: Incident (15328), Point (9133), Location (9132), CensusTract (361), Class (4). Object properties: \u2014.",
   "uses_ontologies": [],
   "prefixes": {},

@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/geoconnex/sparql",
+  "endpoint": "https://apps.okn.us/geoconnex/sparql",
   "description": "Ontology. Top classes: GovernmentOrganization (24838), PropertyValue (24806), Dataset (24296), DataDownload (23950), Point (958). Object properties: \u2014.",
   "uses_ontologies": [],
   "prefixes": {},

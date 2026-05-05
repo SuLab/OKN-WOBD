@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/gene-expression-atlas-okn/sparql",
+  "endpoint": "https://apps.okn.us/gene-expression-atlas-okn/sparql",
   "description": "Gene Expression Atlas differential expression, contrasts, and DE associations",
   "uses_ontologies": [],
   "good_for": [

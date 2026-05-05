@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/sawgraph/sparql",
+  "endpoint": "https://apps.okn.us/sawgraph/sparql",
   "description": "Ontology. Top classes: Thing (11288), Concept (7134), ResultQualifier (7062), b0 (7006), b1 (7006). Object properties: \u2014.",
   "uses_ontologies": [],
   "prefixes": {},

@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/biobricks-mesh/sparql",
+  "endpoint": "https://apps.okn.us/biobricks-mesh/sparql",
   "description": "Ontology. Top classes: TreeNumber (63110), TopicalDescriptor (29381), AllowedDescriptorQualifierPair (4231), Concept (2797), GeographicalDescriptor (399). Object properties: \u2014.",
   "uses_ontologies": [],
   "prefixes": {},

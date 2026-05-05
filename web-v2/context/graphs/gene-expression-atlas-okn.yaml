@@ -1,7 +1,7 @@
 # Gene Expression Atlas OKN - GXA differential expression and contrasts
 # Uses Study (not schema:Dataset) as primary entity; Disease via studies (EFO)
 id: gene-expression-atlas-okn
-endpoint: "https://frink.apps.renci.org/gene-expression-atlas-okn/sparql"
+endpoint: "https://apps.okn.us/gene-expression-atlas-okn/sparql"
 description: "Gene Expression Atlas differential expression, contrasts, and DE associations"
 
 # Primary class for introspection: GXA uses biolink:Study individuals (e.g. E-GEOD-76), not schema:Dataset

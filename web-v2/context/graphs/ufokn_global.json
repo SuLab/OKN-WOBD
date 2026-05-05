@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/ufokn/sparql",
+  "endpoint": "https://apps.okn.us/ufokn/sparql",
   "description": "Ontology. Top classes: PropertyValue (63480), S2Cell (18064), GeoShape (9248), GeoCoordinates (9208). Object properties: \u2014.",
   "uses_ontologies": [],
   "prefixes": {},

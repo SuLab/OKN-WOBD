@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/ruralkg/sparql",
+  "endpoint": "https://apps.okn.us/ruralkg/sparql",
   "description": "Ontology. Top classes: City (31120), NSDUHAnswer (14923), TreatmentProvider (9037), County (3253), CountyStatus (3234). Object properties: \u2014.",
   "uses_ontologies": [],
   "prefixes": {},

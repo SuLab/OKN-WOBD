@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/biobricks-tox21/sparql",
+  "endpoint": "https://apps.okn.us/biobricks-tox21/sparql",
   "description": "Ontology. Top classes: CHEMINF_000446 (8947). Object properties: \u2014.",
   "uses_ontologies": [
     "CHEMINF"

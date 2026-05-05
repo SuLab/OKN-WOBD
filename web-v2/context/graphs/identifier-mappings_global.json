@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/identifier-mappings/sparql",
+  "endpoint": "https://apps.okn.us/identifier-mappings/sparql",
   "description": "Ontology. Top classes: \u2014. Object properties: \u2014.",
   "uses_ontologies": [],
   "prefixes": {},

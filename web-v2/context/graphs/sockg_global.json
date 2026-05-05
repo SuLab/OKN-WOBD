@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/sockg/sparql",
+  "endpoint": "https://apps.okn.us/sockg/sparql",
   "description": "Ontology. Top classes: QuantityValue (94105), ExperimentalUnit (3863), S2Cell_Level13 (1069), Cultivar (308), Class (91). Object properties: \u2014.",
   "uses_ontologies": [],
   "prefixes": {},

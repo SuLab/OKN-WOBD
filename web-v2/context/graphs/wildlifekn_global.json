@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/wildlifekn/sparql",
+  "endpoint": "https://apps.okn.us/wildlifekn/sparql",
   "description": "Ontology. Top classes: Statement (10410), Location (657), Location (657), Bird_name (303), Bird_name (303). Object properties: \u2014.",
   "uses_ontologies": [],
   "prefixes": {},

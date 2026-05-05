@@ -1,5 +1,5 @@
 id: ubergraph
-endpoint: "https://frink.apps.renci.org/ubergraph/sparql"
+endpoint: "https://apps.okn.us/ubergraph/sparql"
 description: "Merged biomedical ontologies - comprehensive collection of 50+ ontologies including MONDO, NCBITaxon, GO, HP, UBERON, CL, PATO, RO, and many others"
 good_for: ["entity_lookup", "ontology_reasoning"]
 # Provides 50+ integrated ontologies including:

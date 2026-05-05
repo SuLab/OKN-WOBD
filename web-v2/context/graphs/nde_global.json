@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/nde/sparql",
+  "endpoint": "https://apps.okn.us/nde/sparql",
   "description": "NIAID biomedical datasets with disease, species, and publication metadata",
   "uses_ontologies": [
     "DOID",

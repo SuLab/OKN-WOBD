@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/dreamkg/sparql",
+  "endpoint": "https://apps.okn.us/dreamkg/sparql",
   "description": "Ontology. Top classes: Entity (1586), OpeningHoursSpecification (609), ServiceChannel (174), CategoryCode (157), ContactPoint (87). Object properties: \u2014.",
   "uses_ontologies": [],
   "prefixes": {},

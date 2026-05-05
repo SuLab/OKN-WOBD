@@ -1,5 +1,5 @@
 {
-  "endpoint": "https://frink.apps.renci.org/biobricks-ice/sparql",
+  "endpoint": "https://apps.okn.us/biobricks-ice/sparql",
   "description": "Ontology. Top classes: BAO_0000040 (33321), CHEMINF_000000 (31756), ChemicalEntity (31755), BAO_0000179 (3168). Object properties: \u2014.",
   "uses_ontologies": [
     "CHEMINF"
