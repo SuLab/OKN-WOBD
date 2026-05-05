@@ -18,7 +18,7 @@ export default function AboutPage() {
           <p className="mt-3 text-slate-600 dark:text-slate-400">
             This work is supported by the U.S. National Science Foundation under award{" "}
             <a
-              className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
+              className="font-medium text-niaid-link hover:underline"
               href="https://www.nsf.gov/awardsearch/show-award/?AWD_ID=2535091"
               rel="noopener noreferrer"
               target="_blank"
@@ -36,7 +36,7 @@ export default function AboutPage() {
           <p>
             The WOBD work extends ideas from the NSF{" "}
             <a
-              className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
+              className="font-medium text-niaid-link hover:underline"
               href="https://www.proto-okn.net/"
               rel="noopener noreferrer"
               target="_blank"
@@ -48,7 +48,7 @@ export default function AboutPage() {
             path within that broader fabric, connecting harmonized biomedical dataset metadata
             from the{" "}
             <a
-              className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
+              className="font-medium text-niaid-link hover:underline"
               href="https://data.niaid.nih.gov/"
               rel="noopener noreferrer"
               target="_blank"
@@ -57,7 +57,7 @@ export default function AboutPage() {
             </a>{" "}
             with gene expression data from the{" "}
             <a
-              className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
+              className="font-medium text-niaid-link hover:underline"
               href="https://www.ebi.ac.uk/gxa/home"
               rel="noopener noreferrer"
               target="_blank"
@@ -66,7 +66,7 @@ export default function AboutPage() {
             </a>
             ,{" "}
             <a
-              className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
+              className="font-medium text-niaid-link hover:underline"
               href="https://www.wikidata.org/wiki/Wikidata:Main_Page"
               rel="noopener noreferrer"
               target="_blank"
@@ -85,7 +85,7 @@ export default function AboutPage() {
           <p>
             The primary structured metadata behind many graphs in this project comes from the{" "}
             <a
-              className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
+              className="font-medium text-niaid-link hover:underline"
               href="https://data.niaid.nih.gov"
               rel="noopener noreferrer"
               target="_blank"
@@ -102,7 +102,7 @@ export default function AboutPage() {
           <p>
             For a full description of the portal&apos;s design and scope, see the resource report:{" "}
             <a
-              className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
+              className="font-medium text-niaid-link hover:underline"
               href="https://arxiv.org/abs/2509.13524"
               rel="noopener noreferrer"
               target="_blank"
@@ -122,7 +122,7 @@ export default function AboutPage() {
           <p>
             Data for the GXA graph is built from experiments in the{" "}
             <a
-              className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
+              className="font-medium text-niaid-link hover:underline"
               href="https://www.ebi.ac.uk/gxa/home"
               rel="noopener noreferrer"
               target="_blank"
@@ -145,7 +145,7 @@ export default function AboutPage() {
           <p>
             Knowledge graphs are listed in the{" "}
             <a
-              className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
+              className="font-medium text-niaid-link hover:underline"
               href="https://registry.okn.us/"
               rel="noopener noreferrer"
               target="_blank"
@@ -154,7 +154,7 @@ export default function AboutPage() {
             </a>
             , each with a short name, title, description, and a link to its query endpoint. The{" "}
             <a
-              className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
+              className="font-medium text-niaid-link hover:underline"
               href="https://frink.apps.renci.org/"
               rel="noopener noreferrer"
               target="_blank"
@@ -178,7 +178,7 @@ export default function AboutPage() {
           <p>
             This site offers two ways to access WOBD content. The{" "}
             <a
-              className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
+              className="font-medium text-niaid-link hover:underline"
               href="/queries"
             >
               templated queries
@@ -189,7 +189,7 @@ export default function AboutPage() {
             executes it against the registered graph endpoints so you can explore the NDE dataset
             layer and related biological knowledge in FRINK without writing queries by hand. The{" "}
             <a
-              className="text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700"
+              className="font-medium text-niaid-link hover:underline"
               href="/mcp"
             >
               unified MCP server
