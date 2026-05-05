@@ -29,11 +29,11 @@ const audiencePaths = [
       "Ask open-ended questions across the Proto-OKN federation from Claude, ChatGPT, VS Code, or another MCP-capable client.",
   },
   {
-    title: "For funders and program officers",
+    title: "For content partners",
     href: "/about",
-    cta: "Review the growth case",
+    cta: "Explore integration opportunities",
     description:
-      "See why WOBD is research infrastructure: each new graph, repository, and metadata relationship compounds what the network can answer.",
+      "See how datasets, knowledge graphs, ontologies, and curated resources can become part of a shared query layer.",
   },
 ];
 
