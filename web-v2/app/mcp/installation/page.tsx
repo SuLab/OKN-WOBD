@@ -25,6 +25,8 @@ export default function MCPInstallationPage() {
               https://apps.okn.us/okn-mcp/mcp
             </code>
             . Point your MCP-capable client at that URL &mdash; no local installation required.
+            Visiting it directly in a browser returns a JSON-RPC error (the endpoint speaks
+            JSON-RPC, not HTTP GET); that is expected and does not indicate the server is down.
             Setup steps below cover the two most common clients; for additional clients and
             up-to-date screenshots, see the upstream{" "}
             <a
