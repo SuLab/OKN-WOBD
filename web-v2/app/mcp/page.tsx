@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { VignetteCards } from "@/components/landing/VignetteCards";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
@@ -26,9 +27,6 @@ export default function MCPPage() {
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
             Ask 30+ knowledge graphs from your AI assistant
           </h1>
-          <p className="mt-3 text-base font-medium text-slate-700 dark:text-slate-300">
-            The unified MCP server &mdash; one endpoint, the entire Proto-OKN federation
-          </p>
           <div className="mx-auto mt-5 w-[90%] max-w-full space-y-3 text-left text-base leading-relaxed text-slate-600 [text-wrap:pretty] dark:text-slate-400">
             <p>
               Connect Claude, ChatGPT, or any MCP-capable client to a single{" "}
@@ -77,20 +75,28 @@ export default function MCPPage() {
 
         <VignetteCards />
 
-        <section className="w-full max-w-3xl border-t border-slate-200 pt-6 text-center text-sm text-slate-600 dark:border-slate-700 dark:text-slate-400">
-          <p>
-            More worked analyses across the Proto-OKN federation are available in the upstream{" "}
-            <a
-              className="font-medium text-niaid-link hover:underline"
-              href="https://github.com/sbl-sdsc/mcp-proto-okn#example-queries"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              mcp-proto-okn example library
-            </a>{" "}
-            &mdash; spanning environmental justice, criminal-justice patterns, spaceflight
-            biology, drug-target discovery, and more.
-          </p>
+        <section className="w-full max-w-3xl">
+          <a
+            href="https://github.com/sbl-sdsc/mcp-proto-okn#example-queries"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition-all hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600"
+          >
+            <div>
+              <div className="font-medium text-niaid-link group-hover:underline">
+                More worked analyses across the Proto-OKN federation
+              </div>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                Browse the upstream <code className="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">mcp-proto-okn</code> example library &mdash; spanning environmental
+                justice, criminal-justice patterns, spaceflight biology, drug-target discovery,
+                and more.
+              </p>
+            </div>
+            <ArrowRight
+              className="h-5 w-5 flex-shrink-0 text-niaid-link"
+              aria-hidden
+            />
+          </a>
         </section>
       </div>
     </div>
