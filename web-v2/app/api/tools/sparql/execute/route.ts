@@ -80,7 +80,7 @@ export async function POST(request: Request) {
 
     let endpoint = pack?.endpoint_mode.federated_endpoint ||
       process.env.NEXT_PUBLIC_FRINK_FEDERATION_URL ||
-      "https://apps.okn.us/federation/sparql";
+      "https://frink.apps.renci.org/federation/sparql";
 
     // Always run GXA template queries through the federated endpoint. Templates bind
     // log2fc/adj_p_value from both http://purl.org/okn/wobd/ and spokegenelab: for

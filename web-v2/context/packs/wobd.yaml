@@ -5,7 +5,7 @@ version: "0.1.0"
 
 endpoint_mode:
   default: federated
-  federated_endpoint: "https://apps.okn.us/federation/sparql"
+  federated_endpoint: "https://frink.apps.renci.org/federation/sparql"
   direct_endpoints:
     nde: "https://apps.okn.us/nde/sparql"
     gene-expression-atlas-okn: "https://apps.okn.us/gene-expression-atlas-okn/sparql"

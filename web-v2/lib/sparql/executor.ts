@@ -4,7 +4,7 @@ import { parseJsonOrThrow } from "@/lib/http/parse-fetch-json";
 import type { SPARQLResult } from "@/types";
 
 const FRINK_FEDERATION_URL = process.env.NEXT_PUBLIC_FRINK_FEDERATION_URL ||
-  "https://apps.okn.us/federation/sparql";
+  "https://frink.apps.renci.org/federation/sparql";
 
 export interface ExecutionOptions {
   timeout_s?: number;

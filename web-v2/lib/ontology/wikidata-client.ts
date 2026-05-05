@@ -15,7 +15,7 @@ export interface WikidataSearchResult {
 // Use FRINK's federated endpoint with the Wikidata graph (for drug→disease queries in the pipeline)
 const FRINK_FEDERATION_ENDPOINT =
     process.env.NEXT_PUBLIC_FRINK_FEDERATION_URL ||
-    "https://apps.okn.us/federation/sparql";
+    "https://frink.apps.renci.org/federation/sparql";
 
 // Public Wikidata Query Service — used for drug search (autocomplete + resolution) for reliability
 const PUBLIC_WIKIDATA_SPARQL =
