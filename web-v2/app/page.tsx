@@ -232,12 +232,12 @@ export default function LandingPage() {
 
         {/* Why WOBD — value proposition */}
         <section
-          id="impact"
+          id="support-case"
           className="w-full max-w-5xl"
-          aria-labelledby="why-wobd-heading"
+          aria-labelledby="support-case-heading"
         >
           <h2
-            id="why-wobd-heading"
+            id="support-case-heading"
             className="text-center text-xl font-semibold text-slate-900 dark:text-slate-100"
           >
             Why continued support matters

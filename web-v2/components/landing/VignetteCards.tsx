@@ -13,10 +13,10 @@ export function VignetteCards({
   return (
     <section
       className="w-full max-w-5xl mx-auto"
-      aria-labelledby="vignette-cards-heading"
+      aria-labelledby="impact"
     >
       <h2
-        id="vignette-cards-heading"
+        id="impact"
         className="text-center text-lg sm:text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2"
       >
         {heading}
