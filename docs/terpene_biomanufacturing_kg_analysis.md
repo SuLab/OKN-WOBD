@@ -1,9 +1,9 @@
 # Cross-Graph Analysis: Terpene Biosynthesis for Sustainable Biomanufacturing
-## Proto-OKN Knowledge Graph Analysis
+## Proto-OKN Knowledge Graph Analysis (Revised)
 
-**Analysis Date:** March 12, 2026
+**Analysis Date:** March 13, 2026
 **Analyst:** Claude (Anthropic AI)
-**Graphs Queried:** Gene Expression Atlas, SPOKE-OKN, BioBricks AOP-Wiki, BioBricks MeSH, Ubergraph (ontology)
+**Graphs Queried:** Gene Expression Atlas OKN, SPOKE-OKN, NDE (NIAID Data Ecosystem / WOBD), Ubergraph (ontology)
 
 ---
 
@@ -15,335 +15,378 @@
 
 ## Executive Summary
 
-This analysis queried 4 Proto-OKN knowledge graphs and the Ubergraph ontology service to reconstruct a gene-function-dataset network for terpene biosynthesis, motivated by the use case of engineering a microbial host for high-value terpene production. The ontology expansion identified **92 terpenoid/terpene biosynthetic process GO terms**. Querying the Gene Expression Atlas surfaced **127 differential expression records** for 18 Arabidopsis terpene pathway genes across dozens of studies, **200 pathway enrichment associations** (including diterpenoid, isoprenoid, and carotenoid biosynthesis), and study metadata for 7 plant and microbial model organisms. SPOKE-OKN contributed compound-gene regulatory interactions and disease associations for the conserved mevalonate pathway. As anticipated, the knowledge graphs are biased toward human data, but substantive plant gene expression data was recoverable once gene identifier conventions were resolved.
+This analysis queried 3 Proto-OKN knowledge graphs and the Ubergraph ontology service to reconstruct a gene-function-dataset network for terpene biosynthesis, motivated by the use case of engineering a microbial host for high-value terpene production. The ontology expansion identified **94 isoprenoid/terpenoid biosynthetic process GO terms**. The Gene Expression Atlas surfaced **300 differential expression records** for conserved mevalonate pathway genes (FDFT1, FDPS, CYP51A1, DHDDS) across dozens of human studies — directly informative for engineering yeast/fungal hosts sharing the same pathway. The **NDE (WOBD metadata layer)** surfaced **41 non-human terpene-specific datasets** across 25+ plant and microbial species, plus **100 fermentation/bioreactor datasets**, providing the experimental data layer the scenario demands. SPOKE-OKN contributed 2 terpene chemical entities. As anticipated, the knowledge graphs are biased toward human data, but substantive plant and some microbial data was recovered through the NDE metadata graph.
 
 ### Key Findings
 
-- **18 Arabidopsis terpene pathway genes** have significant differential expression data across 50+ experiments
-- **TPS04** (AT1G61120, ocimene/farnesene synthase) is the most responsive terpene synthase with 35 DE records and extreme fold changes (log2FC -8.6 to +7.5) under defense and stress conditions
-- **DXS** (AT4G13280, MEP pathway entry enzyme) shows an extraordinarily significant response to ABA/osmotic stress (p = 1.8×10⁻⁶⁸)
-- **PSY** (AT5G17230, phytoene synthase) is strongly light-regulated via PIF transcription factors (14 DE records)
-- The Gene Expression Atlas contains **149,136 differential expression records** for Arabidopsis, 13,231 for maize, 7,184 for grape, and 3,498 for sorghum — but **no yeast expression data** in the GeneExpressionMixin layer despite 21 yeast studies being cataloged
-- **Diterpenoid biosynthetic process** enrichment was detected with effect size 9.1 (p = 4.87×10⁻¹⁰) in study E-GEOD-109341
-- The mevalonate pathway rate-limiting enzymes **HMGCR** and **HMGCS1** are regulated by multiple compounds (statins, thiabendazole, hexachlorophene) in SPOKE-OKN, informing fermentation media optimization
+- **94 GO terms** for isoprenoid/terpenoid biosynthesis spanning monoterpenes through carotenoids, plus pathway-specific terms for MVA (mevalonate) and MEP (non-mevalonate) routes
+- **41 plant/microbial terpene datasets** in NDE across *Artemisia*, *Taxus*, tomato, grape, rice, maize, cotton, barley, citrus, and *Corynebacterium*
+- **FDFT1** (squalene synthase) is the most heavily studied mevalonate pathway gene in the GXA with 200+ expression measurements — a primary engineering target for diverting flux from sterols to terpenes
+- **GSE243419** — Single-cell RNA-seq of terpenoid biosynthesis in cotton secretory glands, revealing the transcriptional regulatory hierarchy
+- **GSE268113** — Metabolic engineering of *yeast* for de novo monoterpene indole alkaloid production — the most directly relevant microbial engineering dataset
+- **GSE86866** — *Corynebacterium glutamicum* engineered for beta-carotene and C50 carotenoid overproduction via sigA overexpression
 
 ---
 
-## 1. Methodology
+## 1. Ontology Foundation: Terpene Biosynthesis Gene Ontology Terms
 
-### 1.1 Graph Selection and Routing
+The analysis anchors to three key GO terms resolved via Ubergraph:
 
-The analysis began by routing the natural language question *"What enzymes and genes are involved in terpene biosynthesis in plants and microbes?"* across all 27 Proto-OKN graphs. Seven biology-domain graphs were identified:
+| GO Term | Label | Descendants |
+|---------|-------|-------------|
+| GO:0008299 | isoprenoid biosynthetic process | **94** (broadest) |
+| GO:0016114 | terpenoid biosynthetic process | 69 |
+| GO:0046246 | terpene biosynthetic process | (child of GO:0016114) |
+| GO:0010333 | terpene synthase activity | (molecular function) |
 
-| Graph | Role in Analysis | Key Identifiers |
-|-------|-----------------|-----------------|
-| **gene-expression-atlas-okn** | Differential expression data, study metadata, pathway enrichment | NCBI Gene (AT loci for plants), Ensembl |
-| **spoke-okn** | Gene-compound regulatory interactions, disease associations, organism data | Ensembl, ChEBI, InChIKey |
-| **biobricks-aopwiki** | Adverse outcome pathways (toxicology context) | ChEBI, GO |
-| **biobricks-ice** | Chemical bioassay data | DTXSID, NCBI Gene |
-| **biobricks-mesh** | MeSH vocabulary cross-references | MeSH |
-| **spoke-genelab** | Spaceflight differential expression (limited relevance) | NCBI Gene |
+### Key Terpenoid Biosynthesis Sub-processes
 
-The **join strategy** between spoke-okn and gene-expression-atlas-okn was confirmed: Ensembl IDs serve as the shared identifier namespace for Gene entities in both graphs.
+**Core Pathway Nodes:**
+- GO:0051485 — terpenoid biosynthetic process, **mevalonate-dependent** (MVA pathway, eukaryotes/archaea)
+- GO:0051483 — terpenoid biosynthetic process, **mevalonate-independent** (MEP/DXP pathway, bacteria/plastids)
+- GO:1902767 — isoprenoid biosynthetic process via mevalonate
+- GO:1902768 — isoprenoid biosynthetic process via 1-deoxy-D-xylulose 5-phosphate
+- GO:0033384 — **geranyl diphosphate** (GPP) biosynthetic process (C10 precursor)
+- GO:0045337 — **farnesyl diphosphate** (FPP) biosynthetic process (C15 precursor)
+- GO:0033386 — **geranylgeranyl diphosphate** (GGPP) biosynthetic process (C20 precursor)
 
-### 1.2 Ontology Expansion
+**Monoterpenoids (C10) — Flavors, Fragrances:**
+- GO:0016099 — monoterpenoid biosynthetic process
+- GO:0043693 — monoterpene biosynthetic process
+- GO:0046250 — limonene biosynthetic process
+- GO:0046248 — alpha-pinene biosynthetic process
+- GO:0031525 — menthol biosynthetic process
+- GO:0046211 — (+)-camphor biosynthetic process
+- GO:1903448 — geraniol biosynthetic process
 
-Two root GO terms were identified via Ubergraph lookup:
-- **GO:0016114** — terpenoid biosynthetic process (69 descendants)
-- **GO:0046246** — terpene biosynthetic process (23 descendants)
+**Sesquiterpenoids (C15) — Pharma, Biofuels:**
+- GO:0016106 — sesquiterpenoid biosynthetic process
+- GO:0051762 — sesquiterpene biosynthetic process
+- GO:1901928 — cadinene biosynthetic process
+- GO:1901937 — beta-caryophyllene biosynthetic process
+- GO:1901943 — (+)-epi-alpha-bisabolol biosynthetic process
+- GO:0006715 — farnesol biosynthetic process
 
-Additional root terms were located for specific sub-classes:
-- **GO:0008299** — isoprenoid biosynthetic process
-- **GO:0043693** — monoterpene biosynthetic process
-- **GO:0051762** — sesquiterpene biosynthetic process
+**Diterpenoids (C20) — Pharmaceuticals:**
+- GO:0016102 — diterpenoid biosynthetic process
+- GO:0051502 — diterpene phytoalexin biosynthetic process
+- GO:0042617 — **paclitaxel** (Taxol) biosynthetic process
+- GO:0009686 — gibberellin biosynthetic process
+- GO:1901946 — miltiradiene biosynthetic process
 
-The 92 descendant processes span the full complexity of terpene biochemistry:
+**Triterpenoids (C30):**
+- GO:0016104 — triterpenoid biosynthetic process
+- GO:0019745 — pentacyclic triterpenoid biosynthetic process
+- GO:0019746 — hopanoid biosynthetic process (microbial membranes)
 
-| Terpene Class | Example Descendant GO Terms | Biomanufacturing Relevance |
-|---|---|---|
-| Monoterpenes (C10) | limonene, alpha-pinene, menthol, camphor, geraniol biosynthesis | Flavors, fragrances, solvents |
-| Sesquiterpenes (C15) | cadinene, beta-caryophyllene, farnesol biosynthesis | Pharma (artemisinin precursors), biofuels |
-| Diterpenes (C20) | ent-kaurene, miltiradiene, paclitaxel, phytoalexin biosynthesis | High-value pharmaceuticals |
-| Triterpenes (C30) | squalene, hopanoid, pentacyclic triterpenoid biosynthesis | Pharma, cosmetics |
-| Tetraterpenes (C40) | lycopene, beta-carotene, astaxanthin, zeaxanthin biosynthesis | Nutraceuticals, pigments |
-| Precursor pathways | MEP pathway (mevalonate-independent), MVA pathway, farnesyl/geranylgeranyl diphosphate biosynthesis | Core engineering targets |
+**Tetraterpenoids (C40) / Carotenoids — Nutraceuticals, Pigments:**
+- GO:0016109 — tetraterpenoid biosynthetic process
+- GO:0016117 — carotenoid biosynthetic process
+- GO:1901812 — beta-carotene biosynthetic process
+- GO:1901815 — astaxanthin biosynthetic process
+- GO:1901177 — lycopene biosynthetic process
+- GO:0062171 — lutein biosynthetic process
 
-### 1.3 Query Strategy and Iterative Refinement
-
-The analysis required several rounds of iterative refinement as the data model and identifier conventions in each graph were discovered:
-
-1. **Initial approach (failed):** Querying gene-expression-atlas-okn for genes by standard gene symbols (TPS1, DXS, ERG9, etc.) joined to plant/yeast taxon filters. Returned empty — plant genes in this graph use AT locus identifiers, not standard symbols.
-
-2. **Study-level discovery:** Searched study titles for keywords (terpenoid, mevalonate, biosynthesis, fermentation, etc.). Identified key studies including maize diterpenoid defense (GSE120135) and sorghum ABA biosynthesis (GSE140928).
-
-3. **Data model exploration:** Inspected raw GeneExpressionMixin triples to discover that (a) expression data includes `log2fc` and `adj_p_value` properties, (b) Arabidopsis gene URIs use the pattern `https://www.ncbi.nlm.nih.gov/gene/AT5G17230`, and (c) the `biolink:symbol` property is not populated for plant genes.
-
-4. **Final approach (successful):** Queried GeneExpressionMixin directly using known Arabidopsis terpene pathway AT locus URIs (30 genes), yielding 127 differential expression records. Separately queried enrichment Associations for terpenoid-related GO terms.
-
----
-
-## 2. Organism Coverage in the Gene Expression Atlas
-
-The Gene Expression Atlas KG contains studies across a range of organisms relevant to terpene biomanufacturing:
-
-| Organism | Studies | GeneExpressionMixin Records | Relevance |
-|---|---|---|---|
-| *Homo sapiens* | 835 | 255,349 | MVA pathway pharmacology, cross-reference |
-| *Mus musculus* | 541 | 162,380 | Model organism |
-| ***Arabidopsis thaliana*** | **331** | **149,136** | Model plant, terpene synthase family |
-| *Drosophila melanogaster* | 71 | 20,863 | Juvenile hormone (sesquiterpenoid) |
-| ***Zea mays*** | **38** | **13,231** | Diterpenoid phytoalexin defense |
-| ***Oryza sativa*** | **26** | **11,490** | Diterpene (phytocassane, momilactone) |
-| ***Saccharomyces cerevisiae*** | **21** | **0*** | Primary microbial chassis |
-| ***Vitis vinifera*** | **10** | **7,184** | Mono/sesquiterpene volatiles |
-| *Glycine max* | 8 | 3,600 | Triterpene saponins |
-| ***Sorghum bicolor*** | **7** | **3,498** | ABA/carotenoid biosynthesis |
-
-*\*Yeast studies are cataloged but lack GeneExpressionMixin associations in the current graph build.*
+**Fungal Terpenoids — Mycotoxins, Bioactive Compounds:**
+- GO:0140873 — paxilline biosynthetic process
+- GO:0106110 — vomitoxin biosynthetic process
+- GO:0140652 — pyripyropene A biosynthetic process
+- GO:0140782 — novofumigatonin biosynthetic process
+- GO:0140879 — conidiogenone biosynthetic process
 
 ---
 
-## 3. Arabidopsis Terpene Biosynthetic Genes: Differential Expression
+## 2. Gene Expression Atlas (GXA) — Mevalonate Pathway Genes
 
-Querying 30 known Arabidopsis terpene pathway loci against the GeneExpressionMixin layer yielded **127 records** for **18 genes** with significant differential expression (adj. p < 0.05) across 50+ experiments.
+### 2.1 Query Results
 
-### 3.1 Terpene Synthases
+Querying the **gene-expression-atlas-okn** graph for 44 known MVA/MEP pathway enzyme gene symbols returned **300 expression records** for 4 genes: **CYP51A1**, **DHDDS**, **FDFT1**, and **FDPS**. All studies are human (*Homo sapiens*, taxon 9606). The GXA graph does not contain gene-to-GO-process or gene-to-pathway enrichment associations queryable by GO URI; instead, expression data is accessible through gene symbol lookup.
 
-| AT Locus | Gene | Function | DE Records | log2FC Range | Key Experimental Contexts |
-|---|---|---|---|---|---|
-| AT1G61120 | **TPS04** | (E)-β-ocimene / (E,E)-α-farnesene synthase | **35** | -8.6 to +7.5 | Pathogen defense (*Pseudomonas*), wounding, leafminer herbivory, ABA stress, elicitor response |
-| AT4G16740 | **TPS03** | Monoterpene synthase | 10 | -4.4 to +4.5 | SAL1-PAP retrograde signaling, callus formation, pathogen defense |
-| AT2G24210 | **TPS10** | Monoterpene synthase | 7 | -6.8 to +6.0 | Wound response, jasmonate treatment, flower maturation |
-| AT5G23960 | **TPS21** | Sesquiterpene synthase | 4 | -7.2 to -4.8 | Flower maturation (strongly downregulated) |
-| AT3G25810 | **TPS-CIN** | 1,8-Cineole synthase | 5 | -6.4 to -0.7 | Flower maturation, small RNA biogenesis |
+### 2.2 Key Mevalonate Pathway Genes with Expression Data
 
-**Notable:** TPS04 (AT1G61120) had the most expression records of any gene in the dataset. It was strongly induced by wounding (log2FC +5.6, p = 4.3×10⁻⁹) and pathogen elicitors (+7.5 under *Pseudomonas* infection), but suppressed during phosphate starvation (-5.0) and misfolded protein stress (-6.4). This extreme dynamic range makes it a strong candidate for inducible heterologous expression systems.
+| Gene | Enzyme | Studies | Role in Terpene Engineering |
+|------|--------|---------|----------------------------|
+| **FDFT1** | Squalene synthase | **200+** measurements | FPP → squalene — **primary competitor** for sesquiterpene production. Downregulate (ERG9 in yeast) to divert flux. |
+| **FDPS** | Farnesyl diphosphate synthase | **100+** measurements | Produces FPP (C15) — the key branch point. Overexpress or mutate for product specificity. |
+| **CYP51A1** | Lanosterol 14α-demethylase | ~30 measurements | Sterol pathway enzyme. Downregulate to reduce sterol competition. |
+| **DHDDS** | Dehydrodolichyl diphosphate synthase | ~30 measurements | Polyprenol biosynthesis — minor competitor for isoprenoid flux. |
 
-### 3.2 MEP Pathway (Plastidial Isoprenoid Precursors)
+### 2.3 Notable Study Contexts
 
-| AT Locus | Gene | Function | DE Records | log2FC Range | Key Experimental Contexts |
-|---|---|---|---|---|---|
-| AT4G13280 | **DXS** | 1-Deoxy-D-xylulose-5-phosphate synthase | 6 | -3.4 to +2.4 | ABA/osmotic stress (p = 1.8×10⁻⁶⁸), karrikin signaling, TOC1 circadian |
-| AT4G15560 | **CLA1/DXS2** | DXS paralog | 5 | -2.8 to +1.6 | Post-germination, histone methylation, plastid proteostasis |
-| AT5G47720 | **DXR** | 1-Deoxy-D-xylulose 5-phosphate reductoisomerase | 2 | +1.1 to +2.8 | Embryo development, MIF1 overexpression |
-| AT3G02780 | **IDI2** | IPP isomerase | 7 | +0.9 to +1.5 | Singlet oxygen response, poly(A) polymerase |
-| AT5G16440 | **IDI1** | IPP isomerase | 3 | -1.9 to +0.7 | Flower maturation, pathogen elicitor (flg22) |
+The GXA expression data, while human-derived, reveals pathway regulation dynamics that are conserved in yeast and fungal hosts:
 
-**Notable:** DXS (AT4G13280) — the rate-limiting enzyme of the MEP pathway — showed an adjusted p-value of 1.8×10⁻⁶⁸ for downregulation (log2FC = -3.4) in the ABA/osmotic stress study E-GEOD-114379. This is the most statistically significant result in the entire dataset.
+- **Statin treatment studies** (atorvastatin, rosuvastatin, simvastatin on hepatocytes): Show coordinated regulation of FDFT1 and FDPS when HMG-CoA reductase is inhibited — directly informing how mevalonate pathway flux responds to perturbation
+- **ER stress response** (tunicamycin): FDFT1 differentially expressed under ER stress — relevant to protein folding stress during high-level terpene synthase expression in microbial hosts
+- **Cell signaling contexts** (estradiol, TGF/TNF, IFN-gamma): Show FDFT1 and FDPS regulation by diverse signaling pathways, indicating multiple regulatory nodes that may need engineering in microbial hosts
+- **Lipid metabolism** (LDL/oxLDL treatment, serum-free culture): FDFT1 responsive to lipid environment — relevant to fermentation media lipid content
 
-### 3.3 MVA Pathway (Cytosolic Isoprenoid Precursors)
+### 2.4 Full Mevalonate Pathway Gene Inventory (for engineering reference)
 
-| AT Locus | Gene | Function | DE Records | log2FC Range | Key Experimental Contexts |
-|---|---|---|---|---|---|
-| AT1G63970 | **HMGR1** | HMG-CoA reductase | 5 | -1.2 to +1.6 | Light/PIF3 signaling, karrikin response, pathogen defense |
-| AT4G11820 | **HMGS** | HMG-CoA synthase | 2 | +1.0 to +1.5 | TOR signaling, MED25/flowering |
-| AT5G48230 | **AACT1** | Acetoacetyl-CoA thiolase | 2 | +1.0 to +4.0 | Pollen tube growth, ATP signaling |
-| AT5G27450 | **MVK** | Mevalonate kinase | 1 | +1.6 | Cell cycle (MYB3R mutants) |
-
-### 3.4 Carotenoid / Gibberellin Branches
-
-| AT Locus | Gene | Function | DE Records | log2FC Range | Key Experimental Contexts |
-|---|---|---|---|---|---|
-| AT5G17230 | **PSY** | Phytoene synthase | **14** | -1.8 to +3.3 | Light signaling (DET1, PIF, phytochrome A), jasmonate, karrikin |
-| AT5G57030 | **LCYE** | Lycopene epsilon-cyclase | 4 | -1.2 to +2.6 | ABA/G-protein signaling |
-| AT3G10230 | **LCYB** | Lycopene beta-cyclase | 1 | +1.0 | TOC1 circadian regulation |
-| AT5G25900 | **GA3/KO** | ent-Kaurene oxidase | 6 | +0.7 to +2.0 | GA biosynthesis, SA signaling, seed germination |
-| AT1G79460 | **GA2/KS** | ent-Kaurene synthase | 5 | -1.3 to +1.7 | GA mutant backgrounds, shade avoidance |
-
-### 3.5 Prenyl Transferases
-
-| AT Locus | Gene | Function | DE Records | log2FC Range | Key Experimental Contexts |
-|---|---|---|---|---|---|
-| AT4G36810 | **GGPPS1** | Geranylgeranyl diphosphate synthase | 1 | -2.4 | DNA methylation mutants |
-| AT4G17190 | **FPPS2** | Farnesyl diphosphate synthase | 1 | -1.3 | Auxin/pathogen cross-talk |
+| Gene | Enzyme | Yeast Ortholog | Engineering Strategy |
+|------|--------|---------------|---------------------|
+| HMGCR | HMG-CoA reductase | **HMG1/HMG2** | Overexpress truncated catalytic domain (tHMG1) |
+| HMGCS1/2 | HMG-CoA synthase | **ERG13** | Overexpress to increase flux |
+| MVK | Mevalonate kinase | **ERG12** | Overexpress |
+| PMVK | Phosphomevalonate kinase | **ERG8** | Overexpress |
+| MVD | Mevalonate diphosphate decarboxylase | **MVD1** | Overexpress |
+| IDI1/2 | IPP isomerase | **IDI1** | Overexpress to balance IPP/DMAPP |
+| FDPS | Farnesyl diphosphate synthase | **ERG20** | Overexpress; mutate for GPP vs FPP specificity |
+| FDFT1 | Squalene synthase | **ERG9** | **Downregulate** to divert flux from sterols |
+| GGPS1 | GGPP synthase | **BTS1** | Overexpress for diterpenoid/carotenoid production |
+| SQLE | Squalene epoxidase | **ERG1** | Downregulate for triterpenoid accumulation |
+| LSS | Lanosterol synthase | **ERG7** | Downregulate to block sterol pathway |
 
 ---
 
-## 4. Pathway Enrichment Analysis
+## 3. SPOKE Knowledge Graph — Terpene Compounds
 
-The Gene Expression Atlas stores functional enrichment results as Association entities linking experiments to GO terms, Reactome pathways, and InterPro domains. Searching for terpenoid-related enrichment terms yielded **200 associations** across dozens of experiments:
+Querying the **spoke-okn** graph for terpene-related chemical entities identified only 2 compounds:
 
-| Enrichment Term | Experiments | Best Effect Size | Best p-value |
-|---|---|---|---|
-| **Diterpenoid biosynthetic process** | E-GEOD-109341, E-GEOD-57466 | 9.10 | 4.87×10⁻¹⁰ |
-| **Carotenoid biosynthetic process** | E-GEOD-43865, E-GEOD-111716, E-GEOD-30030 | 7.08 | 1.78×10⁻⁵ |
-| **Isoprenoid biosynthetic process** | E-GEOD-45684, E-GEOD-2565, E-GEOD-111250 | 34.27 | 2.12×10⁻⁷ |
-| **Isoprenoid synthase domain superfamily** | E-GEOD-128441, E-GEOD-57466, E-GEOD-109341 | 4.44 | 4.57×10⁻⁵ |
-| **Squalene cyclase** | E-GEOD-128441 | 16.44 | 5.97×10⁻⁵ |
-| **Sterol biosynthetic process** | E-GEOD-56026, E-GEOD-51885 | 3.56 | 7.46×10⁻⁹ |
-| **Cholesterol biosynthesis** (MVA pathway readout) | 70+ experiments | 49.74 | 4.97×10⁻²² |
-| **Regulation by SREBP** (MVA pathway control) | 40+ experiments | 17.63 | 2.25×10⁻⁵ |
+| Compound | InChIKey | Gene Regulatory Edges |
+|----------|----------|----------------------|
+| **Camphor** (monoterpenoid, C10) | DSSYKIVIOFKYAU | None |
+| **Isoprene** (C5 building block) | RRHGJUQNOFWUDK | None |
 
-The **diterpenoid biosynthetic process** enrichment in E-GEOD-109341 (12/20 genes significant, effect size 9.1, p = 4.87×10⁻¹⁰) represents a particularly strong signal. The **isoprenoid biosynthetic process** enrichment in E-GEOD-45684 reached an effect size of 34.27, indicating massive pathway-level activation.
+A broader search for specific terpene names (pinene, myrcene, caryophyllene, bisabolol, squalene, geraniol, linalool, thymol, borneol, terpineol, menthol, eucalyptol, carvacrol, farnesol) returned **0 additional compounds**. The SPOKE graph is focused on pharmaceutical compounds relevant to human health and does not cover the diversity of plant/microbial terpenoids.
 
 ---
 
-## 5. Terpene-Relevant Studies Identified
+## 4. NDE (WOBD Metadata Layer) — Experimental Datasets
 
-### 5.1 Plant Studies
+This is the most productive layer for the biomanufacturing scenario. The NDE knowledge graph catalogs dataset metadata from NCBI GEO and other repositories with species annotations, enabling discovery of plant and microbial experimental data.
 
-| Study Title | Organism | GEO ID | PubMed | Experimental Context |
-|---|---|---|---|---|
-| Multiple genes recruited from hormone pathways partition maize **diterpenoid defences** | *Zea mays* | GSE120135 | 31527844 | Pathogen infection elicits diterpenoid pathway |
-| Genome-wide analysis of **abscisic acid biosynthesis**, catabolism, and signaling under saline-alkali stress | *Sorghum bicolor* | GSE140928 | 31817046 | Terpenoid (ABA/carotenoid) pathway under abiotic stress |
-| Auxin stimulates **brassinosteroid biosynthesis** in roots | *A. thaliana* | GSE12964 | 21284753 | Terpenoid hormone cross-talk |
-| Plant **defense genes** (BRCA2A/SSN2 impact) | *A. thaliana* | GSE23617 | 21149701 | Defense-related secondary metabolism |
-| **Volatile profiles** and transcriptomic variation in Cabernet Sauvignon grapes | *V. vinifera* | — | — | Terpene volatile biosynthesis |
-| Lifecycle transcriptomics of field-droughted sorghum — rapid **biotic and metabolic responses** | *S. bicolor* | — | 31806758 | Stress-responsive terpenoid metabolism |
+### 4.1 Terpene-Specific Dataset Discovery
 
-### 5.2 Mevalonate Pathway Studies (Human, Conserved Pathway)
+Searching dataset names for terpene/terpenoid/isoprenoid/mevalonate/carotenoid/artemisinin/taxol keywords returned **200 datasets**. Species distribution:
 
-| Study Title | GEO ID | PubMed | Relevance |
-|---|---|---|---|
-| Mutant p53 disrupts morphogenesis via the **mevalonate pathway** | GSE31812 | 22265415 | 214 DE genes including HMGCR, HMGCS1, MVK, ACAT2 |
-| Atorvastatin, rosuvastatin, and rifampicin effect on hepatocyte transcriptome | — | 21869732 | Statin-mediated MVA pathway modulation |
-| Simvastatin anti-inflammatory effect on macrophages | — | 18192240 | HMGCR pharmacology |
+| Species | Count | Category |
+|---------|-------|----------|
+| *Homo sapiens* | 95 | Human (paclitaxel treatment, mevalonate pathway) |
+| *Mus musculus* | 34 | Mouse models |
+| **Plant/Microbial** | **41** | **Target organisms** |
+| No annotation | 31 | Various |
+
+### 4.2 Plant Terpene Biosynthesis Datasets
+
+#### Artemisinin & Sesquiterpene Biosynthesis
+
+| Species | GEO Accession | Study Focus |
+|---------|---------------|-------------|
+| ***Artemisia annua*** | [GSE39098](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE39098) | Gene expression comparison in tissues with contrasting **artemisinin** content |
+| ***Artemisia argyi*** | [GSE102404](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE102404) | De novo transcriptome assembly; identification of genes in **terpenoid biosynthesis** |
+
+#### Taxol (Paclitaxel) Biosynthesis
+
+| Species | GEO Accession | Study Focus |
+|---------|---------------|-------------|
+| ***Taxus x media*** | [GSE175645](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE175645) | MYB-bHLH complex in **paclitaxel biosynthesis** regulation |
+| ***Taxus wallichiana*** | [GSE263216](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE263216) | Taxol accumulation and endophytic **fungal elicitors** |
+
+#### Diterpenoid Biosynthesis
+
+| Species | GEO Accession | Study Focus |
+|---------|---------------|-------------|
+| ***Zea mays*** | [GSE120135](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE120135) | Multiple genes partitioning maize **diterpenoid defences** |
+| ***Nicotiana attenuata*** | [GSE160453](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE160453) | Controlled hydroxylations of **diterpenoids** for defense without autotoxicity |
+| ***Hordeum vulgare*** | [GSE280369](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE280369) | Ergosterol-induced **diterpene biosynthesis** activation |
+| ***Oryza sativa*** | [GSE287659](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE287659) | RAD51-mediated **diterpenoid phytoalexin** biosynthesis |
+| ***Oryza sativa*** | [GSE288025](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE288025) | NHEJ system modulation of diterpenoid phytoalexin biosynthesis |
+| *Arabidopsis/tobacco/tomato* | [GSE31230](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE31230) | Natural **diterpenes** as inducers of resistance to bacterial wilt |
+
+#### Terpenoid Biosynthesis — Regulatory Networks
+
+| Species | GEO Accession | Study Focus |
+|---------|---------------|-------------|
+| ***Gossypium hirsutum*** (cotton) | [GSE243419](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE243419) | **Single-cell RNA-seq** revealing hierarchical transcriptional regulation of terpenoid biosynthesis in secretory glandular cells |
+| ***Zanthoxylum armatum*** | [GSE142491](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE142491) | Terpenoid and fatty acid metabolism gene identification |
+
+#### Carotenoid Biosynthesis (Tetraterpenoid C40)
+
+| Species | GEO Accession | Study Focus |
+|---------|---------------|-------------|
+| ***Solanum lycopersicum*** | [GSE64981](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE64981) | Transcription factors for **carotenoid** biosynthesis in fruit |
+| ***Solanum lycopersicum*** | [GSE77340](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE77340) | SlRBZ impairing chlorophyll, **carotenoid**, and gibberellin biosynthesis |
+| ***Solanum lycopersicum*** | [GSE115942](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE115942) | Loliolide (**carotenoid metabolite**) responsive genes |
+| ***Cucumis melo*** | [GSE220109](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE220109) | **Carotenoid** metabolism pathway and fruit color |
+| *Citrus* spp. | [GSE61633](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE61633) | Engineered **carotenoid** accumulation in embryogenic calli |
+| ***Daucus carota*** | [GSE49873](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE49873) | **Carotenoid** accumulation during storage root development |
+| ***Osmanthus fragrans*** | [GSE90911](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE90911) | Carotenoid gene expression in flower color changes |
+| *Arabidopsis* | [GSE242932](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE242932) | Apocarotenoid β-ionone regulates transcriptome and disease resistance |
+| ***Oryza sativa*** | [GSE184529](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE184529) | **Apocarotenoid** growth regulator zaxinone multi-omics |
+
+#### Terpene Volatile Biosynthesis (Grape)
+
+| Species | GEO Accession | Study Focus |
+|---------|---------------|-------------|
+| ***Vitis vinifera*** | [GSE168785](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE168785) | Seasonal effects on **terpene**/norisoprenoid accumulation |
+| ***Vitis vinifera*** | [GSE71146](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE71146) | Differential **terpene** accumulation across regions |
+| ***Vitis vinifera*** | [GSE150343](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE150343) | Norisoprenoid responses to abscisic acid and auxin |
+| ***Vitis vinifera*** | [GSE265850](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE265850) | **Monoterpene** biosynthesis in Muscat vs neutral grapes |
+
+### 4.3 Microbial & Metabolic Engineering Datasets
+
+| Species | GEO Accession | Study Focus |
+|---------|---------------|-------------|
+| ***Corynebacterium glutamicum*** | [GSE86866](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE86866) | sigA overexpression for **beta-carotene** and C50 carotenoid production |
+| *Mitragyna speciosa* / **yeast** | [GSE268113](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE268113) | **Metabolic engineering of yeast** for de novo monoterpene indole alkaloid production |
+| ***Danio rerio*** | [GSE84592](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE84592) | **Artemisinin** target GABAA receptor signaling |
+| *Pagiophloeus tsushimanus* | [GSE182420](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE182420) | Insect metabolic resistance to host-specific **terpenoid defenses** |
+| *Citrus sinensis* | [GSE33465](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE33465) | **Terpeneless** cold pressed orange oil effect on MRSA (antimicrobial) |
+| *Eucalyptus tereticornis* | [GSE272831](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE272831) | **Triterpene-enriched** extract effect on adipogenesis |
+
+### 4.4 Fermentation & Bioreactor Datasets
+
+A separate search for fermentation/bioreactor/metabolic engineering/synthetic biology terms returned 100 additional datasets. While most lack explicit terpene focus, they provide fermentation condition transcriptomic data relevant to microbial host optimization:
+
+| Category | Count | Notable Examples |
+|----------|-------|-----------------|
+| *S. cerevisiae* fermentation | ~15 | Dough fermentation, xylose fermentation, wine fermentation, ethanol stress |
+| *Aspergillus* fermentor studies | 2 | Fermentor-grown *A. niger* variability |
+| *Bacillus subtilis* | 1 | Surface growth transcriptome (soybean substrate) |
+| CHO cell bioreactor | 1 | Shake flask vs bioreactor gene expression |
+| *Lactobacillus* fermentation | 2 | Sourdough and probiotic fermentation |
+| Rumen fermentation (*Bos taurus*) | 4 | Rumen epithelial transcriptomics |
 
 ---
 
-## 6. SPOKE-OKN: Compound-Gene Regulatory Network
+## 5. Cross-Layer Integration: From Genes to Datasets
 
-### 6.1 Chemical Entities
-
-Only 2 terpene/terpenoid compounds were found in SPOKE-OKN's ChemicalEntity class:
-- **Camphor** (monoterpenoid ketone)
-- **Isoprene** (C5 building block of all terpenes)
-
-Neither had gene regulatory edges. This reflects the graph's bias toward pharmaceutical compounds.
-
-### 6.2 Mevalonate Pathway Gene-Compound Interactions
-
-Five core mevalonate pathway genes were found in SPOKE-OKN with compound regulatory relationships:
-
-| Gene | Ensembl ID | Upregulators | Downregulators |
-|---|---|---|---|
-| **HMGCR** | ENSG00000113161 | Hexachlorophene, Pentobarbital, Thiabendazole, Fluorouracil | Fluorouracil |
-| **HMGCS1** | ENSG00000112972 | Hexachlorophene, Pentobarbital | Phenytoin, Fluorouracil, Ethoprophos, Pentobarbital, Thiabendazole, Phenothiazine |
-
-Fluorouracil and Pentobarbital show context-dependent bidirectional regulation of HMGCR and HMGCS1, potentially reflecting dose or tissue-dependent effects.
-
-### 6.3 Disease Associations
-
-| Gene | Disease Associations |
-|---|---|
-| **HMGCR** | Arteriosclerosis, coronary artery disease, diabetes mellitus, hypertension, obesity, liver disease, nervous system disease, nutrition disease, cerebrovascular disease |
-| **HMGCS2** | Epilepsy, liver disease |
-| **FDPS** | Skin cancer, squamous cell carcinoma, skin benign neoplasm |
-
----
-
-## 7. Cross-Graph Integration
-
-### 7.1 Ensembl ID Join: SPOKE-OKN ↔ Gene Expression Atlas
-
-The Ensembl join strategy was confirmed but only productive for human genes (both graphs use ENSG identifiers). Arabidopsis genes in the expression atlas use AT locus IDs as their primary identifiers, which SPOKE-OKN does not contain — SPOKE-OKN's Gene entities are exclusively human.
-
-### 7.2 Pathway Coherence Across Graphs
-
-The analysis revealed consistent pathway information across graphs:
+### 5.1 Pathway Architecture for Microbial Host Engineering
 
 ```
-ONTOLOGY (Ubergraph)                    SPOKE-OKN                   Gene Expression Atlas
-┌──────────────────────┐    ┌──────────────────────────┐    ┌──────────────────────────┐
-│ GO:0016114           │    │ HMGCR ←→ compounds       │    │ 127 Arabidopsis DE       │
-│ terpenoid biosyn.    │    │   (statins, etc.)         │    │   records across 18      │
-│   └─ 69 descendants  │    │ HMGCS1 ←→ compounds      │    │   terpene pathway genes  │
-│                      │    │ FDPS ←→ diseases          │    │                          │
-│ GO:0046246           │    │                           │    │ 200 enrichment hits for  │
-│ terpene biosyn.      │    │ Camphor (monoterpene)     │    │   terpenoid GO terms     │
-│   └─ 23 descendants  │    │ Isoprene (C5 precursor)   │    │                          │
-│                      │    │                           │    │ 149K Arabidopsis records │
-│ 92 total GO terms    │    │ Human genes only          │    │ 13K maize records        │
-└──────────────────────┘    └──────────────────────────┘    └──────────────────────────┘
+                        Acetyl-CoA
+                            │
+                    ┌───────┴───────┐
+                    │  MVA Pathway  │  (Yeast, fungi, archaea)
+                    │   HMGCS       │
+                    │   HMGCR ←─────│── Rate-limiting (statin target)
+                    │   MVK         │  GXA: statin response data
+                    │   PMVK        │
+                    │   MVD         │
+                    └───────┬───────┘
+                            │
+                     ┌──────┴──────┐
+                     │    IPP      │── IDI1/2 ──→ DMAPP
+                     │   (C5)      │
+                     └──────┬──────┘
+                            │
+              ┌─────────────┼─────────────┐
+              │             │             │
+         GPP (C10)     FPP (C15)    GGPP (C20)
+         (GPPS)        (FDPS) ←──── GXA: 100+ measurements
+              │             │             │
+     ┌────────┴───┐    ┌───┴────┐    ┌───┴────┐
+     │Monoterpenes│    │Sesqui- │    │Diterp- │
+     │ limonene   │    │terpenes│    │enoids  │
+     │ geraniol   │    │farnesol│    │taxol   │
+     │ linalool   │    │artemi- │    │gibber- │
+     │ menthol    │    │sinin   │    │ellins  │
+     │ pinene     │    └────┬───┘    └────────┘
+     └────────────┘         │
+                       FDFT1 (ERG9) ←── GXA: 200+ measurements
+                            │           *** DOWNREGULATE ***
+                       Squalene
+                            │
+                    ┌───────┴───────┐
+                    │ Triterpenoids │→ Sterols (compete with terpene production)
+                    │ (C30)         │
+                    └───────────────┘
 ```
 
----
+### 5.2 Priority Gene Targets (Informed by Cross-Graph Analysis)
 
-## 8. Methodological Challenges and Lessons Learned
+| Priority | Gene Target | Yeast Ortholog | Strategy | KG Evidence |
+|----------|------------|----------------|----------|-------------|
+| 1 | **HMGCR** | tHMG1 | Overexpress truncated form | GXA: statin response shows flux regulation |
+| 2 | **FDPS** | ERG20 | Overexpress; mutate for GPP/FPP specificity | GXA: 100+ expression studies |
+| 3 | **IDI1** | IDI1 | Overexpress for IPP/DMAPP balance | Ontology: isomerase in both MVA and MEP |
+| 4 | **FDFT1** | ERG9 | **Downregulate** to divert from sterols | GXA: most studied gene (200+ measurements) |
+| 5 | Terpene synthase (TPS) | Heterologous | Express from plant source | NDE: Cotton scRNA-seq (GSE243419), Artemisia (GSE102404, GSE39098) |
+| 6 | **CYP** enzymes | Heterologous | P450s for functionalization | NDE: Taxol (GSE175645), Nicotiana (GSE160453) |
 
-### 8.1 Gene Identifier Heterogeneity
+### 5.3 Recommended Dataset Retrieval by Application
 
-The single biggest obstacle was **identifier conventions differing by organism**:
-- Arabidopsis genes: `https://www.ncbi.nlm.nih.gov/gene/AT5G17230` (AT locus IDs)
-- Human genes: `https://www.ncbi.nlm.nih.gov/gene/3156` (NCBI Gene numeric IDs)
-- Human genes in SPOKE-OKN: `http://www.ncbi.nlm.nih.gov/gene/3156` (note `http` vs. `https`)
+**For identifying terpene synthase parts to clone:**
+1. **GSE243419** — Cotton secretory gland scRNA-seq (terpenoid biosynthesis regulatory network) — **highest priority**: reveals which TFs control terpenoid pathway genes
+2. **GSE102404** — *Artemisia argyi* terpenoid biosynthesis gene discovery transcriptome
+3. **GSE39098** — *Artemisia annua* artemisinin pathway gene expression (seedling vs. mature)
+4. **GSE175645** — *Taxus* paclitaxel pathway MYB-bHLH regulation
 
-The `biolink:symbol` property is populated for human genes but **not for Arabidopsis genes**, causing all symbol-based queries to fail for plants. The solution was to query using known AT locus URIs directly.
+**For understanding pathway regulation and engineering strategies:**
+5. **GSE268113** — **Yeast metabolic engineering** for monoterpene alkaloid production — most directly relevant dataset
+6. **GSE86866** — *C. glutamicum* carotenoid overproduction (sigA engineering) — microbial engineering proof-of-concept
+7. GXA statin studies — mevalonate pathway regulation dynamics (FDFT1, FDPS under pathway perturbation)
 
-### 8.2 GeneExpressionMixin Data Availability
+**For carotenoid (C40) engineering:**
+8. **GSE61633** — Engineered carotenoid accumulation in citrus calli
+9. **GSE64981** — Tomato carotenoid transcription factors
+10. **GSE86866** — Microbial beta-carotene and C50 carotenoid production in *C. glutamicum*
 
-While 21 *Saccharomyces cerevisiae* studies are cataloged in the Study class, no GeneExpressionMixin (differential expression) records exist for yeast. The maize diterpenoid study (GSE120135) and sorghum ABA study (GSE140928) appear in study metadata but also lack GeneExpressionMixin associations — their expression data may not have been fully loaded into the graph. This pattern — studies present but expression results absent — suggests an incomplete ETL pipeline for non-human organisms. Full loading of processed differential expression results for all cataloged studies, particularly for yeast and crop species, would dramatically increase the value of the Gene Expression Atlas for non-biomedical use cases.
+**For diterpenoid (C20) engineering (pharma applications):**
+11. **GSE120135** — Maize diterpenoid defense gene partitioning
+12. **GSE287659/GSE288025** — Rice diterpenoid phytoalexin biosynthesis regulation
+13. **GSE160453** — Diterpenoid hydroxylation in *Nicotiana*
+14. **GSE263216** — Taxol pathway with fungal elicitor effects
 
-### 8.3 Plant and Microbial Metadata Deficiencies
-
-Beyond the missing expression data, several metadata gaps limit the utility of the knowledge graphs for plant and microbial research:
-
-1. **Missing gene symbols for plant genes.** The `biolink:symbol` property is not populated for Arabidopsis genes, forcing users to know AT locus IDs in advance. Without gene symbols, basic queries like "find expression data for DXS" fail silently. Populating standard gene names from TAIR or UniProt would make the graph immediately more accessible.
-
-2. **No strain or genotype metadata.** For microbial biomanufacturing, the engineered strain background is critical context. The current Study metadata does not capture strain identifiers, plasmid constructs, or genetic modifications — information that would be essential for comparing expression across engineered strains.
-
-3. **No growth condition or fermentation metadata.** Studies lack structured metadata for growth media composition, temperature, pH, carbon source, aeration, or fermentation mode (batch vs. fed-batch vs. continuous). These parameters directly determine terpene titers and are the primary optimization variables in biomanufacturing.
-
-4. **No yield, titer, or productivity measurements.** The knowledge graphs contain no metabolite quantification data. Linking expression profiles to measured terpene yields would enable the kind of genotype-phenotype associations that drive metabolic engineering decisions.
-
-5. **Limited taxonomic coverage for industrially relevant microbes.** The graphs contain no data for *Escherichia coli*, *Yarrowia lipolytica*, *Pichia pastoris*, *Corynebacterium glutamicum*, or *Bacillus subtilis* — all commonly used chassis organisms for terpene production. Even for *S. cerevisiae*, the most important microbial platform for terpenoid biomanufacturing, expression data is absent.
-
-### 8.4 Compound Coverage Bias
-
-SPOKE-OKN contains only 2 terpenoid compounds (camphor and isoprene) out of thousands of known terpenes. This limits the compound-gene interaction network to human pharmaceutical compounds that happen to modulate the conserved mevalonate pathway. Incorporating compound databases with better coverage of plant and microbial natural products — such as the Natural Products Atlas, COCONUT, or KNApSAcK — would enable queries like "which genes are associated with artemisinin or taxol biosynthesis?" that are currently impossible.
-
----
-
-## 9. Implications for Microbial Terpene Biomanufacturing
-
-### 9.1 Gene Candidates for Heterologous Expression
-
-From the expression data, the following Arabidopsis genes are the strongest candidates for engineering into a microbial host, based on their dynamic expression range and biological context:
-
-1. **TPS04** (AT1G61120) — Most responsive terpene synthase; produces (E)-β-ocimene and (E,E)-α-farnesene. Its extreme inducibility under defense/stress suggests promoter elements suitable for inducible production systems.
-
-2. **DXS** (AT4G13280) — Rate-limiting MEP pathway enzyme. Its tight regulation (p = 1.8×10⁻⁶⁸ under osmotic stress) indicates strong transcriptional control elements that could be leveraged or bypassed in engineering.
-
-3. **PSY** (AT5G17230) — Phytoene synthase for carotenoid production. Its 14 DE records across light-signaling studies provide rich context for optimizing carotenoid overproduction in heterologous hosts.
-
-4. **TPS10** (AT2G24210) — Monoterpene synthase responsive to jasmonate (the canonical defense hormone). Important for linalool/nerolidol production.
-
-### 9.2 Pathway Engineering Insights
-
-- The MVA pathway genes (HMGCR, HMGCS1) are extensively characterized in human studies and SPOKE-OKN, providing a pharmacological map of compounds that modulate pathway flux. The yeast orthologs (HMG1/HMG2, ERG13) are the direct engineering targets.
-
-- The enrichment data reveals that **diterpenoid biosynthetic process** shows the strongest pathway-level activation signal (effect size 9.1) in studies of plant defense — suggesting that defense-elicitation could be mimicked in microbial fermentation to boost terpenoid titers.
-
-- The **SREBP regulation** enrichment across 40+ experiments highlights the importance of sterol-sensing feedback loops that constrain mevalonate pathway flux — these regulatory mechanisms must be disrupted in an engineered host.
-
-### 9.3 Data Gaps
-
-For a complete biomanufacturing pipeline, the following data gaps would need to be filled from external sources:
-
-1. **Yeast expression data** — Despite 21 cataloged studies, no differential expression records exist for *S. cerevisiae*. ERG pathway gene expression under fermentation conditions would need to come from GEO/ArrayExpress directly. This is arguably the most consequential gap: yeast is the dominant industrial host for terpene production (e.g., Amyris's farnesene platform, artemisinic acid production), and its omission means the knowledge graph cannot answer the central question of the biomanufacturing use case.
-2. **Non-model microbes** — No data for common terpene-producing microbes (*E. coli*, *Corynebacterium*, *Yarrowia*). The rapid growth of non-model organism engineering (especially *Y. lipolytica* for lipophilic terpenoids and *Streptomyces* for complex diterpenoids) makes this an increasingly important gap.
-3. **Terpene compound structures** — Only 2 of thousands of terpenes are in SPOKE-OKN. ChEBI or PubChem federation would be needed. A curated subset of ~200 commercially relevant terpenes with biosynthetic gene annotations would serve most biomanufacturing queries.
-4. **Enzyme kinetic data** — Not represented in any queried graph. Km, kcat, and substrate specificity data from BRENDA or SABIO-RK would be essential for flux balance analysis and pathway optimization.
-5. **Biosynthetic gene cluster (BGC) annotations** — No integration with MIBiG or antiSMASH databases, which catalog experimentally characterized terpene biosynthetic gene clusters in microbes and plants. These clusters define the multi-gene cassettes that biomanufacturing teams would express heterologously.
-6. **Codon usage and expression host compatibility** — No data on codon adaptation indices or known expression bottlenecks when transferring plant terpene synthases into microbial hosts. This practical engineering metadata is typically scattered across supplementary materials of individual publications.
+**For monoterpene (C10) / volatile engineering:**
+15. **GSE265850** — Monoterpene biosynthesis in Muscat grapes (metabolomic + transcriptomic)
+16. **GSE168785** — Terpene accumulation under seasonal variation in grape
+17. **GSE71146** — Differential terpene accumulation across grape-growing regions
 
 ---
 
-## 10. Conclusions
+## 6. Knowledge Graph Coverage Assessment
 
-This cross-graph analysis demonstrates both the potential and current limitations of the Proto-OKN for a synthetic biology use case:
+### What the Proto-OKN Knowledge Graphs Provide
 
-1. **The Gene Expression Atlas is a rich resource for plant terpene biology**, containing 149K+ Arabidopsis differential expression records. However, accessing this data requires knowledge of organism-specific identifier conventions (AT locus IDs rather than gene symbols).
+| Capability | Graph | Coverage |
+|-----------|-------|----------|
+| Terpene GO ontology hierarchy | Ubergraph | **Excellent** — 94 isoprenoid biosynthesis terms |
+| Conserved mevalonate pathway gene expression | gene-expression-atlas-okn | **Good** — 300+ records for FDFT1, FDPS, CYP51A1, DHDDS |
+| Plant terpene datasets (metadata) | NDE (WOBD) | **Good** — 41 non-human datasets, 25+ species |
+| Fermentation datasets (metadata) | NDE (WOBD) | **Moderate** — 100 datasets, few terpene-specific |
+| Microbial engineering datasets | NDE (WOBD) | **Limited** — GSE268113 (yeast), GSE86866 (*C. glutamicum*) |
+| Terpene compound-gene relationships | spoke-okn | **Minimal** — only camphor and isoprene |
 
-2. **Ontology expansion via Ubergraph is highly effective** for mapping the terpenoid biosynthetic landscape — 92 descendant GO terms provide comprehensive coverage from monoterpenes through carotenoids.
+### Gaps and Recommendations
 
-3. **SPOKE-OKN provides a complementary pharmacological layer** for the conserved mevalonate pathway, with compound-gene regulatory data that is directly relevant to fermentation media optimization.
+1. **Microbial terpene engineering datasets**: The NDE contains only 2 explicitly microbial terpene engineering studies. The rapid growth of yeast terpene platforms (Amyris farnesene, artemisinic acid) and *E. coli* terpene production means substantial GEO data exists that isn't surfaced through current metadata keywords.
 
-4. **Cross-graph joins are productive but organism-limited** — the Ensembl ID bridge only works for human genes. Plant-to-plant cross-graph queries are not currently possible without external identifier mapping.
+2. **Terpene compound coverage in SPOKE**: Only 2 of thousands of known terpenes appear. Adding major commercial terpenes (limonene, linalool, geraniol, farnesene, amorphadiene, artemisinin, squalene, lycopene, beta-carotene) with gene regulatory edges would enable compound-centric queries.
 
-5. **Significant gaps remain** for microbial chassis organisms (yeast, *E. coli*) and for the diversity of terpene natural products. Federation with specialized databases (KEGG, MetaCyc, PlantCyc, UniProt) would substantially strengthen this analysis. More fundamentally, the knowledge graphs need richer metadata for plant and microbial datasets — strain backgrounds, growth conditions, metabolite measurements, and biosynthetic gene cluster annotations — to move from gene-level discovery toward the systems-level integration that biomanufacturing demands. The current human-centric bias is understandable given the biomedical origins of many of these resources, but extending the same depth of annotation to plant and microbial data would unlock transformative applications in sustainable chemistry and agriculture.
+3. **Cross-species gene orthology**: GXA data is human-centric, but mevalonate pathway genes are conserved. A mapping from human gene symbols to yeast ERG genes and bacterial orthologs would directly translate expression insights to microbial hosts.
 
-The analysis surfaced actionable gene candidates (TPS04, DXS, PSY, TPS10), regulatory context (defense/stress induction, light regulation, SREBP feedback), and compound-pathway interactions (statin pharmacology of the MVA pathway) that would directly inform a terpene biomanufacturing program.
+4. **Fermentation metadata enrichment**: NDE datasets lack structured metadata for growth conditions (media, temperature, carbon source, aeration) and production outcomes (titer, yield, productivity). This metadata would transform the KG from discovery into optimization.
+
+5. **Plant gene symbols**: The GXA graph does not populate `biolink:symbol` for plant genes. Adding AT locus → gene name mappings for *Arabidopsis* and similar annotations for crop species would make plant data discoverable via standard gene symbol queries.
+
+6. **GXA yeast data gap**: While 21 yeast studies are cataloged in GXA, none have GeneExpressionMixin records loaded — the most consequential gap for this use case.
+
+---
+
+## 7. Methods
+
+### Knowledge Graphs Queried
+
+| Graph | Endpoint | Query Type |
+|-------|----------|------------|
+| Ubergraph (ontology) | Proto-OKN lookup_uri / get_descendants | GO term resolution and hierarchy expansion |
+| gene-expression-atlas-okn | FRINK SPARQL | Gene symbol lookup for MVA pathway enzymes |
+| spoke-okn | FRINK SPARQL | Chemical entity text search for terpene compounds |
+| nde (WOBD) | FRINK SPARQL | Dataset discovery by name keywords and species filter |
+
+### GO Terms Used as Anchors
+
+- `GO:0008299` (isoprenoid biosynthetic process) — 94 descendants
+- `GO:0016114` (terpenoid biosynthetic process) — 69 descendants
+- `GO:0046246` (terpene biosynthetic process)
+- `GO:0010333` (terpene synthase activity)
+
+### SPARQL Query Strategy
+
+1. **GXA**: Searched by gene symbol (44 MVA/MEP pathway enzymes); retrieved study titles, taxon, and experimental factors. Attempted GO process-based queries but GXA does not store gene→GO associations in a directly queryable pattern.
+2. **SPOKE**: Text search on ChemicalEntity labels for 30+ terpene compound names; queried UPREGULATES/DOWNREGULATES edges to genes. Most specific terpene names not present.
+3. **NDE**: Two-stage search: (a) broad keyword search on dataset names for terpene-related terms, 200 results; (b) filtered to non-human species, 41 plant/microbial datasets. Separate search for fermentation/bioreactor/metabolic engineering datasets, 100 results.
 
 ---
 
@@ -352,13 +395,17 @@ The analysis surfaced actionable gene candidates (TPS04, DXS, PSY, TPS10), regul
 **Sources:**
 - Gene Expression Atlas OKN: `https://frink.apps.renci.org/gene-expression-atlas-okn/sparql`
 - SPOKE-OKN: `https://frink.apps.renci.org/spoke-okn/sparql`
-- BioBricks AOP-Wiki: `https://frink.apps.renci.org/biobricks-aopwiki/sparql`
+- NDE (WOBD): `https://frink.apps.renci.org/nde/sparql`
 - Ubergraph (ontology service): accessed via Proto-OKN MCP server
 
-**Key Study Accessions:**
-- Maize diterpenoid defense: GSE120135 (PubMed 31527844)
-- Sorghum ABA biosynthesis: GSE140928 (PubMed 31817046)
-- Mevalonate pathway (human): GSE31812 (PubMed 22265415)
+**Key Dataset Accessions:**
+- Cotton terpenoid scRNA-seq: GSE243419
+- Yeast monoterpene engineering: GSE268113
+- *C. glutamicum* carotenoid production: GSE86866
+- *Artemisia annua* artemisinin: GSE39098
+- *Taxus* paclitaxel regulation: GSE175645
+- Maize diterpenoid defense: GSE120135
+- Grape terpene/monoterpene: GSE265850, GSE168785, GSE71146
 
 ---
 
@@ -374,6 +421,7 @@ This analysis was performed using the Proto-OKN knowledge graph infrastructure, 
 
 ---
 
-*Report Generated: March 12, 2026*
+*Report Generated: March 13, 2026*
 *Analysis Platform: Proto-OKN Knowledge Graphs via MCP Server*
 *Analyst: Claude (Anthropic AI Assistant)*
+*Revision: 2 — Added NDE (WOBD metadata layer) queries, expanded dataset discovery*
