@@ -161,6 +161,70 @@ export default function TerpeneBiosynthesisVignettePage() {
           </div>
         </section>
 
+        <section className="w-full max-w-3xl space-y-3">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+            What the chat looks like
+          </h2>
+          <p className="text-slate-700 dark:text-slate-300">
+            Excerpt from a conversation that produced these findings:
+          </p>
+          <div className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
+            <div className="flex justify-end">
+              <div
+                className="max-w-[85%] rounded-2xl rounded-br-sm px-4 py-2 text-sm text-white shadow-sm"
+                style={{ backgroundColor: "var(--niaid-link)" }}
+              >
+                I&apos;m designing a microbial host for terpene biomanufacturing. Find candidate
+                enzymes and the experimental datasets that justify them, biased toward plant and
+                microbial systems rather than the human-heavy default.
+              </div>
+            </div>
+            <div className="flex justify-start">
+              <div className="max-w-[90%] rounded-2xl rounded-bl-sm bg-white px-4 py-3 text-sm leading-relaxed text-slate-800 shadow-sm dark:bg-slate-900 dark:text-slate-200">
+                <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Querying prokn, gene-expression-atlas-okn, spoke-genelab, nde&hellip;
+                </p>
+                <p className="mt-2">
+                  Pulled candidate parts from pathway and expression KGs, then leaned on the
+                  NDE/WOBD metadata layer for the supporting experimental datasets.
+                </p>
+                <ul className="mt-2 list-disc space-y-1 pl-5">
+                  <li>
+                    <strong>Precursor-supply panel</strong> (gene-expression-atlas-okn): HMGR,
+                    DXS, DXR, HDR, IDI1/2, ERG20/FDPS, GGPS1, PSY &mdash; consistently present
+                    across plant and microbial systems.
+                  </li>
+                  <li>
+                    <strong>Plant evidence</strong> (NDE):{" "}
+                    <em>Artemisia argyi</em> transcriptome (GSE102404), four{" "}
+                    <em>Taxus</em> paclitaxel-biosynthesis studies, <em>Crocus</em>{" "}
+                    apocarotenoids (GSE103181), maize and <em>Isodon</em> diterpenes.
+                  </li>
+                  <li>
+                    <strong>Microbial host engineering</strong> (NDE):{" "}
+                    <em>E. coli</em> IPP/FPP toxicity (GSE102672, GSE29267, GSE30403), IspG/IspH
+                    balancing (GSE84255), taxadiene-producing yeast adaptation (GSE225783).
+                  </li>
+                  <li>
+                    <strong>Cross-graph integration</strong>: joins on NCBI_Gene, GeneSymbol, and
+                    UBERON link organism-specific pathway evidence to organism-spanning
+                    expression data.
+                  </li>
+                </ul>
+                <p className="mt-2">
+                  Recommended starting panel: a core precursor-supply module, a product-branch
+                  module chosen by target class (taxoid, defense diterpene, or carotenoid), and
+                  a host-hardening module derived from the microbial toxicity datasets.
+                </p>
+              </div>
+            </div>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Illustrative excerpt; phrasing is paraphrased and lightly edited from the upstream
+            analysis. Live results may vary as graphs are updated.
+          </p>
+        </section>
+
         <section className="w-full max-w-3xl space-y-3 text-slate-700 dark:text-slate-300">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
             What this query unlocks

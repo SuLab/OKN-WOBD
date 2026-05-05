@@ -162,6 +162,70 @@ export default function DiabeticNephropathyVignettePage() {
           </div>
         </section>
 
+        <section className="w-full max-w-3xl space-y-3">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+            What the chat looks like
+          </h2>
+          <p className="text-slate-700 dark:text-slate-300">
+            Excerpt from a conversation that produced these findings:
+          </p>
+          <div className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
+            <div className="flex justify-end">
+              <div
+                className="max-w-[85%] rounded-2xl rounded-br-sm px-4 py-2 text-sm text-white shadow-sm"
+                style={{ backgroundColor: "var(--niaid-link)" }}
+              >
+                Run a differential expression analysis of diabetic nephropathy using ARCHS4 and
+                try both pooled and study-matched modes. Walk me through the steps.
+              </div>
+            </div>
+            <div className="flex justify-start">
+              <div className="max-w-[90%] rounded-2xl rounded-bl-sm bg-white px-4 py-3 text-sm leading-relaxed text-slate-800 shadow-sm dark:bg-slate-900 dark:text-slate-200">
+                <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Resolving disease term, querying ARCHS4 metadata, running DE&hellip;
+                </p>
+                <p className="mt-2">
+                  Workflow complete. Two modes &mdash; <strong>two stories.</strong>
+                </p>
+                <ul className="mt-2 list-disc space-y-1 pl-5">
+                  <li>
+                    <strong>Ontology:</strong> &ldquo;diabetic nephropathy&rdquo; &rarr;
+                    MONDO:0005016 (exact match).
+                  </li>
+                  <li>
+                    <strong>Samples:</strong> 174 disease samples across 13 ARCHS4 studies; 555
+                    kidney controls; 9 studies with matched controls.
+                  </li>
+                  <li>
+                    <strong>Pooled DE</strong> (100 vs. 53 samples, 10 studies): five
+                    immediate-early transcription factors strongly downregulated &mdash; FOS,
+                    FOSB, EGR1, NR4A1, DUSP1.
+                  </li>
+                  <li>
+                    <strong>Study-matched DE</strong> (71 vs. 27 samples, 3 studies; controls
+                    for batch via Stouffer&apos;s Z): same five &mdash; <em>plus</em> two
+                    upregulated interferon-stimulated genes, <strong>OAS2</strong> and{" "}
+                    <strong>RSAD2</strong>.
+                  </li>
+                  <li>
+                    <strong>Enrichment</strong> (g:Profiler): PPAR signaling, MAPK pathway,
+                    NGF-stimulated transcription.
+                  </li>
+                </ul>
+                <p className="mt-2">
+                  Two coordinated processes in DN kidney: suppressed immediate-early response
+                  plus activated interferon signaling. The pooled analysis would have missed
+                  the interferon signal entirely.
+                </p>
+              </div>
+            </div>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Illustrative excerpt; phrasing is paraphrased and lightly edited from the upstream
+            analysis. Live results may vary as graphs are updated.
+          </p>
+        </section>
+
         <section className="w-full max-w-3xl space-y-3 text-slate-700 dark:text-slate-300">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
             What this query unlocks
