@@ -38,6 +38,23 @@ export default function TerpeneBiosynthesisVignettePage() {
           </p>
         </div>
 
+        <section className="w-full max-w-3xl">
+          <div
+            className="rounded-lg border border-slate-200 border-l-4 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+            style={{ borderLeftColor: "var(--niaid-link)" }}
+          >
+            <div className="text-xs font-semibold uppercase tracking-wider text-niaid-link">
+              Key finding
+            </div>
+            <p className="mt-2 text-base leading-relaxed text-slate-800 dark:text-slate-200">
+              <strong>20+ datasets</strong> surfaced spanning <strong>seven plant species</strong>
+              {" "}and <strong>three microbial hosts</strong>, with a candidate enzyme panel
+              anchored across pathway and expression evidence &mdash; usable starting material
+              for a synthetic biology team within minutes.
+            </p>
+          </div>
+        </section>
+
         <section className="w-full max-w-3xl space-y-3 text-slate-700 dark:text-slate-300">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
             The question
@@ -178,20 +195,23 @@ export default function TerpeneBiosynthesisVignettePage() {
 
         <section className="w-full max-w-3xl space-y-3 border-t border-slate-200 pt-6 text-slate-700 dark:border-slate-700 dark:text-slate-300">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-            Why this matters
+            Why this matters &mdash; translational research
           </h2>
           <p>
-            Terpene biomanufacturing is one example. The same unified MCP server federates over 30
-            Proto-OKN knowledge graphs spanning biology and health, environment, justice, and
-            technology and manufacturing. Investment in shared knowledge-graph infrastructure
-            compounds across domains: a query pattern that works for terpene engineering also
-            works for tracing PFAS exposure pathways, mapping disease mechanisms, or correlating
-            socioeconomic factors with environmental risk.
+            Every commercial fermentation product &mdash; antimalarials, biofuels, fragrances,
+            cannabinoids &mdash; starts with a similar question: which gene parts to express, in
+            which host, with what tolerance modules. The discovery phase is traditionally a
+            months-long literature review for a synthetic biology team. Federated KG access
+            shortens it to a single chat session, with the supporting datasets surfaced
+            alongside the gene panel.
           </p>
           <p>
-            The point is not any single answer. It is that an entire class of cross-domain
-            questions &mdash; previously intractable without a team of domain experts and weeks of
-            manual integration &mdash; becomes tractable in a single chat.
+            The same pattern &mdash; pathway evidence + organism-spanning expression coverage +
+            curated dataset metadata + microbial host-engineering data &mdash; applies to every
+            terpene class and every microbial host platform. As more dataset metadata sources
+            are ingested into the federation, the same query also reaches further into clinical
+            trial registries, raw-omics archives, and chemical-space databases that today live
+            in separate silos.
           </p>
         </section>
 

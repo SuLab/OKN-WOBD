@@ -39,6 +39,24 @@ export default function PFASVignettePage() {
           </p>
         </div>
 
+        <section className="w-full max-w-3xl">
+          <div
+            className="rounded-lg border border-slate-200 border-l-4 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+            style={{ borderLeftColor: "var(--niaid-link)" }}
+          >
+            <div className="text-xs font-semibold uppercase tracking-wider text-niaid-link">
+              Key finding
+            </div>
+            <p className="mt-2 text-base leading-relaxed text-slate-800 dark:text-slate-200">
+              <strong>GenX</strong>, the chemical that replaced PFOA, is detected at{" "}
+              <strong>73% the frequency of legacy PFOS</strong> in U.S. water systems and was
+              the <strong>most potent PPAR&alpha; activator</strong> of 16 PFAS tested by the
+              EPA &mdash; convergent evidence across seven graphs that compound-by-compound
+              substitution is not reducing risk.
+            </p>
+          </div>
+        </section>
+
         <section className="w-full max-w-3xl space-y-3 text-slate-700 dark:text-slate-300">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
             The question
@@ -186,23 +204,24 @@ export default function PFASVignettePage() {
 
         <section className="w-full max-w-3xl space-y-3 border-t border-slate-200 pt-6 text-slate-700 dark:border-slate-700 dark:text-slate-300">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-            Why this matters
+            Why this matters &mdash; public-health policy
           </h2>
           <p>
-            The PFAS question is the kind of cross-domain inquiry that public-health policy
-            depends on but that has been historically intractable. Class-based chemical
-            regulation requires evidence linking environmental fate, toxicity mechanism, and
-            disease association &mdash; evidence that lives in separately funded, separately
-            curated databases. The unified MCP server makes a question of that shape a single
-            chat session instead of a multi-month working group.
+            Class-based chemical regulation has been a long-standing aim of public-health
+            agencies, but the evidence required &mdash; environmental fate, toxicity mechanism,
+            and disease association, all linked to specific compounds &mdash; has historically
+            lived in separately funded, separately curated databases. Assembling it has meant
+            standing up a multi-disciplinary working group for months. The federated MCP
+            server makes a question of that shape a chat session, with provenance preserved
+            back to each source graph.
           </p>
           <p>
-            The same federation pattern applies to drug repurposing, infrastructure
-            resilience, environmental justice, and dozens of other domains served by the 30+
-            Proto-OKN graphs. Investment in shared knowledge-graph infrastructure compounds
-            across them all: a query pattern that justifies class-based PFAS regulation also
-            traces opioid prescribing patterns through socioeconomic data, or links spaceflight
-            gene-expression studies to terrestrial disease models.
+            The implication for emerging-contaminant policy is direct: as the next generation
+            of PFAS replacements (and bisphenols, microplastics, and other chemical classes)
+            enters the regulatory pipeline, the substrate to evaluate them is already in
+            place. The federation also turns single-event policy questions into recurring
+            queries &mdash; a regulator can rerun the analysis as new datasets land in the
+            knowledge graphs, without rebuilding the workflow.
           </p>
         </section>
 

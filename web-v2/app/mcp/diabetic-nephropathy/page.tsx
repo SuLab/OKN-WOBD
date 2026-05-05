@@ -39,6 +39,24 @@ export default function DiabeticNephropathyVignettePage() {
           </p>
         </div>
 
+        <section className="w-full max-w-3xl">
+          <div
+            className="rounded-lg border border-slate-200 border-l-4 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+            style={{ borderLeftColor: "var(--niaid-link)" }}
+          >
+            <div className="text-xs font-semibold uppercase tracking-wider text-niaid-link">
+              Key finding
+            </div>
+            <p className="mt-2 text-base leading-relaxed text-slate-800 dark:text-slate-200">
+              An <strong>end-to-end DE workflow</strong> &mdash; disease ontology resolution,
+              ARCHS4 sample classification, statistical testing, enrichment &mdash; executed
+              from one chat. Comparing pooled and study-matched modes revealed an{" "}
+              <strong>interferon signaling signal</strong> (OAS2, RSAD2) that the simpler
+              pooled analysis would have missed.
+            </p>
+          </div>
+        </section>
+
         <section className="w-full max-w-3xl space-y-3 text-slate-700 dark:text-slate-300">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
             The question
@@ -171,23 +189,25 @@ export default function DiabeticNephropathyVignettePage() {
 
         <section className="w-full max-w-3xl space-y-3 border-t border-slate-200 pt-6 text-slate-700 dark:border-slate-700 dark:text-slate-300">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-            Why this matters
+            Why this matters &mdash; research productivity
           </h2>
           <p>
-            Differential-expression workflows are some of the most routine, most labor-intensive
-            tasks in biomedical research. Every disease has its own analysis, every analysis
-            takes weeks of scripting, and the methodological choices (pooled vs. matched, FDR
-            cutoffs, sample inclusion) are buried in supplementary methods. An OKN-backed MCP
-            server makes the workflow itself a first-class object &mdash; portable, comparable,
-            and inspectable.
+            Differential expression is the single most common bioinformatics analysis in
+            biomedical research. Every disease produces its own variant, every variant takes
+            weeks of postdoc time to assemble, and the methodological choices (pooled vs.
+            matched, FDR cutoffs, sample inclusion) are buried in supplementary methods that
+            rarely make it back into the next study. An MCP server that runs the workflow
+            end-to-end &mdash; with both methods, with classification logged, with parameters
+            preserved &mdash; turns the analysis itself into a portable, comparable artifact
+            instead of an undocumented one-off.
           </p>
           <p>
-            Diabetic nephropathy is one example. The same tool stack runs an analysis for any
-            disease in ARCHS4 with a single question. Investments in shared bioinformatics
-            tooling and federated knowledge graphs compound: the same chat that runs DE for
-            diabetic nephropathy also traces PFAS exposure pathways, identifies plant terpene
-            engineering targets, or maps disease genes through Proto-OKN&apos;s 30+ knowledge
-            graphs.
+            Diabetic nephropathy is one disease in ARCHS4&apos;s ~1M-sample archive. The same
+            tool stack runs an analogous analysis for any condition with samples in the
+            archive, and the underlying pattern &mdash; ontology resolution, automated sample
+            classification, two-method DE, enrichment &mdash; transfers to other transcriptomic
+            archives as they are integrated. The compounding investment is in the workflow
+            scaffolding, not the per-disease scripting.
           </p>
         </section>
 
