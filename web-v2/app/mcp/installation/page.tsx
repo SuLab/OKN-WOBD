@@ -36,7 +36,7 @@ export default function MCPInstallationPage() {
             Setup steps below cover the two most common clients; for additional clients and
             up-to-date screenshots, see the upstream{" "}
             <a
-              className="font-medium text-niaid-link underline-offset-2 hover:underline"
+              className="font-medium text-okn-primary underline-offset-2 hover:underline"
               href="https://github.com/sbl-sdsc/mcp-proto-okn#installation-and-configuration"
               rel="noopener noreferrer"
               target="_blank"
@@ -76,7 +76,7 @@ export default function MCPInstallationPage() {
             <p>
               Requires a Claude Pro or Max subscription. Download Claude Desktop from{" "}
               <a
-                className="font-medium text-niaid-link hover:underline"
+                className="font-medium text-okn-primary hover:underline"
                 href="https://claude.ai/download"
                 rel="noopener noreferrer"
                 target="_blank"
@@ -118,7 +118,7 @@ export default function MCPInstallationPage() {
             <p className="text-sm text-slate-600 dark:text-slate-400">
               Detailed walkthrough with screenshots:{" "}
               <a
-                className="font-medium text-niaid-link hover:underline"
+                className="font-medium text-okn-primary hover:underline"
                 href="https://github.com/sbl-sdsc/mcp-proto-okn/blob/main/docs/claude-setup.md"
                 rel="noopener noreferrer"
                 target="_blank"
@@ -136,7 +136,7 @@ export default function MCPInstallationPage() {
             <p>
               Requires a ChatGPT subscription and the{" "}
               <a
-                className="font-medium text-niaid-link hover:underline"
+                className="font-medium text-okn-primary hover:underline"
                 href="https://chatgpt.com/"
                 rel="noopener noreferrer"
                 target="_blank"
@@ -148,7 +148,7 @@ export default function MCPInstallationPage() {
             <ol className="list-decimal space-y-2 pl-6">
               <li>
                 Sign in at <a
-                  className="font-medium text-niaid-link hover:underline"
+                  className="font-medium text-okn-primary hover:underline"
                   href="https://chatgpt.com/"
                   rel="noopener noreferrer"
                   target="_blank"
@@ -191,7 +191,7 @@ export default function MCPInstallationPage() {
             <p className="text-sm text-slate-600 dark:text-slate-400">
               Detailed walkthrough with screenshots:{" "}
               <a
-                className="font-medium text-niaid-link hover:underline"
+                className="font-medium text-okn-primary hover:underline"
                 href="https://github.com/sbl-sdsc/mcp-proto-okn/blob/main/docs/chatgpt-setup.md"
                 rel="noopener noreferrer"
                 target="_blank"

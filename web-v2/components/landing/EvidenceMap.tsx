@@ -12,7 +12,7 @@ export function EvidenceMap({ items }: { items: EvidenceMapItem[] }) {
         {items.map((item, index) => (
           <div key={item.label} className="contents">
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60">
-              <div className="text-xs font-semibold uppercase tracking-wider text-niaid-link">
+              <div className="text-xs font-semibold uppercase tracking-wider text-okn-primary">
                 {item.label}
               </div>
               <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">

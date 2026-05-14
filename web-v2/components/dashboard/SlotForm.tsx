@@ -2011,7 +2011,7 @@ export function SlotForm({
       <button
         type="button"
         onClick={() => setAdvancedOpen((o) => !o)}
-        className="text-sm text-niaid-link hover:underline"
+        className="text-sm text-okn-primary hover:underline"
         aria-expanded={advancedOpen}
       >
         {advancedOpen ? "Hide filters" : "Filters / Advanced"}

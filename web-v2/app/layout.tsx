@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { withBasePath } from "@/lib/base-path";
 
 const SITE_TITLE = "WOBD — Web of Biological Data";
 const SITE_DESCRIPTION =
@@ -14,12 +15,15 @@ export const metadata: Metadata = {
     template: "%s · WOBD",
   },
   description: SITE_DESCRIPTION,
+  icons: {
+    icon: [{ url: withBasePath("/okn-favicon.png"), type: "image/png" }],
+  },
   openGraph: {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     type: "website",
     locale: "en_US",
-    siteName: "WOBD",
+    siteName: "WOBD · OKN",
     images: [
       {
         url: "/wobd-logo.png",
@@ -38,7 +42,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="light">
-      <body className="min-h-dvh bg-white text-gray-900">
+      <body className="min-h-dvh bg-okn-bgSoft text-okn-textStrong">
         <div className="flex min-h-dvh flex-col">
           <Header />
           <main className="flex min-h-0 flex-1 flex-col">{children}</main>

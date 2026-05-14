@@ -11,7 +11,7 @@ const outputs = [
 export function FederationDiagram() {
   return (
     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60">
-      <div className="text-xs font-semibold uppercase tracking-wider text-niaid-link">
+      <div className="text-xs font-semibold uppercase tracking-wider text-okn-primary">
         How WOBD works
       </div>
       <div className="mt-4 grid gap-3">
@@ -35,14 +35,14 @@ export function FederationDiagram() {
             className="absolute inset-0 opacity-10"
             style={{
               background:
-                "radial-gradient(circle at 20% 30%, var(--niaid-link), transparent 28%), radial-gradient(circle at 80% 70%, var(--niaid-button), transparent 30%)",
+                "radial-gradient(circle at 20% 30%, var(--okn-primary), transparent 28%), radial-gradient(circle at 80% 70%, var(--okn-primary-light), transparent 30%)",
             }}
             aria-hidden
           />
           <div className="relative flex items-center gap-3">
             <span
               className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-white"
-              style={{ backgroundColor: "var(--niaid-link)" }}
+              style={{ backgroundColor: "var(--okn-primary)" }}
             >
               <Network className="h-5 w-5" aria-hidden />
             </span>
@@ -70,7 +70,7 @@ export function FederationDiagram() {
                 key={output.label}
                 className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm font-medium text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
               >
-                <Icon className="h-4 w-4 flex-shrink-0 text-niaid-link" aria-hidden />
+                <Icon className="h-4 w-4 flex-shrink-0 text-okn-primary" aria-hidden />
                 {output.label}
               </div>
             );

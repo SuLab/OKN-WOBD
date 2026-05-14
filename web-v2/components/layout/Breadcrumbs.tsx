@@ -16,7 +16,7 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
             item.href && !isLast ? (
               <Link
                 href={item.href}
-                className="hover:text-niaid-link hover:underline"
+                className="hover:text-okn-primary hover:underline"
               >
                 {item.label}
               </Link>

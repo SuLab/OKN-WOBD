@@ -9,6 +9,30 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        // Match okn.us system stack — no webfont
+        sans: [
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "'Segoe UI'",
+          "Roboto",
+          "'Helvetica Neue'",
+          "Arial",
+          "sans-serif",
+          "'Apple Color Emoji'",
+          "'Segoe UI Emoji'",
+          "'Segoe UI Symbol'",
+        ],
+        mono: [
+          "'SF Mono'",
+          "Monaco",
+          "'Cascadia Code'",
+          "'Roboto Mono'",
+          "Consolas",
+          "'Courier New'",
+          "monospace",
+        ],
+      },
       colors: {
         background: {
           DEFAULT: "#ffffff",
@@ -24,7 +48,21 @@ const config: Config = {
           DEFAULT: "#F1F5F9",
           dark: "#1E293B"
         },
-        // NIAID Data Discovery Portal palette (dashboard and result cards)
+        // OKN (parent site) palette — okn.us
+        okn: {
+          navbar: "#2f204a",       // dark eggplant header/footer accent
+          primary: "#6B4C9A",      // brand purple (links, hover)
+          primaryLight: "#9659FF",
+          primaryHoverBg: "#F5F0FA",
+          borderPurple: "#D4C5E8",
+          bgSoft: "#FAFAFA",       // page background
+          bgMuted: "#F5F5F5",      // section / footer background
+          border: "#E0E0E0",
+          textStrong: "#333333",
+          textMuted: "#666666",
+          textLight: "#999999",
+        },
+        // NIAID Data Discovery Portal palette (kept for NIAID-sourced result cards)
         niaid: {
           header: "#20558A",
           link: "#0071bc",
@@ -53,6 +91,3 @@ const config: Config = {
 };
 
 export default config;
-
-
-

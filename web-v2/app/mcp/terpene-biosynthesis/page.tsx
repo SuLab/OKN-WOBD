@@ -49,9 +49,9 @@ export default function TerpeneBiosynthesisVignettePage() {
         <section className="w-full max-w-3xl">
           <div
             className="rounded-lg border border-slate-200 border-l-4 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900"
-            style={{ borderLeftColor: "var(--niaid-link)" }}
+            style={{ borderLeftColor: "var(--okn-navbar)" }}
           >
-            <div className="text-xs font-semibold uppercase tracking-wider text-niaid-link">
+            <div className="text-xs font-semibold uppercase tracking-wider text-okn-primary">
               Key finding
             </div>
             <p className="mt-2 text-base leading-relaxed text-slate-800 dark:text-slate-200">
@@ -112,7 +112,7 @@ export default function TerpeneBiosynthesisVignettePage() {
           </h2>
           <div className="grid grid-cols-1 items-stretch gap-3 md:grid-cols-[1fr_auto_1.5fr_auto_1fr]">
             <div className="flex flex-col rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-              <div className="flex items-center gap-2 text-niaid-link">
+              <div className="flex items-center gap-2 text-okn-primary">
                 <Lightbulb className="h-5 w-5" aria-hidden />
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                   Natural-language query
@@ -125,7 +125,7 @@ export default function TerpeneBiosynthesisVignettePage() {
             </div>
             <FlowArrow />
             <div className="flex flex-col rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-              <div className="flex items-center gap-2 text-niaid-link">
+              <div className="flex items-center gap-2 text-okn-primary">
                 <Database className="h-5 w-5" aria-hidden />
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                   Unified MCP server federates four KGs
@@ -160,7 +160,7 @@ export default function TerpeneBiosynthesisVignettePage() {
             </div>
             <FlowArrow />
             <div className="flex flex-col rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-              <div className="flex items-center gap-2 text-niaid-link">
+              <div className="flex items-center gap-2 text-okn-primary">
                 <FileSearch className="h-5 w-5" aria-hidden />
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                   Integrated answer
@@ -195,7 +195,7 @@ export default function TerpeneBiosynthesisVignettePage() {
             <div className="flex justify-end">
               <div
                 className="max-w-[85%] rounded-2xl rounded-br-sm px-4 py-2 text-sm text-white shadow-sm"
-                style={{ backgroundColor: "var(--niaid-link)" }}
+                style={{ backgroundColor: "var(--okn-primary)" }}
               >
                 I&apos;m designing a microbial host for terpene biomanufacturing. Find candidate
                 enzymes and the experimental datasets that justify them, biased toward plant and
@@ -315,7 +315,7 @@ export default function TerpeneBiosynthesisVignettePage() {
             className="group flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition-all hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600"
           >
             <div>
-              <div className="font-medium text-niaid-link group-hover:underline">
+              <div className="font-medium text-okn-primary group-hover:underline">
                 Read the full analysis
               </div>
               <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
@@ -324,7 +324,7 @@ export default function TerpeneBiosynthesisVignettePage() {
               </p>
             </div>
             <ArrowRight
-              className="h-5 w-5 flex-shrink-0 text-niaid-link"
+              className="h-5 w-5 flex-shrink-0 text-okn-primary"
               aria-hidden
             />
           </Link>

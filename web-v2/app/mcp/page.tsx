@@ -33,7 +33,7 @@ export default function MCPPage() {
               WOBD can be used through guided forms, but the broader federation is best explored
               conversationally. Connect Claude, ChatGPT, or any MCP-capable client to a single{" "}
               <a
-                className="font-medium text-niaid-link hover:underline"
+                className="font-medium text-okn-primary hover:underline"
                 href="https://modelcontextprotocol.io/"
                 rel="noopener noreferrer"
                 target="_blank"
@@ -47,7 +47,7 @@ export default function MCPPage() {
             <p>
               Built on the{" "}
               <a
-                className="font-medium text-niaid-link hover:underline"
+                className="font-medium text-okn-primary hover:underline"
                 href="https://github.com/sbl-sdsc/mcp-proto-okn"
                 rel="noopener noreferrer"
                 target="_blank"
@@ -56,7 +56,7 @@ export default function MCPPage() {
               </a>{" "}
               project; see the{" "}
               <a
-                className="font-medium text-niaid-link hover:underline"
+                className="font-medium text-okn-primary hover:underline"
                 href="https://github.com/sbl-sdsc/mcp-proto-okn/blob/main/docs/unified-server.md"
                 rel="noopener noreferrer"
                 target="_blank"
@@ -66,7 +66,7 @@ export default function MCPPage() {
               for the full tool list and design.{" "}
               <Link
                 href="/mcp/installation"
-                className="font-medium text-niaid-link underline-offset-2 hover:underline"
+                className="font-medium text-okn-primary underline-offset-2 hover:underline"
               >
                 Connect your AI assistant &rarr;
               </Link>
@@ -100,7 +100,7 @@ export default function MCPPage() {
 
         <section className="grid w-full grid-cols-1 gap-4 md:grid-cols-2" aria-label="AI assistant use cases">
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-niaid-link">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-okn-primary">
               What to ask
             </h2>
             <ul className="mt-3 space-y-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
@@ -110,7 +110,7 @@ export default function MCPPage() {
             </ul>
           </div>
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-niaid-link">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-okn-primary">
               Why it matters
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
@@ -129,7 +129,7 @@ export default function MCPPage() {
             className="group flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition-all hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600"
           >
             <div>
-              <div className="font-medium text-niaid-link group-hover:underline">
+              <div className="font-medium text-okn-primary group-hover:underline">
                 Connect Claude Desktop or ChatGPT
               </div>
               <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
@@ -138,7 +138,7 @@ export default function MCPPage() {
               </p>
             </div>
             <ArrowRight
-              className="h-5 w-5 flex-shrink-0 text-niaid-link"
+              className="h-5 w-5 flex-shrink-0 text-okn-primary"
               aria-hidden
             />
           </Link>
@@ -152,7 +152,7 @@ export default function MCPPage() {
             className="group flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition-all hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600"
           >
             <div>
-              <div className="font-medium text-niaid-link group-hover:underline">
+              <div className="font-medium text-okn-primary group-hover:underline">
                 More worked analyses across the Proto-OKN federation
               </div>
               <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
@@ -162,7 +162,7 @@ export default function MCPPage() {
               </p>
             </div>
             <ArrowRight
-              className="h-5 w-5 flex-shrink-0 text-niaid-link"
+              className="h-5 w-5 flex-shrink-0 text-okn-primary"
               aria-hidden
             />
           </a>

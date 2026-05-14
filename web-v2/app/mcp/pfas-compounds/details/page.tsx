@@ -49,9 +49,9 @@ export default function PFASDetailsPage() {
         <section className="w-full max-w-3xl">
           <div
             className="rounded-lg border border-slate-200 border-l-4 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900"
-            style={{ borderLeftColor: "var(--niaid-link)" }}
+            style={{ borderLeftColor: "var(--okn-navbar)" }}
           >
-            <div className="text-xs font-semibold uppercase tracking-wider text-niaid-link">
+            <div className="text-xs font-semibold uppercase tracking-wider text-okn-primary">
               Key finding
             </div>
             <p className="mt-2 text-base leading-relaxed text-slate-800 dark:text-slate-200">

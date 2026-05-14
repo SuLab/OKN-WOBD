@@ -37,11 +37,11 @@ export default function QueriesPage() {
             Current guided queries focus on NIAID Data Ecosystem dataset metadata and Gene
             Expression Atlas evidence. For open-ended questions across all 30+ Proto-OKN graphs,
             use{" "}
-            <Link href="/mcp" className="font-medium text-niaid-link hover:underline">
+            <Link href="/mcp" className="font-medium text-okn-primary hover:underline">
               AI assistant access
             </Link>
             .{" "}
-            <Link href="/about" className="font-medium text-niaid-link hover:underline">
+            <Link href="/about" className="font-medium text-okn-primary hover:underline">
               Learn why the federation grows in value as more sources are added
             </Link>
           </p>

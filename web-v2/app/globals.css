@@ -4,6 +4,18 @@
 
 :root {
   color-scheme: light;
+  /* OKN (parent site) palette — okn.us */
+  --okn-navbar: #2f204a;
+  --okn-primary: #6B4C9A;
+  --okn-primary-light: #9659FF;
+  --okn-primary-hover-bg: #F5F0FA;
+  --okn-border-purple: #D4C5E8;
+  --okn-bg-soft: #FAFAFA;
+  --okn-bg-muted: #F5F5F5;
+  --okn-border: #E0E0E0;
+  --okn-text-strong: #333333;
+  --okn-text-muted: #666666;
+  --okn-text-light: #999999;
   /* NIAID Data Discovery Portal palette (dashboard and result cards) */
   --niaid-header: #20558A;
   --niaid-link: #0071bc;
@@ -25,7 +37,7 @@
 }
 
 body {
-  @apply bg-white text-gray-900 antialiased;
+  @apply bg-okn-bgSoft text-okn-textStrong antialiased;
 }
 
 /* Custom scrollbar styling */

@@ -411,7 +411,7 @@ export default function TemplatePage() {
             {help && (
               <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm dark:border-slate-700 dark:bg-slate-800/60 md:grid-cols-3">
                 <div>
-                  <h2 className="text-xs font-semibold uppercase tracking-wider text-niaid-link">
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-okn-primary">
                     Use this when
                   </h2>
                   <p className="mt-2 leading-relaxed text-slate-700 dark:text-slate-300">
@@ -419,7 +419,7 @@ export default function TemplatePage() {
                   </p>
                 </div>
                 <div>
-                  <h2 className="text-xs font-semibold uppercase tracking-wider text-niaid-link">
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-okn-primary">
                     Example input
                   </h2>
                   <p className="mt-2 leading-relaxed text-slate-700 dark:text-slate-300">
@@ -427,7 +427,7 @@ export default function TemplatePage() {
                   </p>
                 </div>
                 <div>
-                  <h2 className="text-xs font-semibold uppercase tracking-wider text-niaid-link">
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-okn-primary">
                     How to read results
                   </h2>
                   <p className="mt-2 leading-relaxed text-slate-700 dark:text-slate-300">

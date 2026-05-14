@@ -25,17 +25,17 @@ export function WorkflowSteps({
             >
               <div
                 className="absolute -right-6 -top-6 h-20 w-20 rounded-full opacity-10"
-                style={{ backgroundColor: "var(--niaid-link)" }}
+                style={{ backgroundColor: "var(--okn-primary)" }}
                 aria-hidden
               />
               <div className="relative flex items-center gap-3">
                 <span
                   className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
-                  style={{ backgroundColor: "var(--niaid-link)" }}
+                  style={{ backgroundColor: "var(--okn-primary)" }}
                 >
                   {Icon ? <Icon className="h-4 w-4" aria-hidden /> : index + 1}
                 </span>
-                <h2 className="text-sm font-semibold uppercase tracking-wider text-niaid-link">
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-okn-primary">
                   {index + 1}. {step.title}
                 </h2>
               </div>
