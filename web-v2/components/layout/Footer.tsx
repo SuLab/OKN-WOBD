@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
-  FRINK_OKN_URL,
-  FRINK_REGISTRY_URL,
+  OKN_FABRIC_URL,
+  OKN_REGISTRY_URL,
   GITHUB_REPO_URL,
   GITHUB_ISSUES_URL,
   CONTACT_EMAIL,
@@ -83,20 +83,20 @@ export function Footer() {
             Issues
           </a>
           <a
-            href={FRINK_OKN_URL}
+            href={OKN_FABRIC_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="transition hover:text-okn-primary hover:underline"
           >
-            FRINK OKN
+            OKN Fabric
           </a>
           <a
-            href={FRINK_REGISTRY_URL}
+            href={OKN_REGISTRY_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="transition hover:text-okn-primary hover:underline"
           >
-            FRINK Registry
+            OKN Registry
           </a>
           <a
             href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(CONTACT_SUBJECT)}`}

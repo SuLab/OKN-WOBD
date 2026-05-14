@@ -1,7 +1,7 @@
 /** Site-wide links and contact info for footer and about page */
 
-export const FRINK_OKN_URL = "https://registry.okn.us/";
-export const FRINK_REGISTRY_URL = "https://registry.okn.us/registry/";
+export const OKN_FABRIC_URL = "https://registry.okn.us/";
+export const OKN_REGISTRY_URL = "https://registry.okn.us/registry/";
 export const GITHUB_REPO_URL = "https://github.com/SuLab/OKN-WOBD";
 export const GITHUB_ISSUES_URL = "https://github.com/SuLab/OKN-WOBD/issues";
 

@@ -535,7 +535,7 @@ export default function TemplatePage() {
                             type="button"
                             onClick={() => handleCopyQuery(item.query, index)}
                             className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-md transition-colors shadow-sm border border-slate-200 dark:border-slate-700"
-                            title="Copy query to use in FRINK"
+                            title="Copy query to use in OKN Fabric"
                           >
                             {copiedQueryIndex === index ? (
                               <>

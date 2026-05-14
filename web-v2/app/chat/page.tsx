@@ -485,7 +485,7 @@ function ChatPage() {
             })
             .join("\n\n");
 
-          content = `Available Graphs in FRINK Federated SPARQL\n\n` +
+          content = `Available Graphs in OKN Federated SPARQL\n\n` +
             `Total: ${data.total} graphs\n\n` +
             `${graphList}\n\n` +
             `Use @graph <shortname> to get details about a specific graph.\n` +

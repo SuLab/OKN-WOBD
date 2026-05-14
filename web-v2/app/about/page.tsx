@@ -3,8 +3,8 @@ import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import {
   CONTACT_EMAIL,
   CONTACT_SUBJECT,
-  FRINK_OKN_URL,
-  FRINK_REGISTRY_URL,
+  OKN_FABRIC_URL,
+  OKN_REGISTRY_URL,
   NSF_AWARD_NUMBER,
   NSF_AWARD_URL,
   PROTO_OKN_URL,
@@ -240,22 +240,23 @@ export default function AboutPage() {
               Knowledge graphs are listed in the{" "}
               <a
                 className="font-medium text-okn-primary hover:underline"
-                href={FRINK_REGISTRY_URL}
+                href={OKN_REGISTRY_URL}
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                FRINK registry
+                OKN Registry
               </a>
               , and the{" "}
               <a
                 className="font-medium text-okn-primary hover:underline"
-                href={FRINK_OKN_URL}
+                href={OKN_FABRIC_URL}
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                FRINK SPARQL federation
+                OKN Fabric
               </a>{" "}
-              exposes those graphs so they can be queried individually or together.
+              exposes those graphs through a SPARQL federation so they can be queried
+              individually or together.
             </p>
           </section>
 
