@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FederationDiagram } from "@/components/landing/FederationDiagram";
+import { OverviewCard } from "@/components/landing/OverviewCard";
 import { VignetteCards } from "@/components/landing/VignetteCards";
 import {
   NSF_AWARD_NUMBER,
@@ -125,7 +126,10 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <FederationDiagram />
+            <div>
+              <FederationDiagram />
+              <OverviewCard />
+            </div>
           </div>
         </section>
 
